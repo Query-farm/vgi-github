@@ -27,10 +27,10 @@ REPO = "duckdb/duckdb"
 def con() -> Iterator[Any]:
     haybarn = pytest.importorskip("haybarn")
     connection = haybarn.connect()
-    try:
-        connection.execute("ATTACH 'github' (TYPE vgi, LOCATION 'uv run github_worker.py')")
-    except Exception as exc:  # pragma: no cover - environment, not the worker
-        pytest.skip(f"cannot attach the worker: {exc}")
+    # A failed ATTACH is a failure, not a skip. It used to skip, and on a CI
+    # runner without the vgi extension the whole tier reported "20 skipped"
+    # under a green check while testing nothing.
+    connection.execute("ATTACH 'github' (TYPE vgi, LOCATION 'uv run github_worker.py')")
     yield connection
     connection.close()
 

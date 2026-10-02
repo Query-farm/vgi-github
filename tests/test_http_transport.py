@@ -53,7 +53,7 @@ def server() -> Iterator[str]:
             break
     if port is None:
         proc.kill()
-        pytest.skip("the HTTP worker did not report a port")
+        pytest.fail("the HTTP worker exited without reporting a port")
     # Keep draining output so the server never blocks on a full pipe.
     threading.Thread(target=proc.stdout.read, daemon=True).start()
     yield f"http://127.0.0.1:{port}"
