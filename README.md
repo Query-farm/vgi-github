@@ -79,14 +79,58 @@ ATTACH 'github' (TYPE vgi,
 **This package is not published to PyPI** — install it from this repository. Its
 *dependencies* are all published, so `uvx` resolves them normally.
 
-To run the worker as a server and attach to a URL instead, `vgi-github-http` is the HTTP entry
-point:
+The catalog must be attached as `github` — that is the name the worker exposes.
 
-```sql
-ATTACH 'github' (TYPE vgi, LOCATION 'http://localhost:8000');
+### Serving over HTTP
+
+Over stdio every DuckDB connection launches a worker of its own. Run it as an HTTP server instead
+and one long-lived process serves any number of clients, and they need nothing but the URL.
+
+Start the server — from a clone, or straight from GitHub with nothing installed:
+
+```bash
+uv run serve.py --port 8000
+
+uvx --from git+https://github.com/Query-farm/vgi-github@v0.1.0 vgi-github-http --port 8000
 ```
 
-The catalog must be attached as `github` — that is the name the worker exposes.
+Attach from DuckDB, and give each client its own token:
+
+```sql
+INSTALL vgi FROM community;
+LOAD vgi;
+ATTACH 'github' (TYPE vgi, LOCATION 'http://localhost:8000');
+CREATE SECRET github (TYPE github, token 'ghp_...');
+
+SELECT resource, remaining, request_limit, authenticated FROM github.rate_limit;
+```
+
+The secret travels with each request and authorizes only that client's queries. The server's
+connection pool and ETag cache are shared, but entries are keyed by token, so one client's token
+never authorizes another's queries. `tests/test_http_transport.py` checks this with an anonymous
+and an authenticated client on one server, interleaved, including a private repository.
+
+Useful options (`uv run serve.py --help` lists them all):
+
+| Option | |
+|---|---|
+| `--port 8000` | Port to listen on; `0` picks a free one and prints `PORT:<n>` |
+| `--host 0.0.0.0` | Accept connections from other machines (default `127.0.0.1`, local only) |
+| `--prefix /github` | Serve under a path, e.g. behind a reverse proxy: attach with `LOCATION 'http://host:8000/github'` |
+| `--http-threads 16` | More request threads, for many concurrent clients (default 4) |
+| `--log-format json` | Structured logs for a log collector |
+
+`GET /` on the server returns a description page for the worker.
+
+**Before exposing it beyond localhost:**
+
+- **The server has no client authentication of its own.** Anyone who can reach the port can query
+  GitHub through it. Keep the default `127.0.0.1` binding, or put it behind a reverse proxy or
+  network policy that does the authenticating.
+- **Do not set `VGI_GITHUB_TOKEN` on a shared server** unless that is the point. It is used for every
+  client that sends no secret of its own, so every such client gets that token's identity, rate
+  limit and private-repository access.
+- `GITHUB_API_URL` set on the server points it at a GitHub Enterprise Server for all clients.
 
 ### Developing
 
