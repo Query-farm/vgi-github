@@ -1220,8 +1220,9 @@ class StargazersFunction(RowTransformFunction[RepoListArgs]):
                 "One row per star, in the order they were given.\n\n"
                 "### Only for repositories you administer\n\n"
                 "GitHub restricts who may list a repository's stargazers. For repositories the "
-                "token does not administer it answers 404 even though the repository exists "
-                "(401 anonymously), so this function raises an explanatory error instead of "
+                "token does not administer it refuses the listing even though the repository "
+                "exists — 404 for a user token, 403 for a GitHub App or Actions token, 401 "
+                "anonymously — so this function raises an explanatory error instead of "
                 "returning an empty result that would read as 'no stars'. For anyone else's "
                 "repository, `repo()` still reports `stargazers_count`.\n\n"
                 "### Oldest first\n\n"
@@ -1281,14 +1282,16 @@ class StargazersFunction(RowTransformFunction[RepoListArgs]):
                     accept=api.ACCEPT_STAR,
                 )
             except api.GitHubError as exc:
-                if exc.status in (401, 404):
+                # 404 for a user token, 403 ("Resource not accessible by
+                # integration") for a GitHub App or Actions token, 401 anonymously.
+                if exc.status in (401, 403, 404):
                     raise api.GitHubError(
                         exc.status,
                         path,
                         "GitHub will not list this repository's stargazers to these credentials. "
                         "It restricts the listing to repositories the token can administer, and "
-                        "answers 404 (401 anonymously) for every other one — or the repository "
-                        "does not exist.",
+                        "refuses every other one (404 for a user token, 403 for an app token, 401 "
+                        "anonymously) — or the repository does not exist.",
                     ) from exc
                 raise
             return [flatten_stargazer(s, repo) for s in found]

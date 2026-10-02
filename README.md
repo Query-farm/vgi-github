@@ -241,8 +241,8 @@ mid-walk* is still an error: the object existed a moment ago, and a short result
 whole.
 
 **`stargazers()` only works on repositories you administer.** GitHub restricts the listing: for
-anyone else's repository it answers 404 even though the repository plainly exists (401
-anonymously). An empty result would read as "no stars", so this one function raises an
+anyone else's repository it refuses even though the repository plainly exists — 404 for a user
+token, 403 for a GitHub App or Actions token, 401 anonymously. An empty result would read as "no stars", so this one function raises an
 explanatory error instead. `repo()` still reports `stargazers_count` for any repository. Note
 also that stargazers are listed oldest first, so the default cap returns the *first* hundred.
 

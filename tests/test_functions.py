@@ -231,8 +231,17 @@ class TestStargazers:
         assert seen[0].headers["Accept"] == "application/vnd.github.star+json"
         assert out.batches[0].column("login").to_pylist() == ["x"]
 
-    def test_refused_listing_is_an_explained_error_not_zero_stars(self, monkeypatch) -> None:
-        install(monkeypatch, lambda r: httpx.Response(404, json={"message": "Not Found"}))
+    @pytest.mark.parametrize(
+        ("status", "message"),
+        [
+            (404, "Not Found"),
+            (403, "Resource not accessible by integration"),
+            (401, "Requires authentication"),
+        ],
+    )
+    def test_refused_listing_is_an_explained_error_not_zero_stars(self, monkeypatch, status, message) -> None:
+        """User tokens get 404, GitHub App / Actions tokens 403, anonymous callers 401."""
+        install(monkeypatch, lambda r: httpx.Response(status, json={"message": message}))
         with pytest.raises(GitHubError, match="administer"):
             _run(fn.StargazersFunction, fn.RepoListArgs(repo=""), _input(repo=["big/repo"]))
 

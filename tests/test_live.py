@@ -27,6 +27,9 @@ REPO = "duckdb/duckdb"
 #: An organization repository the token's owner administers, for the
 #: stargazer listing. Override for a token from another account.
 ADMIN_REPO = os.environ.get("VGI_GITHUB_ADMIN_REPO", "Query-farm/vgi-kalshi")
+#: How GitHub refuses a stargazer listing to a token: 404 for a user token, 403
+#: ("Resource not accessible by integration") for a GitHub App or Actions token.
+REFUSED = (403, 404)
 #: A repository known to have been renamed, so its old name redirects.
 RENAMED = "rustyconover/duckdb-crypto-extension"
 
@@ -126,9 +129,14 @@ class TestPayloadShapes:
         assert runs and {run["conclusion"] for run in runs} == {"failure"}
 
     def test_star_media_type_adds_starred_at(self, creds) -> None:
-        rows = api.collect(
-            f"/repos/{ADMIN_REPO}/stargazers", limit=1, credentials=creds, accept=api.ACCEPT_STAR
-        )
+        try:
+            rows = api.collect(
+                f"/repos/{ADMIN_REPO}/stargazers", limit=1, credentials=creds, accept=api.ACCEPT_STAR
+            )
+        except api.GitHubError as exc:
+            if exc.status in REFUSED:
+                pytest.skip(f"this token cannot list {ADMIN_REPO}'s stargazers ({exc.status})")
+            raise
         if not rows:
             pytest.skip(f"{ADMIN_REPO} has no stars, or the token cannot list them")
         assert "starred_at" in rows[0] and "user" in rows[0]
@@ -138,10 +146,11 @@ class TestAccess:
     def test_stargazers_of_others_repositories_are_refused(self, creds) -> None:
         """Why stargazers() raises instead of returning zero rows.
 
-        If this starts passing with a 200, GitHub has lifted the restriction and
+        A user token gets 404 and a GitHub App or Actions token 403. If this starts
+        failing with a 200, GitHub has lifted the restriction and
         the error, the docs and the vgi-lint waivers should all go.
         """
-        assert _raw(f"/repos/{REPO}/stargazers", creds, per_page=1).status_code == 404
+        assert _raw(f"/repos/{REPO}/stargazers", creds, per_page=1).status_code in REFUSED
 
     def test_stargazers_need_a_token(self) -> None:
         assert _raw(f"/repos/{REPO}/stargazers", per_page=1).status_code == 401
