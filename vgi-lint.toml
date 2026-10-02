@@ -1,0 +1,28 @@
+# vgi-lint configuration for the GitHub worker.
+#
+#   vgi-lint lint --audit-waivers
+#
+# re-runs the rules these waivers silence and fails if either has stopped buying
+# anything — a waiver that suppresses nothing is a standing claim nobody
+# revisits, and it hides the moment the rule starts applying.
+
+location = "uv run github_worker.py"
+select = ["ALL"]
+fail_on = "error"
+
+ignore = [
+  { code = "VGI311", kind = "tooling-bug", reason = """\
+The one parameterless scan here IS exposed as a table: all_rate_limit backs \
+`rate_limit`. The rule looks for a table whose name matches the function's, so \
+it cannot see the link. The names differ deliberately — a function and a table \
+cannot share one name in a schema.\
+""" },
+]
+
+[per-object]
+# GitHub lists a repository's stargazers only to tokens that administer it, so
+# no task can be written that every agent's credentials can complete; a task
+# against someone else's repository would be graded on an error.
+"github.main.stargazers" = { ignore = [
+  { code = "VGI520", kind = "domain-exemption", reason = "listing requires admin access to the repository; no portable task exists" },
+] }

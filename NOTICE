@@ -1,0 +1,18 @@
+vgi-github
+Copyright (c) 2026 Query Farm LLC - https://query.farm
+
+This product is licensed under the MIT License. See LICENSE.
+
+------------------------------------------------------------------------------
+
+GitHub data
+
+This software reads GitHub's REST API. The data it returns belongs to GitHub,
+Inc. and to the users who created it, is not covered by the MIT License above,
+and is subject to GitHub's terms of service:
+
+    https://docs.github.com/site-policy/github-terms/github-terms-of-service
+
+Neither this software nor Query Farm LLC is affiliated with, endorsed by, or
+sponsored by GitHub, Inc. "GitHub" is a trademark of GitHub, Inc. and is used
+here only to describe what this software connects to.

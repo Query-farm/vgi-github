@@ -1,0 +1,53 @@
+name: Live
+
+# The tiers that hit GitHub's real API. Scheduled rather than on push: they
+# spend rate-limit budget, and two concurrent runs sharing a token throttle
+# each other into failures that say nothing about the code.
+
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: github-live
+  cancel-in-progress: false
+
+env:
+  # The workflow's own token: 1,000 requests an hour per repository, plenty
+  # for both tiers, and read-only here. The worker reads VGI_GITHUB_TOKEN
+  # only because a lint run cannot issue CREATE SECRET first.
+  VGI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    name: Live API tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --no-sources
+      - name: End-to-end SQL
+        run: uv run --no-sources pytest -q -m live tests/test_end_to_end.py
+
+  behavioural:
+    name: vgi-lint (executes every example)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: live
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --no-sources
+      - name: vgi-lint (structural + behavioural)
+        run: >
+          uvx --no-sources --from vgi-lint-check==0.81.1 vgi-lint lint "uv run --no-sources github_worker.py"
+          --execute-concurrency 1 --no-check-links --audit-waivers --fail-on error
