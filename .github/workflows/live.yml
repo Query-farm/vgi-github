@@ -36,6 +36,12 @@ jobs:
       - name: End-to-end SQL
         run: uv run --no-sources pytest -q -m live tests/test_end_to_end.py
 
+      # One HTTP server, several clients. The server runs without
+      # VGI_GITHUB_TOKEN, so any authentication seen came from a client's own
+      # secret — and must not reach any other client.
+      - name: HTTP transport and client isolation
+        run: uv run --no-sources pytest -q -m live tests/test_http_transport.py
+
   behavioural:
     name: vgi-lint (executes every example)
     runs-on: ubuntu-latest

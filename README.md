@@ -382,7 +382,8 @@ with `--audit-waivers --fail-on warning`. All of it resolves from PyPI (`UV_NO_S
 also proves the published dependencies are sufficient.
 
 `.github/workflows/live.yml` runs daily, never concurrently, and is the half that touches GitHub:
-the end-to-end SQL suite against a real `ATTACH`, then `vgi-lint --execute`, which runs every
+the end-to-end SQL suite against a real `ATTACH`, the same worker served over HTTP to several
+clients at once, then `vgi-lint --execute`, which runs every
 shipped example. It authenticates with the workflow's own read-only `GITHUB_TOKEN`, passed as
 `VGI_GITHUB_TOKEN`.
 
@@ -394,14 +395,19 @@ and an example that wedged the client — none of which an offline test could se
 
 ```bash
 uv run pytest                                              # 126 offline tests
-VGI_GITHUB_TOKEN=$(gh auth token) uv run pytest -m live    # 20 tests against a real ATTACH
+VGI_GITHUB_TOKEN=$(gh auth token) uv run pytest -m live    # 28 tests against a real ATTACH
 ```
 
 `tests/test_functions.py` drives every function's `process()` as DuckDB would — a batch of input
 rows in, one batch with provenance out — against a mock GitHub. `tests/test_api.py` pins the
 chokepoint: retries, rate-limit waits, origin-checked `next` links, the query string surviving a
 followed link, and token-partitioned ETags. `tests/test_auth.py` covers secret selection by type
-and scope, and that an ambient `GITHUB_TOKEN` is never borrowed. `tests/test_packaging.py`
+and scope, and that an ambient `GITHUB_TOKEN` is never borrowed. `tests/test_http_transport.py`
+serves the worker over HTTP and attaches several clients to one server — the server holds no
+token of its own, so it checks that a client's secret crosses the wire, and that it never
+authorizes another client: an anonymous client stays anonymous even after a token client has
+warmed every server-side cache, and with `VGI_GITHUB_PRIVATE_REPO` set it checks a private
+repository stays invisible to the anonymous one. `tests/test_packaging.py`
 checks the entry-point scripts' PEP-723 headers still cover every runtime dependency — they
 resolve independently of `pyproject.toml`, so they drift silently and only an end-to-end
 `ATTACH` notices.
