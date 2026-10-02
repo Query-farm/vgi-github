@@ -23,6 +23,10 @@ cannot share one name in a schema.\
 # GitHub lists a repository's stargazers only to tokens that administer it, so
 # no task can be written that every agent's credentials can complete; a task
 # against someone else's repository would be graded on an error.
+# The same restriction defeats VGI911's bare-LIMIT probe for any token that does
+# not administer the example repository — CI's workflow token among them — and
+# the function raises rather than reporting "zero stars", by design.
 "github.main.stargazers" = { ignore = [
   { code = "VGI520", kind = "domain-exemption", reason = "listing requires admin access to the repository; no portable task exists" },
+  { code = "VGI911", kind = "domain-exemption", reason = "GitHub refuses the listing without admin access and the function raises; scannable only with an administering token" },
 ] }

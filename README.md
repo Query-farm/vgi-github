@@ -354,7 +354,7 @@ examples, categories, agent test tasks — is published as `vgi.*` tags and chec
 
 ```bash
 vgi-lint lint                     # config lives in vgi-lint.toml
-vgi-lint lint --audit-waivers     # prove both waivers still buy something
+vgi-lint lint --audit-waivers     # prove the waivers still buy something
 ```
 
 The catalog scores 99/100 with no findings, structural and behavioural — the behavioural tier
@@ -366,11 +366,13 @@ out to build each function's declared result schema. A column documented once sh
 `DESCRIBE`, in `duckdb_columns()` and in `vgi.result_columns_schema`, and cannot drift between
 them.
 
-Two rules are waived in `vgi-lint.toml`, each with a recorded kind and reason that
+Three waivers live in `vgi-lint.toml`, each with a recorded kind and reason that
 `--audit-waivers` re-checks. VGI311 asks that a parameterless scan be exposed as a table, which
 `all_rate_limit` is — as `rate_limit`; the rule matches on name, and a function and a table
-cannot share one. VGI520 asks for an agent test task on `stargazers`, which cannot be written
-portably: the listing needs admin access to the repository.
+cannot share one. The other two are on `stargazers`, and both come from GitHub listing
+stargazers only to tokens that administer the repository: no agent test task can be written
+that every caller's credentials can complete (VGI520), and VGI911's bare-`LIMIT` probe sees the
+function's deliberate error for any token without that access — CI's workflow token included.
 
 ## CI
 
