@@ -42,7 +42,7 @@ class SearchRepositoriesArgs:
         str,
         Arg(
             "sort",
-            doc="Order: best match (default), stars, forks, help-wanted-issues or updated",
+            doc="Field to sort by: stars, forks, help-wanted-issues or updated; empty = best match",
             default="",
             choices=["", "stars", "forks", "help-wanted-issues", "updated"],
         ),
@@ -76,9 +76,10 @@ class SearchRepositoriesFunction(TableFunctionGenerator[SearchRepositoriesArgs, 
             llm=(
                 "Find repositories with GitHub's search syntax — topic words plus qualifiers like "
                 "org:NAME, user:NAME, language:rust, stars:>1000, topic:database, pushed:>2026-01-01. "
-                "The discovery entry point when you do not already know a repository's name; "
-                "every row's full_name then feeds the per-repository functions under LATERAL. "
-                "At most 1,000 results per query."
+                "The discovery entry point when you do not already know a repository's name. It "
+                "must be the DRIVING side of a join: feed each row's full_name into the "
+                "per-repository functions with a LATERAL on the right. Streams pages, so it has no "
+                "max_rows; GitHub returns at most 1,000 results per query."
             ),
             md=(
                 "Repositories matching a search, streamed one page of 100 at a time — a `LIMIT` "
@@ -161,7 +162,7 @@ class SearchIssuesArgs:
         str,
         Arg(
             "sort",
-            doc="Order: best match (default), created, updated, comments or reactions",
+            doc="Field to sort by: created, updated, comments, reactions, ...; empty = best match",
             default="",
             choices=["", "created", "updated", "comments", "reactions", "reactions-+1", "interactions"],
         ),
@@ -196,15 +197,17 @@ class SearchIssuesFunction(TableFunctionGenerator[SearchIssuesArgs, PagedScanSta
                 "Find issues and pull requests across GitHub with its search syntax: text plus "
                 "qualifiers like repo:OWNER/NAME, org:NAME, is:issue or is:pr, is:open, label:bug, "
                 "author:LOGIN, involves:LOGIN, created:>2026-01-01. The way to search across many "
-                "repositories at once, or by text. Same columns as issues(). At most 1,000 "
-                "results per query."
+                "repositories at once, or by text. Same columns as issues(), but pull requests "
+                "are INCLUDED unless the query says is:issue (is_pull_request tells them apart). "
+                "Streams pages, so it has no max_rows; GitHub returns at most 1,000 results per "
+                "query. Drive a LATERAL from it — it cannot be the inner side of one."
             ),
             md=(
                 "Issues and pull requests matching a search, streamed one page of 100 at a time.\n\n"
                 "### Issues and pull requests together\n\n"
                 "Search covers both unless the query says `is:issue` or `is:pr`; "
-                "`is_pull_request` tells them apart in the result. GitHub now requires one of "
-                "those qualifiers for some queries, and rejects the query if it is missing.\n\n"
+                "`is_pull_request` tells them apart in the result. This differs from `issues()`, "
+                "which drops pull requests by default.\n\n"
                 "### Query, not WHERE\n\n"
                 "Qualifiers are evaluated by GitHub across everything; a WHERE clause only "
                 "filters the at-most-1,000 results it returned. `repo:`, `org:`, `label:`, "

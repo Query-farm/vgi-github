@@ -25,3 +25,19 @@ def install(monkeypatch, handler: Callable[[httpx.Request], httpx.Response]) -> 
     monkeypatch.setattr(github_api, "shared_client", lambda: client)
     monkeypatch.setattr(github_api.time, "sleep", lambda _s: None)
     return seen
+
+
+def haybarn_connection():
+    """A Haybarn connection with the vgi extension installed and loaded.
+
+    Haybarn does not have vgi until asked: on a fresh machine ``ATTACH ...
+    (TYPE vgi, ...)`` fails with "Extension ... not found". Installing it here
+    makes the live tiers self-provisioning on a clean CI runner, where they
+    used to skip every test under a green check.
+    """
+    import pytest
+
+    haybarn = pytest.importorskip("haybarn")
+    connection = haybarn.connect()
+    connection.execute("INSTALL vgi FROM community; LOAD vgi;")
+    return connection

@@ -48,10 +48,13 @@ class RateLimitFunction(TableFunctionGenerator[None, None]):
                 "One row per budget GitHub tracks.\n\n"
                 "### Prefer the table\n\n"
                 "The `rate_limit` catalog table is backed by this function and returns the same "
-                "rows; it is named `all_rate_limit` only so the two can share a schema.\n\n"
+                "rows; query the table.\n\n"
                 "### The budgets that matter\n\n"
-                "`core` covers every function here except the two searches, which draw on "
-                "`search` (30 a minute with a token, 10 without)."
+                "`core` (hourly) covers every function here except `search_repositories()` and "
+                "`search_issues()`, which draw on `search` — a per-MINUTE window of 30 with a "
+                "token, 10 without. `reset_at` is a UTC instant. The column is `request_limit` "
+                "rather than GitHub's `limit` because LIMIT is an SQL keyword. Other resources "
+                "(graphql, ...) are for APIs this worker does not call and can be ignored."
             ),
             example_queries=examples(
                 (

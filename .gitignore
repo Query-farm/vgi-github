@@ -16,3 +16,6 @@ venv/
 
 # vgi-lint baselines are per-machine unless deliberately committed
 .vgi-lint-baseline*.json
+
+# vgi-lint LLM verdict cache (per-machine)
+.vgi-review-cache.json

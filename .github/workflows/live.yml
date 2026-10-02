@@ -33,11 +33,12 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --no-sources
-      # Haybarn does not bundle the vgi extension; a fresh runner has to fetch
-      # it. Without this every ATTACH fails — which the suite treats as a
-      # failure, not a skip, because a skipped tier once reported green here.
-      - name: Install the vgi DuckDB extension
-        run: uv run --no-sources python -c "import haybarn; haybarn.connect().execute('INSTALL vgi FROM community')"
+      # The test fixtures run `INSTALL vgi FROM community; LOAD vgi;` themselves,
+      # so a fresh runner needs no setup step. vgi-lint installs it on its own.
+      # GitHub's own behaviour, no DuckDB: the facts the design rests on.
+      - name: Live API behaviour
+        run: uv run --no-sources pytest -q -m live tests/test_live.py
+
       - name: End-to-end SQL
         run: uv run --no-sources pytest -q -m live tests/test_end_to_end.py
 

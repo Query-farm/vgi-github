@@ -26,6 +26,8 @@ from typing import Any
 
 import pytest
 
+from tests.helpers import haybarn_connection
+
 pytestmark = pytest.mark.live
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -62,8 +64,7 @@ def server() -> Iterator[str]:
 
 
 def _attach(url: str, *, auth: str | None = None, token: str | None = None) -> Any:
-    haybarn = pytest.importorskip("haybarn")
-    con = haybarn.connect()
+    con = haybarn_connection()
     option = f", auth '{auth}'" if auth else ""
     con.execute(f"ATTACH 'github' (TYPE vgi, LOCATION '{url}'{option})")
     if token:

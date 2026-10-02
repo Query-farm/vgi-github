@@ -18,6 +18,8 @@ from typing import Any
 
 import pytest
 
+from tests.helpers import haybarn_connection
+
 pytestmark = pytest.mark.live
 
 REPO = "duckdb/duckdb"
@@ -25,8 +27,7 @@ REPO = "duckdb/duckdb"
 
 @pytest.fixture(scope="module")
 def con() -> Iterator[Any]:
-    haybarn = pytest.importorskip("haybarn")
-    connection = haybarn.connect()
+    connection = haybarn_connection()
     # A failed ATTACH is a failure, not a skip. It used to skip, and on a CI
     # runner without the vgi extension the whole tier reported "20 skipped"
     # under a green check while testing nothing.
@@ -56,8 +57,7 @@ class TestAuthentication:
     def test_required_mode_fails_without_a_credential(self) -> None:
         if os.environ.get("VGI_GITHUB_TOKEN"):
             pytest.skip("the environment fallback satisfies 'required'")
-        haybarn = pytest.importorskip("haybarn")
-        strict = haybarn.connect()
+        strict = haybarn_connection()
         strict.execute("ATTACH 'github' (TYPE vgi, LOCATION 'uv run github_worker.py', auth 'required')")
         with pytest.raises(Exception, match="required"):
             strict.execute("SELECT * FROM github.main.repo('duckdb/duckdb')").fetchall()

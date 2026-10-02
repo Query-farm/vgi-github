@@ -47,9 +47,15 @@ uv run serve.py --port 8000        # HTTP
 ```
 
 ```sql
+INSTALL vgi FROM community;   -- once per machine
+LOAD vgi;
 ATTACH 'github' (TYPE vgi, LOCATION 'uv run github_worker.py');
 CREATE SECRET github (TYPE github, token 'ghp_...');   -- optional; see Authentication
 ```
+
+The `vgi` extension comes from DuckDB's community repository — in stock DuckDB and in
+[Haybarn](https://query.farm) alike. Without it, `ATTACH ... (TYPE vgi, ...)` fails with
+`Extension "vgi" not found`.
 
 Both scripts carry PEP-723 headers pinning their dependencies, so they run from a fresh clone
 with nothing installed. That `LOCATION` resolves `github_worker.py` against the working
@@ -61,6 +67,13 @@ worker on first use — nothing to install, and the working directory stops matt
 ```sql
 ATTACH 'github' (TYPE vgi,
   LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github vgi-github');
+```
+
+Pin a tag for a deployment, so the worker cannot change under you:
+
+```sql
+ATTACH 'github' (TYPE vgi,
+  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github@v0.1.0 vgi-github');
 ```
 
 **This package is not published to PyPI** — install it from this repository. Its
@@ -382,7 +395,8 @@ with `--audit-waivers --fail-on warning`. All of it resolves from PyPI (`UV_NO_S
 also proves the published dependencies are sufficient.
 
 `.github/workflows/live.yml` runs daily, never concurrently, and is the half that touches GitHub:
-the end-to-end SQL suite against a real `ATTACH`, the same worker served over HTTP to several
+live checks of GitHub's own behaviour, the end-to-end SQL suite against a real `ATTACH`, the
+same worker served over HTTP to several
 clients at once, then `vgi-lint --execute`, which runs every
 shipped example. It authenticates with the workflow's own read-only `GITHUB_TOKEN`, passed as
 `VGI_GITHUB_TOKEN`.
@@ -395,8 +409,15 @@ and an example that wedged the client — none of which an offline test could se
 
 ```bash
 uv run pytest                                              # 126 offline tests
-VGI_GITHUB_TOKEN=$(gh auth token) uv run pytest -m live    # 28 tests against a real ATTACH
+VGI_GITHUB_TOKEN=$(gh auth token) uv run pytest -m live    # 48 tests against the real API
 ```
+
+`tests/test_live.py` pins the GitHub behaviour the design rests on, with no DuckDB involved:
+`next` links pointing at `/repositories/{id}` and carrying their query, page size capped at 100,
+search answering page 11 with a 422, the issue listing mixing in pull requests, a `304` not being
+charged, authenticated responses being `private`, and stargazer listings being refused for other
+people's repositories. If GitHub changes one of these, this tier goes red before a user sees a
+wrong answer.
 
 `tests/test_functions.py` drives every function's `process()` as DuckDB would — a batch of input
 rows in, one batch with provenance out — against a mock GitHub. `tests/test_api.py` pins the

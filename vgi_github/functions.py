@@ -281,6 +281,7 @@ class UserFunction(RowTransformFunction[LoginArgs]):
             llm=(
                 "A GitHub account's public profile — name, company, location, follower counts, "
                 "account age — by login. Works for organizations too (type = 'Organization'). "
+                "An unknown login yields no row rather than an error. "
                 "Use it under LATERAL to turn any column of logins (issue authors, contributors, "
                 "stargazers) into profiles; pass cache_ttl so repeated logins are fetched once."
             ),
@@ -390,7 +391,9 @@ class ReposFunction(RowTransformFunction[ReposArgs]):
                 "Every repository an account owns, most recently pushed first, with the same "
                 "columns as repo(). The way to go from an organization or user to its "
                 "repositories — and, under LATERAL, from a set of accounts to all of theirs. "
-                "Capped at max_rows per account (default 100); pass max_rows => 0 for all."
+                "Capped at max_rows per account (default 100); pass max_rows => 0 for all. "
+                "type => 'owner' (default) lists what the account owns; 'member' and 'all' add "
+                "repositories it collaborates on. An unknown owner yields no rows."
             ),
             md=(
                 "One row per repository owned by the account.\n\n"
@@ -512,12 +515,13 @@ class IssuesFunction(RowTransformFunction[IssuesArgs]):
             category="issues",
             result_schema=ISSUE_SCHEMA,
             llm=(
-                "A repository's issues, newest first — open and closed unless you filter — with "
+                "A repository's issues, newest first by creation — state defaults to 'all' "
+                "(GitHub's own default is open-only) — with "
                 "author, labels, assignees, comment and reaction counts. Pull requests are "
                 "excluded by default (GitHub mixes them in); use pulls() for those. Capped at "
                 "max_rows per repository (default 100), newest first. Filter with the named "
-                "arguments (state => 'open', labels => 'bug', since => '2026-01-01'), not WHERE: "
-                "a WHERE clause only sees the rows already fetched."
+                "arguments (state => 'open', labels => 'bug', since => '2026-01-01' — since "
+                "filters on UPDATED time), not WHERE: a WHERE clause only sees fetched rows."
             ),
             md=(
                 "One row per issue, newest first.\n\n"
@@ -743,9 +747,10 @@ class IssueCommentsFunction(RowTransformFunction[IssueCommentsArgs]):
             result_schema=ISSUE_COMMENT_SCHEMA,
             llm=(
                 "The comment thread on one issue or pull request, oldest first. Takes the "
-                "repository AND the number, so it composes directly under LATERAL from issues() "
-                "or pulls() output (i.repo, i.number). Pull request review comments on code "
-                "lines are a different thing and are not included."
+                "repository AND the number — the repo and number columns of issues() and pulls() "
+                "output — so it composes directly under LATERAL (i.repo, i.number). max_rows "
+                "(default 100) keeps the EARLIEST comments of a long thread. Pull request review "
+                "comments on code lines are a different thing and are not included."
             ),
             md=(
                 "One row per comment, in posting order.\n\n"
@@ -879,7 +884,9 @@ class CommitsFunction(RowTransformFunction[CommitsArgs]):
                 "A repository's commit history, newest first, with git author and committer "
                 "identities, dates, messages, parents and signature verification. Defaults to the "
                 "default branch; pass sha => 'branch' for another, path => 'dir/' to follow one "
-                "part of the tree, since/until for a window. Capped at max_rows (default 100)."
+                "part of the tree, author => 'login-or-email', since/until (ISO 8601, e.g. "
+                "'2026-01-01'; an unparseable value is an error) for a window. Capped at "
+                "max_rows (default 100)."
             ),
             md=(
                 "One row per commit reachable from `sha` (the default branch unless given), "
@@ -980,8 +987,9 @@ class ReleasesFunction(RowTransformFunction[RepoListArgs]):
             result_schema=RELEASE_SCHEMA,
             llm=(
                 "A repository's published releases, newest first: tag, title, pre-release flag, "
-                "publish date, release notes and total asset downloads. Use it for release "
-                "cadence, version history or download counts. Capped at max_rows (default 100)."
+                "publish date, release notes and download_count (summed over attached assets). "
+                "Use it for release cadence, version history or download counts. Capped at "
+                "max_rows (default 100). A repository with no releases, or none at all, yields no rows."
             ),
             md=(
                 "One row per release, newest first.\n\n"
@@ -1057,8 +1065,9 @@ class ContributorsFunction(RowTransformFunction[RepoListArgs]):
             llm=(
                 "Who has contributed to a repository and how many commits each, largest first. "
                 "Counts only commits on the default branch that GitHub can attribute to an "
-                "account. Feed login to user() under LATERAL for profiles. Capped at max_rows "
-                "(default 100)."
+                "account; anonymous (unlinked-email) contributors are not included. Feed login to "
+                "user() under LATERAL for profiles. Capped at max_rows (default 100). GitHub may "
+                "refuse to compute the list for an enormous history and answer with an error."
             ),
             md=(
                 "One row per contributing account, ordered by commit count.\n\n"
@@ -1138,8 +1147,9 @@ class LanguagesFunction(RowTransformFunction[RepoArgs]):
             md=(
                 "One row per language GitHub's linguist detected.\n\n"
                 "### Shares\n\n"
-                "Divide `bytes` by the repository's total for a percentage; the example does it "
-                "with a window function.\n\n"
+                "Rows come back largest first. Divide `bytes` by the repository's total for a "
+                "share — the first example does it with a window function. A byte share is not a "
+                "line count, so it can differ from other 'language share' measures.\n\n"
                 "### What linguist excludes\n\n"
                 "Vendored code, generated files and documentation are excluded by linguist's own "
                 "rules, and a repository can override them, so this measures what GitHub "
@@ -1199,11 +1209,12 @@ class StargazersFunction(RowTransformFunction[RepoListArgs]):
             category="people",
             result_schema=STARGAZER_SCHEMA,
             llm=(
-                "Every star on a repository with its timestamp, OLDEST first — the raw data "
+                "Stars on a repository with their timestamps (up to 10,000), OLDEST first — the raw data "
                 "behind a star-history chart. Only works for repositories your token can "
                 "administer: GitHub refuses the listing for anyone else's, and this raises an "
                 "error rather than reporting zero stars. The default max_rows of 100 returns the "
-                "first hundred stars; pass max_rows => 0 for the full history."
+                "first hundred stars; pass max_rows => 0 for the full history. For anyone else's "
+                "repository, use repo() and its stargazers_count instead."
             ),
             md=(
                 "One row per star, in the order they were given.\n\n"
@@ -1332,7 +1343,9 @@ class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):
                 "branch, status and conclusion, timing. Use it for CI reliability (failure rate "
                 "by workflow), duration, or what is running now. Narrow at the source with "
                 "branch =>, event => and status => (which also accepts a conclusion such as "
-                "'failure'); a WHERE clause only sees the max_rows (default 100) runs fetched."
+                "'failure'); a WHERE clause only sees the max_rows (default 100) runs fetched, so a "
+                "failure rate over the default is over the last 100 runs. For a longer window "
+                "raise max_rows (GitHub caps a filtered listing at 1,000 runs)."
             ),
             md=(
                 "One row per workflow run, newest first.\n\n"
