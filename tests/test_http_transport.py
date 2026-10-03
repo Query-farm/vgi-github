@@ -38,7 +38,11 @@ _PORT_LINE = re.compile(r"^PORT:(\d+)$")
 
 @pytest.fixture(scope="module")
 def server() -> Iterator[str]:
-    env = {k: v for k, v in os.environ.items() if k not in ("VGI_GITHUB_TOKEN", "GITHUB_TOKEN", "GH_TOKEN")}
+    env = {
+        k: v
+        for k, v in os.environ.items()
+        if k not in ("VGI_GITHUB_TOKEN", "GITHUB_TOKEN", "GH_TOKEN", "VGI_GITHUB_ALLOW_TOKEN_SOURCE")
+    }
     proc = subprocess.Popen(
         ["uv", "run", "serve.py", "--port", "0"],
         cwd=ROOT,
@@ -116,8 +120,8 @@ class TestOverHttp:
         assert len(rows) == 5
 
     def test_token_source_is_refused_over_http(self, server: str) -> None:
-        """A shared server must never run gh, or read its environment, for a client."""
-        with pytest.raises(Exception, match="only available when DuckDB launches the worker locally"):
+        """By default a shared server never runs gh, or reads its environment, for a client."""
+        with pytest.raises(Exception, match="not enabled on this worker"):
             _attach(server, token_source="gh")
 
     def test_required_mode_over_http(self, server: str) -> None:

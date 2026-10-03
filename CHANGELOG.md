@@ -4,9 +4,10 @@
 
 - `token_source` ATTACH option: `'gh'` authenticates with the GitHub CLI's login, `'env'` with
   `GH_TOKEN` or `GITHUB_TOKEN` — no secret needed, and the token never appears in the ATTACH
-  statement. Only when DuckDB launches the worker locally: a worker serving HTTP or a socket refuses
-  it at ATTACH, so a remote client cannot borrow the operator's login. A `github` secret still takes
-  precedence.
+  statement. A worker serving HTTP or a socket refuses it at ATTACH by default, so a remote client
+  cannot borrow the operator's login; start the server with `VGI_GITHUB_ALLOW_TOKEN_SOURCE=1` to
+  allow it, using the server's own login, for a server you run for yourself. A `github` secret still
+  takes precedence.
 
 ## 0.1.0 — 2026-10-02
 

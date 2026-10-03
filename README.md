@@ -204,8 +204,8 @@ ATTACH 'github' (TYPE vgi,
 ```
 
 `token_source 'env'` does the same with a `GH_TOKEN` or `GITHUB_TOKEN` environment variable. Either
-way the token never appears in the `ATTACH` statement. These only work when DuckDB starts the
-worker itself; a shared server (below) refuses them, since it would be lending out its own login.
+way the token never appears in the `ATTACH` statement. By default these only work when DuckDB
+starts the worker itself; a shared server (below) refuses them unless you turn them on.
 
 Or create a token at **GitHub → Settings → Developer settings → Personal access tokens** (a
 fine-grained token with read-only access is enough) and give it to DuckDB as a secret:
@@ -249,6 +249,17 @@ own machine:
   under a path, and `--http-threads 16` for many people at once.
 - Don't set `VGI_GITHUB_TOKEN` on a shared server unless you want everyone without their own
   token to use yours.
+- **Running the server just for yourself?** Start it with `VGI_GITHUB_ALLOW_TOKEN_SOURCE=1` and
+  you can attach with `token_source 'gh'` instead of a secret. The token comes from the *server's*
+  GitHub CLI login, so anyone else who can reach it would act as you too.
+
+  ```bash
+  VGI_GITHUB_ALLOW_TOKEN_SOURCE=1 uvx --from git+https://github.com/Query-farm/vgi-github@v0.1.0 vgi-github-http --port 8000
+  ```
+
+  ```sql
+  ATTACH 'github' (TYPE vgi, LOCATION 'http://localhost:8000', token_source 'gh');
+  ```
 
 ## GitHub Enterprise
 

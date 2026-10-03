@@ -226,7 +226,7 @@ class TestTokenSourceAttach:
         from vgi_github.worker import GitHubCatalog
 
         monkeypatch.setattr(auth, "_local_sources_allowed", False)
-        with pytest.raises(ValueError, match="locally"):
+        with pytest.raises(ValueError, match="not enabled"):
             GitHubCatalog().catalog_attach(name="github", options={"token_source": "gh"})
 
     @pytest.mark.parametrize(
@@ -243,7 +243,28 @@ class TestTokenSourceAttach:
     def test_server_flags_turn_local_sources_off(self, monkeypatch, argv, allowed) -> None:
         from vgi_github import worker
 
+        monkeypatch.delenv(auth.ALLOW_SOURCES_ENV, raising=False)
         monkeypatch.setattr(worker.GitHubWorker, "main", classmethod(lambda cls: None))
         monkeypatch.setattr(worker.sys, "argv", ["github_worker.py"])
         worker._start(argv)
         assert auth.local_sources_allowed() is allowed
+
+    @pytest.mark.parametrize("value", ["1", "true", "yes"])
+    def test_operator_can_enable_sources_on_a_server(self, monkeypatch, value) -> None:
+        """For a server run for oneself, the operator may lend clients the server's login."""
+        from vgi_github import worker
+
+        monkeypatch.setenv(auth.ALLOW_SOURCES_ENV, value)
+        monkeypatch.setattr(worker.GitHubWorker, "main", classmethod(lambda cls: None))
+        monkeypatch.setattr(worker.sys, "argv", ["serve.py"])
+        worker._start(["--http", "--port", "8000"])
+        assert auth.local_sources_allowed() is True
+
+    def test_opt_in_needs_a_truthy_value(self, monkeypatch) -> None:
+        from vgi_github import worker
+
+        monkeypatch.setenv(auth.ALLOW_SOURCES_ENV, "0")
+        monkeypatch.setattr(worker.GitHubWorker, "main", classmethod(lambda cls: None))
+        monkeypatch.setattr(worker.sys, "argv", ["serve.py"])
+        worker._start(["--http"])
+        assert auth.local_sources_allowed() is False

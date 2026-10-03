@@ -563,9 +563,10 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
         # never going to work, and failing here says so before anything runs.
         if source and not auth.local_sources_allowed():
             raise ValueError(
-                f"ATTACH option token_source => {source!r} is only available when DuckDB launches "
-                "the worker locally; this worker is shared over HTTP or a socket, so send your own "
-                "token with CREATE SECRET (TYPE github, token '...') instead"
+                f"ATTACH option token_source => {source!r} is not enabled on this worker, which is "
+                "shared over HTTP or a socket; send your own token with CREATE SECRET (TYPE github, "
+                "token '...'), or start the server with "
+                f"{auth.ALLOW_SOURCES_ENV}=1 to let clients use the server's own GitHub login"
             )
         result = super().catalog_attach(name=name, options=options, **kwargs)
         return replace(
@@ -600,8 +601,14 @@ _SHARED_SERVER_FLAGS = ("--http", "--unix", "--tcp")
 
 
 def _start(argv: list[str]) -> None:
-    """Run the worker, refusing ``token_source`` if it is serving many clients."""
-    if any(arg == flag or arg.startswith(flag + "=") for arg in argv for flag in _SHARED_SERVER_FLAGS):
+    """Run the worker, refusing ``token_source`` if it serves many clients.
+
+    A server refuses it unless the operator sets ``VGI_GITHUB_ALLOW_TOKEN_SOURCE=1``:
+    the token would come from the server's own login, so every client asking
+    for it would act as the operator.
+    """
+    serving = any(arg == flag or arg.startswith(flag + "=") for arg in argv for flag in _SHARED_SERVER_FLAGS)
+    if serving and not auth.sources_allowed_on_server():
         auth.disallow_local_sources()
     sys.argv = [sys.argv[0], *argv]
     GitHubWorker.main()

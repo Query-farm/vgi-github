@@ -195,6 +195,18 @@ GH_TOKEN_TTL_SECONDS = 300
 _gh_cache: dict[str, tuple[float, str]] = {}
 _gh_lock = threading.Lock()
 
+#: Set to 1 on a server to let clients use ``token_source`` anyway. The token
+#: then comes from the *server's* GitHub CLI login or environment, so every
+#: client that asks gets the operator's identity — right for a server you run
+#: for yourself, wrong for one others can reach.
+ALLOW_SOURCES_ENV = "VGI_GITHUB_ALLOW_TOKEN_SOURCE"
+
+
+def sources_allowed_on_server() -> bool:
+    """Whether the operator opted a shared server in to ``token_source``."""
+    return os.environ.get(ALLOW_SOURCES_ENV, "").strip().lower() in ("1", "true", "yes", "on")
+
+
 #: Whether this process may read a token from its own environment on a
 #: client's request. True when DuckDB launched the worker for one user over
 #: stdio. A worker serving HTTP or a socket answers many clients, and running
@@ -286,8 +298,9 @@ def from_source(source: str, api_base: str) -> Credentials | None:
         return None
     if not _local_sources_allowed:
         raise GitHubAuthError(
-            f"token_source {source!r} is not available on a shared (HTTP or socket) worker; "
-            "send your own token with CREATE SECRET (TYPE github, token '...') instead"
+            f"token_source {source!r} is not enabled on this shared (HTTP or socket) worker; "
+            "send your own token with CREATE SECRET (TYPE github, token '...'), or start the "
+            f"server with {ALLOW_SOURCES_ENV}=1 to let clients use the server's own login"
         )
     if source == SOURCE_GH:
         return from_gh_cli(api_base)
