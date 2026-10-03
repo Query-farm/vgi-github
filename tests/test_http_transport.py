@@ -63,9 +63,12 @@ def server() -> Iterator[str]:
     proc.wait(timeout=10)
 
 
-def _attach(url: str, *, auth: str | None = None, token: str | None = None) -> Any:
+def _attach(
+    url: str, *, auth: str | None = None, token: str | None = None, token_source: str | None = None
+) -> Any:
     con = haybarn_connection()
     option = f", auth '{auth}'" if auth else ""
+    option += f", token_source '{token_source}'" if token_source else ""
     con.execute(f"ATTACH 'github' (TYPE vgi, LOCATION '{url}'{option})")
     if token:
         con.execute(f"CREATE SECRET client_token (TYPE github, token '{token}')")
@@ -111,6 +114,11 @@ class TestOverHttp:
         con = _attach(server, token=token)
         rows = con.execute("SELECT * FROM github.search_repositories('duckdb') LIMIT 5").fetchall()
         assert len(rows) == 5
+
+    def test_token_source_is_refused_over_http(self, server: str) -> None:
+        """A shared server must never run gh, or read its environment, for a client."""
+        with pytest.raises(Exception, match="only available when DuckDB launches the worker locally"):
+            _attach(server, token_source="gh")
 
     def test_required_mode_over_http(self, server: str) -> None:
         con = _attach(server, auth="required")

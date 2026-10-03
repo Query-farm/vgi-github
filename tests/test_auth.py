@@ -111,3 +111,139 @@ class TestAttach:
 
         with pytest.raises(ValueError, match="not one of"):
             GitHubCatalog().catalog_attach(name="github", options={"auth": "require"})
+
+
+class TestTokenSource:
+    """`token_source` names where to find a token — never the token itself."""
+
+    @pytest.fixture(autouse=True)
+    def _isolate(self, monkeypatch):
+        monkeypatch.delenv(auth.ENV_TOKEN, raising=False)
+        monkeypatch.delenv("GH_TOKEN", raising=False)
+        monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+        monkeypatch.delenv("GITHUB_API_URL", raising=False)
+        monkeypatch.setattr(auth, "_local_sources_allowed", True)
+        auth._gh_cache.clear()
+        yield
+        auth._gh_cache.clear()
+
+    @staticmethod
+    def _fake_gh(monkeypatch, *, token="gho_cli", returncode=0, stderr=""):
+        calls: list[list[str]] = []
+
+        def run(cmd, **kwargs):
+            calls.append(cmd)
+            import subprocess
+
+            return subprocess.CompletedProcess(cmd, returncode, stdout=token + "\n", stderr=stderr)
+
+        monkeypatch.setattr(auth.shutil, "which", lambda name: "/usr/bin/gh")
+        monkeypatch.setattr(auth.subprocess, "run", run)
+        return calls
+
+    def test_attach_bytes_round_trip(self) -> None:
+        data = auth.encode_attach("required", "gh")
+        assert auth.mode_of(data) == "required" and auth.token_source_of(data) == "gh"
+
+    def test_legacy_attach_bytes_still_read(self) -> None:
+        """Bytes from before token_source were the bare mode string."""
+        assert auth.mode_of(b"required") == "required"
+        assert auth.token_source_of(b"required") == ""
+
+    def test_gh_login_is_used(self, monkeypatch) -> None:
+        calls = self._fake_gh(monkeypatch)
+        creds = auth.for_call(None, auth.encode_attach("auto", "gh"))
+        assert creds is not None and creds.token == "gho_cli"
+        assert calls[0][1:] == ["auth", "token", "--hostname", "github.com"]
+
+    def test_gh_token_is_cached(self, monkeypatch) -> None:
+        """A LATERAL makes many calls; gh must not be spawned for each."""
+        calls = self._fake_gh(monkeypatch)
+        for _ in range(5):
+            auth.for_call(None, auth.encode_attach("auto", "gh"))
+        assert len(calls) == 1
+
+    def test_enterprise_host_is_asked_for(self, monkeypatch) -> None:
+        monkeypatch.setenv("GITHUB_API_URL", "https://ghe.example.com/api/v3")
+        calls = self._fake_gh(monkeypatch)
+        auth.for_call(None, auth.encode_attach("auto", "gh"))
+        assert calls[0][-1] == "ghe.example.com"
+
+    def test_missing_gh_is_an_error_not_anonymous(self, monkeypatch) -> None:
+        monkeypatch.setattr(auth.shutil, "which", lambda name: None)
+        with pytest.raises(auth.GitHubAuthError, match="not on this machine"):
+            auth.for_call(None, auth.encode_attach("auto", "gh"))
+
+    def test_gh_not_logged_in_is_an_error(self, monkeypatch) -> None:
+        self._fake_gh(monkeypatch, token="", returncode=1, stderr="no oauth token found for github.com")
+        with pytest.raises(auth.GitHubAuthError, match="gh auth login"):
+            auth.for_call(None, auth.encode_attach("auto", "gh"))
+
+    def test_env_source_reads_the_standard_variables(self, monkeypatch) -> None:
+        monkeypatch.setenv("GITHUB_TOKEN", "from_github_token")
+        assert auth.for_call(None, auth.encode_attach("auto", "env")).token == "from_github_token"
+        monkeypatch.setenv("GH_TOKEN", "from_gh_token")
+        assert auth.for_call(None, auth.encode_attach("auto", "env")).token == "from_gh_token"
+
+    def test_env_source_without_a_variable_is_an_error(self) -> None:
+        with pytest.raises(auth.GitHubAuthError, match="GH_TOKEN"):
+            auth.for_call(None, auth.encode_attach("auto", "env"))
+
+    def test_a_secret_beats_the_source(self, monkeypatch) -> None:
+        calls = self._fake_gh(monkeypatch)
+        creds = auth.for_call({"github": {"token": "from_secret"}}, auth.encode_attach("auto", "gh"))
+        assert creds.token == "from_secret" and calls == []
+
+    def test_the_source_satisfies_required(self, monkeypatch) -> None:
+        self._fake_gh(monkeypatch)
+        assert auth.for_call(None, auth.encode_attach("required", "gh")) is not None
+
+    def test_off_ignores_the_source(self, monkeypatch) -> None:
+        calls = self._fake_gh(monkeypatch)
+        assert auth.for_call(None, auth.encode_attach("off", "gh")) is None and calls == []
+
+    def test_a_shared_server_refuses_local_sources(self, monkeypatch) -> None:
+        """On an HTTP worker, gh would run as the operator — anyone could borrow that login."""
+        calls = self._fake_gh(monkeypatch)
+        auth.disallow_local_sources()
+        with pytest.raises(auth.GitHubAuthError, match="shared"):
+            auth.for_call(None, auth.encode_attach("auto", "gh"))
+        assert calls == []
+
+
+class TestTokenSourceAttach:
+    @pytest.fixture(autouse=True)
+    def _allow(self, monkeypatch):
+        monkeypatch.setattr(auth, "_local_sources_allowed", True)
+
+    def test_bad_source_is_rejected_at_attach(self) -> None:
+        from vgi_github.worker import GitHubCatalog
+
+        with pytest.raises(ValueError, match="token_source"):
+            GitHubCatalog().catalog_attach(name="github", options={"token_source": "keychain"})
+
+    def test_shared_server_rejects_the_option_at_attach(self, monkeypatch) -> None:
+        from vgi_github.worker import GitHubCatalog
+
+        monkeypatch.setattr(auth, "_local_sources_allowed", False)
+        with pytest.raises(ValueError, match="locally"):
+            GitHubCatalog().catalog_attach(name="github", options={"token_source": "gh"})
+
+    @pytest.mark.parametrize(
+        ("argv", "allowed"),
+        [
+            ([], True),
+            (["--http"], False),
+            (["--port", "8000", "--http"], False),
+            (["--unix=/tmp/s"], False),
+            (["--tcp", "9000"], False),
+            (["--describe"], True),
+        ],
+    )
+    def test_server_flags_turn_local_sources_off(self, monkeypatch, argv, allowed) -> None:
+        from vgi_github import worker
+
+        monkeypatch.setattr(worker.GitHubWorker, "main", classmethod(lambda cls: None))
+        monkeypatch.setattr(worker.sys, "argv", ["github_worker.py"])
+        worker._start(argv)
+        assert auth.local_sources_allowed() is allowed

@@ -528,7 +528,17 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
             ),
             type=pa.string(),
             default=auth.AUTO,
-        )
+        ),
+        AttachOptionSpec(
+            name="token_source",
+            desc=(
+                "Where to find your GitHub identity when no 'github' secret resolves: 'gh' uses "
+                "the GitHub CLI's login (gh auth token), 'env' uses GH_TOKEN or GITHUB_TOKEN. "
+                "Only when DuckDB launches the worker locally; refused by a shared HTTP server."
+            ),
+            type=pa.string(),
+            default=auth.SOURCE_NONE,
+        ),
     ]
 
     def catalog_attach(self, *, name: str, options: dict[str, Any], **kwargs: Any) -> CatalogAttachResult:
@@ -545,10 +555,22 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
         mode = str(options.get("auth") or auth.AUTO).strip().lower()
         if mode not in auth.MODES:
             raise ValueError(f"ATTACH option auth => {mode!r} is not one of {', '.join(auth.MODES)}")
+        source = str(options.get("token_source") or auth.SOURCE_NONE).strip().lower()
+        if source not in auth.SOURCES:
+            choices = ", ".join(repr(s) for s in auth.SOURCES if s)
+            raise ValueError(f"ATTACH option token_source => {source!r} is not one of {choices}")
+        # Refused at ATTACH, not at the first query: on a shared server it is
+        # never going to work, and failing here says so before anything runs.
+        if source and not auth.local_sources_allowed():
+            raise ValueError(
+                f"ATTACH option token_source => {source!r} is only available when DuckDB launches "
+                "the worker locally; this worker is shared over HTTP or a socket, so send your own "
+                "token with CREATE SECRET (TYPE github, token '...') instead"
+            )
         result = super().catalog_attach(name=name, options=options, **kwargs)
         return replace(
             result,
-            attach_opaque_data=AttachOpaqueData(mode.encode()),
+            attach_opaque_data=AttachOpaqueData(auth.encode_attach(mode, source)),
             attach_opaque_data_required=True,
         )
 
@@ -572,9 +594,22 @@ class GitHubWorker(Worker):
     catalog_interface = GitHubCatalog
 
 
+#: Flags that make the worker a server for many clients rather than a child
+#: process of one DuckDB.
+_SHARED_SERVER_FLAGS = ("--http", "--unix", "--tcp")
+
+
+def _start(argv: list[str]) -> None:
+    """Run the worker, refusing ``token_source`` if it is serving many clients."""
+    if any(arg == flag or arg.startswith(flag + "=") for arg in argv for flag in _SHARED_SERVER_FLAGS):
+        auth.disallow_local_sources()
+    sys.argv = [sys.argv[0], *argv]
+    GitHubWorker.main()
+
+
 def main() -> None:
     """Run the worker (stdio by default; pass ``--http`` for the HTTP server)."""
-    GitHubWorker.main()
+    _start(sys.argv[1:])
 
 
 def main_http() -> None:
@@ -582,5 +617,4 @@ def main_http() -> None:
     argv = sys.argv[1:]
     if "--http" not in argv:
         argv = ["--http", *argv]
-    sys.argv = [sys.argv[0], *argv]
-    GitHubWorker.main()
+    _start(argv)

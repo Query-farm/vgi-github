@@ -194,9 +194,21 @@ Without a token GitHub allows **60 requests an hour**, which a single query acro
 repositories can use up. With one you get **5,000**, and you can read private repositories you
 have access to.
 
-Create a token at **GitHub → Settings → Developer settings → Personal access tokens** (a
-fine-grained token with read-only access is enough), or reuse the one the GitHub CLI already has
-(`gh auth token`). Then:
+**Already logged in with the [GitHub CLI](https://cli.github.com)?** Tell the worker to use that
+login when you attach:
+
+```sql
+ATTACH 'github' (TYPE vgi,
+  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github@v0.1.0 vgi-github',
+  token_source 'gh');
+```
+
+`token_source 'env'` does the same with a `GH_TOKEN` or `GITHUB_TOKEN` environment variable. Either
+way the token never appears in the `ATTACH` statement. These only work when DuckDB starts the
+worker itself; a shared server (below) refuses them, since it would be lending out its own login.
+
+Or create a token at **GitHub → Settings → Developer settings → Personal access tokens** (a
+fine-grained token with read-only access is enough) and give it to DuckDB as a secret:
 
 ```sql
 CREATE SECRET github (TYPE github, token 'github_pat_...');

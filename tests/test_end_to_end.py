@@ -147,3 +147,47 @@ class TestMaterialization:
     )
     def test_every_column_can_be_fetched(self, con: Any, relation: str) -> None:
         assert con.execute(f"SELECT * FROM {relation}").fetchall()
+
+
+class TestTokenSource:
+    """ATTACH (token_source ...) authenticates without a secret or VGI_GITHUB_TOKEN."""
+
+    @staticmethod
+    def _core(con: Any) -> tuple[int, bool]:
+        return con.execute(
+            "SELECT request_limit, authenticated FROM github.rate_limit WHERE resource = 'core'"
+        ).fetchone()
+
+    def test_env_source(self, monkeypatch) -> None:
+        token = os.environ.get("VGI_GITHUB_TOKEN")
+        if not token:
+            pytest.skip("needs VGI_GITHUB_TOKEN to stand in for GITHUB_TOKEN")
+        # The worker inherits this process's environment: offer the token only
+        # under the standard name, so a pass proves token_source 'env' found it.
+        monkeypatch.delenv("VGI_GITHUB_TOKEN")
+        monkeypatch.delenv("GH_TOKEN", raising=False)
+        monkeypatch.setenv("GITHUB_TOKEN", token)
+        # A distinct LOCATION: the vgi extension pools workers per location, and
+        # a worker launched by an earlier test predates this environment.
+        con = haybarn_connection()
+        con.execute(
+            "ATTACH 'github' (TYPE vgi, LOCATION 'uv run github_worker.py --log-level WARNING', "
+            "token_source 'env')"
+        )
+        limit, authenticated = self._core(con)
+        assert authenticated and limit > 60
+
+    def test_gh_source(self, monkeypatch) -> None:
+        import shutil
+        import subprocess
+
+        if (
+            shutil.which("gh") is None
+            or subprocess.run(["gh", "auth", "token"], capture_output=True).returncode
+        ):
+            pytest.skip("needs a logged-in GitHub CLI")
+        monkeypatch.delenv("VGI_GITHUB_TOKEN", raising=False)
+        con = haybarn_connection()
+        con.execute("ATTACH 'github' (TYPE vgi, LOCATION 'uv run github_worker.py', token_source 'gh')")
+        limit, authenticated = self._core(con)
+        assert authenticated and limit > 60
