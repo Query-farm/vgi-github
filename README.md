@@ -188,6 +188,33 @@ Every column is documented — `DESCRIBE github.issues('duckdb/duckdb')` shows w
   another query, as in the examples above.
 - **A missing repository returns no rows**, rather than an error.
 
+## See what it's doing
+
+A query that waits out a GitHub rate limit just looks slow. Turn on DuckDB's logging to see why:
+the worker reports every rate-limit wait and retry, warns when your remaining budget runs low, and
+logs a one-line summary of each call.
+
+```sql
+SET enable_logging = true;
+SET logging_level = 'INFO';        -- leave this out to see only warnings
+SET logging_storage = 'memory';    -- keep the messages queryable
+
+SELECT count(*) FROM github.languages('duckdb/duckdb');
+
+SELECT timestamp, log_level, event AS message
+FROM duckdb_logs_parsed('VGI')
+WHERE event LIKE '%GitHub%'
+ORDER BY timestamp;
+```
+
+```
+INFO  1 GitHub request; core budget 4664/5000, resets 14:51:02 UTC
+WARN  GitHub rate limited on /repos/duckdb/duckdb/issues; waiting 3s before retrying (attempt 2 of 5)
+WARN  GitHub core budget is low: 42 of 5000 requests left, resets at 14:51:02 UTC
+```
+
+`SELECT * FROM github.rate_limit` shows your remaining budget at any time.
+
 ## Use a token
 
 Without a token GitHub allows **60 requests an hour**, which a single query across a few

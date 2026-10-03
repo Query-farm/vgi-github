@@ -19,6 +19,7 @@ from vgi_rpc.rpc import OutputCollector
 
 from vgi_github import auth
 from vgi_github import github_api as api
+from vgi_github.client_log import emitter
 from vgi_github.meta import docs, examples
 from vgi_github.schemas import RATE_LIMIT_SCHEMA, batch_from_rows, flatten_rate_limit
 
@@ -82,7 +83,8 @@ class RateLimitFunction(TableFunctionGenerator[None, None]):
     def process(cls, params: ProcessParams[None], state: None, out: OutputCollector) -> None:
         """Fetch the budgets. Never cached: the point is to see them move."""
         credentials = auth.for_call(params.secrets, params.attach_opaque_data)
-        payload = api.lookup("/rate_limit", credentials=credentials)
+        with api.reporting_to(emitter(out)):
+            payload = api.lookup("/rate_limit", credentials=credentials)
         rows = flatten_rate_limit(payload, authenticated=credentials is not None)
         out.emit(batch_from_rows(rows, params.output_schema))
         out.finish()

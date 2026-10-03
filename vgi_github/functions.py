@@ -54,6 +54,7 @@ from vgi_rpc.rpc import OutputCollector
 from vgi_github import auth
 from vgi_github import github_api as api
 from vgi_github.auth import Credentials
+from vgi_github.client_log import emitter
 from vgi_github.github_api import STALE_IF_ERROR, CacheHint, GitHubInputError
 from vgi_github.meta import docs, examples
 from vgi_github.schemas import (
@@ -151,14 +152,15 @@ def _fan_out(
     fetched: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
     rows: list[dict[str, Any]] = []
     parents: list[int] = []
-    for index, key in enumerate(keys):
-        if any(part is None for part in key):
-            continue
-        if key not in fetched:
-            fetched[key] = fetch(key[0] if len(key) == 1 else key, hint, credentials)
-        found = fetched[key]
-        rows.extend(found)
-        parents.extend([index] * len(found))
+    with api.reporting_to(emitter(out)):
+        for index, key in enumerate(keys):
+            if any(part is None for part in key):
+                continue
+            if key not in fetched:
+                fetched[key] = fetch(key[0] if len(key) == 1 else key, hint, credentials)
+            found = fetched[key]
+            rows.extend(found)
+            parents.extend([index] * len(found))
     cache_control = _origin_cache_control(hint) or _opt_in_cache_control(cache_ttl)
     cast("VgiOutputCollector", out).emit(
         batch_from_rows(rows, params.output_schema), parent_rows=parents, cache_control=cache_control

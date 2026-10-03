@@ -23,13 +23,15 @@ Three GitHub behaviours shape this module more than any endpoint does:
 from __future__ import annotations
 
 import atexit
+import contextlib
+import contextvars
 import json
 import os
 import re
 import threading
 import time
 from collections import OrderedDict
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -376,6 +378,95 @@ _ETAGS = _ETagCache(_ETAG_CACHE_ENTRIES)
 
 
 # --------------------------------------------------------------------------
+# Telling the caller what happened
+# --------------------------------------------------------------------------
+
+#: Budget below which a call warns: this fraction of the limit, or this many
+#: requests, whichever is larger.
+_LOW_BUDGET_FRACTION = 0.10
+_LOW_BUDGET_FLOOR = 10
+
+#: ``(level, message)`` — level is a vgi_rpc ``Level`` name such as ``"WARN"``.
+Emit = Callable[[str, str], None]
+
+
+@dataclass(slots=True)
+class ActivityLog:
+    """What one function call did on the wire, reported back to the DuckDB client.
+
+    Rate-limit waits and retries happen inside a call, so without this a
+    throttled query just looks slow. Warnings go out as they happen; a one-line
+    summary goes out when the call finishes.
+    """
+
+    emit: Emit
+    requests: int = 0
+    revalidated: int = 0
+    retries: int = 0
+    #: resource -> (remaining, limit, reset epoch), from the latest response.
+    budget: dict[str, tuple[int, int, int]] = field(default_factory=dict)
+    warned_low: set[str] = field(default_factory=set)
+
+    def warn(self, message: str) -> None:
+        self.emit("WARN", message)
+
+    def observe(self, response: httpx.Response) -> None:
+        headers = response.headers
+        try:
+            remaining = int(headers["x-ratelimit-remaining"])
+            limit = int(headers["x-ratelimit-limit"])
+            reset = int(headers.get("x-ratelimit-reset", "0"))
+        except (KeyError, ValueError):
+            return
+        resource = headers.get("x-ratelimit-resource", "core")
+        self.budget[resource] = (remaining, limit, reset)
+        threshold = max(_LOW_BUDGET_FLOOR, int(limit * _LOW_BUDGET_FRACTION))
+        if remaining < threshold and resource not in self.warned_low:
+            self.warned_low.add(resource)
+            self.warn(
+                f"GitHub {resource} budget is low: {remaining} of {limit} requests left, "
+                f"resets at {_clock(reset)}"
+            )
+
+    def summary(self) -> str:
+        parts = [f"{self.requests} GitHub request{'s' if self.requests != 1 else ''}"]
+        if self.revalidated:
+            parts.append(f"{self.revalidated} unchanged (free)")
+        if self.retries:
+            parts.append(f"{self.retries} retried")
+        for resource, (remaining, limit, reset) in sorted(self.budget.items()):
+            parts.append(f"{resource} budget {remaining}/{limit}, resets {_clock(reset)}")
+        return "; ".join(parts)
+
+
+def _clock(epoch: int) -> str:
+    return datetime.fromtimestamp(epoch, tz=UTC).strftime("%H:%M:%S UTC") if epoch else "unknown"
+
+
+_activity: contextvars.ContextVar[ActivityLog | None] = contextvars.ContextVar(
+    "github_activity", default=None
+)
+
+
+@contextlib.contextmanager
+def reporting_to(emit: Emit) -> Iterator[ActivityLog]:
+    """Report this call's rate-limit waits, retries and budget through ``emit``.
+
+    A context variable carries it down to :func:`_get`, so none of the fetch
+    helpers between a function and the chokepoint need a parameter for it. The
+    summary is emitted on the way out, even if the call failed.
+    """
+    log = ActivityLog(emit)
+    token = _activity.set(log)
+    try:
+        yield log
+    finally:
+        _activity.reset(token)
+        if log.requests:
+            emit("INFO", log.summary())
+
+
+# --------------------------------------------------------------------------
 # The chokepoint
 # --------------------------------------------------------------------------
 
@@ -517,21 +608,42 @@ def _get(
         headers["If-None-Match"] = cached.etag
 
     http = client or shared_client()
+    activity = _activity.get()
     for attempt in range(_RETRY_ATTEMPTS):
         last_attempt = attempt == _RETRY_ATTEMPTS - 1
+        if activity is not None:
+            activity.requests += 1
         try:
             response = http.get(target, headers=headers)
-        except httpx.TransportError:
+        except httpx.TransportError as exc:
             if last_attempt:
                 raise
-            time.sleep(_RETRY_BASE_SECONDS * (2**attempt))
+            wait = _RETRY_BASE_SECONDS * (2**attempt)
+            if activity is not None:
+                activity.retries += 1
+                activity.warn(
+                    f"GitHub request to {path_or_url} failed ({type(exc).__name__}); "
+                    f"retrying in {wait:g}s (attempt {attempt + 2} of {_RETRY_ATTEMPTS})"
+                )
+            time.sleep(wait)
             continue
+        if activity is not None:
+            activity.observe(response)
         wait = _retry_after(response, attempt) if response.status_code >= 400 else None
         if wait is None or last_attempt:
             break
+        if activity is not None:
+            activity.retries += 1
+            why = "rate limited" if _is_rate_limited(response) else f"answered {response.status_code}"
+            activity.warn(
+                f"GitHub {why} on {path_or_url}; waiting {wait:g}s before retrying "
+                f"(attempt {attempt + 2} of {_RETRY_ATTEMPTS})"
+            )
         time.sleep(wait)
 
     if response.status_code == 304 and cached is not None:
+        if activity is not None:
+            activity.revalidated += 1
         if hint is not None:
             hint.observe(response.headers)
         return Response(_decode(cached.body, url, 200), cached.link, 200)

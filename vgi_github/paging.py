@@ -30,6 +30,7 @@ from vgi_rpc.rpc import OutputCollector
 
 from vgi_github import auth
 from vgi_github import github_api as api
+from vgi_github.client_log import emitter
 from vgi_github.github_api import PER_PAGE, SEARCH_RESULT_CAP, STALE_IF_ERROR, CacheHint
 from vgi_github.schemas import batch_from_rows
 
@@ -69,13 +70,14 @@ def emit_search_page(
         out.finish()
         return
     hint = CacheHint()
-    rows, next_url = api.page(
-        state.next_url or path,
-        None if state.next_url else {**query, "per_page": PER_PAGE},
-        key="items",
-        hint=hint,
-        credentials=auth.for_call(params.secrets, params.attach_opaque_data),
-    )
+    with api.reporting_to(emitter(out)):
+        rows, next_url = api.page(
+            state.next_url or path,
+            None if state.next_url else {**query, "per_page": PER_PAGE},
+            key="items",
+            hint=hint,
+            credentials=auth.for_call(params.secrets, params.attach_opaque_data),
+        )
     state.fetched += len(rows)
     state.next_url = next_url or ""
     state.done = next_url is None or state.fetched >= SEARCH_RESULT_CAP

@@ -37,6 +37,7 @@ class _Out:
     parents: list[list[int] | None] = field(default_factory=list)
     cache: list[Any] = field(default_factory=list)
     finished: bool = False
+    logs: list[tuple[str, str]] = field(default_factory=list)
 
     def emit(self, batch, parent_rows=None, cache_control=None) -> None:
         self.batches.append(batch)
@@ -45,6 +46,9 @@ class _Out:
 
     def finish(self) -> None:
         self.finished = True
+
+    def client_log(self, level, message: str, **extra: str) -> None:
+        self.logs.append((level.name, message))
 
 
 def _run(func, args, batch: pa.RecordBatch) -> _Out:
@@ -338,3 +342,68 @@ class TestRateLimitTable:
         row = out.batches[0].to_pylist()[0]
         assert row["resource"] == "core" and row["request_limit"] == 60 and row["authenticated"] is False
         assert out.finished
+
+
+class TestClientLog:
+    """Rate-limit waits, retries and the budget reach DuckDB as log batches.
+
+    Without these a throttled query only looks slow from the client's side.
+    """
+
+    @staticmethod
+    def _budget(remaining: int, limit: int = 5000) -> dict[str, str]:
+        return {
+            "x-ratelimit-remaining": str(remaining),
+            "x-ratelimit-limit": str(limit),
+            "x-ratelimit-reset": "1790000000",
+            "x-ratelimit-resource": "core",
+        }
+
+    def test_a_summary_is_logged_per_call(self, monkeypatch) -> None:
+        install(monkeypatch, lambda r: httpx.Response(200, json={"C": 1}, headers=self._budget(4321)))
+        out = _run(fn.LanguagesFunction, fn.RepoArgs(repo=""), _input(repo=["o/a", "o/b"]))
+        info = [m for level, m in out.logs if level == "INFO"]
+        assert len(info) == 1
+        assert "2 GitHub requests" in info[0] and "core budget 4321/5000" in info[0]
+
+    def test_a_rate_limit_wait_is_a_warning(self, monkeypatch) -> None:
+        responses = iter(
+            [
+                httpx.Response(403, json={"message": "secondary rate limit"}, headers={"retry-after": "3"}),
+                httpx.Response(200, json={}, headers=self._budget(4000)),
+            ]
+        )
+        install(monkeypatch, lambda r: next(responses))
+        out = _run(fn.LanguagesFunction, fn.RepoArgs(repo=""), _input(repo=["o/r"]))
+        warnings = [m for level, m in out.logs if level == "WARN"]
+        assert len(warnings) == 1 and "rate limited" in warnings[0] and "waiting 3s" in warnings[0]
+        assert "1 retried" in [m for level, m in out.logs if level == "INFO"][0]
+
+    def test_a_low_budget_warns_once(self, monkeypatch) -> None:
+        install(monkeypatch, lambda r: httpx.Response(200, json={}, headers=self._budget(42)))
+        out = _run(fn.LanguagesFunction, fn.RepoArgs(repo=""), _input(repo=["o/a", "o/b", "o/c"]))
+        low = [m for level, m in out.logs if level == "WARN" and "budget is low" in m]
+        assert len(low) == 1 and "42 of 5000" in low[0]
+
+    def test_free_revalidations_are_counted(self, monkeypatch) -> None:
+        def handler(request: httpx.Request) -> httpx.Response:
+            if request.headers.get("If-None-Match"):
+                return httpx.Response(304, headers=self._budget(4999))
+            return httpx.Response(200, json={}, headers={**self._budget(4999), "etag": '"e"'})
+
+        install(monkeypatch, handler)
+        _run(fn.LanguagesFunction, fn.RepoArgs(repo=""), _input(repo=["o/r"]))
+        out = _run(fn.LanguagesFunction, fn.RepoArgs(repo=""), _input(repo=["o/r"]))
+        assert "1 unchanged (free)" in [m for level, m in out.logs if level == "INFO"][0]
+
+    def test_the_summary_is_logged_even_when_the_call_fails(self, monkeypatch) -> None:
+        install(monkeypatch, lambda r: httpx.Response(429, json={}, headers={"retry-after": "900"}))
+        out = _Out()
+        with pytest.raises(GitHubError):
+            fn.LanguagesFunction.process(
+                _Params(args=fn.RepoArgs(repo=""), output_schema=fn.LANGUAGE_SCHEMA),
+                None,
+                _input(repo=["o/r"]),
+                out,
+            )
+        assert any(level == "INFO" and "1 GitHub request" in m for level, m in out.logs)

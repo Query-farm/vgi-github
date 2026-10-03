@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The worker reports what it is doing to DuckDB's log: a warning for every rate-limit wait and
+  retry, a warning when the remaining budget drops below 10%, and a one-line summary per call
+  (requests made, free 304 revalidations, budget left and its reset time). Read them with
+  `SET enable_logging = true` and `duckdb_logs_parsed('VGI')`.
 - `token_source` ATTACH option: `'gh'` authenticates with the GitHub CLI's login, `'env'` with
   `GH_TOKEN` or `GITHUB_TOKEN` — no secret needed, and the token never appears in the ATTACH
   statement. A worker serving HTTP or a socket refuses it at ATTACH by default, so a remote client
