@@ -16,8 +16,8 @@ import pyarrow as pa
 import pytest
 
 from tests.helpers import install
+from vgi_github import auth, search
 from vgi_github import functions as fn
-from vgi_github import search
 from vgi_github.github_api import GitHubError
 from vgi_github.paging import PagedScanState
 from vgi_github.reference import RateLimitFunction
@@ -205,6 +205,46 @@ class TestRowCaps:
 
 
 class TestCaching:
+    @pytest.mark.parametrize("policy", ["public, max-age=60", "private, max-age=60"])
+    @pytest.mark.parametrize("call_ttl, expected", [(None, 300), (15, 15), (0, None)])
+    @pytest.mark.parametrize("kind", ["lookup", "search_repositories", "search_issues"])
+    def test_attach_default_and_call_override(self, monkeypatch, policy, call_ttl, expected, kind) -> None:
+        install(
+            monkeypatch,
+            lambda r: httpx.Response(
+                200,
+                json={} if kind == "lookup" else {"items": [], "total_count": 0},
+                headers={"cache-control": policy},
+            ),
+        )
+        out = _Out()
+        data = auth.encode_attach("auto", "", 300)
+        if kind == "lookup":
+            func = fn.LanguagesFunction
+            args = fn.RepoArgs(repo="", cache_ttl=call_ttl)
+            func.process(
+                _Params(args, func.FIXED_SCHEMA, attach_opaque_data=data), None, _input(repo=["o/r"]), out
+            )
+        else:
+            func, arg_type = (
+                (search.SearchRepositoriesFunction, search.SearchRepositoriesArgs)
+                if kind == "search_repositories"
+                else (search.SearchIssuesFunction, search.SearchIssuesArgs)
+            )
+            func.process(
+                _Params(arg_type(query="q", cache_ttl=call_ttl), func.FIXED_SCHEMA, attach_opaque_data=data),
+                PagedScanState(),
+                out,
+            )
+        if call_ttl == 0 and policy.startswith("public"):
+            expected = 60
+        control = out.cache[0]
+        if expected is None:
+            assert control is None
+        else:
+            assert control.ttl == expected
+            assert bool(control.per_value) == (kind == "lookup" and call_ttl != 0)
+
     def test_anonymous_public_responses_forward_githubs_ttl(self, monkeypatch) -> None:
         install(
             monkeypatch,
@@ -338,7 +378,16 @@ class TestRateLimitTable:
             ),
         )
         out = _Out()
-        RateLimitFunction.process(_Params(args=None, output_schema=RateLimitFunction.FIXED_SCHEMA), None, out)
+        RateLimitFunction.process(
+            _Params(
+                args=None,
+                output_schema=RateLimitFunction.FIXED_SCHEMA,
+                attach_opaque_data=auth.encode_attach("auto", "", 300),
+            ),
+            None,
+            out,
+        )
+        assert out.cache == [None]
         row = out.batches[0].to_pylist()[0]
         assert row["resource"] == "core" and row["request_limit"] == 60 and row["authenticated"] is False
         assert out.finished

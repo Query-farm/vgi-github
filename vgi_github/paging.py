@@ -23,15 +23,15 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from vgi.cache_control import CacheControl
 from vgi.table_function import ProcessParams
 from vgi_rpc import ArrowSerializableDataclass
 from vgi_rpc.rpc import OutputCollector
 
 from vgi_github import auth
 from vgi_github import github_api as api
+from vgi_github.caching import result_cache_control
 from vgi_github.client_log import emitter
-from vgi_github.github_api import PER_PAGE, SEARCH_RESULT_CAP, STALE_IF_ERROR, CacheHint
+from vgi_github.github_api import PER_PAGE, SEARCH_RESULT_CAP, CacheHint
 from vgi_github.schemas import batch_from_rows
 
 
@@ -81,7 +81,7 @@ def emit_search_page(
     state.fetched += len(rows)
     state.next_url = next_url or ""
     state.done = next_url is None or state.fetched >= SEARCH_RESULT_CAP
-    cache_control = CacheControl(ttl=hint.max_age, stale_if_error=STALE_IF_ERROR) if hint.cacheable else None
+    cache_control = result_cache_control(hint, params.args.cache_ttl, params.attach_opaque_data)
     out.emit(
         batch_from_rows([flatten(row) for row in rows], params.output_schema), cache_control=cache_control
     )

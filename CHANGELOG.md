@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `cache_ttl` ATTACH option sets a default result TTL for lookups and searches. Per-call TTLs
+  override it; omitted/NULL TTLs inherit it, and explicit zero uses GitHub's cache policy.
+  Positive TTLs now take precedence over GitHub's default freshness. `rate_limit` stays uncached.
+
 - The worker reports what it is doing to DuckDB's log: a warning for every rate-limit wait and
   retry, a warning when the remaining budget drops below 10%, and a one-line summary per call
   (requests made, free 304 revalidations, budget left and its reset time). Read them with

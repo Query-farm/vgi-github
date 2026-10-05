@@ -47,8 +47,8 @@ per-row input columns, so one registration serves a literal call and a `LATERAL`
 
 | Function | Positional (per-row) | Named |
 |---|---|---|
-| `search_repositories(query)` *(scan)* | GitHub search syntax | `sort`, `order` |
-| `search_issues(query)` *(scan)* | GitHub search syntax | `sort`, `order` |
+| `search_repositories(query)` *(scan)* | GitHub search syntax | `sort`, `order`, `cache_ttl` |
+| `search_issues(query)` *(scan)* | GitHub search syntax | `sort`, `order`, `cache_ttl` |
 | `repo(repo)` | `'owner/name'` | `cache_ttl` |
 | `repos(owner)` | login | `type`, `sort`, `max_rows`, `cache_ttl` |
 | `user(login)` | login | `cache_ttl` |
@@ -193,7 +193,12 @@ caller — and bodies are re-decoded on every hit, so mutating rows cannot corru
 invented. Anonymous responses say `public, max-age=60` and are cached for 60 seconds.
 Authenticated responses say `private` — what a token can see is specific to it — and a
 `private` response is not reusable by a shared cache, so they are not cached unless you pass
-`cache_ttl => N`, which also turns on per-value memoization for a `LATERAL` that repeats keys.
+`cache_ttl => N` or set `cache_ttl N` on ATTACH. Positive TTLs override GitHub's freshness
+policy and enable per-value memoization for keyed lookups in a `LATERAL` that repeats keys.
+Search scans use the same TTL policy without per-value memoization. An omitted or NULL
+function TTL inherits the attach default; an explicit `cache_ttl => 0` uses GitHub's policy
+even when ATTACH sets a positive TTL. The attach default is 0, preserving existing behavior.
+`rate_limit` is always uncached.
 
 **Rate limits.** GitHub says when you may retry, and the worker listens: `Retry-After` on a
 secondary limit, `X-RateLimit-Remaining: 0` plus the reset epoch on the primary one. A wait of up

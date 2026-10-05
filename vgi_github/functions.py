@@ -44,7 +44,6 @@ from typing import TYPE_CHECKING, Annotated, Any, ClassVar, cast
 
 import pyarrow as pa
 from vgi.arguments import Arg, SecretLookupEntry
-from vgi.cache_control import CacheControl
 from vgi.invocation import BindResponse
 from vgi.metadata import FunctionExample
 from vgi.table_function import BindParams, ProcessParams
@@ -54,8 +53,9 @@ from vgi_rpc.rpc import OutputCollector
 from vgi_github import auth
 from vgi_github import github_api as api
 from vgi_github.auth import Credentials
+from vgi_github.caching import result_cache_control
 from vgi_github.client_log import emitter
-from vgi_github.github_api import STALE_IF_ERROR, CacheHint, GitHubInputError
+from vgi_github.github_api import CacheHint, GitHubInputError
 from vgi_github.meta import docs, examples
 from vgi_github.schemas import (
     COMMIT_SCHEMA,
@@ -97,31 +97,6 @@ _MAX_ROWS_DOC = "Cap on rows fetched per input row (default 100 = one request; 0
 Fetch = Callable[[Any, CacheHint, Credentials | None], list[dict[str, Any]]]
 
 
-def _origin_cache_control(hint: CacheHint) -> CacheControl | None:
-    """Forward GitHub's own Cache-Control, when it is reusable by a shared cache.
-
-    GitHub says ``public, max-age=60`` on anonymous responses, which is
-    forwarded. Authenticated responses say ``private`` — what a token can see is
-    specific to it — and are left uncached unless the caller opts in.
-    """
-    if not hint.cacheable:
-        return None
-    return CacheControl(ttl=hint.max_age, stale_if_error=STALE_IF_ERROR)
-
-
-def _opt_in_cache_control(ttl: int) -> CacheControl | None:
-    """Cache metadata for an explicit ``cache_ttl``, with per-value memoization.
-
-    A correlated LATERAL repeats lookups — the same author across many issues,
-    the same repository across many search hits — and per-value memoization
-    turns each repeat into a cache hit. It trades freshness for that, which is
-    why the default is off.
-    """
-    if ttl <= 0:
-        return None
-    return CacheControl(ttl=ttl, stale_if_error=STALE_IF_ERROR, per_value=True)
-
-
 def _limit(max_rows: int) -> int | None:
     """``max_rows`` as :func:`~vgi_github.github_api.collect` wants it: 0 means no cap."""
     return max_rows or None
@@ -134,7 +109,7 @@ def _fan_out(
     columns: Sequence[str],
     fetch: Fetch,
     *,
-    cache_ttl: int,
+    cache_ttl: int | None,
 ) -> None:
     """Fetch every input row's rows and emit them as one 1->N batch with provenance.
 
@@ -143,8 +118,8 @@ def _fan_out(
     constantly — so provenance is unchanged while the request count drops. A
     NULL in any key column emits nothing for that row.
 
-    Cache metadata rides on this, the only batch each call emits: GitHub's own
-    policy when it declared a reusable one, otherwise the caller's opt-in TTL.
+    Cache metadata rides on this, the only batch each call emits: the call's
+    TTL overrides the attach default, with zero using GitHub's own policy.
     """
     keys = list(zip(*(batch.column(name).to_pylist() for name in columns), strict=True))
     hint = CacheHint()
@@ -161,7 +136,7 @@ def _fan_out(
             found = fetched[key]
             rows.extend(found)
             parents.extend([index] * len(found))
-    cache_control = _origin_cache_control(hint) or _opt_in_cache_control(cache_ttl)
+    cache_control = result_cache_control(hint, cache_ttl, params.attach_opaque_data, per_value=True)
     cast("VgiOutputCollector", out).emit(
         batch_from_rows(rows, params.output_schema), parent_rows=parents, cache_control=cache_control
     )
@@ -178,8 +153,14 @@ class RepoArgs:
 
     repo: Annotated[str, Arg(0, doc="Repository as 'owner/name', e.g. 'duckdb/duckdb'")]
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 class RepoFunction(RowTransformFunction[RepoArgs]):
@@ -262,8 +243,14 @@ class LoginArgs:
 
     login: Annotated[str, Arg(0, doc="User or organization login, e.g. 'torvalds' or 'duckdb'")]
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 class UserFunction(RowTransformFunction[LoginArgs]):
@@ -371,8 +358,14 @@ class ReposArgs:
         DEFAULT_MAX_ROWS
     )
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 class ReposFunction(RowTransformFunction[ReposArgs]):
@@ -498,8 +491,14 @@ class IssuesArgs:
         DEFAULT_MAX_ROWS
     )
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 class IssuesFunction(RowTransformFunction[IssuesArgs]):
@@ -626,8 +625,14 @@ class PullsArgs:
         DEFAULT_MAX_ROWS
     )
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 class PullsFunction(RowTransformFunction[PullsArgs]):
@@ -729,8 +734,14 @@ class IssueCommentsArgs:
         DEFAULT_MAX_ROWS
     )
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 class IssueCommentsFunction(RowTransformFunction[IssueCommentsArgs]):
@@ -854,8 +865,14 @@ class CommitsArgs:
         DEFAULT_MAX_ROWS
     )
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 def _timestamp_arg(name: str, value: str) -> str | None:
@@ -969,8 +986,14 @@ class RepoListArgs:
         DEFAULT_MAX_ROWS
     )
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 class ReleasesFunction(RowTransformFunction[RepoListArgs]):
@@ -1325,8 +1348,14 @@ class WorkflowRunsArgs:
         DEFAULT_MAX_ROWS
     )
     cache_ttl: Annotated[
-        int, Arg("cache_ttl", doc="Seconds to cache this result (0 = GitHub's own policy)", default=0, ge=0)
-    ] = 0
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):

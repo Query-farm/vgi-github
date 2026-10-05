@@ -252,6 +252,24 @@ ATTACH 'github' (TYPE vgi,
   auth 'required');
 ```
 
+## Cache results
+
+Set a default cache lifetime in seconds when you attach:
+
+```sql
+ATTACH 'github' (TYPE vgi, LOCATION 'uv run github_worker.py', cache_ttl 300);
+
+SELECT * FROM github.repo('duckdb/duckdb'); -- inherits 300 seconds
+SELECT * FROM github.repo('duckdb/duckdb', cache_ttl => 30); -- overrides the default
+SELECT * FROM github.repo('duckdb/duckdb', cache_ttl => 0); -- uses GitHub's cache policy
+```
+
+This applies to lookups and searches. An omitted or NULL per-call TTL inherits the attach
+setting. Positive TTLs override GitHub's freshness policy, including for authenticated results;
+keyed lookups also memoize repeated input values. The default is 0: follow GitHub's cache
+headers, leaving private responses out of the result cache. Zero does not disable the separate
+ETag revalidation cache. `rate_limit` always fetches fresh data.
+
 ## Share one server with a team
 
 Instead of every DuckDB starting its own worker, run one server and point everyone at it:

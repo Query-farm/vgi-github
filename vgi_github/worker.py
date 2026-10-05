@@ -510,15 +510,20 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
     """Advertises the worker's versions, its optional credential, and the auth mode.
 
     The credential is a DuckDB secret rather than an ATTACH option because ATTACH
-    option strings are visible in ``duckdb_databases()``. The one thing worth
-    deciding at ATTACH time is what should happen when no credential resolves,
-    which is what the ``auth`` option selects.
+    option strings are visible in ``duckdb_databases()``. Attach options select
+    authentication behavior and the default result cache TTL.
     """
 
     catalog = _GITHUB_CATALOG
     catalog_name = _GITHUB_CATALOG.name
     secret_types = [auth.SECRET_SPEC]
     attach_option_specs = [
+        AttachOptionSpec(
+            name="cache_ttl",
+            desc="Default result cache seconds; 0 uses GitHub policy. Per-call cache_ttl overrides this.",
+            type=pa.int64(),
+            default=0,
+        ),
         AttachOptionSpec(
             name="auth",
             desc=(
@@ -542,7 +547,7 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
     ]
 
     def catalog_attach(self, *, name: str, options: dict[str, Any], **kwargs: Any) -> CatalogAttachResult:
-        """Validate the ``auth`` option and carry it through to the functions.
+        """Validate attach policies and carry them through to the functions.
 
         An unknown mode is rejected here rather than ignored: a typo'd
         'require' would otherwise read as 'auto' and quietly run anonymously —
@@ -552,6 +557,9 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
         back to every ``process()`` as ``attach_opaque_data`` — the only route
         an ATTACH-time choice has into a function body.
         """
+        cache_ttl = options.get("cache_ttl", 0)
+        if isinstance(cache_ttl, bool) or not isinstance(cache_ttl, int) or cache_ttl < 0:
+            raise ValueError("ATTACH option cache_ttl must be a non-negative integer number of seconds")
         mode = str(options.get("auth") or auth.AUTO).strip().lower()
         if mode not in auth.MODES:
             raise ValueError(f"ATTACH option auth => {mode!r} is not one of {', '.join(auth.MODES)}")
@@ -571,7 +579,7 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
         result = super().catalog_attach(name=name, options=options, **kwargs)
         return replace(
             result,
-            attach_opaque_data=AttachOpaqueData(auth.encode_attach(mode, source)),
+            attach_opaque_data=AttachOpaqueData(auth.encode_attach(mode, source, cache_ttl)),
             attach_opaque_data_required=True,
         )
 

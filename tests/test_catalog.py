@@ -5,11 +5,13 @@ from __future__ import annotations
 import json
 
 import pyarrow as pa
+import pytest
 
+from vgi_github import auth
 from vgi_github.functions import KEYED_FUNCTIONS
 from vgi_github.meta import comment_of
 from vgi_github.search import SEARCH_FUNCTIONS
-from vgi_github.worker import _GITHUB_CATALOG
+from vgi_github.worker import _GITHUB_CATALOG, GitHubCatalog
 
 SCHEMA = _GITHUB_CATALOG.schemas[0]
 
@@ -74,3 +76,24 @@ class TestMetadata:
     def test_executable_examples_parse(self) -> None:
         examples = json.loads(_GITHUB_CATALOG.tags["vgi.executable_examples"])
         assert examples and all({"name", "sql", "expected_result"} <= set(e) for e in examples)
+
+
+class TestAttachCaching:
+    @pytest.mark.parametrize("ttl", [0, 300])
+    def test_default_round_trip(self, ttl) -> None:
+        result = GitHubCatalog().catalog_attach(
+            name="github",
+            options={"cache_ttl": ttl},
+            data_version_spec=None,
+            implementation_version=None,
+        )
+        assert auth.cache_ttl_of(result.attach_opaque_data) == ttl
+
+    @pytest.mark.parametrize("ttl", [-1, 1.5, True, "300", None])
+    def test_invalid_ttl_rejected_at_attach(self, ttl) -> None:
+        with pytest.raises(ValueError, match="cache_ttl must be a non-negative integer"):
+            GitHubCatalog().catalog_attach(name="github", options={"cache_ttl": ttl})
+
+    @pytest.mark.parametrize("data", [None, b"required", b'{"auth":"auto","token_source":""}'])
+    def test_old_attach_payloads_keep_origin_policy(self, data) -> None:
+        assert auth.cache_ttl_of(data) == 0

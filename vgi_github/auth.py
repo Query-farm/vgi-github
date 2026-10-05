@@ -321,9 +321,11 @@ OFF = "off"
 MODES = (AUTO, REQUIRED, OFF)
 
 
-def encode_attach(mode: str, token_source: str) -> bytes:
+def encode_attach(mode: str, token_source: str, cache_ttl: int = 0) -> bytes:
     """The ATTACH choices as the catalog's attach bytes."""
-    return json.dumps({"auth": mode, "token_source": token_source}, sort_keys=True).encode()
+    return json.dumps(
+        {"auth": mode, "token_source": token_source, "cache_ttl": cache_ttl}, sort_keys=True
+    ).encode()
 
 
 def _attach_options(attach_opaque_data: bytes | None) -> dict[str, str]:
@@ -343,6 +345,11 @@ def _attach_options(attach_opaque_data: bytes | None) -> dict[str, str]:
             return {}
         return {k: str(v) for k, v in decoded.items()} if isinstance(decoded, dict) else {}
     return {"auth": text}
+
+
+def cache_ttl_of(attach_opaque_data: bytes | None) -> int:
+    """The attach-level result TTL; older attach payloads use GitHub's policy."""
+    return int(_attach_options(attach_opaque_data).get("cache_ttl", "0"))
 
 
 def mode_of(attach_opaque_data: bytes | None) -> str:

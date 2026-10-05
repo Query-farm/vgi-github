@@ -56,6 +56,15 @@ class SearchRepositoriesArgs:
             choices=["desc", "asc"],
         ),
     ] = "desc"
+    cache_ttl: Annotated[
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 @init_single_worker
@@ -176,6 +185,15 @@ class SearchIssuesArgs:
             choices=["desc", "asc"],
         ),
     ] = "desc"
+    cache_ttl: Annotated[
+        int | None,
+        Arg(
+            "cache_ttl",
+            doc="Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+            default=None,
+            ge=0,
+        ),
+    ] = None
 
 
 @init_single_worker
