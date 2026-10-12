@@ -317,6 +317,10 @@ availability and query-parameter schemas required by generic dispatch.
 
 ## CI
 
+CI and Live set `UV_PYTHON=3.14` for dependency installation, tools and standalone scripts.
+The locked PyArrow, DuckDB and Haybarn releases have Linux wheels for that interpreter;
+allowing uv to select Python 3.15 instead triggers unsupported source builds.
+
 `.github/workflows/ci.yml` runs on every push: ruff (lint and format), the offline tests, a check
 that both entry-point scripts start without the dev checkouts, and `vgi-lint`'s structural tier
 with `--audit-waivers --fail-on warning`. All of it resolves from PyPI (`UV_NO_SOURCES=1`), so it

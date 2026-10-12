@@ -11,6 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  # Keep sync, uvx and standalone scripts on a Python with published native wheels.
+  # Python 3.15 currently makes PyArrow, DuckDB and Haybarn fall back to source builds.
+  UV_PYTHON: "3.14"
   # A fresh clone resolves from PyPI; this keeps it that way if a local path
   # source is ever added, so CI proves the published dependencies suffice.
   UV_NO_SOURCES: "1"

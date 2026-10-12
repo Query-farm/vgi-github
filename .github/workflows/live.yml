@@ -14,6 +14,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # Match CI, including the uvx linter and the worker subprocess it launches.
+  # Python 3.15 currently lacks wheels for the locked native dependencies.
+  UV_PYTHON: "3.14"
   # The workflow's own token: 1,000 requests an hour per repository, plenty
   # for both tiers, and read-only here. The worker reads VGI_GITHUB_TOKEN
   # only because a lint run cannot issue CREATE SECRET first.
