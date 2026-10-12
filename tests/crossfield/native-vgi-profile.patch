@@ -1,0 +1,637 @@
+# Isolated VGI profile baseline: 1599d86632e092ad4a53497d49960dc10aff1fc3
+# Includes pre-existing unpublished scalar adapter and GitHub compatibility changes.
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8a5d2f3..6dd78e2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -393,6 +393,7 @@ if(EMSCRIPTEN)
+ endif()
+ 
+ if(VGI_DUCKDB2_INVOCATION_PROFILE)
++  list(APPEND EXTENSION_SOURCES src/vgi_scalar_duckdb2_profile.cpp)
+   list(REMOVE_ITEM EXTENSION_SOURCES
+     src/vgi_streaming_window_operator.cpp
+     src/vgi_lateral_batch_operator.cpp
+diff --git a/docs/duckdb2_invocation_profile.md b/docs/duckdb2_invocation_profile.md
+index dee5ed4..108ccab 100644
+--- a/docs/duckdb2_invocation_profile.md
++++ b/docs/duckdb2_invocation_profile.md
+@@ -19,8 +19,11 @@ DuckDB 2 adapters use explicit `Identifier` names, native function signatures,
+ Both asynchronous producer initialization and async prefetch are disabled in
+ code. Enabling async prefetch raises an explicit unsupported-capability error.
+ Producers must declare at most one worker and return exactly one worker at init.
+-Arguments must be explicit and fixed; variadic arguments, defaults, classic
+-TABLE arguments, finalizers, and order-dependent/buffering profiles are rejected.
++Arguments must be fixed; variadic arguments, classic TABLE arguments, finalizers,
++and order-dependent/buffering profiles are rejected. Table functions admit
++keyword-only defaults with exact primitive Arrow types (BOOLEAN, INTEGER,
++BIGINT, DOUBLE, VARCHAR and typed NULL). Scalar overloads retain their narrower
++explicit positional contract.
+ 
+ The fixture supports synchronous subprocess, Unix socket, and TCP worker byte
+ streams. Every Arrow read and write uses nonblocking POSIX I/O, checks the live
+@@ -38,7 +41,7 @@ provides cooperative cancellation. HTTP credential brokers are outside this
+ profile; local registered secret types and existing DuckDB secrets remain real.
+ 
+ Optimizer rewrites, filter pushdown, partition/split scans, result-cache serving,
+-DuckDB window/aggregate/scalar functions, macros/views/stored-table scans, write
++DuckDB window/aggregate functions, macros/views/stored-table scans, write
+ planning, COPY formats, global function publishing, and companion attachments
+ are not supported by this profile. Unsupported executable capabilities fail
+ explicitly. SQL diagnostic helper functions are omitted. A worker advertising
+@@ -51,3 +54,129 @@ write interruption; descriptor-flag restoration; and unchanged healthy bytes.
+ Passing any argument additionally exercises both real 30-second idle ceilings.
+ This document describes the implementation contract; build/load/live numerical
+ results must be recorded separately after execution.
++
++## Historical scalar qualification (before native execution migration)
++
++The M9 working tree adds `src/vgi_scalar_duckdb2_profile.cpp`, a synchronous
++scalar path that reuses VGI's actual Arrow IPC and connection implementation.
++Catalog-owned scalar overloads need fixed concrete positional arguments and a
++single static result column. Overloads with ANY inputs, constant/named/variadic
++arguments, defaults, TABLE input or dynamic output types are not registered in
++this profile. Other supported overloads in the catalog remain usable.
++
++Native binding constructs Arrow metadata and captures settings without invoking
++the worker. The first nonempty execution batch acquires the current original
++catalog transaction, binds and initializes a real worker connection, then
++exchanges one Arrow batch per DuckDB input batch. One output row per input row
++is mandatory. The profile always validates output types and Arrow buffers,
++including when general optional worker validation is disabled. It performs no
++input deduplication, result memoization or scalar-specific optimizer rewrites.
++Worker errors are marked fallible in DuckDB; failed connections are destroyed
++and never returned to the worker pool. Successful connections retain the
++existing bounded POSIX I/O and pooling behavior.
++
++The following scalar qualification describes the earlier M9 implementation; it
++is not a new units-worker qualification against the current GitHub host.
++
++Cardinality validation covers each returned execution batch. Successful scalar
++state cleanup closes the input stream and drains EOS before pooling; an extra
++post-input batch discards the connection, but a native local-state destructor
++cannot report a new query error. This is therefore qualification of the selected
++units worker's one-batch-per-process contract, not full adversarial stream
++finalization for arbitrary providers.
++
++Direct native SQL can constant-fold a consistent scalar. The historical
++Crossfield private scalar execution wrapper has since been removed. Current
++Crossfield queries use DuckDB native provider callbacks and normal scheduling;
++these earlier scalar results do not requalify the current units integration.
++
++`test/duckdb2/verify_scalar_units.py` exercises the real Rust units worker through
++the matching native DuckDB C API: linear and offset conversions, temperature
++differences, negative values, strict unknown/missing/incompatible unit errors,
++valid NULLs, nonfinite/overflow rejection, repeated 10,001-row prepared results,
++late-batch failure/recovery and cancellation/recovery with both optimizer modes.
++It records artifact hashes and a canonical sorted unit-catalog digest. The
++worker must implement protocol 2.1.0; the original units SDK 0.32 speaks 1.5.0
++and is rejected. The compatible worker uses VGI 0.43.0, RPC 0.31.1 and Arrow 60
++under its lockfile, with strict function contract 1 and implementation 0.1.6.
++
++Run it with `--library`, `--vgi`, `--worker`, `--crossfield` (the sibling project
++directory supplying the C API test helper) and `--output`. The separate governed
++runner is `crossfield/scripts/verify_scalar_vgi.py`.
++
++`test/duckdb2/verify_scalar_transport.py` adds an actual byte-stall proxy around
++the Rust worker. It proves interruption and subsequent recovery while a scalar
++RPC is blocked; `--with-timeout` also exercises the real 30-second idle ceiling.
++This isolation disables the ordinary optimizer: constant propagation from
++single-row table statistics can otherwise attempt a scalar fold, swallow its
++fallible error, then retry at execution, consuming two separate idle bounds.
++Neither transport test
++asserts a hard wall-clock bound for a complete semantic query.
++
++## Current GitHub worker qualification
++
++The working-tree adapter also builds against DuckDB
++`6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd` with Crossfield's ordered core patches.
++It uses the engine's external `BindInfo` scan classification and ordinary scalar
++registration; the retired scalar callback-pointer identity setter is removed.
++Crossfield's fifth generic patch preserves named scalar options on correlated
++table in-out calls. Without it, a call such as `pulls(r.repo, max_rows => 0)`
++incorrectly treated the keyword value as a second positional input column.
++
++`test/duckdb2/github_catalog.sql` binds all 15 GitHub table functions without API
++reads, including named defaults and LIST result columns.
++`test/duckdb2/github_values.sql` checks independently chosen numerical answers
++through the real GitHub worker and its native callbacks. It expects the
++`vgi-github/tests/crossfield/worker_fixture.py` subprocess worker attached as
++`github`, with `reporting true` and `auth 'off'`. The fixture replaces only HTTP
++transport; it retains Arrow IPC, worker binding, paging and strict validation.
++Python is the provider implementation, not the test engine.
++
++The matching EC2 module is built with `VGI_ENABLE_IROH=OFF`,
++`VGI_DUCKDB2_INVOCATION_PROFILE=ON`, `GIT_COMMIT_HASH` set to the above SHA, and
++`DUCKDB_EXPLICIT_VERSION=v2.0.0-dev0`. Set the source hash when reusing an older
++build directory so the extension footer matches the actual host. The GitHub
++worker's locked dependencies are VGI Python 0.40.0 and VGI RPC 0.48.0.
++This qualification uses native subprocess transport; HTTP/Iroh transport and
++the `rate_limit` catalog table remain outside the isolated profile. Its existing
++`all_rate_limit()` function provides the same data through a native producer.
++
++## Reproducing the current GitHub profile
++
++The companion patches in `vgi-github/tests/crossfield/` reproduce this profile:
++`native-vgi-profile-base.patch` exports local commit
++`1599d86632e092ad4a53497d49960dc10aff1fc3` against upstream
++`de68c1786d517ad65bce535bc00d3c2e54d18c1e`; `native-vgi-profile.patch` adds the
++previously uncommitted fixed-schema scalar adapter and current GitHub changes:
++exact keyword defaults, external scan metadata, and removal of the retired
++scalar callback identity API. Starting at the upstream commit, apply the base
++patch and then the current patch with `git apply`. Starting at the isolated
++profile commit, apply only the current patch. No build artifacts or historical
++Python test harnesses are included. VGI retains its own license and remains a
++separately built extension, not a Crossfield source dependency.
++
++Point a DuckDB extension configuration at the patched VGI directory, for example:
++
++```cmake
++duckdb_extension_load(vgi SOURCE_DIR /path/to/vgi-profile)
++```
++
++Configure a separate build directory against the same patched DuckDB source as
++Crossfield (including `0005-table-in-out-keyword-arguments.patch`):
++
++```sh
++cmake -S /path/to/duckdb -B /path/to/build-vgi \
++  -DDUCKDB_EXTENSION_CONFIGS=/path/to/vgi-profile-config.cmake \
++  -DVGI_ENABLE_IROH=OFF -DVGI_DUCKDB2_INVOCATION_PROFILE=ON \
++  -DGIT_COMMIT_HASH=6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd \
++  -DDUCKDB_EXPLICIT_VERSION=v2.0.0-dev0 \
++  -DArrow_DIR=/path/to/arrow/share/arrow
++cmake --build /path/to/build-vgi --target vgi_loadable_extension -j20
++```
++
++The EC2 Arrow package used for this build is at
++`/home/ec2-user/Development/vgi/build/release/vcpkg_installed/arm64-linux/share/arrow`.
++Use the resulting module at `extension/vgi/vgi.duckdb_extension` with the matching
++DuckDB host. The worker checkout uses `uv sync --locked`; no DuckDB Python package
++is used. The model example's native SQLLogicTest is the current integration
++acceptance test; the earlier scalar Python harnesses are historical evidence.
+diff --git a/src/include/vgi_scalar_function_impl.hpp b/src/include/vgi_scalar_function_impl.hpp
+index ce3af7f..f878287 100644
+--- a/src/include/vgi_scalar_function_impl.hpp
++++ b/src/include/vgi_scalar_function_impl.hpp
+@@ -231,8 +231,12 @@ void VgiScalarFunctionExecute(DataChunk &args, ExpressionState &state, Vector &r
+ 
+ // Bind function for scalar functions with dynamic return types
+ // Connects to the worker to determine actual return type based on argument types
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++unique_ptr<FunctionData> VgiScalarFunctionBind(BindScalarFunctionInput &input);
++#else
+ unique_ptr<FunctionData> VgiScalarFunctionBind(ClientContext &context, ScalarFunction &bound_function,
+                                                 vector<unique_ptr<Expression>> &arguments);
++#endif
+ 
+ } // namespace vgi
+ } // namespace duckdb
+diff --git a/src/storage/vgi_scalar_function_set.cpp b/src/storage/vgi_scalar_function_set.cpp
+index 5264c82..7584233 100644
+--- a/src/storage/vgi_scalar_function_set.cpp
++++ b/src/storage/vgi_scalar_function_set.cpp
+@@ -32,7 +32,58 @@ ScalarFunctionSet BuildVgiScalarFunctionSet(ClientContext &context, const std::s
+                                             const VgiFunctionRegistrationTarget &target,
+                                             vector<FunctionDescription> &descriptions) {
+ #ifdef VGI_DUCKDB2_INVOCATION_PROFILE
+-throw NotImplementedException("VGI DuckDB 2 invocation profile supports table functions only");
++	ScalarFunctionSet func_set {Identifier(registered_name)};
++	for (const auto &func_info : overloads) {
++		auto args = func_info.arguments_schema ? ParseFunctionArgumentSchema(context, func_info.arguments_schema)
++		                                     : FunctionArgumentTypes();
++		// Unsupported overloads are not registered. Catalog inventory is shared by
++		// all functions, so rejecting one overload must not hide supported peers.
++		if (args.has_varargs || args.HasTableInput() || !args.named_parameters.empty() ||
++		    !func_info.parameter_default_values_bytes.empty() ||
++		    std::find(args.positional_is_const.begin(), args.positional_is_const.end(), true) != args.positional_is_const.end() ||
++		    std::find(args.positional_types.begin(), args.positional_types.end(), LogicalType::ANY) != args.positional_types.end() ||
++		    !func_info.output_schema || func_info.output_schema->num_fields() != 1) {
++			continue;
++		}
++		auto field = func_info.output_schema->field(0);
++		if (field->HasMetadata() &&
++		    (field->metadata()->Contains("vgi:any") ||
++		     (field->metadata()->Contains("vgi_type") && field->metadata()->Get("vgi_type").ValueOr("") == "any"))) {
++			continue;
++		}
++		ArrowSchemaWrapper c_schema;
++		ArrowTableSchema arrow_table;
++		vector<LogicalType> output_types;
++		vector<string> output_names;
++		ArrowSchemaToDuckDBTypes(context, func_info.output_schema, c_schema, arrow_table, output_types, output_names);
++		ScalarFunction scalar(args.positional_types, output_types[0], VgiScalarFunctionExecute);
++		scalar.SetFallible();
++		scalar.SetStability(func_info.stability.value_or(FunctionStability::CONSISTENT));
++		scalar.SetNullHandling(func_info.null_handling.value_or(FunctionNullHandling::DEFAULT_NULL_HANDLING));
++		auto info = make_shared_ptr<VgiScalarFunctionInfo>();
++		info->attach_params = target.attach_params;
++		info->attach_opaque_data = target.attach_opaque_data;
++		info->catalog = target.catalog;
++		info->catalog_name = target.catalog_name;
++		info->function_name = func_info.name;
++		info->schema_name = target.DispatchSchema(func_info);
++		info->output_schema = func_info.output_schema;
++		info->positional_names = args.positional_names;
++		info->setting_names = target.setting_names;
++		info->required_secrets = func_info.required_secrets;
++		scalar.SetExtraFunctionInfo(info);
++		scalar.SetInitStateCallback(VgiScalarFunctionInitLocalState);
++		scalar.SetBindCallback(VgiScalarFunctionBind);
++		func_set.AddFunction(std::move(scalar));
++		FunctionDescription description;
++		description.parameter_types = args.positional_types;
++		for (const auto &name : args.positional_names) {
++			description.parameter_names.emplace_back(name);
++		}
++		description.description = func_info.description;
++		descriptions.push_back(std::move(description));
++	}
++	return func_set;
+ #else
+ 
+ 	ScalarFunctionSet func_set(registered_name);
+@@ -215,6 +266,9 @@ void VgiScalarFunctionSet::LoadEntries(ClientContext &context, const std::lock_g
+ 		// Collect function descriptions for all overloads
+ 		vector<FunctionDescription> descriptions;
+ 		auto func_set = vgi::BuildVgiScalarFunctionSet(context, pair.first, pair.second, target, descriptions);
++		if (func_set.Size() == 0) {
++			continue;
++		}
+ 
+ 		// Create function info and entry
+ 		CreateScalarFunctionInfo info(func_set);
+diff --git a/src/storage/vgi_table_function_set.cpp b/src/storage/vgi_table_function_set.cpp
+index e3cf1b5..c7d71be 100644
+--- a/src/storage/vgi_table_function_set.cpp
++++ b/src/storage/vgi_table_function_set.cpp
+@@ -15,6 +15,7 @@
+ #include "storage/vgi_transaction.hpp"
+ #include "vgi_arrow_utils.hpp"
+ #include "vgi_catalog_rpc.hpp"
++#include "vgi_rpc_types.hpp"
+ #include "vgi_table_function_impl.hpp"
+ #include "vgi_table_in_out_impl.hpp"
+ 
+@@ -25,6 +26,49 @@ namespace duckdb {
+ 
+ namespace {
+ 
++optional<Value> ParameterDefault(const vgi::VgiFunctionInfo &info, const string &name,
++                                 const LogicalType &type) {
++	if (info.parameter_default_values_bytes.empty()) {
++		return {};
++	}
++	auto batch = vgi::DeserializeFromIpcBytes(info.parameter_default_values_bytes);
++	if (!batch || batch->num_rows() != 1) {
++		throw InvalidInputException("VGI parameter defaults must contain exactly one row: %s", info.name);
++	}
++	auto array = batch->GetColumnByName(name);
++	if (!array) {
++		return {};
++	}
++	if (array->IsNull(0)) {
++		return Value(type);
++	}
++	Value value;
++	switch (array->type_id()) {
++	case arrow::Type::BOOL:
++		value = Value::BOOLEAN(std::static_pointer_cast<arrow::BooleanArray>(array)->Value(0));
++		break;
++	case arrow::Type::INT32:
++		value = Value::INTEGER(std::static_pointer_cast<arrow::Int32Array>(array)->Value(0));
++		break;
++	case arrow::Type::INT64:
++		value = Value::BIGINT(std::static_pointer_cast<arrow::Int64Array>(array)->Value(0));
++		break;
++	case arrow::Type::DOUBLE:
++		value = Value::DOUBLE(std::static_pointer_cast<arrow::DoubleArray>(array)->Value(0));
++		break;
++	case arrow::Type::STRING:
++		value = Value(std::static_pointer_cast<arrow::StringArray>(array)->GetString(0));
++		break;
++	default:
++		throw NotImplementedException("VGI DuckDB 2 profile does not support this default type for %s.%s",
++		                              info.name, name);
++	}
++	if (value.type() != type) {
++		throw InvalidInputException("VGI parameter default type differs from its declaration: %s.%s", info.name, name);
++	}
++	return value;
++}
++
+ bool SupportsVgiFilterV2(const vgi::VgiFunctionInfo &info) {
+ #ifdef VGI_DUCKDB2_INVOCATION_PROFILE
+ 	return false;
+@@ -342,8 +386,8 @@ TableFunctionSet BuildVgiTableFunctionSet(ClientContext &context, const std::str
+ 		}
+ 
+ #ifdef VGI_DUCKDB2_INVOCATION_PROFILE
+-		if (arg_types.has_varargs || (arg_types.HasTableInput() && !func_info.input_from_args) || !func_info.parameter_default_values_bytes.empty()) {
+-			throw NotImplementedException("VGI DuckDB 2 invocation profile requires fixed explicit arguments without defaults or TABLE input: %s", func_info.name);
++		if (arg_types.has_varargs || (arg_types.HasTableInput() && !func_info.input_from_args)) {
++			throw NotImplementedException("VGI DuckDB 2 invocation profile requires fixed arguments without TABLE input: %s", func_info.name);
+ 		}
+ #endif
+ 
+@@ -425,7 +469,8 @@ TableFunctionSet BuildVgiTableFunctionSet(ClientContext &context, const std::str
+ 
+ 			// Register named parameters
+ 			for (const auto &parameter : arg_types.named_parameters) {
+-				table_func.GetSignature().AddKeywordOnly(Identifier(parameter.first), parameter.second);
++				table_func.GetSignature().AddKeywordOnly(Identifier(parameter.first), parameter.second,
++				                                        ParameterDefault(func_info, parameter.first, parameter.second));
+ 			}
+ 
+ 			// Register varargs so DuckDB accepts a blended VARARGS call
+@@ -517,7 +562,8 @@ TableFunctionSet BuildVgiTableFunctionSet(ClientContext &context, const std::str
+ 
+ 			// Register named parameters so DuckDB knows how to handle them
+ 			for (const auto &parameter : arg_types.named_parameters) {
+-				table_func.GetSignature().AddKeywordOnly(Identifier(parameter.first), parameter.second);
++				table_func.GetSignature().AddKeywordOnly(Identifier(parameter.first), parameter.second,
++				                                        ParameterDefault(func_info, parameter.first, parameter.second));
+ 			}
+ 
+ 			// Register varargs support if the function accepts additional positional arguments
+diff --git a/src/vgi_table_function_impl.cpp b/src/vgi_table_function_impl.cpp
+index 6f2bcfd..abeddf6 100644
+--- a/src/vgi_table_function_impl.cpp
++++ b/src/vgi_table_function_impl.cpp
+@@ -4418,10 +4418,6 @@ InsertionOrderPreservingMap<string> VgiTableFunctionDynamicToString(TableFunctio
+ // ============================================================================
+ 
+ BindInfo VgiTableScanGetBindInfo(const optional_ptr<FunctionData> bind_data_p) {
+-	auto &bind_data = bind_data_p->Cast<VgiTableFunctionBindData>();
+-	if (bind_data.table_entry) {
+-		return BindInfo(const_cast<TableCatalogEntry &>(*bind_data.table_entry));
+-	}
+ 	return BindInfo(ScanType::EXTERNAL);
+ }
+ 
+diff --git a/src/vgi_scalar_duckdb2_profile.cpp b/src/vgi_scalar_duckdb2_profile.cpp
+new file mode 100644
+index 0000000..42371cb
+--- /dev/null
++++ b/src/vgi_scalar_duckdb2_profile.cpp
+@@ -0,0 +1,196 @@
++// © Copyright 2026 Query Farm LLC - https://query.farm
++// Narrow synchronous fixed-schema scalar profile for the pinned DuckDB 2 host.
++// Reuses the VGI transport and Arrow engine; no result memoization or input
++// deduplication is enabled in this interoperability profile.
++#include "vgi_scalar_function_impl.hpp"
++#include "storage/vgi_transaction.hpp"
++#include "vgi_arrow_utils.hpp"
++#include "vgi_batch_validation.hpp"
++#include "vgi_function_connection.hpp"
++#include "vgi_ifunction_connection.hpp"
++#include "vgi_logging.hpp"
++#include "vgi_worker_pool.hpp"
++#include "duckdb/common/vector_operations/vector_operations.hpp"
++#include "duckdb/function/table/arrow.hpp"
++#include "duckdb/main/client_context.hpp"
++#include "duckdb/planner/expression/bound_function_expression.hpp"
++#include <exception>
++
++namespace duckdb {
++VgiScalarFunctionLocalState::VgiScalarFunctionLocalState() = default;
++VgiScalarFunctionLocalState::~VgiScalarFunctionLocalState() {
++	if (!connection || !initialized) {
++		return;
++	}
++	try {
++		if (!connection->IsFinished()) {
++			connection->CloseInputWriter();
++			if (connection->ReadDataBatch()) {
++				// Extra output violates the scalar protocol. Never pool that stream.
++				return;
++			}
++		}
++		if (use_pool) {
++			if (auto pooled = connection->ReleaseForPooling()) {
++				vgi::VgiWorkerPool::Instance().Release(std::move(pooled));
++			}
++		}
++	} catch (...) {
++		// Failure/cancellation destroys the connection; destructors do not throw.
++	}
++}
++
++namespace vgi {
++unique_ptr<FunctionLocalState> VgiScalarFunctionInitLocalState(ExpressionState &, const BoundFunctionExpression &,
++                                                            FunctionData *) {
++	return make_uniq<VgiScalarFunctionLocalState>();
++}
++
++static void CheckSchema(ClientContext &context, const std::shared_ptr<arrow::Schema> &schema,
++                        const LogicalType &expected, const string &function_name) {
++	if (!schema || schema->num_fields() != 1) {
++		throw IOException("VGI scalar '%s' requires exactly one output column", function_name);
++	}
++	ArrowSchemaWrapper c_schema;
++	ArrowTableSchema table;
++	vector<LogicalType> types;
++	vector<string> names;
++	ArrowSchemaToDuckDBTypes(context, schema, c_schema, table, types, names);
++	if (types.size() != 1 || types[0] != expected) {
++		throw IOException("VGI scalar '%s' changed its fixed result type", function_name);
++	}
++}
++
++// Binding only constructs native metadata. Provider bind/init are deferred to
++// the first nonempty execution batch. Native SQL constant folding can still
++// execute a consistent scalar; Crossfield's private wrapper supplies its
++// separate compile/explain nonexecution boundary.
++unique_ptr<FunctionData> VgiScalarFunctionBind(BindScalarFunctionInput &input) {
++	auto &context = input.GetClientContext();
++	auto &function = input.GetBoundFunction();
++	auto &info = function.GetExtraFunctionInfo().Cast<VgiScalarFunctionInfo>();
++	if (info.global || !info.catalog || info.has_dynamic_return_type ||
++	    function.GetArguments().size() != input.GetArguments().size()) {
++		throw NotImplementedException("VGI DuckDB 2 scalar profile requires a catalog-owned fixed signature");
++	}
++	auto data = make_uniq<VgiScalarFunctionBindData>();
++	data->attach_params = info.attach_params;
++	data->attach_opaque_data = info.attach_opaque_data;
++	data->function_name = info.function_name;
++	data->schema_name = info.schema_name;
++	data->settings = ExtractVgiSettings(context, info.setting_names);
++	data->required_secrets = info.required_secrets;
++	data->resolved_output_schema = info.output_schema;
++	data->input_duckdb_types = function.GetArguments();
++	vector<string> names;
++	std::vector<std::optional<std::string>> argument_names;
++	for (idx_t i = 0; i < data->input_duckdb_types.size(); ++i) {
++		if (data->input_duckdb_types[i].id() == LogicalTypeId::ANY ||
++		    data->input_duckdb_types[i].id() == LogicalTypeId::INVALID) {
++			throw NotImplementedException("VGI DuckDB 2 scalar profile requires concrete argument types");
++		}
++		auto name = i < info.positional_names.size() ? info.positional_names[i] : "col_" + std::to_string(i);
++		names.push_back(name);
++		argument_names.emplace_back(name);
++	}
++	data->argument_names = std::move(argument_names);
++	data->input_schema = BuildArrowSchemaFromDuckDB(context, data->input_duckdb_types, names);
++	CheckSchema(context, data->resolved_output_schema, function.GetReturnType(), info.function_name);
++	return data;
++}
++
++void VgiScalarFunctionExecute(DataChunk &args, ExpressionState &state, Vector &result) {
++	if (args.size() == 0) {
++		return;
++	}
++	auto &context = state.GetContext();
++	if (context.IsInterrupted()) {
++		throw InterruptException();
++	}
++	auto &expression = state.expr.Cast<BoundFunctionExpression>();
++	auto &info = expression.Function().GetExtraFunctionInfo().Cast<VgiScalarFunctionInfo>();
++	auto &data = expression.BindInfo()->Cast<VgiScalarFunctionBindData>();
++	auto &local = ExecuteFunctionState::GetFunctionState(state)->Cast<VgiScalarFunctionLocalState>();
++	struct FailedExchange {
++		VgiScalarFunctionLocalState &state;
++		int exceptions = std::uncaught_exceptions();
++		~FailedExchange() {
++			if (std::uncaught_exceptions() > exceptions) {
++				// A failed stream is never drained or offered to the worker pool.
++				state.initialized = false;
++				state.connection.reset();
++			}
++		}
++	} failure {local};
++	if (!local.initialized) {
++		auto arguments = BuildArgumentsFromValues(context, {}, {});
++		auto transaction = VgiTransaction::Get(context, *info.catalog).GetTransactionOpaqueData();
++		std::unique_ptr<IFunctionConnection> connection;
++		if (data.use_pool()) {
++			PoolKey key {data.worker_path(), data.data_version_spec(), data.implementation_version()};
++			if (auto pooled = VgiWorkerPool::Instance().TryAcquire(key)) {
++				connection = CreateFunctionConnectionFromPool(std::move(pooled), data.function_name, arguments,
++				    data.attach_opaque_data, transaction, context, "SCALAR", {}, data.worker_debug(), data.settings,
++				    data.required_secrets);
++			}
++		}
++		if (!connection) {
++			connection = CreateFunctionConnection(data.worker_path(), data.function_name, arguments,
++			    data.attach_opaque_data, transaction, context, "SCALAR", {}, data.worker_debug(), data.settings,
++			    data.required_secrets, data.attach_params);
++		}
++		connection->SetInputSchema(data.input_schema);
++		connection->SetSchemaName(data.schema_name);
++		connection->SetArgumentNames(data.argument_names);
++		auto bound = connection->PerformBindRpc();
++		CheckSchema(context, bound.output_schema, result.GetType(), data.function_name);
++		connection->PerformInit(bound);
++		connection->OpenInputWriter();
++		local.connection = std::move(connection);
++		local.initialized = true;
++		local.use_pool = data.use_pool();
++		VGI_LOG(context, "scalar.init", {{"function_name", data.function_name}});
++	}
++	if (args.ColumnCount() != data.input_duckdb_types.size()) {
++		throw InternalException("VGI scalar argument count changed after binding");
++	}
++	DataChunk input;
++	input.Initialize(Allocator::Get(context), data.input_duckdb_types, args.size());
++	input.SetCardinalityUnsafe(args.size());
++	for (idx_t i = 0; i < args.ColumnCount(); ++i) {
++		if (args.data[i].GetType() == data.input_duckdb_types[i]) {
++			input.data[i].Reference(args.data[i]);
++		} else {
++			VectorOperations::DefaultCast(args.data[i], input.data[i], args.size());
++		}
++	}
++	VGI_LOG(context, "scalar.write_input", {{"function_name", data.function_name}, {"input_rows", std::to_string(args.size())}});
++	local.connection->WriteInputBatch(DataChunkToArrow(context, input, data.input_schema));
++	auto output = local.connection->ReadDataBatch();
++	if (!output || output->num_rows() != static_cast<int64_t>(args.size()) || output->num_columns() != 1) {
++		throw IOException("VGI scalar '%s' requires exactly one output row per input row", data.function_name);
++	}
++	VGI_LOG(context, "scalar.read_output", {{"function_name", data.function_name}, {"output_rows", std::to_string(output->num_rows())}});
++	// Required in this fixed-schema profile even when the general worker batch
++	// validation setting is disabled. Never read a mismatched Arrow buffer type.
++	ValidateWireBatchTypes(*output, {data.resolved_output_schema->field(0)->type()}, data.worker_path(), data.function_name);
++	auto validation = output->ValidateFull();
++	if (!validation.ok()) {
++		throw IOException("VGI scalar '%s' returned an invalid Arrow batch", data.function_name);
++	}
++	if (!local.output_schema_cached) {
++		ArrowSchemaToDuckDBTypes(context, data.resolved_output_schema, local.output_c_schema, local.output_arrow_table,
++		                        local.output_types, local.output_names);
++		local.output_schema_cached = true;
++	}
++	auto wrapper = make_uniq<ArrowArrayWrapper>();
++	ExportRecordBatch(output, *wrapper);
++	ArrowScanLocalState scan(std::move(wrapper), context);
++	DataChunk converted;
++	converted.Initialize(context, {result.GetType()});
++	converted.SetCardinalityUnsafe(args.size());
++	ArrowTableFunction::ArrowToDuckDB(scan, local.output_arrow_table.GetColumns(), converted, false);
++	result.Reference(converted.data[0]);
++}
++} // namespace vgi
++} // namespace duckdb
+diff --git a/test/duckdb2/github_catalog.sql b/test/duckdb2/github_catalog.sql
+new file mode 100644
+index 0000000..8fd1782
+--- /dev/null
++++ b/test/duckdb2/github_catalog.sql
+@@ -0,0 +1,17 @@
++-- Run after loading the native VGI module and attaching the GitHub worker as github.
++-- These bind-only checks require no GitHub credentials or API calls.
++DESCRIBE SELECT * FROM github.main.repo('example/repository');
++DESCRIBE SELECT * FROM github.main.repos('example', max_rows => 0);
++DESCRIBE SELECT * FROM github.main.user('example');
++DESCRIBE SELECT * FROM github.main.issues('example/repository', max_rows => 0);
++DESCRIBE SELECT * FROM github.main.pulls('example/repository', max_rows => 0);
++DESCRIBE SELECT * FROM github.main.issue_comments('example/repository', 1, max_rows => 0);
++DESCRIBE SELECT * FROM github.main.commits('example/repository', max_rows => 0);
++DESCRIBE SELECT * FROM github.main.releases('example/repository', max_rows => 0);
++DESCRIBE SELECT * FROM github.main.contributors('example/repository', max_rows => 0);
++DESCRIBE SELECT * FROM github.main.languages('example/repository');
++DESCRIBE SELECT * FROM github.main.stargazers('example/repository', max_rows => 0);
++DESCRIBE SELECT * FROM github.main.workflow_runs('example/repository', max_rows => 0);
++DESCRIBE SELECT * FROM github.main.search_repositories('repo:example/repository');
++DESCRIBE SELECT * FROM github.main.search_issues('repo:example/repository');
++DESCRIBE SELECT * FROM github.main.all_rate_limit();
+diff --git a/test/duckdb2/github_values.sql b/test/duckdb2/github_values.sql
+new file mode 100644
+index 0000000..fafcadb
+--- /dev/null
++++ b/test/duckdb2/github_values.sql
+@@ -0,0 +1,36 @@
++-- Run after attaching vgi-github/tests/crossfield/worker_fixture.py as github
++-- with reporting=true. All comparisons are independent fixture expectations.
++SELECT 'repositories', CASE WHEN count(*)=2 AND sum(stargazers_count)=24 THEN 'ok' ELSE error('repositories') END
++FROM github.main.repos('example', max_rows=>0);
++SELECT 'repo', CASE WHEN count(*)=1 AND max(topics)=['sql','semantic'] THEN 'ok' ELSE error('repo') END
++FROM github.main.repo('example/project');
++SELECT 'user', CASE WHEN count(*)=1 AND max(followers)=5 THEN 'ok' ELSE error('user') END
++FROM github.main.user('alice');
++SELECT 'issues', CASE WHEN count(*)=2 THEN 'ok' ELSE error('issues') END
++FROM github.main.issues('example/project', max_rows=>0);
++SELECT 'pulls', CASE WHEN count(*)=4 AND avg(date_diff('millisecond',created_at,merged_at)/3600000.0)=9
++AND median(date_diff('millisecond',created_at,merged_at)/3600000.0)=7
++AND quantile_cont(date_diff('millisecond',created_at,merged_at)/3600000.0,0.9)=17
++THEN 'ok' ELSE error('pulls') END
++FROM github.main.pulls('example/project',state=>'closed',max_rows=>0)
++WHERE merged_at>=TIMESTAMPTZ '2026-09-01' AND merged_at<TIMESTAMPTZ '2026-10-01';
++SELECT 'comments', CASE WHEN count(*)=1 THEN 'ok' ELSE error('comments') END
++FROM github.main.issue_comments('example/project',1,max_rows=>0);
++SELECT 'commits', CASE WHEN count(*)=2 AND count(*) FILTER(WHERE is_verified)=1 THEN 'ok' ELSE error('commits') END
++FROM github.main.commits('example/project',max_rows=>0);
++SELECT 'releases', CASE WHEN count(*)=1 AND sum(download_count)=35 THEN 'ok' ELSE error('releases') END
++FROM github.main.releases('example/project',max_rows=>0);
++SELECT 'contributors', CASE WHEN count(*)=2 AND sum(contributions)=10 THEN 'ok' ELSE error('contributors') END
++FROM github.main.contributors('example/project',max_rows=>0);
++SELECT 'languages', CASE WHEN count(*)=2 AND sum(bytes)=1000 THEN 'ok' ELSE error('languages') END
++FROM github.main.languages('example/project');
++SELECT 'stargazers', CASE WHEN count(*)=2 THEN 'ok' ELSE error('stargazers') END
++FROM github.main.stargazers('example/project',max_rows=>0);
++SELECT 'workflow_runs', CASE WHEN count(*)=3 AND count(*) FILTER(WHERE conclusion='failure')=1 THEN 'ok' ELSE error('workflow_runs') END
++FROM github.main.workflow_runs('example/project',max_rows=>0);
++SELECT 'search_repositories', CASE WHEN count(*)=2 THEN 'ok' ELSE error('search_repositories') END
++FROM github.main.search_repositories('org:example');
++SELECT 'search_issues', CASE WHEN count(*)=2 THEN 'ok' ELSE error('search_issues') END
++FROM github.main.search_issues('repo:example/project');
++SELECT 'rate_limit', CASE WHEN count(*)=2 AND sum(remaining)=64 THEN 'ok' ELSE error('rate_limit') END
++FROM github.main.all_rate_limit();

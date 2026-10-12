@@ -7,7 +7,7 @@ This product is licensed under the MIT License. See LICENSE.
 
 GitHub data
 
-This software reads GitHub's REST API. The data it returns belongs to GitHub,
+This software reads GitHub's REST and GraphQL APIs. The data it returns belongs to GitHub,
 Inc. and to the users who created it, is not covered by the MIT License above,
 and is subject to GitHub's terms of service:
 
@@ -16,3 +16,32 @@ and is subject to GitHub's terms of service:
 Neither this software nor Query Farm LLC is affiliated with, endorsed by, or
 sponsored by GitHub, Inc. "GitHub" is a trademark of GitHub, Inc. and is used
 here only to describe what this software connects to.
+
+------------------------------------------------------------------------------
+
+GitHub REST API OpenAPI description
+
+The generated operation manifest contains material from:
+https://github.com/github/rest-api-description
+
+MIT License
+
+Copyright (c) 2020 GitHub
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

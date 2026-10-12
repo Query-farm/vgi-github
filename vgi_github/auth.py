@@ -321,11 +321,19 @@ OFF = "off"
 MODES = (AUTO, REQUIRED, OFF)
 
 
-def encode_attach(mode: str, token_source: str, cache_ttl: int = 0) -> bytes:
+def encode_attach(
+    mode: str,
+    token_source: str,
+    cache_ttl: int = 0,
+    *,
+    reporting: bool = False,
+    operation_timeout_seconds: int = 120,
+) -> bytes:
     """The ATTACH choices as the catalog's attach bytes."""
-    return json.dumps(
-        {"auth": mode, "token_source": token_source, "cache_ttl": cache_ttl}, sort_keys=True
-    ).encode()
+    options = {"auth": mode, "token_source": token_source, "cache_ttl": cache_ttl}
+    if reporting:
+        options.update(reporting=True, operation_timeout_seconds=operation_timeout_seconds)
+    return json.dumps(options, sort_keys=True).encode()
 
 
 def _attach_options(attach_opaque_data: bytes | None) -> dict[str, str]:
@@ -350,6 +358,16 @@ def _attach_options(attach_opaque_data: bytes | None) -> dict[str, str]:
 def cache_ttl_of(attach_opaque_data: bytes | None) -> int:
     """The attach-level result TTL; older attach payloads use GitHub's policy."""
     return int(_attach_options(attach_opaque_data).get("cache_ttl", "0"))
+
+
+def reporting_of(attach_opaque_data: bytes | None) -> bool:
+    """Whether this catalog requires complete, validated reporting reads."""
+    return _attach_options(attach_opaque_data).get("reporting", "false").lower() == "true"
+
+
+def operation_timeout_of(attach_opaque_data: bytes | None) -> int:
+    """Cooperative operation deadline in seconds, validated at attachment."""
+    return int(_attach_options(attach_opaque_data).get("operation_timeout_seconds", "120"))
 
 
 def mode_of(attach_opaque_data: bytes | None) -> str:

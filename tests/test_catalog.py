@@ -3,17 +3,81 @@
 from __future__ import annotations
 
 import json
+import sys
+from pathlib import Path
 
 import pyarrow as pa
 import pytest
+from vgi.catalog import SchemaObjectType
+from vgi.client import Client
+from vgi.protocol import CatalogAttachRequest, CatalogContentsResponse
 
 from vgi_github import auth
 from vgi_github.functions import KEYED_FUNCTIONS
 from vgi_github.meta import comment_of
 from vgi_github.search import SEARCH_FUNCTIONS
-from vgi_github.worker import _GITHUB_CATALOG, GitHubCatalog
+from vgi_github.worker import _GITHUB_CATALOG, GitHubCatalog, GitHubWorker
 
 SCHEMA = _GITHUB_CATALOG.schemas[0]
+
+
+class TestCatalogContents:
+    def test_bulk_serialization_matches_per_schema_rpcs(self) -> None:
+        worker = GitHubWorker()
+        attached = worker.catalog_attach(
+            CatalogAttachRequest(
+                name="github", options=None, data_version_spec=None, implementation_version=None
+            )
+        )
+        assert attached.supports_catalog_contents
+        assert attached.catalog_version_frozen
+        assert attached.attach_opaque_data_required
+        attach = bytes(attached.attach_opaque_data)
+        response = worker.catalog_contents(attach)
+        decoded = CatalogContentsResponse.deserialize_from_bytes(response.serialize_to_bytes())
+        assert decoded.catalog_version == attached.catalog_version
+        assert not decoded.not_modified
+        assert [s.path for s in decoded.schemas] == [["main"], ["rest"], ["api"]]
+        main = decoded.schemas[0]
+        assert [s.schema for s in decoded.schemas] == worker.catalog_schemas(attach).items
+        assert main.tables == worker.catalog_schema_contents_tables(attach, ["main"]).items
+        assert len(main.tables) == 1
+        assert (
+            main.table_functions
+            == worker.catalog_schema_contents_functions(
+                attach, ["main"], SchemaObjectType.TABLE_FUNCTION
+            ).items
+        )
+        assert len(main.table_functions) == len(SCHEMA.functions)
+        for kind in (
+            "views",
+            "scalar_functions",
+            "aggregate_functions",
+            "scalar_macros",
+            "table_macros",
+            "indexes",
+        ):
+            assert getattr(main, kind) == []
+
+    def test_client_bulk_contents_preserve_each_attach_policy(self) -> None:
+        script = Path(__file__).resolve().parent.parent / "github_worker.py"
+        with Client([sys.executable, str(script)], pool=None, worker_limit=1) as client:
+            for mode, ttl in [("off", 0), ("required", 300), ("auto", 60)]:
+                attached = client.catalog_attach(
+                    name="github",
+                    options={"auth": mode, "cache_ttl": ttl},
+                    data_version_spec=None,
+                    implementation_version=None,
+                )
+                assert attached.supports_catalog_contents
+                contents = client.contents(attach_opaque_data=attached.attach_opaque_data)
+                assert [list(s.schema.path) for s in contents.schemas] == [["main"], ["rest"], ["api"]]
+                main = contents.schemas[0]
+                assert bytes(main.schema.attach_opaque_data) == auth.encode_attach(mode, "", ttl)
+                assert main.schema.comment == SCHEMA.comment
+                assert main.schema.tags == SCHEMA.tags
+                assert [t.name for t in main.tables] == ["rate_limit"]
+                assert {f.name for f in main.table_functions} == {f.Meta.name for f in SCHEMA.functions}
 
 
 class TestLateralComposability:

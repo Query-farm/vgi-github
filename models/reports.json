@@ -1,0 +1,717 @@
+[
+  {
+    "name": "repo_detail",
+    "report_id": "49e3a56b-ce72-517e-9823-24957ae7a4e0",
+    "semantic_sql": "SELECT repo.\"full_name\" AS \"full_name\", repo.\"id\" AS \"id\", repo.\"owner_login\" AS \"owner_login\", repo.\"owner_type\" AS \"owner_type\", repo.\"name\" AS \"name\", repo.\"description\" AS \"description\", repo.\"html_url\" AS \"html_url\", repo.\"homepage\" AS \"homepage\", repo.\"language\" AS \"language\", repo.\"topics\" AS \"topics\", repo.\"license_spdx_id\" AS \"license_spdx_id\", repo.\"visibility\" AS \"visibility\", repo.\"is_private\" AS \"is_private\", repo.\"is_fork\" AS \"is_fork\", repo.\"is_archived\" AS \"is_archived\", repo.\"is_template\" AS \"is_template\", repo.\"default_branch\" AS \"default_branch\", repo.\"stargazers_count\" AS \"stargazers_count\", repo.\"forks_count\" AS \"forks_count\", repo.\"open_issues_count\" AS \"open_issues_count\", repo.\"watchers_count\" AS \"watchers_count\", repo.\"size_kb\" AS \"size_kb\", repo.\"has_issues\" AS \"has_issues\", repo.\"has_wiki\" AS \"has_wiki\", repo.\"has_discussions\" AS \"has_discussions\", repo.\"created_at\" AS \"created_at\", repo.\"updated_at\" AS \"updated_at\", repo.\"pushed_at\" AS \"pushed_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"repo\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"repo\"}',$repository) ORDER BY repo.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name', e.g. 'duckdb/duckdb'"
+      }
+    ],
+    "comment": "One GitHub repository by 'owner/name'. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "repo",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "user_detail",
+    "report_id": "9e3af0d5-187c-5ec7-bff1-1d7ec06bd3e4",
+    "semantic_sql": "SELECT user.\"login\" AS \"login\", user.\"id\" AS \"id\", user.\"type\" AS \"type\", user.\"name\" AS \"name\", user.\"company\" AS \"company\", user.\"blog\" AS \"blog\", user.\"location\" AS \"location\", user.\"email\" AS \"email\", user.\"bio\" AS \"bio\", user.\"twitter_username\" AS \"twitter_username\", user.\"public_repos\" AS \"public_repos\", user.\"public_gists\" AS \"public_gists\", user.\"followers\" AS \"followers\", user.\"following\" AS \"following\", user.\"html_url\" AS \"html_url\", user.\"created_at\" AS \"created_at\", user.\"updated_at\" AS \"updated_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"user\":{\"arguments\":{\"login\":{\"member\":\"user_input.login\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"user_input\",\"rows\":[[{\"parameter\":\"login\"}]]}},\"detail_dataset\":\"user\"}',$login) ORDER BY user.id",
+    "parameters": [
+      {
+        "name": "login",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "User or organization login, e.g. 'torvalds' or 'duckdb'"
+      }
+    ],
+    "comment": "One GitHub user or organization profile by login. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "user",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "repos_detail",
+    "report_id": "48685627-e952-5f32-803d-904af1038686",
+    "semantic_sql": "SELECT repos.\"full_name\" AS \"full_name\", repos.\"id\" AS \"id\", repos.\"owner_login\" AS \"owner_login\", repos.\"owner_type\" AS \"owner_type\", repos.\"name\" AS \"name\", repos.\"description\" AS \"description\", repos.\"html_url\" AS \"html_url\", repos.\"homepage\" AS \"homepage\", repos.\"language\" AS \"language\", repos.\"topics\" AS \"topics\", repos.\"license_spdx_id\" AS \"license_spdx_id\", repos.\"visibility\" AS \"visibility\", repos.\"is_private\" AS \"is_private\", repos.\"is_fork\" AS \"is_fork\", repos.\"is_archived\" AS \"is_archived\", repos.\"is_template\" AS \"is_template\", repos.\"default_branch\" AS \"default_branch\", repos.\"stargazers_count\" AS \"stargazers_count\", repos.\"forks_count\" AS \"forks_count\", repos.\"open_issues_count\" AS \"open_issues_count\", repos.\"watchers_count\" AS \"watchers_count\", repos.\"size_kb\" AS \"size_kb\", repos.\"has_issues\" AS \"has_issues\", repos.\"has_wiki\" AS \"has_wiki\", repos.\"has_discussions\" AS \"has_discussions\", repos.\"created_at\" AS \"created_at\", repos.\"updated_at\" AS \"updated_at\", repos.\"pushed_at\" AS \"pushed_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"repos\":{\"arguments\":{\"owner\":{\"member\":\"repos_input.owner\"},\"type\":{\"literal\":\"owner\"},\"sort\":{\"literal\":\"pushed\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repos_input\",\"rows\":[[{\"parameter\":\"owner\"}]]}},\"detail_dataset\":\"repos\"}',$owner) ORDER BY repos.id",
+    "parameters": [
+      {
+        "name": "owner",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "User or organization login whose repositories to list"
+      }
+    ],
+    "comment": "Repositories owned by a GitHub user or organization. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "repos",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "issues_detail",
+    "report_id": "35632ff1-ea96-5717-aeb2-d25afaa38a51",
+    "semantic_sql": "SELECT issues.\"repo\" AS \"repo\", issues.\"number\" AS \"number\", issues.\"id\" AS \"id\", issues.\"title\" AS \"title\", issues.\"state\" AS \"state\", issues.\"state_reason\" AS \"state_reason\", issues.\"user_login\" AS \"user_login\", issues.\"author_association\" AS \"author_association\", issues.\"labels\" AS \"labels\", issues.\"assignees\" AS \"assignees\", issues.\"milestone\" AS \"milestone\", issues.\"comments\" AS \"comments\", issues.\"reactions_total\" AS \"reactions_total\", issues.\"reactions_plus_one\" AS \"reactions_plus_one\", issues.\"is_locked\" AS \"is_locked\", issues.\"is_pull_request\" AS \"is_pull_request\", issues.\"body\" AS \"body\", issues.\"html_url\" AS \"html_url\", issues.\"created_at\" AS \"created_at\", issues.\"updated_at\" AS \"updated_at\", issues.\"closed_at\" AS \"closed_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"issues\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"labels\":{\"literal\":\"\"},\"since\":{\"literal\":\"\"},\"include_pull_requests\":{\"literal\":false},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"issues\"}',$repository) ORDER BY issues.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Issues in a GitHub repository, newest first. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "issues",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "pulls_detail",
+    "report_id": "a05df38a-3f3c-54cd-b8dd-ddf83342ee63",
+    "semantic_sql": "SELECT pulls.\"repo\" AS \"repo\", pulls.\"number\" AS \"number\", pulls.\"id\" AS \"id\", pulls.\"title\" AS \"title\", pulls.\"state\" AS \"state\", pulls.\"is_draft\" AS \"is_draft\", pulls.\"user_login\" AS \"user_login\", pulls.\"author_association\" AS \"author_association\", pulls.\"head_ref\" AS \"head_ref\", pulls.\"head_repo\" AS \"head_repo\", pulls.\"head_sha\" AS \"head_sha\", pulls.\"base_ref\" AS \"base_ref\", pulls.\"labels\" AS \"labels\", pulls.\"assignees\" AS \"assignees\", pulls.\"requested_reviewers\" AS \"requested_reviewers\", pulls.\"milestone\" AS \"milestone\", pulls.\"merge_commit_sha\" AS \"merge_commit_sha\", pulls.\"body\" AS \"body\", pulls.\"html_url\" AS \"html_url\", pulls.\"created_at\" AS \"created_at\", pulls.\"updated_at\" AS \"updated_at\", pulls.\"closed_at\" AS \"closed_at\", pulls.\"merged_at\" AS \"merged_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"pulls\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"base\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"pulls\"}',$repository) ORDER BY pulls.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Pull requests in a GitHub repository, newest first. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "pulls",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "issue_comments_detail",
+    "report_id": "d715e79c-5463-50b7-b0d1-834f9bea672b",
+    "semantic_sql": "SELECT issue_comments.\"repo\" AS \"repo\", issue_comments.\"issue_number\" AS \"issue_number\", issue_comments.\"id\" AS \"id\", issue_comments.\"user_login\" AS \"user_login\", issue_comments.\"author_association\" AS \"author_association\", issue_comments.\"body\" AS \"body\", issue_comments.\"reactions_total\" AS \"reactions_total\", issue_comments.\"html_url\" AS \"html_url\", issue_comments.\"created_at\" AS \"created_at\", issue_comments.\"updated_at\" AS \"updated_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"issue_comments\":{\"arguments\":{\"repo\":{\"member\":\"issue_comments_input.repo\"},\"number\":{\"member\":\"issue_comments_input.number\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"issue_comments_input\",\"rows\":[[{\"parameter\":\"repository\"},{\"parameter\":\"issue_number\"}]]}},\"detail_dataset\":\"issue_comments\"}',$repository,$issue_number) ORDER BY issue_comments.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "issue_number",
+        "type": "BIGINT",
+        "nullable": false,
+        "comment": "Issue or pull request number"
+      }
+    ],
+    "comment": "Comments on a GitHub issue or pull request. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "issue_comments",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "commits_detail",
+    "report_id": "18d37241-298e-5212-a469-cd986e68bd67",
+    "semantic_sql": "SELECT commits.\"repo\" AS \"repo\", commits.\"sha\" AS \"sha\", commits.\"message\" AS \"message\", commits.\"author_name\" AS \"author_name\", commits.\"author_email\" AS \"author_email\", commits.\"author_date\" AS \"author_date\", commits.\"author_login\" AS \"author_login\", commits.\"committer_name\" AS \"committer_name\", commits.\"committer_email\" AS \"committer_email\", commits.\"committer_date\" AS \"committer_date\", commits.\"committer_login\" AS \"committer_login\", commits.\"parent_shas\" AS \"parent_shas\", commits.\"comment_count\" AS \"comment_count\", commits.\"is_verified\" AS \"is_verified\", commits.\"html_url\" AS \"html_url\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"commits\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"sha\":{\"literal\":\"\"},\"path\":{\"literal\":\"\"},\"author\":{\"literal\":\"\"},\"since\":{\"literal\":\"\"},\"until\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"commits\"}',$repository) ORDER BY commits.repo, commits.sha",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Commit history of a GitHub repository, newest first. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "commits",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "releases_detail",
+    "report_id": "9a7f0f9e-a164-53a8-b916-393d07f15113",
+    "semantic_sql": "SELECT releases.\"repo\" AS \"repo\", releases.\"id\" AS \"id\", releases.\"tag_name\" AS \"tag_name\", releases.\"name\" AS \"name\", releases.\"is_draft\" AS \"is_draft\", releases.\"is_prerelease\" AS \"is_prerelease\", releases.\"author_login\" AS \"author_login\", releases.\"target_commitish\" AS \"target_commitish\", releases.\"assets_count\" AS \"assets_count\", releases.\"download_count\" AS \"download_count\", releases.\"body\" AS \"body\", releases.\"html_url\" AS \"html_url\", releases.\"created_at\" AS \"created_at\", releases.\"published_at\" AS \"published_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"releases\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"releases\"}',$repository) ORDER BY releases.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Releases of a GitHub repository, newest first. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "releases",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "contributors_detail",
+    "report_id": "0185d16f-9bdc-54fc-93f2-04981358bd83",
+    "semantic_sql": "SELECT contributors.\"repo\" AS \"repo\", contributors.\"login\" AS \"login\", contributors.\"id\" AS \"id\", contributors.\"type\" AS \"type\", contributors.\"contributions\" AS \"contributions\", contributors.\"html_url\" AS \"html_url\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"contributors\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"contributors\"}',$repository) ORDER BY contributors.repo, contributors.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Contributors to a GitHub repository, most commits first. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "contributors",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "languages_detail",
+    "report_id": "40b6aab4-e889-5d51-b14a-e73ade5b2f10",
+    "semantic_sql": "SELECT languages.\"repo\" AS \"repo\", languages.\"language\" AS \"language\", languages.\"bytes\" AS \"bytes\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"languages\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"languages\"}',$repository) ORDER BY languages.repo, languages.language",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name', e.g. 'duckdb/duckdb'"
+      }
+    ],
+    "comment": "Bytes of code per language in a GitHub repository. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "languages",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "stargazers_detail",
+    "report_id": "2d304236-3780-52b5-a932-f8c0b7ad759e",
+    "semantic_sql": "SELECT stargazers.\"repo\" AS \"repo\", stargazers.\"starred_at\" AS \"starred_at\", stargazers.\"login\" AS \"login\", stargazers.\"id\" AS \"id\", stargazers.\"type\" AS \"type\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"stargazers\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"stargazers\"}',$repository) ORDER BY stargazers.repo, stargazers.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Stars on a GitHub repository with when each was given, oldest first. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "stargazers",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "workflow_runs_detail",
+    "report_id": "7b71b917-4581-5f49-9605-e4608cf8b943",
+    "semantic_sql": "SELECT workflow_runs.\"repo\" AS \"repo\", workflow_runs.\"id\" AS \"id\", workflow_runs.\"name\" AS \"name\", workflow_runs.\"workflow_id\" AS \"workflow_id\", workflow_runs.\"run_number\" AS \"run_number\", workflow_runs.\"run_attempt\" AS \"run_attempt\", workflow_runs.\"event\" AS \"event\", workflow_runs.\"status\" AS \"status\", workflow_runs.\"conclusion\" AS \"conclusion\", workflow_runs.\"head_branch\" AS \"head_branch\", workflow_runs.\"head_sha\" AS \"head_sha\", workflow_runs.\"actor_login\" AS \"actor_login\", workflow_runs.\"html_url\" AS \"html_url\", workflow_runs.\"created_at\" AS \"created_at\", workflow_runs.\"run_started_at\" AS \"run_started_at\", workflow_runs.\"updated_at\" AS \"updated_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"workflow_runs\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"branch\":{\"literal\":\"\"},\"event\":{\"literal\":\"\"},\"status\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"workflow_runs\"}',$repository) ORDER BY workflow_runs.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "GitHub Actions workflow runs for a repository, newest first. Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "workflow_runs",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "search_repositories_detail",
+    "report_id": "e8a26fdb-b6c7-5634-83bd-6e03d42d676a",
+    "semantic_sql": "SELECT search_repositories.\"full_name\" AS \"full_name\", search_repositories.\"id\" AS \"id\", search_repositories.\"owner_login\" AS \"owner_login\", search_repositories.\"owner_type\" AS \"owner_type\", search_repositories.\"name\" AS \"name\", search_repositories.\"description\" AS \"description\", search_repositories.\"html_url\" AS \"html_url\", search_repositories.\"homepage\" AS \"homepage\", search_repositories.\"language\" AS \"language\", search_repositories.\"topics\" AS \"topics\", search_repositories.\"license_spdx_id\" AS \"license_spdx_id\", search_repositories.\"visibility\" AS \"visibility\", search_repositories.\"is_private\" AS \"is_private\", search_repositories.\"is_fork\" AS \"is_fork\", search_repositories.\"is_archived\" AS \"is_archived\", search_repositories.\"is_template\" AS \"is_template\", search_repositories.\"default_branch\" AS \"default_branch\", search_repositories.\"stargazers_count\" AS \"stargazers_count\", search_repositories.\"forks_count\" AS \"forks_count\", search_repositories.\"open_issues_count\" AS \"open_issues_count\", search_repositories.\"watchers_count\" AS \"watchers_count\", search_repositories.\"size_kb\" AS \"size_kb\", search_repositories.\"has_issues\" AS \"has_issues\", search_repositories.\"has_wiki\" AS \"has_wiki\", search_repositories.\"has_discussions\" AS \"has_discussions\", search_repositories.\"created_at\" AS \"created_at\", search_repositories.\"updated_at\" AS \"updated_at\", search_repositories.\"pushed_at\" AS \"pushed_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"search_repositories\":{\"arguments\":{\"query\":{\"parameter\":\"query\"},\"sort\":{\"literal\":\"\"},\"order\":{\"literal\":\"desc\"},\"cache_ttl\":{\"literal\":\"0\"}}}},\"detail_dataset\":\"search_repositories\"}',$query) ORDER BY search_repositories.id",
+    "parameters": [
+      {
+        "name": "query",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "GitHub search syntax, e.g. 'duckdb language:python stars:>100' or 'org:duckdb'"
+      }
+    ],
+    "comment": "Search GitHub repositories with GitHub's query syntax. Capped search matches, not a complete population or approved total.",
+    "tags": {
+      "source": "search_repositories",
+      "consistency": "live",
+      "population": "capped discovery"
+    }
+  },
+  {
+    "name": "search_issues_detail",
+    "report_id": "b7743218-1d31-5a3e-96fd-fd4ecf9c79e8",
+    "semantic_sql": "SELECT search_issues.\"repo\" AS \"repo\", search_issues.\"number\" AS \"number\", search_issues.\"id\" AS \"id\", search_issues.\"title\" AS \"title\", search_issues.\"state\" AS \"state\", search_issues.\"state_reason\" AS \"state_reason\", search_issues.\"user_login\" AS \"user_login\", search_issues.\"author_association\" AS \"author_association\", search_issues.\"labels\" AS \"labels\", search_issues.\"assignees\" AS \"assignees\", search_issues.\"milestone\" AS \"milestone\", search_issues.\"comments\" AS \"comments\", search_issues.\"reactions_total\" AS \"reactions_total\", search_issues.\"reactions_plus_one\" AS \"reactions_plus_one\", search_issues.\"is_locked\" AS \"is_locked\", search_issues.\"is_pull_request\" AS \"is_pull_request\", search_issues.\"body\" AS \"body\", search_issues.\"html_url\" AS \"html_url\", search_issues.\"created_at\" AS \"created_at\", search_issues.\"updated_at\" AS \"updated_at\", search_issues.\"closed_at\" AS \"closed_at\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"search_issues\":{\"arguments\":{\"query\":{\"parameter\":\"query\"},\"sort\":{\"literal\":\"\"},\"order\":{\"literal\":\"desc\"},\"cache_ttl\":{\"literal\":\"0\"}}}},\"detail_dataset\":\"search_issues\"}',$query) ORDER BY search_issues.id",
+    "parameters": [
+      {
+        "name": "query",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "GitHub search syntax, e.g. 'repo:duckdb/duckdb is:issue is:open label:bug parquet'"
+      }
+    ],
+    "comment": "Search GitHub issues and pull requests with GitHub's query syntax. Capped search matches, not a complete population or approved total.",
+    "tags": {
+      "source": "search_issues",
+      "consistency": "live",
+      "population": "capped discovery"
+    }
+  },
+  {
+    "name": "all_rate_limit_detail",
+    "report_id": "98b4ebdf-03c6-5b42-869b-3e6c9d5eebce",
+    "semantic_sql": "SELECT all_rate_limit.\"resource\" AS \"resource\", all_rate_limit.\"request_limit\" AS \"request_limit\", all_rate_limit.\"used\" AS \"used\", all_rate_limit.\"remaining\" AS \"remaining\", all_rate_limit.\"reset_at\" AS \"reset_at\", all_rate_limit.\"authenticated\" AS \"authenticated\" FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"all_rate_limit\":{\"arguments\":{}}},\"detail_dataset\":\"all_rate_limit\"}') ORDER BY all_rate_limit.resource",
+    "parameters": [],
+    "comment": "GitHub API rate-limit budgets (the scan backing the `rate_limit` table). Complete visible source response within execution bounds.",
+    "tags": {
+      "source": "all_rate_limit",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "pr_overview",
+    "report_id": "e1f75df0-994b-59e3-a955-07a2cd78b59c",
+    "semantic_sql": "SELECT pull_request_count, open_pull_requests, open_draft_pull_requests, merged_prs, closed_unmerged_pull_requests FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"pulls\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"base\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository)",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Current PR state overview, all states and authors.",
+    "tags": {
+      "source": "pulls",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "pr_merge_summary",
+    "report_id": "3640fc33-fe39-5824-baff-530ae89d66af",
+    "semantic_sql": "SELECT merged_prs, mean_merge_hours, median_merge_hours, p90_merge_hours FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"pulls\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"base\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) WHERE pulls.merged_day >= $start_day AND pulls.merged_day < $end_day",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "Merged-in-period throughput and elapsed creation-to-merge hours. Half-open UTC merge-date cohort.",
+    "tags": {
+      "source": "pulls",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "pr_merges_daily",
+    "report_id": "efe3a160-424d-5bee-912e-d2ae19af39cf",
+    "semantic_sql": "SELECT pulls.merged_day AS merge_day, merged_prs, mean_merge_hours, median_merge_hours, p90_merge_hours FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"pulls\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"base\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) WHERE pulls.merged_day >= $start_day AND pulls.merged_day < $end_day GROUP BY pulls.merged_day ORDER BY pulls.merged_day",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "Daily merged cohort; missing days stay missing, never filled with zero.",
+    "tags": {
+      "source": "pulls",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "pr_merges_by_author",
+    "report_id": "f9da0fca-d8d0-5826-954f-16e34f6d5e03",
+    "semantic_sql": "SELECT pulls.user_login AS author, merged_prs, mean_merge_hours, median_merge_hours, p90_merge_hours FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"pulls\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"base\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) WHERE pulls.merged_day >= $start_day AND pulls.merged_day < $end_day GROUP BY pulls.user_login ORDER BY pulls.user_login NULLS LAST",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "Merged-in-period cohort by author; bots included. Means/percentiles cannot be averaged across authors.",
+    "tags": {
+      "source": "pulls",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "merged_pr_detail",
+    "report_id": "5639006e-e69a-50db-90e6-e7af072d86e7",
+    "semantic_sql": "SELECT pulls.id AS id, pulls.repo AS repository, pulls.number AS number, pulls.title AS title, pulls.user_login AS author, pulls.created_at AS created_at, pulls.merged_at AS merged_at, pulls.merge_hours AS merge_hours, pulls.labels AS labels, pulls.html_url AS url FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"pulls\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"base\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}},\"detail_dataset\":\"pulls\"}',$repository) WHERE pulls.merged_day >= $start_day AND pulls.merged_day < $end_day ORDER BY pulls.id",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "The same merged cohort as pr_merge_summary, one row per PR.",
+    "tags": {
+      "source": "pulls",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "issue_backlog",
+    "report_id": "43c4f93e-ec45-5025-8a51-1c9b8c601567",
+    "semantic_sql": "SELECT issue_count, open_issues, closed_issues FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"issues\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"labels\":{\"literal\":\"\"},\"since\":{\"literal\":\"\"},\"include_pull_requests\":{\"literal\":false},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository)",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Current issue-only state, excluding PRs. No historical backlog reconstruction.",
+    "tags": {
+      "source": "issues",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "issue_closure_summary",
+    "report_id": "c3c5c6ea-e808-5464-891c-130e6f9ed7b9",
+    "semantic_sql": "SELECT closed_issues, mean_issue_close_hours FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"issues\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"labels\":{\"literal\":\"\"},\"since\":{\"literal\":\"\"},\"include_pull_requests\":{\"literal\":false},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) WHERE issues.closed_day >= $start_day AND issues.closed_day < $end_day",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "Currently closed issues whose recorded closure falls in the UTC interval.",
+    "tags": {
+      "source": "issues",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "commits_summary",
+    "report_id": "7f9d9c22-7c4a-5a1c-b34f-c59196c80c56",
+    "semantic_sql": "SELECT commit_count, verified_commit_count FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"commits\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"sha\":{\"literal\":\"\"},\"path\":{\"literal\":\"\"},\"author\":{\"literal\":\"\"},\"since\":{\"literal\":\"\"},\"until\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) WHERE commits.committer_day >= $start_day AND commits.committer_day < $end_day",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "Default-branch commits by committer UTC date; not developer productivity or deployments.",
+    "tags": {
+      "source": "commits",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "release_summary",
+    "report_id": "2ba61c57-0763-5086-8082-01977d69df06",
+    "semantic_sql": "SELECT published_releases, prereleases, release_asset_downloads FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"releases\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) WHERE releases.published_day >= $start_day AND releases.published_day < $end_day",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "Releases published in the interval. Download values are lifetime counts observed now, not interval download increments.",
+    "tags": {
+      "source": "releases",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "contributors_summary",
+    "report_id": "c84419d9-2e75-5d78-9ad8-a00bde9e0c2f",
+    "semantic_sql": "SELECT contributor_count, attributed_commits FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"contributors\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository)",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Current GitHub contributor attribution.",
+    "tags": {
+      "source": "contributors",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "languages_summary",
+    "report_id": "d55e6049-9bd8-510f-9d33-dfdae7884242",
+    "semantic_sql": "SELECT languages.language AS language, language_bytes FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"languages\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) GROUP BY languages.language ORDER BY languages.language",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name', e.g. 'duckdb/duckdb'"
+      }
+    ],
+    "comment": "Current bytes by detected language.",
+    "tags": {
+      "source": "languages",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "stars_summary",
+    "report_id": "18c55d6a-6f5c-5bf8-93d3-543d60f02311",
+    "semantic_sql": "SELECT current_stargazers FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"stargazers\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository)",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Current visible stargazers; requires repository administrator access under this worker profile.",
+    "tags": {
+      "source": "stargazers",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "ci_summary",
+    "report_id": "125cfc05-2cd8-5ce6-885c-676d823d53c3",
+    "semantic_sql": "SELECT workflow_run_count, eligible_runs, successful_runs, failed_runs, timed_out_runs, cancelled_runs, ci_success_rate FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"workflow_runs\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"branch\":{\"literal\":\"\"},\"event\":{\"literal\":\"\"},\"status\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) WHERE workflow_runs.created_day >= $start_day AND workflow_runs.created_day < $end_day",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "Runs created in the interval, using each run's current/latest reported attempt. Cancellation and skipped/other outcomes excluded from reliability denominator.",
+    "tags": {
+      "source": "workflow_runs",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "ci_by_workflow",
+    "report_id": "8499d3d7-7a4e-52c1-8725-d0cd7e4ae34e",
+    "semantic_sql": "SELECT workflow_runs.name AS workflow, workflow_run_count, eligible_runs, successful_runs, ci_success_rate FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"workflow_runs\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"branch\":{\"literal\":\"\"},\"event\":{\"literal\":\"\"},\"status\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) WHERE workflow_runs.created_day >= $start_day AND workflow_runs.created_day < $end_day GROUP BY workflow_runs.name ORDER BY workflow_runs.name",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      {
+        "name": "start_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Inclusive UTC calendar date."
+      },
+      {
+        "name": "end_day",
+        "type": "DATE",
+        "nullable": false,
+        "comment": "Exclusive UTC calendar date."
+      }
+    ],
+    "comment": "Same created-in-period current run outcomes grouped by workflow name.",
+    "tags": {
+      "source": "workflow_runs",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "repository_summary",
+    "report_id": "9820bc01-f950-5beb-98d9-d06d2aa6587e",
+    "semantic_sql": "SELECT repository_stars, repository_forks FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"repo\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository)",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name', e.g. 'duckdb/duckdb'"
+      }
+    ],
+    "comment": "One current repository observation.",
+    "tags": {
+      "source": "repo",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "account_repository_summary",
+    "report_id": "df585a7b-caf9-5c0f-85fb-898ee99b37be",
+    "semantic_sql": "SELECT repository_count FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"repos\":{\"arguments\":{\"owner\":{\"member\":\"repos_input.owner\"},\"type\":{\"literal\":\"owner\"},\"sort\":{\"literal\":\"pushed\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repos_input\",\"rows\":[[{\"parameter\":\"owner\"}]]}}}',$owner)",
+    "parameters": [
+      {
+        "name": "owner",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "User or organization login whose repositories to list"
+      }
+    ],
+    "comment": "Complete visible owned repository listing for an account.",
+    "tags": {
+      "source": "repos",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  },
+  {
+    "name": "repository_activity",
+    "report_id": "139f3360-c795-5b8a-9b75-67bbc8cf63d7",
+    "semantic_sql": "SELECT repository_input.repo AS repository, merged_prs, workflow_run_count, ci_success_rate FROM crossfield_pipeline('github_reporting','{\"version\":1,\"source_bindings\":{\"pulls\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"state\":{\"literal\":\"all\"},\"base\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true},\"workflow_runs\":{\"arguments\":{\"repo\":{\"member\":\"repository_input.repo\"},\"branch\":{\"literal\":\"\"},\"event\":{\"literal\":\"\"},\"status\":{\"literal\":\"\"},\"max_rows\":{\"literal\":\"0\"},\"cache_ttl\":{\"literal\":\"0\"}},\"driver\":{\"input\":\"selection\"},\"allow_driving_grain_reduction\":true}},\"inputs\":{\"selection\":{\"definition\":\"repository_input\",\"rows\":[[{\"parameter\":\"repository\"}]]}}}',$repository) GROUP BY repository_input.repo",
+    "parameters": [
+      {
+        "name": "repository",
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      }
+    ],
+    "comment": "Independent complete PR and CI populations aggregated before combination at the requested repository. All visible history, current run outcomes; separate live observations, not a transactional snapshot.",
+    "tags": {
+      "source": "pulls,workflow_runs",
+      "consistency": "live",
+      "population": "complete endpoint within declared limits"
+    }
+  }
+]

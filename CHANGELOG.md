@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Add typed `main.discussions`, `discussion_comments` and `discussion_replies` through
+  GraphQL, and `projects`, `project_items` and `project_fields` through REST. All support
+  bounded automatic pagination, named filters and correlated `LATERAL`; custom Project
+  field values remain JSON. These additions are outside the original Crossfield model.
+- Check upstream REST coverage weekly with read-only workflow permissions. Add
+  `--check-upstream` for drift detection and `--revision latest` for reviewed local refreshes;
+  preserve the pinned API version unless explicitly changed.
+- Report GraphQL errors before partial response data so large responses cannot hide the cause.
+
+- Add a generated `rest` schema for all 780 distinct GET operations in pinned GitHub.com
+  and Enterprise Cloud API descriptions, plus `api.endpoints` discovery and `api.rest()`
+  dispatch. Preserve complete JSON, HTTP statuses, binary downloads and pagination links.
+- Add `api.graphql()` for query-only access, including Discussions and Projects. Parse
+  every document before transport and reject mutations, subscriptions and schema definitions.
+  REST remains GET-only; the sole POST is the validated GraphQL query transport.
+
+- Update published dependencies to VGI Python 0.40.0 and VGI RPC 0.48.0, refresh the
+  dependency lockfile, and update development/build tools and CI's VGI linter.
+  Move agent-task grading data to `vgi-agent-tests.yaml` for the updated metadata contract.
+- Support `catalog_contents` for loading the full catalog in one RPC, preserving
+  each attachment's authentication and cache settings in the serialized metadata.
+
 - `cache_ttl` ATTACH option sets a default result TTL for lookups and searches. Per-call TTLs
   override it; omitted/NULL TTLs inherit it, and explicit zero uses GitHub's cache policy.
   Positive TTLs now take precedence over GitHub's default freshness. `rate_limit` stays uncached.

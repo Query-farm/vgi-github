@@ -1,0 +1,657 @@
+# The real vgi-github worker with deterministic HTTP responses, executed through
+# native DuckDB/VGI/Crossfield. See worker_fixture.py for the independent inputs.
+# The runner loads VGI and Crossfield on init and exports these exact paths.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+# Seed a valid empty-request log before the worker starts; every real GET adds
+# one JSON object. This also makes zero-request checks independent of inference.
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+# Complete reporting cannot silently bind the exploratory 100-row/default
+# behavior, or a provider with a different approved operation-timeout contract.
+statement ok
+ATTACH 'github' AS exploratory (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting false, auth 'off');
+
+statement error
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS rejected (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"exploratory","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+----
+INVOCATION_METADATA_REQUIRED
+
+statement ok
+DETACH exploratory;
+
+statement ok
+ATTACH 'github' AS wrong_timeout (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, operation_timeout_seconds 119, auth 'off');
+
+statement error
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS rejected (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"wrong_timeout","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+----
+INVOCATION_METADATA_REQUIRED
+
+statement ok
+DETACH wrong_timeout;
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query TTT
+SELECT name,type,nullable::VARCHAR FROM crossfield_parameters() WHERE database_name='engineering' AND invocation_name='engineering.semantic.github_reporting' ORDER BY name;
+----
+issue_number	BIGINT	false
+owner	VARCHAR	false
+repository	VARCHAR	false
+
+query I
+SELECT count(*) FROM crossfield_queries() WHERE database_name='engineering';
+----
+32
+
+query TTTT
+SELECT name,type,nullable::VARCHAR,comment FROM crossfield_query_parameters() WHERE database_name='engineering' AND query_name='pr_merge_summary' ORDER BY ordinal;
+----
+repository	VARCHAR	false	Repository as 'owner/name'
+start_day	DATE	false	Inclusive UTC calendar date.
+end_day	DATE	false	Exclusive UTC calendar date.
+
+query TT
+SELECT name,type FROM crossfield_query_parameters() WHERE database_name='engineering' AND query_name='issue_comments_detail' ORDER BY ordinal;
+----
+repository	VARCHAR
+issue_number	BIGINT
+
+statement ok
+PREPARE merge_cohort AS SELECT * FROM engineering.reports.pr_merge_summary(repository=>$1,start_day=>$2,end_day=>$3);
+
+statement ok
+PREPARE search_repos AS SELECT full_name,id FROM engineering.reports.search_repositories_detail(query=>$1) ORDER BY full_name;
+
+statement ok
+PREPARE search_issues AS SELECT number,state FROM engineering.reports.search_issues_detail(query=>$1) ORDER BY number;
+
+statement ok
+PREPARE semantic_merges AS SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>$1) WHERE pulls_merged_day >= $2::DATE AND pulls_merged_day < $3::DATE;
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT pulls_user_login AS author,merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01' GROUP BY pulls_user_login;
+
+statement ok
+EXPLAIN (SQL) SELECT repository_input_repo,merged_prs,workflow_run_count,ci_success_rate FROM engineering.semantic.github_reporting(repository=>'example/project') GROUP BY repository_input_repo;
+
+statement ok
+DESCRIBE SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project');
+
+# Public inputs are model-owned. Required arguments depend on the selected
+# metrics; unknown/unused arguments cannot silently look like effective filters.
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting();
+----
+SEMANTIC_PARAMETER_MISSING
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>NULL);
+----
+SEMANTIC_PARAMETER_NULL
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>42);
+----
+SEMANTIC_PARAMETER_TYPE
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>'example/project',max_rows=>1);
+----
+SEMANTIC_PARAMETER_NAME
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>'example/project',owner=>'example');
+----
+SEMANTIC_PARAMETER_UNUSED
+
+statement error
+SELECT issue_comment_count FROM engineering.semantic.github_reporting(repository=>'example/project');
+----
+SEMANTIC_PARAMETER_MISSING
+
+statement error
+SELECT issue_comment_count FROM engineering.semantic.github_reporting(repository=>'example/project',issue_number=>'one');
+----
+SEMANTIC_PARAMETER_TYPE
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting('example/project');
+----
+SEMANTIC_ARGUMENTS
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting('example/project',repository=>'example/project');
+----
+<REGEX>:(?s).*(SEMANTIC_ARGUMENTS|named|positional).*
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>'example/project',repository=>'example/other');
+----
+<REGEX>:(?s).*(SEMANTIC_ARGUMENTS|Duplicate|duplicate).*
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>upper('example/project'));
+----
+SEMANTIC_PARAMETER_EXPRESSION
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT * FROM engineering.reports.search_repositories_detail(query=>'org:example');
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+
+statement ok
+EXPLAIN (SQL) SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-09-01');
+----
+<REGEX>:(?s).*(end_day|argument|parameter).*
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>NULL,start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+<REGEX>:(?s).*(NULL|null|parameter).*
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-02-30',end_day=>'2026-10-01');
+----
+INVOCATION_VALUE
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01',max_rows=>1);
+----
+<REGEX>:(?s).*(max_rows|argument|parameter).*
+
+# Source access and ad hoc transformations reject before reading data.
+statement error
+SELECT * FROM github.main.pulls('example/project');
+----
+RAW_SOURCE
+
+statement error
+SELECT ROUND(mean_merge_hours,2) FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+CROSSFIELD
+
+statement error
+SELECT AVG(mean_merge_hours) FROM engineering.reports.pr_merges_by_author(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+CROSSFIELD_REAGGREGATION
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM duckdb_functions() WHERE database_name='engineering' AND schema_name='semantic' AND function_name='github_reporting';
+----
+1
+
+query I
+SELECT count(*) FROM duckdb_tables() WHERE database_name='engineering' AND schema_name='semantic' AND table_name='github_reporting';
+----
+1
+
+query T
+SELECT name FROM crossfield_parameters() WHERE database_name='engineering' AND list_contains(source_datasets,'pulls') AND list_contains(metric_names,'merged_prs');
+----
+repository
+
+query TTT
+SELECT name,json_extract(requirements,'$.required_parameters')::VARCHAR,json_extract(requirements,'$.requires_pipeline')::VARCHAR FROM crossfield_catalog_capabilities() WHERE database_name='engineering' AND name IN ('merged_prs','repository_count') ORDER BY name;
+----
+merged_prs	["repository"]	false
+repository_count	["owner"]	false
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+query III
+SELECT contains(metadata,'mean_merge_hours')::INTEGER,contains(metadata,'github_reporting')::INTEGER,contains(metadata,'live_explicit')::INTEGER FROM crossfield_compile('SELECT * FROM engineering.reports.pr_merge_summary(repository=>''example/project'',start_day=>''2026-09-01'',end_day=>''2026-10-01'')');
+----
+1	1	1
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+# Free metric composition keeps the caller's dimensions and population. These
+# two authors have durations (2,10) and (4,20), respectively.
+query TIRR
+SELECT pulls_user_login AS author,merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01' GROUP BY pulls_user_login ORDER BY author;
+----
+alice	2	6.000	9.200
+bob	2	12.000	18.400
+
+# Only the selected PR source may execute; metadata and unrelated metric
+# sources (including owner/comment inputs) must not generate API requests.
+statement ok
+SET crossfield_mode='off';
+
+query II
+SELECT count(*) FILTER (WHERE path='/repos/example/project/pulls')>0,count(*) FILTER (WHERE path NOT IN ('','/repos/example/project/pulls')) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}');
+----
+true	0
+
+# The callable entry also works without strict-session enforcement.
+query IRR
+SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01';
+----
+4	7.000	17.000
+
+statement ok
+SET crossfield_mode='strict';
+
+query IRR
+EXECUTE semantic_merges('example/project','2026-09-01','2026-10-01');
+----
+4	7.000	17.000
+
+query IRR
+EXECUTE semantic_merges('example/other','2026-09-01','2026-10-01');
+----
+1	6.000	6.000
+
+statement error
+EXECUTE semantic_merges(NULL,'2026-09-01','2026-10-01');
+----
+<REGEX>:(?s).*(SEMANTIC_PARAMETER_NULL|NULL|null).*
+
+query IRR
+WITH merges AS (SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01') SELECT merged_prs,median_merge_hours,p90_merge_hours FROM merges;
+----
+4	7.000	17.000
+
+query TIIR
+SELECT repository_input_repo AS repository,merged_prs,workflow_run_count,ci_success_rate FROM engineering.semantic.github_reporting(repository=>'example/project') GROUP BY repository_input_repo;
+----
+example/project	6	3	0.500
+
+# Source pruning changes the required inputs: repository is not required by
+# account repository counts; issue comments require both repository and number.
+query I
+SELECT repository_count FROM engineering.semantic.github_reporting(owner=>'example');
+----
+2
+
+query I
+SELECT issue_comment_count FROM engineering.semantic.github_reporting(repository=>'example/project',issue_number=>1);
+----
+1
+
+# Main numerical oracle: four September merges have 2, 4, 10, and 20 elapsed
+# hours. Include the exact lower bound and exclude the exact upper bound.
+query IRRR
+EXECUTE merge_cohort('example/project','2026-09-01','2026-10-01');
+----
+4	9.000	7.000	17.000
+
+query IRRR
+SELECT * FROM engineering.reports.pr_merge_summary(end_day=>'2026-10-01',repository=>'example/project',start_day=>'2026-09-01');
+----
+4	9.000	7.000	17.000
+
+query IIIII
+SELECT * FROM engineering.reports.pr_overview(repository=>'example/project');
+----
+9	2	1	6	1
+
+query TIRRR
+SELECT * FROM engineering.reports.pr_merges_daily(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01') ORDER BY merge_day;
+----
+2026-09-01	1	2.000	2.000	2.000
+2026-09-10	1	4.000	4.000	4.000
+2026-09-20	1	10.000	10.000	10.000
+2026-09-30	1	20.000	20.000	20.000
+
+query TIRRR
+SELECT * FROM engineering.reports.pr_merges_by_author(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01') ORDER BY author;
+----
+alice	2	6.000	6.000	9.200
+bob	2	12.000	12.000	18.400
+
+query IITRT
+SELECT id,number,author,merge_hours,labels FROM engineering.reports.merged_pr_detail(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01') ORDER BY id;
+----
+1001	1	alice	2.000	[feature, sql]
+1002	2	bob	4.000	[feature, sql]
+1003	3	alice	10.000	[feature, sql]
+1004	4	bob	20.000	[feature, sql]
+
+# An independently selected repository cannot reuse another call's population.
+query IRRR
+EXECUTE merge_cohort('example/other','2026-09-01','2026-10-01');
+----
+1	6.000	6.000	6.000
+
+query IRRR
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/empty',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+0	NULL	NULL	NULL
+
+# SQL half-open intervals: an empty or reversed interval has an empty cohort.
+query IRRR
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-09-01');
+----
+0	NULL	NULL	NULL
+
+query IRRR
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-10-01',end_day=>'2026-09-01');
+----
+0	NULL	NULL	NULL
+
+# Exercise every other approved summary, using independent source facts.
+query III
+SELECT * FROM engineering.reports.issue_backlog(repository=>'example/project');
+----
+2	1	1
+
+query IR
+SELECT * FROM engineering.reports.issue_closure_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+1	48.000
+
+query II
+SELECT * FROM engineering.reports.commits_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+2	1
+
+query III
+SELECT * FROM engineering.reports.release_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+1	0	35
+
+query II
+SELECT * FROM engineering.reports.contributors_summary(repository=>'example/project');
+----
+2	10
+
+query TI
+SELECT * FROM engineering.reports.languages_summary(repository=>'example/project') ORDER BY language;
+----
+C++	250
+Python	750
+
+query I
+SELECT * FROM engineering.reports.stars_summary(repository=>'example/project');
+----
+2
+
+# Cancellation is excluded from the denominator, not treated as failure:
+# one success / (one success + one failure + zero timeouts) = 0.5.
+query IIIIIIR
+SELECT * FROM engineering.reports.ci_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+3	2	1	1	0	1	0.500
+
+query TIIIR
+SELECT * FROM engineering.reports.ci_by_workflow(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+Checks	3	2	1	0.500
+
+query IIIIIIR
+SELECT * FROM engineering.reports.ci_summary(repository=>'example/empty',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+0	0	0	0	0	0	NULL
+
+query II
+SELECT * FROM engineering.reports.repository_summary(repository=>'example/project');
+----
+12	3
+
+query I
+SELECT * FROM engineering.reports.account_repository_summary(owner=>'example');
+----
+2
+
+# Nine raw PR rows and three raw workflow rows must not become 27 fact rows.
+# Each source aggregates independently before the common repository is joined.
+query TIIR
+SELECT * FROM engineering.reports.repository_activity(repository=>'example/project');
+----
+example/project	6	3	0.500
+
+# All fifteen source-detail reports run through the real native provider.
+# Collections are values at their parent's grain, including empty arrays.
+query TITT
+SELECT full_name,id,language,topics FROM engineering.reports.repo_detail(repository=>'example/project');
+----
+example/project	10	Python	[sql, semantic]
+
+query TIT
+SELECT login,id,type FROM engineering.reports.user_detail(login=>'alice');
+----
+alice	101	User
+
+query TI
+SELECT full_name,id FROM engineering.reports.repos_detail(owner=>'example') ORDER BY full_name;
+----
+example/project	10
+example/second	20
+
+query ITTT
+SELECT number,state,labels,assignees FROM engineering.reports.issues_detail(repository=>'example/project') ORDER BY number;
+----
+1	open	[bug]	[]
+2	closed	[bug]	[]
+
+query ITTTT
+SELECT number,state,labels,assignees,requested_reviewers FROM engineering.reports.pulls_detail(repository=>'example/project') WHERE number IN (1,9) ORDER BY number;
+----
+1	closed	[feature, sql]	[]	[reviewer]
+9	open	[feature, sql]	[]	[reviewer]
+
+query IIT
+SELECT issue_number,id,user_login FROM engineering.reports.issue_comments_detail(repository=>'example/project',issue_number=>1);
+----
+1	3001	alice
+
+query TTT
+SELECT sha,is_verified,parent_shas FROM engineering.reports.commits_detail(repository=>'example/project') ORDER BY sha;
+----
+0000000000000000000000000000000000000001	true	[0000000000000000000000000000000000000006]
+0000000000000000000000000000000000000002	false	[0000000000000000000000000000000000000007]
+
+query TII
+SELECT tag_name,assets_count,download_count FROM engineering.reports.releases_detail(repository=>'example/project');
+----
+v1.0.0	2	35
+
+query TI
+SELECT login,contributions FROM engineering.reports.contributors_detail(repository=>'example/project') ORDER BY login;
+----
+alice	8
+bob	2
+
+query TI
+SELECT language,bytes FROM engineering.reports.languages_detail(repository=>'example/project') ORDER BY language;
+----
+C++	250
+Python	750
+
+query TI
+SELECT login,id FROM engineering.reports.stargazers_detail(repository=>'example/project') ORDER BY login;
+----
+alice	101
+bob	102
+
+query ITI
+SELECT id,conclusion,run_attempt FROM engineering.reports.workflow_runs_detail(repository=>'example/project') ORDER BY id;
+----
+5001	success	1
+5002	failure	1
+5003	cancelled	1
+
+query TI
+SELECT full_name,id FROM engineering.reports.search_repositories_detail(query=>'org:example') ORDER BY full_name;
+----
+example/project	10
+example/second	20
+
+query ITT
+SELECT number,state,is_pull_request FROM engineering.reports.search_issues_detail(query=>'repo:example/project is:issue') ORDER BY number;
+----
+1	open	false
+2	closed	false
+
+# Bind-time schema witnesses must never replace real prepared arguments. The
+# endpoint log below independently checks that each executed value reached HTTP.
+query TI
+EXECUTE search_repos('org:example-alpha');
+----
+example/project	10
+example/second	20
+
+query TI
+EXECUTE search_repos('org:example-beta');
+----
+example/project	10
+example/second	20
+
+query IT
+EXECUTE search_issues('repo:example/project is:issue label:alpha');
+----
+1	open
+2	closed
+
+query IT
+EXECUTE search_issues('repo:example/project is:issue label:beta');
+----
+1	open
+2	closed
+
+query TIIT
+SELECT resource,request_limit,remaining,authenticated FROM engineering.reports.all_rate_limit_detail ORDER BY resource;
+----
+core	60	55	false
+search	10	9	false
+
+# Native CTE and prepared report paths preserve semantic identity and parameters.
+query IRRR
+WITH merges AS (SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01')) SELECT merged_prs,mean_merge_hours,median_merge_hours,p90_merge_hours FROM merges;
+----
+4	9.000	7.000	17.000
+
+# Search does not become a population count merely because its rows are exposed.
+statement error
+SELECT COUNT(*) FROM engineering.reports.search_repositories_detail(query=>'org:example');
+----
+CROSSFIELD
+
+statement error
+SELECT UNNEST(labels) FROM engineering.reports.pulls_detail(repository=>'example/project');
+----
+CROSSFIELD
+
+# Missing access, malformed identity/evidence, and failure after the first API
+# page are errors. None may be presented as a successful empty/partial total.
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/missing',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+<REGEX>:(?s).*(404|Not Found|not found).*
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/late-error',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+<REGEX>:(?s).*(403|Later page denied).*
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/duplicate',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+<REGEX>:(?s).*(duplicate|DUPLICATE).*
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/null-id',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+<REGEX>:(?s).*(non-NULL|NULL|null).*
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/negative-duration',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+<REGEX>:(?s).*(negative|duration).*
+
+statement error
+SELECT * FROM engineering.reports.pr_merge_summary(repository=>'example/missing-merge',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+<REGEX>:(?s).*missing merged_at.*
+
+# A failed execution must not poison the connection or the approved prepared query.
+query IRRR
+EXECUTE merge_cohort('example/project','2026-09-01','2026-10-01');
+----
+4	9.000	7.000	17.000
+
+statement ok
+SET crossfield_mode='off';
+
+# The complete report really traverses multiple API pages. This only asserts
+# traversal, not callback counts (DuckDB owns scheduling and reuse).
+query I
+SELECT count(*)>0 FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path='/repos/example/project/pulls' AND contains(query,'page=3');
+----
+true
+
+query IIII
+SELECT count(*) FILTER (WHERE path='/search/repositories' AND contains(query,'example-alpha'))>0,
+       count(*) FILTER (WHERE path='/search/repositories' AND contains(query,'example-beta'))>0,
+       count(*) FILTER (WHERE path='/search/issues' AND contains(query,'label%3Aalpha'))>0,
+       count(*) FILTER (WHERE path='/search/issues' AND contains(query,'label%3Abeta'))>0
+FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}');
+----
+true	true	true	true
+
+# Every search GET must correspond to an actual requested query. A metadata
+# placeholder, empty query, or fabricated witness is never an executable input.
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}')
+WHERE (path='/search/repositories' AND NOT contains(query,'q=org%3Aexample'))
+   OR (path='/search/issues' AND NOT contains(query,'q=repo%3Aexample%2Fproject'));
+----
+0
+
+statement ok
+DEALLOCATE merge_cohort;
+
+statement ok
+DEALLOCATE search_repos;
+
+statement ok
+DEALLOCATE search_issues;
+
+statement ok
+DEALLOCATE semantic_merges;
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

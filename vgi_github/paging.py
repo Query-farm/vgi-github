@@ -27,7 +27,7 @@ from vgi.table_function import ProcessParams
 from vgi_rpc import ArrowSerializableDataclass
 from vgi_rpc.rpc import OutputCollector
 
-from vgi_github import auth
+from vgi_github import auth, reporting
 from vgi_github import github_api as api
 from vgi_github.caching import result_cache_control
 from vgi_github.client_log import emitter
@@ -48,6 +48,7 @@ class PagedScanState(ArrowSerializableDataclass):
     next_url: str = ""
     done: bool = False
     fetched: int = 0
+    deadline: float = 0.0
 
 
 def emit_search_page(
@@ -70,7 +71,12 @@ def emit_search_page(
         out.finish()
         return
     hint = CacheHint()
-    with api.reporting_to(emitter(out)):
+    if auth.reporting_of(params.attach_opaque_data) and state.deadline == 0:
+        state.deadline = api.time.monotonic() + auth.operation_timeout_of(params.attach_opaque_data)
+    with (
+        api.reporting_operation(params.attach_opaque_data, deadline=state.deadline),
+        api.reporting_to(emitter(out)),
+    ):
         rows, next_url = api.page(
             state.next_url or path,
             None if state.next_url else {**query, "per_page": PER_PAGE},
@@ -78,10 +84,12 @@ def emit_search_page(
             hint=hint,
             credentials=auth.for_call(params.secrets, params.attach_opaque_data),
         )
+        flattened = [flatten(row) for row in rows]
+        reporting.validate_rows(
+            "search_repositories" if path.endswith("repositories") else "search_issues", flattened
+        )
     state.fetched += len(rows)
     state.next_url = next_url or ""
     state.done = next_url is None or state.fetched >= SEARCH_RESULT_CAP
     cache_control = result_cache_control(hint, params.args.cache_ttl, params.attach_opaque_data)
-    out.emit(
-        batch_from_rows([flatten(row) for row in rows], params.output_schema), cache_control=cache_control
-    )
+    out.emit(batch_from_rows(flattened, params.output_schema), cache_control=cache_control)

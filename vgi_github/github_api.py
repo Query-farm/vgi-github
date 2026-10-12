@@ -1,8 +1,8 @@
-"""Read-only HTTP access to the GitHub REST API.
+"""Read-only HTTP access to GitHub.
 
-Every function here issues ``GET`` requests only — the single chokepoint
-:func:`_get` is the sole place an HTTP call is made, which is what the read-only
-CI guard (``tests/test_readonly_guard.py``) asserts against.
+REST requests use the single GET chokepoint. GraphQL's POST transport is confined
+to :func:`graphql_query`, which parses and rejects every non-query operation
+before sending anything. The read-only CI guard checks both boundaries.
 
 Three GitHub behaviours shape this module more than any endpoint does:
 
@@ -39,7 +39,7 @@ from urllib.parse import quote, urlsplit
 
 import httpx
 
-from vgi_github import __version__
+from vgi_github import __version__, auth
 from vgi_github.auth import Credentials
 
 #: Production base URL. ``GITHUB_API_URL`` overrides it — the same variable
@@ -277,6 +277,7 @@ class GitHubError(RuntimeError):
         super().__init__(f"GitHub API {status} for {path}: {_message_of(body)[:400]}")
         self.status = status
         self.path = path
+        self.message = _message_of(body)
 
 
 class GitHubRateLimitError(GitHubError):
@@ -322,6 +323,64 @@ def _message_of(body: str) -> str:
     return body
 
 
+class GitHubReportingError(RuntimeError):
+    """A response cannot support the complete reporting contract."""
+
+
+class GitHubDeadlineError(TimeoutError):
+    """The reporting operation exhausted its shared cooperative deadline."""
+
+
+_deadline: contextvars.ContextVar[float | None] = contextvars.ContextVar("github_deadline", default=None)
+
+
+def reporting_enabled() -> bool:
+    return _deadline.get() is not None
+
+
+def remaining_time() -> float | None:
+    """Check the total deadline; this does not preempt a synchronous transport call."""
+    deadline = _deadline.get()
+    if deadline is None:
+        return None
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise GitHubDeadlineError(
+            "GitHub reporting operation deadline exceeded; narrow the source population"
+        )
+    return remaining
+
+
+@contextlib.contextmanager
+def reporting_operation(attach: bytes | None, *, deadline: float | None = None) -> Iterator[None]:
+    """One shared deadline across fetches, retries, validation and batch construction.
+
+    Request timeouts are clamped to remaining time, and late responses are
+    rejected. Cancellation of an in-flight synchronous request belongs to the
+    native VGI transport; lifecycle on_cancel is not a worker polling token.
+    """
+    if not auth.reporting_of(attach):
+        yield
+        return
+    token = _deadline.set(
+        deadline if deadline is not None else time.monotonic() + auth.operation_timeout_of(attach)
+    )
+    try:
+        remaining_time()
+        yield
+        remaining_time()
+    finally:
+        _deadline.reset(token)
+
+
+def _wait(seconds: float) -> None:
+    remaining = remaining_time()
+    if remaining is not None and seconds >= remaining:
+        raise GitHubDeadlineError("GitHub reporting deadline cannot accommodate the requested retry wait")
+    time.sleep(max(seconds, 0))
+    remaining_time()
+
+
 # --------------------------------------------------------------------------
 # Conditional requests
 # --------------------------------------------------------------------------
@@ -333,6 +392,7 @@ class _Cached:
     body: bytes
     link: str | None
     cache_control: str
+    content_type: str = ""
 
 
 class _ETagCache:
@@ -549,6 +609,8 @@ class Response:
     payload: Any
     next_url: str | None
     status: int
+    body: bytes = b""
+    content_type: str = ""
 
 
 def _get(
@@ -559,11 +621,14 @@ def _get(
     hint: CacheHint | None = None,
     credentials: Credentials | None = None,
     accept: str = ACCEPT_JSON,
+    raw: bool = False,
+    api_version: str = API_VERSION,
+    allow_not_found: bool = False,
 ) -> Response:
     """GET a path below the API base (or a validated absolute link) and decode it.
 
-    The one and only outbound-HTTP chokepoint. It issues ``GET`` and nothing
-    else; adding a write verb here is the thing the read-only guard forbids.
+    The REST HTTP chokepoint. It issues ``GET`` and nothing else. GraphQL's
+    separate query-only transport is guarded by a parsed-document check.
 
     Retries transient failures (5xx, transport errors) with exponential backoff
     and honours short rate-limit waits; see :func:`_retry_after`. Revalidates
@@ -598,10 +663,10 @@ def _get(
     if not path_or_url.startswith("/") or not clean:
         clean = None
     target = httpx.URL(url, params=clean) if clean else httpx.URL(url)
-    key = (str(target), accept, credentials.fingerprint if credentials else "")
+    key = (str(target), accept, api_version, credentials.fingerprint if credentials else "")
     cached = _ETAGS.get(key)
 
-    headers = {"Accept": accept}
+    headers = {"Accept": accept, "X-GitHub-Api-Version": api_version}
     if credentials is not None:
         headers.update(credentials.headers())
     if cached is not None:
@@ -614,7 +679,14 @@ def _get(
         if activity is not None:
             activity.requests += 1
         try:
-            response = http.get(target, headers=headers)
+            remaining = remaining_time()
+            timeout = (
+                TIMEOUT
+                if remaining is None
+                else httpx.Timeout(min(30.0, remaining), connect=min(10.0, remaining))
+            )
+            response = http.get(target, headers=headers, timeout=timeout)
+            remaining_time()
         except httpx.TransportError as exc:
             if last_attempt:
                 raise
@@ -625,7 +697,7 @@ def _get(
                     f"GitHub request to {path_or_url} failed ({type(exc).__name__}); "
                     f"retrying in {wait:g}s (attempt {attempt + 2} of {_RETRY_ATTEMPTS})"
                 )
-            time.sleep(wait)
+            _wait(wait)
             continue
         if activity is not None:
             activity.observe(response)
@@ -639,15 +711,16 @@ def _get(
                 f"GitHub {why} on {path_or_url}; waiting {wait:g}s before retrying "
                 f"(attempt {attempt + 2} of {_RETRY_ATTEMPTS})"
             )
-        time.sleep(wait)
+        _wait(wait)
 
     if response.status_code == 304 and cached is not None:
         if activity is not None:
             activity.revalidated += 1
         if hint is not None:
             hint.observe(response.headers)
-        return Response(_decode(cached.body, url, 200), cached.link, 200)
-    if response.status_code >= 400:
+        payload = None if raw else _decode(cached.body, url, 200)
+        return Response(payload, cached.link, 200, cached.body, cached.content_type)
+    if response.status_code >= 400 and not (allow_not_found and response.status_code == 404):
         if _is_rate_limited(response):
             raise GitHubRateLimitError(
                 response.status_code,
@@ -662,12 +735,88 @@ def _get(
     if hint is not None:
         hint.observe(response.headers)
     link = next_link(response.headers)
+    content_type = response.headers.get("content-type", "")
     if response.status_code == 204 or not response.content:
-        return Response(None, link, response.status_code)
-    payload = _decode(response.content, url, response.status_code, response.headers.get("content-type"))
-    if etag := response.headers.get("etag"):
-        _ETAGS.store(key, _Cached(etag, response.content, link, response.headers.get("cache-control", "")))
-    return Response(payload, link, response.status_code)
+        return Response(None, link, response.status_code, b"", content_type)
+    payload = None if raw else _decode(response.content, url, response.status_code, content_type)
+    if (etag := response.headers.get("etag")) and response.status_code == 200:
+        _ETAGS.store(
+            key,
+            _Cached(etag, response.content, link, response.headers.get("cache-control", ""), content_type),
+        )
+    return Response(payload, link, response.status_code, response.content, content_type)
+
+
+def graphql_query(
+    query: str,
+    variables: dict[str, Any],
+    *,
+    operation_name: str | None = None,
+    credentials: Credentials | None = None,
+) -> dict[str, Any]:
+    """Execute a parsed query only, using GitHub's required GraphQL POST transport.
+
+    Reject mutations anywhere in the document, even in an unselected operation.
+    The URL is derived from the configured GitHub host, never from caller input.
+    Redirects are disabled: a GraphQL document and token stay on that endpoint.
+    """
+    from vgi_github.graphql_reads import validate_query
+
+    validate_query(query, operation_name)
+    base = base_url()
+    endpoint = (
+        base.removesuffix("/api/v3") + "/api/graphql" if base.endswith("/api/v3") else base + "/graphql"
+    )
+    headers = {"Accept": ACCEPT_JSON}
+    if credentials is not None:
+        headers.update(credentials.headers())
+    body = {"query": query, "variables": variables}
+    if operation_name:
+        body["operationName"] = operation_name
+    activity = _activity.get()
+    http = shared_client()
+    for attempt in range(_RETRY_ATTEMPTS):
+        remaining = remaining_time()
+        timeout = TIMEOUT if remaining is None else httpx.Timeout(min(30.0, remaining))
+        if activity is not None:
+            activity.requests += 1
+        try:
+            response = http.post(
+                endpoint, json=body, headers=headers, timeout=timeout, follow_redirects=False
+            )
+            remaining_time()
+        except httpx.TransportError:
+            if attempt == _RETRY_ATTEMPTS - 1:
+                raise
+            _wait(_RETRY_BASE_SECONDS * 2**attempt)
+            continue
+        if activity is not None:
+            activity.observe(response)
+        wait = _retry_after(response, attempt)
+        if wait is None or attempt == _RETRY_ATTEMPTS - 1:
+            break
+        if activity is not None:
+            activity.retries += 1
+            activity.warn(f"GitHub GraphQL rate limit or transient error; retrying in {wait:g}s")
+        _wait(wait)
+    if _is_rate_limited(response):
+        raise GitHubRateLimitError(
+            response.status_code,
+            endpoint,
+            response.text,
+            reset_at=_reset_at(response),
+            authenticated=credentials is not None,
+        )
+    if not 200 <= response.status_code < 300:
+        raise GitHubError(response.status_code, endpoint, response.text)
+    payload = _decode(response.content, endpoint, response.status_code)
+    if isinstance(payload, dict) and payload.get("errors"):
+        # Put the actual errors first: a large partial data response otherwise
+        # pushes the failure reason past GitHubError's message-length limit.
+        raise GitHubError(response.status_code, endpoint, f"GraphQL failed: {json.dumps(payload['errors'])}")
+    if not isinstance(payload, dict) or "data" not in payload:
+        raise GitHubError(response.status_code, endpoint, f"GraphQL failed: {json.dumps(payload)}")
+    return payload
 
 
 def _decode(body: bytes, url: str, status: int, content_type: str | None = None) -> Any:
@@ -695,7 +844,11 @@ def rows_of(payload: Any, key: str | None) -> list[dict[str, Any]]:
     if key is not None:
         payload = payload.get(key) if isinstance(payload, dict) else None
     if not isinstance(payload, list):
+        if reporting_enabled():
+            raise GitHubReportingError("GitHub reporting expected a JSON array of records")
         return []
+    if reporting_enabled() and any(not isinstance(row, dict) for row in payload):
+        raise GitHubReportingError("GitHub reporting received a malformed record; refusing to omit it")
     return [row for row in payload if isinstance(row, dict)]
 
 
@@ -708,6 +861,7 @@ def page(
     hint: CacheHint | None = None,
     credentials: Credentials | None = None,
     accept: str = ACCEPT_JSON,
+    expected_total: list[int] | None = None,
 ) -> tuple[list[dict[str, Any]], str | None]:
     """Fetch exactly one page, returning its rows and the link to the next.
 
@@ -724,9 +878,17 @@ def page(
         credentials=credentials,
         accept=accept,
     )
+    if reporting_enabled() and key == "workflow_runs" and expected_total is not None:
+        total = response.payload.get("total_count") if isinstance(response.payload, dict) else None
+        if type(total) is not int or total < 0:
+            raise GitHubReportingError("GitHub reporting workflow listing requires total_count")
+        if not expected_total:
+            expected_total.append(total)
+    if reporting_enabled() and response.status == 204:
+        return [], response.next_url
     rows = rows_of(response.payload, key)
-    # An empty page ends the walk even when a link comes back with it.
-    return rows, (response.next_url if rows else None)
+    # Reporting follows an advertised next link even after an empty page.
+    return rows, (response.next_url if rows or reporting_enabled() else None)
 
 
 def collect(
@@ -760,8 +922,11 @@ def collect(
             page as "no rows". A missing page mid-walk is still an error: the
             object existed a moment ago, and a short result would look whole.
     """
+    if reporting_enabled() and limit is not None:
+        raise GitHubReportingError("Reporting listings require max_rows => 0; row truncation is not allowed")
     rows: list[dict[str, Any]] = []
     per_page = PER_PAGE if limit is None or keep is not None else max(1, min(PER_PAGE, limit))
+    expected_total: list[int] = []
     target: str = path
     first = {**(params or {}), "per_page": per_page}
     for index in range(MAX_PAGES):
@@ -774,15 +939,29 @@ def collect(
                 hint=hint,
                 credentials=credentials,
                 accept=accept,
+                expected_total=expected_total,
             )
         except GitHubError as exc:
-            if index == 0 and missing_ok and exc.status in MISSING_STATUSES:
+            if index == 0 and reporting_enabled():
+                # Only GitHub's explicit empty-git response proves this empty
+                # commit population. Other conflicts or access failures error.
+                if (
+                    exc.status == 409
+                    and path.endswith("/commits")
+                    and exc.message.strip().lower() == "git repository is empty."
+                ):
+                    return []
+            elif index == 0 and missing_ok and exc.status in MISSING_STATUSES:
                 return []
             raise
         rows.extend(row for row in batch if keep is None or keep(row))
         if limit is not None and len(rows) >= limit:
             return rows[:limit]
         if target_next is None:
+            if expected_total and len(rows) < expected_total[0]:
+                raise GitHubReportingError(
+                    "GitHub reporting listing ended before total_count; endpoint truncation is not a total"
+                )
             return rows
         target = target_next
     raise GitHubPageLimitError(path, len(rows))
@@ -800,7 +979,9 @@ def lookup(
     try:
         payload = _get(path, params, client=client, hint=hint, credentials=credentials).payload
     except GitHubError as exc:
-        if exc.status in MISSING_STATUSES:
+        if not reporting_enabled() and exc.status in MISSING_STATUSES:
             return None
         raise
+    if reporting_enabled() and not isinstance(payload, dict):
+        raise GitHubReportingError("GitHub reporting expected a JSON object for a lookup")
     return payload if isinstance(payload, dict) else None

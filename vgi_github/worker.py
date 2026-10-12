@@ -27,10 +27,13 @@ from vgi.catalog.attach_option import AttachOptionSpec
 from vgi.catalog.catalog_interface import AttachOpaqueData, CatalogAttachResult, CatalogInfo
 from vgi.catalog.descriptors import Table
 
-from vgi_github import __version__, auth
+from vgi_github import __version__, auth, github_api
+from vgi_github.datasets import DATASET_FUNCTIONS
 from vgi_github.functions import KEYED_FUNCTIONS
+from vgi_github.graphql_reads import GraphQLFunction
 from vgi_github.meta import column_comments, docs, examples, keywords
 from vgi_github.reference import REFERENCE_FUNCTIONS, RateLimitFunction
+from vgi_github.rest import ENDPOINT_SCHEMA, REST_FUNCTIONS, EndpointsFunction, RestFunction
 from vgi_github.schemas import RATE_LIMIT_SCHEMA
 from vgi_github.search import SEARCH_FUNCTIONS
 
@@ -38,7 +41,7 @@ IMPLEMENTATION_VERSION = __version__
 DATA_VERSION_SPEC = f"=={__version__}"
 SOURCE_URL = "https://github.com/Query-farm/vgi-github"
 
-_FUNCTIONS = [*SEARCH_FUNCTIONS, *KEYED_FUNCTIONS, *REFERENCE_FUNCTIONS]
+_FUNCTIONS = [*SEARCH_FUNCTIONS, *KEYED_FUNCTIONS, *REFERENCE_FUNCTIONS, *DATASET_FUNCTIONS]
 
 _EXAMPLE_QUERIES = examples(
     (
@@ -150,127 +153,47 @@ _AGENT_TEST_TASKS = json.dumps(
         {
             "name": "find_repositories",
             "prompt": "What are the five most starred GitHub repositories that mention DuckDB?",
-            "reference_sql": (
-                "SELECT full_name, stargazers_count FROM github.main.search_repositories("
-                "'duckdb', sort => 'stars') LIMIT 5"
-            ),
-            "success_criteria": "Uses search_repositories sorted by stars rather than guessing names.",
-            "unordered": True,
         },
         {
             "name": "open_issue_hotspots",
             "prompt": "Which open issues in duckdb/duckdb have the most thumbs-up reactions?",
-            "reference_sql": (
-                "SELECT number, title, reactions_plus_one FROM github.main.search_issues("
-                "'repo:duckdb/duckdb is:issue is:open', sort => 'reactions-+1') LIMIT 10"
-            ),
-            "success_criteria": (
-                "Ranks across ALL open issues — via search_issues sorted by reactions-+1, or "
-                "issues() with no row cap — not just the 100 most recent, and excludes pull requests."
-            ),
         },
         {
             "name": "merged_pull_requests",
             "prompt": "How many of the last 100 pull requests in duckdb/duckdb were merged?",
-            "reference_sql": (
-                "SELECT count(*) FILTER (WHERE merged_at IS NOT NULL) FROM github.main.pulls('duckdb/duckdb')"
-            ),
-            "success_criteria": (
-                "Counts merged_at IS NOT NULL. Filtering state = 'merged' is wrong — merged is not a state."
-            ),
         },
         {
             "name": "contributor_profiles",
             "prompt": "Where do the top five contributors to duckdb/duckdb say they are located?",
-            "reference_sql": (
-                "SELECT c.login, u.location FROM github.main.contributors('duckdb/duckdb', max_rows => 5) c, "
-                "LATERAL github.main.user(c.login) u"
-            ),
-            "success_criteria": "Drives user() from contributors() with a LATERAL join.",
-            "unordered": True,
         },
         {
             "name": "ci_health",
             "prompt": "Which GitHub Actions workflows in duckdb/duckdb failed most often recently?",
-            "reference_sql": (
-                "SELECT name, count(*) FILTER (WHERE conclusion = 'failure') AS failures "
-                "FROM github.main.workflow_runs('duckdb/duckdb', status => 'completed') "
-                "GROUP BY name ORDER BY failures DESC"
-            ),
-            "success_criteria": "Uses workflow_runs and counts conclusion = 'failure', not status.",
         },
-        {
-            "name": "language_mix",
-            "prompt": "What share of duckdb/duckdb's code is in each language?",
-            "reference_sql": (
-                "SELECT language, bytes / sum(bytes) OVER () AS share "
-                "FROM github.main.languages('duckdb/duckdb')"
-            ),
-            "success_criteria": "Uses languages() and normalises bytes into a share.",
-            "unordered": True,
-        },
+        {"name": "language_mix", "prompt": "What share of duckdb/duckdb's code is in each language?"},
         {
             "name": "remaining_budget",
             "prompt": "How many GitHub API requests can I still make this hour, and is a token in use?",
-            "reference_sql": (
-                "SELECT remaining, request_limit, authenticated "
-                "FROM github.main.rate_limit WHERE resource = 'core'"
-            ),
-            "success_criteria": "Reads the core row of rate_limit and reports authenticated.",
-            "check_sql": (
-                "SELECT count(*) = (SELECT count(*) FROM github.main.all_rate_limit()) "
-                "FROM github.main.rate_limit"
-            ),
         },
         {
             "name": "repository_snapshot",
             "prompt": "How many stars and forks does duckdb/duckdb have, and under what license?",
-            "reference_sql": (
-                "SELECT stargazers_count, forks_count, license_spdx_id FROM github.main.repo('duckdb/duckdb')"
-            ),
-            "success_criteria": "Uses the repo() point lookup rather than searching.",
         },
         {
             "name": "recently_active_repositories",
             "prompt": "Which repositories in the duckdb organization saw a push most recently?",
-            "reference_sql": (
-                "SELECT full_name, pushed_at FROM github.main.repos('duckdb') "
-                "ORDER BY pushed_at DESC LIMIT 10"
-            ),
-            "success_criteria": "Lists the organization's repositories with repos() and orders by pushed_at.",
         },
         {
             "name": "recent_authors",
             "prompt": "Who authored the last 20 commits on duckdb/duckdb's default branch?",
-            "reference_sql": (
-                "SELECT coalesce(author_login, author_name) AS author, count(*) AS commits "
-                "FROM github.main.commits('duckdb/duckdb', max_rows => 20) GROUP BY author "
-                "ORDER BY commits DESC"
-            ),
-            "success_criteria": "Uses commits() capped at 20 rather than contributors(), which is all-time.",
-            "unordered": True,
         },
         {
             "name": "release_cadence",
             "prompt": "When were the last five non-pre-release versions of duckdb/duckdb published?",
-            "reference_sql": (
-                "SELECT tag_name, published_at FROM github.main.releases('duckdb/duckdb') "
-                "WHERE NOT is_prerelease ORDER BY published_at DESC LIMIT 5"
-            ),
-            "success_criteria": "Uses releases() and excludes pre-releases.",
         },
         {
             "name": "cross_repository_search",
             "prompt": "Find open issues anywhere in the duckdb organization that mention parquet.",
-            "reference_sql": (
-                "SELECT repo, number, title FROM github.main.search_issues("
-                "'org:duckdb is:issue is:open parquet') LIMIT 20"
-            ),
-            "success_criteria": (
-                "Uses search_issues with org:, is:issue and is:open qualifiers in the query rather "
-                "than calling issues() on every repository."
-            ),
-            "unordered": True,
         },
         {
             "name": "who_joined_the_discussion",
@@ -278,14 +201,45 @@ _AGENT_TEST_TASKS = json.dumps(
                 "Among the 20 most recent issues in duckdb/duckdb, take the one with the most "
                 "comments. Who commented on it?"
             ),
-            "reference_sql": (
-                "SELECT DISTINCT c.user_login FROM ("
-                "SELECT repo, number FROM github.main.issues('duckdb/duckdb', max_rows => 20) "
-                "ORDER BY comments DESC LIMIT 1) i, "
-                "LATERAL github.main.issue_comments(i.repo, i.number) c"
+        },
+        {
+            "name": "discover_rest_reads",
+            "prompt": (
+                "Which documented GitHub REST read operations cover pull requests? Show their IDs and paths."
             ),
-            "success_criteria": "Drives issue_comments() from issues() output with both repo and number.",
-            "unordered": True,
+        },
+        {
+            "name": "complete_repository_json",
+            "prompt": (
+                "Read duckdb/duckdb's full repository response using the generic REST dispatcher "
+                "and show full_name."
+            ),
+        },
+        {
+            "name": "graphql_viewer",
+            "prompt": (
+                "Using the supplied GitHub credentials, query GraphQL for the authenticated account's login."
+            ),
+        },
+        {
+            "name": "unanswered_discussions",
+            "prompt": "Using GitHub credentials, list the ten most recently updated unanswered discussions "
+            "in duckdb/duckdb, with title and category.",
+        },
+        {
+            "name": "discussion_conversation",
+            "prompt": "Using GitHub credentials, show up to ten comments on duckdb/duckdb's most recently "
+            "updated discussion, and up to ten replies to each comment, keeping the parent comment ID.",
+        },
+        {
+            "name": "project_contents",
+            "prompt": "List up to ten items for the first project returned for the github organization. "
+            "Include item content types and titles.",
+        },
+        {
+            "name": "project_field_definitions",
+            "prompt": "List up to twenty field definitions for the first project returned for the github "
+            "organization, including field IDs, names and types.",
         },
     ]
 )
@@ -340,13 +294,25 @@ _CATEGORIES = json.dumps(
             "description": "Rate-limit state for the credentials in use.",
             "keywords": ["rate limit", "quota", "authentication"],
         },
+        {
+            "name": "discussions",
+            "title": "Discussions",
+            "description": "Typed discussions, comments and replies with automatic GraphQL pagination.",
+            "keywords": ["discussions", "questions", "answers", "replies"],
+        },
+        {
+            "name": "projects",
+            "title": "Projects",
+            "description": "Projects, items and field definitions read through REST.",
+            "keywords": ["projects", "planning", "fields", "items"],
+        },
     ]
 )
 
 _CATALOG_TAGS = {
     "provider": "github",
     "domain": "software-development",
-    "vgi.title": "GitHub (read-only REST API)",
+    "vgi.title": "GitHub (read-only APIs)",
     "vgi.source_url": SOURCE_URL,
     "vgi.author": "Query Farm LLC <hello@query.farm>",
     "vgi.copyright": (
@@ -369,15 +335,23 @@ _CATALOG_TAGS = {
     "vgi.executable_examples": _EXECUTABLE_EXAMPLES,
     "vgi.agent_test_tasks": _AGENT_TEST_TASKS,
     "vgi.doc_llm": (
-        "Read-only access to GitHub's REST API as SQL: repositories, issues, pull requests, "
-        "comments, commits, releases, contributors, stargazers, languages and Actions runs. Reach "
+        "Read-only access to GitHub's APIs as SQL: repositories, issues, pull requests, "
+        "comments, commits, releases, contributors, stargazers, languages, Actions runs, Projects "
+        "and Discussions. Reach "
         "for it to answer questions about open-source projects — activity, health, who works on "
         "what, CI reliability. Start from search_repositories() when you do not know a repository's "
         "name; every per-repository function takes 'owner/name' and composes under LATERAL. A "
-        "token is optional but anonymous access is only 60 requests an hour."
+        "token is optional but anonymous access is only 60 requests an hour. "
+        "The main schema has curated typed tables. The rest schema covers the pinned GitHub.com "
+        "and Enterprise Cloud GET operations with complete response pages. The api schema "
+        "provides endpoint discovery, operation-ID dispatch and read-only GraphQL queries. "
+        "Prefer typed main functions: Projects uses REST and Discussions uses GraphQL with automatic paging."
     ),
     "vgi.doc_md": (
-        "GitHub's REST API, read-only, as SQL.\n\n"
+        "GitHub's REST and GraphQL APIs, read-only, as SQL.\n\n"
+        "Use `main` for curated typed tables, `rest` for all pinned REST GET operations, "
+        "and `api` for endpoint discovery and GraphQL queries. REST pages retain complete "
+        "JSON and binary bodies. GraphQL mutation documents are rejected before transport.\n\n"
         "### Key concepts\n\n"
         "- **A repository is written `'owner/name'`.** That one string is the key for everything "
         "repository-scoped, and every row that belongs to a repository carries it in a `repo` or "
@@ -387,7 +361,8 @@ _CATALOG_TAGS = {
         "repository or a login and are built to sit inside a correlated `LATERAL`.\n"
         "- **List functions are capped.** A function under `LATERAL` has to fetch everything for "
         "its input before it returns, so the keyed list functions take `max_rows`, default 100 — "
-        "one request per input row, newest first (stargazers are the exception: oldest first). "
+        "one page per input row. Discussion lists default to recently updated first; comments, replies "
+        "and Projects retain GitHub's connection/listing order. "
         "`max_rows => 0` fetches everything, up to 10,000 rows per input row. The two search "
         "functions stream instead, take no `max_rows`, and stop at GitHub's 1,000-result cap.\n"
         "- **Filter with arguments.** DuckDB applies a WHERE clause after the rows are fetched, "
@@ -410,21 +385,22 @@ _CATALOG_TAGS = {
 _SCHEMA_TAGS = {
     "provider": "github",
     "domain": "software-development",
-    "vgi.title": "GitHub REST API",
+    "vgi.title": "Typed GitHub Datasets",
     "vgi.categories": _CATEGORIES,
     "vgi.keywords": keywords("github", "repositories", "issues", "pull requests", "commits", "actions"),
     "vgi.example_queries": _EXAMPLE_QUERIES,
     "vgi.doc_llm": (
-        "The whole read-only GitHub surface in one schema. Discover with search_repositories() "
+        "Curated GitHub tables with typed columns. Discover with search_repositories() "
         "or search_issues(), then pass each repository's full_name ('owner/name') to the "
         "per-repository functions — under LATERAL to cover many repositories in one query. List "
-        "functions return at most max_rows (default 100) rows per input row, newest first "
-        "(stargazers: oldest first); search functions stream instead and stop at 1,000 results; filter "
+        "functions return at most max_rows (default 100) rows per input row; check each function's "
+        "documented ordering. Projects use REST and Discussions use automatically paged GraphQL. "
+        "Search functions stream instead and stop at 1,000 results; filter "
         "with their named arguments (state =>, since =>, ...) rather than WHERE, which only sees "
         "fetched rows. Set max_rows => 0 for complete history."
     ),
     "vgi.doc_md": (
-        "One schema holding the read-only GitHub surface.\n\n"
+        "Typed datasets from GitHub's read-only REST and GraphQL APIs.\n\n"
         "### Finding your way in\n\n"
         "If you know the repository, call its function directly: `issues('duckdb/duckdb')`. If "
         "you do not, `search_repositories()` finds it, and its `full_name` column feeds every "
@@ -481,12 +457,12 @@ _RATE_LIMIT_DOCS = docs(
 _GITHUB_CATALOG = Catalog(
     name="github",
     default_schema="main",
-    comment="Read-only GitHub data: repositories, issues, pull requests, commits, releases, people, Actions",
+    comment="Read-only GitHub: repositories, issues, PRs, code, people, Actions, Projects and Discussions",
     tags=_CATALOG_TAGS,
     schemas=[
         Schema(
             path=["main"],
-            comment="GitHub REST API — anonymous or token-authenticated",
+            comment="Typed GitHub REST and GraphQL datasets; Discussions requires credentials",
             tags=_SCHEMA_TAGS,
             functions=list(_FUNCTIONS),
             tables=[
@@ -500,6 +476,87 @@ _GITHUB_CATALOG = Catalog(
                     not_null=("resource",),
                     cardinality_estimate=12,
                 ),
+            ],
+        ),
+        Schema(
+            path=["rest"],
+            comment="All documented GitHub.com and Enterprise Cloud REST GET operations; complete responses",
+            tags=docs(
+                llm="One function per documented GET operation. Discover signatures in api.endpoints. "
+                "Path parameters are positional; query is a JSON object of filters. "
+                "Each row preserves an entire response page in data (JSON text) and body (`BLOB`).",
+                md="### Complete REST responses\n\n"
+                "Generated from a pinned official OpenAPI description. No write operations. "
+                "Default `max_pages=1`; use `max_pages=0` to follow all Link pages, bounded at 100.\n\n"
+                "GitHub's permissions, product availability and data limits still apply. "
+                "Use the endpoint inventory to find operations and all supported query parameters.",
+                example_queries=examples(
+                    (
+                        "Discover available REST reads",
+                        "SELECT operation_id, path FROM github.api.endpoints WHERE category = 'pulls'",
+                    )
+                ),
+                extra={
+                    "provider": "github",
+                    "vgi.title": "Complete REST Reads",
+                    "vgi.keywords": keywords("REST", "GitHub", "OpenAPI", "read-only", "downloads"),
+                    "vgi.categories": json.dumps(
+                        [{"name": "rest", "description": "Documented REST GET operations"}]
+                    ),
+                },
+            ),
+            functions=REST_FUNCTIONS,
+        ),
+        Schema(
+            path=["api"],
+            comment="Read-only API discovery, REST operation dispatch and GraphQL queries",
+            tags=docs(
+                llm="Discover reads with endpoints; call rest(operation_id, path_parameters, query => JSON) "
+                "or graphql(query, variables). GraphQL mutations are rejected before sending.",
+                md="### API discovery and queries\n\n"
+                "The endpoint inventory is local. REST returns complete response pages, "
+                "preserving nested fields, media types and binary downloads.\n\n"
+                "GraphQL executes query operations only; pagination uses explicit cursor variables. "
+                "Mutation documents and REST write operations are rejected before network access.",
+                example_queries=examples(
+                    (
+                        "Discover available REST reads",
+                        "SELECT operation_id, path FROM github.api.endpoints WHERE category = 'pulls'",
+                    )
+                ),
+                extra={
+                    "provider": "github",
+                    "vgi.title": "API Discovery and GraphQL",
+                    "vgi.keywords": keywords("API", "REST", "GraphQL", "endpoints", "query"),
+                    "vgi.categories": json.dumps(
+                        [
+                            {"name": "rest", "description": "Documented REST GET operations"},
+                            {"name": "graphql", "description": "Read-only GraphQL queries"},
+                        ]
+                    ),
+                },
+            ),
+            functions=[RestFunction, GraphQLFunction, EndpointsFunction],
+            tables=[
+                Table(
+                    name="endpoints",
+                    function=EndpointsFunction,
+                    comment="Pinned inventory of all documented GitHub REST GET operations",
+                    tags={
+                        **EndpointsFunction.Meta.tags,
+                        "vgi.example_queries": examples(
+                            (
+                                "Discover PR reads",
+                                "SELECT operation_id, path FROM github.api.endpoints "
+                                "WHERE category = 'pulls'",
+                            )
+                        ),
+                    },
+                    column_comments=column_comments(ENDPOINT_SCHEMA),
+                    primary_key=(("operation_id",),),
+                    not_null=("operation_id",),
+                    cardinality_estimate=len(REST_FUNCTIONS),
+                )
             ],
         ),
     ],
@@ -516,8 +573,24 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
 
     catalog = _GITHUB_CATALOG
     catalog_name = _GITHUB_CATALOG.name
+    # ReadOnlyCatalogInterface enables the single-RPC catalog_contents API.
+    # SchemaInfo embeds our per-attach auth/token_source/cache_ttl payload, so
+    # its serialized snapshot must not be reused across different attaches.
+    catalog_contents_attach_independent = False
     secret_types = [auth.SECRET_SPEC]
     attach_option_specs = [
+        AttachOptionSpec(
+            name="reporting",
+            desc="Reporting: complete validated keyed listings with max_rows=0; no result caching.",
+            type=pa.bool_(),
+            default=False,
+        ),
+        AttachOptionSpec(
+            name="operation_timeout_seconds",
+            desc="Reporting operation deadline across a blended input batch, in seconds (1..3600).",
+            type=pa.int64(),
+            default=120,
+        ),
         AttachOptionSpec(
             name="cache_ttl",
             desc="Default result cache seconds; 0 uses GitHub policy. Per-call cache_ttl overrides this.",
@@ -557,6 +630,12 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
         back to every ``process()`` as ``attach_opaque_data`` — the only route
         an ATTACH-time choice has into a function body.
         """
+        reporting = options.get("reporting", False)
+        if not isinstance(reporting, bool):
+            raise ValueError("ATTACH option reporting must be a boolean")
+        timeout = options.get("operation_timeout_seconds", 120)
+        if isinstance(timeout, bool) or not isinstance(timeout, int) or not 1 <= timeout <= 3600:
+            raise ValueError("ATTACH option operation_timeout_seconds must be an integer from 1 to 3600")
         cache_ttl = options.get("cache_ttl", 0)
         if isinstance(cache_ttl, bool) or not isinstance(cache_ttl, int) or cache_ttl < 0:
             raise ValueError("ATTACH option cache_ttl must be a non-negative integer number of seconds")
@@ -579,9 +658,23 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
         result = super().catalog_attach(name=name, options=options, **kwargs)
         return replace(
             result,
-            attach_opaque_data=AttachOpaqueData(auth.encode_attach(mode, source, cache_ttl)),
+            attach_opaque_data=AttachOpaqueData(
+                auth.encode_attach(
+                    mode, source, cache_ttl, reporting=reporting, operation_timeout_seconds=timeout
+                )
+            ),
             attach_opaque_data_required=True,
+            tags={
+                **result.tags,
+                "vgi_github_reporting": str(reporting).lower(),
+                "vgi_github_operation_timeout_seconds": str(timeout),
+                "vgi_github_api_origin": github_api.base_url(),
+            },
         )
+
+    def catalog_version(self, **kwargs: Any) -> int:
+        """Match the frozen version advertised by the read-only attach result."""
+        return 1
 
     def catalogs(self) -> list[CatalogInfo]:
         """Advertise the single read-only GitHub catalog."""

@@ -50,7 +50,7 @@ from vgi.table_function import BindParams, ProcessParams
 from vgi.table_in_out_function import RowTransformFunction
 from vgi_rpc.rpc import OutputCollector
 
-from vgi_github import auth
+from vgi_github import auth, reporting
 from vgi_github import github_api as api
 from vgi_github.auth import Credentials
 from vgi_github.caching import result_cache_control
@@ -110,6 +110,7 @@ def _fan_out(
     fetch: Fetch,
     *,
     cache_ttl: int | None,
+    function_name: str,
 ) -> None:
     """Fetch every input row's rows and emit them as one 1->N batch with provenance.
 
@@ -123,23 +124,32 @@ def _fan_out(
     """
     keys = list(zip(*(batch.column(name).to_pylist() for name in columns), strict=True))
     hint = CacheHint()
-    credentials = auth.for_call(params.secrets, params.attach_opaque_data)
     fetched: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
     rows: list[dict[str, Any]] = []
     parents: list[int] = []
-    with api.reporting_to(emitter(out)):
+    with api.reporting_operation(params.attach_opaque_data), api.reporting_to(emitter(out)):
+        if auth.reporting_of(params.attach_opaque_data) and getattr(params.args, "max_rows", 0) != 0:
+            raise api.GitHubReportingError(
+                "Reporting listings require max_rows => 0; row truncation is not allowed"
+            )
+        credentials = auth.for_call(params.secrets, params.attach_opaque_data)
         for index, key in enumerate(keys):
+            api.remaining_time()
             if any(part is None for part in key):
+                if api.reporting_enabled():
+                    raise api.GitHubReportingError("GitHub reporting source keys must not be NULL")
                 continue
             if key not in fetched:
-                fetched[key] = fetch(key[0] if len(key) == 1 else key, hint, credentials)
+                found = fetch(key[0] if len(key) == 1 else key, hint, credentials)
+                reporting.validate_rows(function_name, found)
+                fetched[key] = found
             found = fetched[key]
             rows.extend(found)
             parents.extend([index] * len(found))
-    cache_control = result_cache_control(hint, cache_ttl, params.attach_opaque_data, per_value=True)
-    cast("VgiOutputCollector", out).emit(
-        batch_from_rows(rows, params.output_schema), parent_rows=parents, cache_control=cache_control
-    )
+        cache_control = result_cache_control(hint, cache_ttl, params.attach_opaque_data, per_value=True)
+        result = batch_from_rows(rows, params.output_schema)
+        api.remaining_time()
+        cast("VgiOutputCollector", out).emit(result, parent_rows=parents, cache_control=cache_control)
 
 
 # ==========================================================================
@@ -224,7 +234,9 @@ class RepoFunction(RowTransformFunction[RepoArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[RepoArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -234,7 +246,9 @@ class RepoFunction(RowTransformFunction[RepoArgs]):
             found = api.lookup(api.repo_path(repo), hint=hint, credentials=credentials)
             return [flatten_repo(found)] if found else []
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl)
+        _fan_out(
+            params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl, function_name=cls.Meta.name
+        )
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
@@ -313,7 +327,9 @@ class UserFunction(RowTransformFunction[LoginArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[LoginArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -323,7 +339,9 @@ class UserFunction(RowTransformFunction[LoginArgs]):
             found = api.lookup(f"/users/{api.segment(str(login))}", hint=hint, credentials=credentials)
             return [flatten_user(found)] if found else []
 
-        _fan_out(params, batch, out, ["login"], fetch, cache_ttl=params.args.cache_ttl)
+        _fan_out(
+            params, batch, out, ["login"], fetch, cache_ttl=params.args.cache_ttl, function_name=cls.Meta.name
+        )
 
 
 # ==========================================================================
@@ -429,7 +447,9 @@ class ReposFunction(RowTransformFunction[ReposArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[ReposArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -451,7 +471,7 @@ class ReposFunction(RowTransformFunction[ReposArgs]):
             )
             return [flatten_repo(r) for r in found]
 
-        _fan_out(params, batch, out, ["owner"], fetch, cache_ttl=args.cache_ttl)
+        _fan_out(params, batch, out, ["owner"], fetch, cache_ttl=args.cache_ttl, function_name=cls.Meta.name)
 
 
 # ==========================================================================
@@ -576,7 +596,9 @@ class IssuesFunction(RowTransformFunction[IssuesArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[IssuesArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -603,7 +625,7 @@ class IssuesFunction(RowTransformFunction[IssuesArgs]):
             )
             return [flatten_issue(i, repo) for i in found]
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=args.cache_ttl)
+        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=args.cache_ttl, function_name=cls.Meta.name)
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
@@ -697,7 +719,9 @@ class PullsFunction(RowTransformFunction[PullsArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[PullsArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -719,9 +743,10 @@ class PullsFunction(RowTransformFunction[PullsArgs]):
                 hint=hint,
                 credentials=credentials,
             )
+            reporting.validate_pull_payloads(found)
             return [flatten_pull(p, repo) for p in found]
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=args.cache_ttl)
+        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=args.cache_ttl, function_name=cls.Meta.name)
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
@@ -807,7 +832,9 @@ class IssueCommentsFunction(RowTransformFunction[IssueCommentsArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[IssueCommentsArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -831,7 +858,15 @@ class IssueCommentsFunction(RowTransformFunction[IssueCommentsArgs]):
             )
             return [flatten_issue_comment(c, repo, number) for c in found]
 
-        _fan_out(params, batch, out, ["repo", "number"], fetch, cache_ttl=args.cache_ttl)
+        _fan_out(
+            params,
+            batch,
+            out,
+            ["repo", "number"],
+            fetch,
+            cache_ttl=args.cache_ttl,
+            function_name=cls.Meta.name,
+        )
 
 
 # ==========================================================================
@@ -949,7 +984,9 @@ class CommitsFunction(RowTransformFunction[CommitsArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[CommitsArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -974,7 +1011,7 @@ class CommitsFunction(RowTransformFunction[CommitsArgs]):
             )
             return [flatten_commit(c, repo) for c in found]
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=args.cache_ttl)
+        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=args.cache_ttl, function_name=cls.Meta.name)
 
 
 @dataclass(slots=True, frozen=True, kw_only=True)
@@ -1056,7 +1093,9 @@ class ReleasesFunction(RowTransformFunction[RepoListArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[RepoListArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -1068,9 +1107,12 @@ class ReleasesFunction(RowTransformFunction[RepoListArgs]):
             found = api.collect(
                 f"{api.repo_path(repo)}/releases", limit=limit, hint=hint, credentials=credentials
             )
+            reporting.validate_release_payloads(found)
             return [flatten_release(r, repo) for r in found]
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl)
+        _fan_out(
+            params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl, function_name=cls.Meta.name
+        )
 
 
 class ContributorsFunction(RowTransformFunction[RepoListArgs]):
@@ -1132,7 +1174,9 @@ class ContributorsFunction(RowTransformFunction[RepoListArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[RepoListArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -1146,7 +1190,9 @@ class ContributorsFunction(RowTransformFunction[RepoListArgs]):
             )
             return [flatten_contributor(c, repo) for c in found]
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl)
+        _fan_out(
+            params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl, function_name=cls.Meta.name
+        )
 
 
 class LanguagesFunction(RowTransformFunction[RepoArgs]):
@@ -1206,7 +1252,9 @@ class LanguagesFunction(RowTransformFunction[RepoArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[RepoArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -1214,9 +1262,12 @@ class LanguagesFunction(RowTransformFunction[RepoArgs]):
     ) -> None:
         def fetch(repo: str, hint: CacheHint, credentials: Credentials | None) -> list[dict[str, Any]]:
             found = api.lookup(f"{api.repo_path(repo)}/languages", hint=hint, credentials=credentials)
+            reporting.validate_languages(found)
             return flatten_languages(found, repo)
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl)
+        _fan_out(
+            params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl, function_name=cls.Meta.name
+        )
 
 
 class StargazersFunction(RowTransformFunction[RepoListArgs]):
@@ -1282,7 +1333,9 @@ class StargazersFunction(RowTransformFunction[RepoListArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[RepoListArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -1321,7 +1374,9 @@ class StargazersFunction(RowTransformFunction[RepoListArgs]):
                 raise
             return [flatten_stargazer(s, repo) for s in found]
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl)
+        _fan_out(
+            params, batch, out, ["repo"], fetch, cache_ttl=params.args.cache_ttl, function_name=cls.Meta.name
+        )
 
 
 # ==========================================================================
@@ -1426,7 +1481,9 @@ class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):
 
     @classmethod
     def on_bind(cls, params: BindParams[WorkflowRunsArgs]) -> BindResponse:
-        return BindResponse(output_schema=cls.FIXED_SCHEMA)
+        return BindResponse(
+            output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+        )
 
     @classmethod
     def process(
@@ -1454,7 +1511,7 @@ class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):
             )
             return [flatten_workflow_run(w, repo) for w in found]
 
-        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=args.cache_ttl)
+        _fan_out(params, batch, out, ["repo"], fetch, cache_ttl=args.cache_ttl, function_name=cls.Meta.name)
 
 
 KEYED_FUNCTIONS: list[type] = [

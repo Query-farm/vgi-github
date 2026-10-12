@@ -8,7 +8,7 @@
 
 <p align="center">
   Query <a href="https://github.com">GitHub</a> with SQL in DuckDB — repositories, issues, pull requests,<br>
-  commits, releases, contributors and CI runs.<br>
+  commits, releases, contributors, CI runs, Projects and Discussions.<br>
   A <strong>read-only</strong> <a href="https://query.farm/vgi/">VGI</a> worker, built by <a href="https://query.farm">🚜 Query.Farm</a>
 </p>
 
@@ -25,6 +25,11 @@ Ask GitHub questions in SQL and get tables back: compare projects, triage issues
 fast pull requests get merged, see who contributes, track releases and CI health — across one
 repository or a whole organization in a single query. It only ever reads; it never changes
 anything on GitHub.
+
+For approved business definitions, typed named reports and strict SQL, use the
+[Crossfield semantic model](models/README.md). It covers the original 15 `main` functions,
+including PR merge durations, issue state, CI reliability and complete detail
+schemas. It requires the matching patched DuckDB 2.0 and native VGI build.
 
 ## Get started
 
@@ -170,9 +175,162 @@ Repositories are always written `'owner/name'`, and accounts by their login.
 | `languages('owner/name')` | How much code is in each language |
 | `stargazers('owner/name')` | Who starred and when (repositories you administer only) |
 | `workflow_runs('owner/name')` | GitHub Actions runs and their outcomes |
+| `discussions('owner/name')` | Typed discussions, categories, answer state and counts; GraphQL |
+| `discussion_comments('owner/name', number)` | Top-level discussion comments; GraphQL |
+| `discussion_replies(node_id)` | Replies to a discussion comment; GraphQL |
+| `projects(owner)` | Projects v2 owned by an organization or user; REST |
+| `project_items(owner, number)` | Project items with typed issue, PR and draft content; REST |
+| `project_fields(owner, number)` | Project field IDs, names, types and options; REST |
 | `rate_limit` | How many API requests you have left |
 
 Every column is documented — `DESCRIBE github.issues('duckdb/duckdb')` shows what each one means.
+
+### Discussions and Projects as SQL tables
+
+Use these typed functions for everyday queries. They select the appropriate API and follow
+pagination automatically; no GraphQL document or cursor handling is needed in SQL.
+Discussions require GitHub credentials with access to the repository.
+
+```sql
+-- GitHub filters before the cap; most recently updated first by default
+SELECT number, title, category_name, comments, upvote_count
+FROM github.discussions('duckdb/duckdb', answered => false, max_rows => 20);
+
+-- Comments on the five most recently updated discussions
+SELECT d.title, c.node_id, c.user_login, c.body, c.replies
+FROM github.discussions('duckdb/duckdb', max_rows => 5) d,
+     LATERAL github.discussion_comments(d.repo, d.number, max_rows => 20) c;
+
+-- Read a comment's replies with its node_id, preserving the parent link
+SELECT reply_to_id, user_login, body
+FROM github.discussion_replies('COMMENT_NODE_ID', max_rows => 100);
+
+-- Organization Projects use REST
+SELECT p.title AS project_title, i.content_type, i.title, i.state
+FROM github.projects('github', query => 'is:open', max_rows => 5) p,
+     LATERAL github.project_items(p.owner, p.number, max_rows => 100) i;
+
+-- For personal projects use owner_type => 'user' on each function
+SELECT number, title FROM github.projects('octocat', owner_type => 'user');
+
+-- Discover custom field IDs, then select the values needed
+SELECT id, name, data_type, options_json
+FROM github.project_fields('OWNER', 7);
+
+SELECT title, fields_json
+FROM github.project_items('OWNER', 7, fields => '123,456');
+```
+
+All six functions default to 100 rows **per input key**. `max_rows => 0` follows every page,
+bounded at 100 pages; if more remain the query fails. Discussion sorting supports
+`sort => 'created'` or `'updated'` and `direction => 'asc'` or `'desc'`. Comments and replies
+are separate connections with separate caps, in GitHub's connection order. Project listing
+order is controlled by GitHub. Use the owner's project **number**, not the global project ID.
+
+Project items retain rows with inaccessible content, with NULL content columns. Custom fields
+vary by project, so their values remain in `fields_json`; without `fields`, GitHub returns only
+the title field. `project_fields` provides the IDs, types, select options and iteration settings.
+Errors, including permission failures and partial GraphQL errors, fail the query.
+The six new datasets are not approved Crossfield sources and reject `reporting true`.
+
+REST is the default for new typed datasets when it supplies the data. GraphQL fills coverage
+gaps such as Discussions; the SQL interface remains typed either way. GitHub documents both
+[Projects REST reads](https://docs.github.com/en/rest/projects) and
+[Discussions GraphQL reads](https://docs.github.com/en/graphql/guides/using-the-graphql-api-for-discussions).
+
+### Full read-only API coverage
+
+The `main` functions above provide convenient typed tables. The `rest` schema additionally
+exposes **780 distinct GET operations** from the pinned GitHub.com and Enterprise Cloud
+OpenAPI descriptions (644 and 770 operations respectively, with overlap). This includes
+reviews, files, branches, Actions jobs/logs/artifacts, checks, deployments, security alerts,
+organization membership, enterprise administration, billing, packages and the other REST reads.
+
+Discover operations, path arguments and query parameters without making an API request:
+
+```sql
+SELECT operation_id, function_name, path, parameters
+FROM github.api.endpoints
+WHERE category IN ('pulls', 'actions', 'code-scanning');
+```
+
+Function names come from GitHub's operation IDs with `/` and `-` replaced by `_`.
+Path placeholders become positional arguments in their path order. Optional filters go in
+the `query` JSON object. Each result row represents **one complete response page**, with
+`data` containing the original JSON text, `body` containing the exact bytes, and
+`status_code`, `content_type`, `page_number` and `next_url` describing the response.
+Nested fields and large integer identifiers are preserved.
+
+```sql
+-- Reviews on one PR, expanded into ordinary SQL rows
+SELECT review.value ->> 'state' AS review_state,
+       review.value -> 'user' ->> 'login' AS reviewer
+FROM github.rest.pulls_list_reviews('duckdb', 'duckdb', 1, max_pages => 0) page,
+     LATERAL json_each(page.data) review;
+
+-- Full PR details, including fields absent from the curated PR listing
+SELECT data::JSON ->> 'mergeable_state', data::JSON ->> 'additions'
+FROM github.rest.pulls_get('duckdb', 'duckdb', 1);
+
+-- Private repositories accessible to the authenticated user
+SELECT data
+FROM github.rest.repos_list_for_authenticated_user(
+  query => '{"visibility":"private","per_page":100}', max_pages => 0);
+
+-- Every REST read is also available through the operation-ID dispatcher
+SELECT data
+FROM github.api.rest('actions/list-jobs-for-workflow-run',
+  '{"owner":"OWNER","repo":"REPO","run_id":123}', query => '{"filter":"all"}');
+
+-- Binary downloads and alternate media types use the same interface
+SELECT body
+FROM github.rest.pulls_get('duckdb', 'duckdb', 1, accept => 'application/vnd.github.diff');
+```
+
+The default is one page. A non-NULL `next_url` on the final row means more pages exist.
+`max_pages => 0` follows all advertised next links, failing if the 100-page limit is reached.
+GitHub's own search caps, tree truncation and endpoint-specific limits still apply; requesting
+all pages cannot recover data GitHub does not serve. Complete search/tree requests reject
+explicitly incomplete responses. Query parameters such as `page`, `before` and `after` can
+also be supplied when supported by the endpoint. These raw response pages are not approved
+Crossfield reporting sources; the semantic model continues to use its original 15 `main` sources.
+
+Missing or forbidden resources raise errors. For endpoints where 404 is a useful negative
+answer, such as membership checks, use `allow_not_found => true` and inspect `status_code`.
+Some reads require specific token permissions or an Enterprise subscription. The generated
+catalog uses API version `2026-03-10`; override `api_version` for a compatible Enterprise
+Server. The inventory covers the pinned cloud specifications, not every historical
+Enterprise Server release or future API addition.
+
+The [API coverage workflow](.github/workflows/api-coverage.yml) checks upstream weekly and
+reports added, removed or changed GET operations. It has read-only permissions and creates no
+commits or pull requests. Maintainers can refresh the local snapshot with
+`python scripts/generate_rest_catalog.py --revision latest`, review the diff and run the tests.
+`--check-upstream` checks for drift without modifying files. The request API version remains
+pinned unless explicitly updated with `--api-version`.
+
+### Read-only GraphQL
+
+`github.api.graphql(query, variables)` exposes all GraphQL query fields, including Discussions
+and Projects. Both arguments support `LATERAL`; variables are a JSON object. Use
+`operation_name => 'Name'` when a document contains multiple queries.
+
+```sql
+SELECT data::JSON -> 'data' -> 'repository' -> 'discussions'
+FROM github.api.graphql(
+  'query($owner:String!, $name:String!) {
+     repository(owner:$owner, name:$name) {
+       discussions(first:10) { nodes { number title } pageInfo { hasNextPage endCursor } }
+     }
+   }',
+  '{"owner":"OWNER","name":"REPO"}');
+```
+
+Pagination is explicit: pass each connection's `endCursor` back through an `after` variable.
+GraphQL responses containing errors fail the query, including partial-data responses.
+GraphQL uses GitHub's required HTTP POST transport, but a real GraphQL parser rejects
+**all mutations and subscriptions before network access**, even unselected operations in
+the same document. REST remains GET-only. No GitHub write operation is available.
 
 ## Good to know
 

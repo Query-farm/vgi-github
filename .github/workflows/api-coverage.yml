@@ -1,0 +1,28 @@
+name: API coverage drift
+
+on:
+  schedule:
+    - cron: "41 8 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - scripts/generate_rest_catalog.py
+      - vgi_github/rest_manifest.json
+      - .github/workflows/api-coverage.yml
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Verify reproducible pinned catalog
+        run: python3 scripts/generate_rest_catalog.py --check
+      - name: Check upstream read coverage
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/generate_rest_catalog.py --check-upstream

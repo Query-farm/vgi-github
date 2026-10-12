@@ -19,7 +19,23 @@ cannot share one name in a schema.\
 """ },
 ]
 
+[options]
+# These declarations mirror GitHub's upstream operation IDs; the API inventory
+# provides category/path filtering across the intentionally exhaustive surface.
+max_functions = 1000
+max_schema_objects = 1000
+max_function_name_length = 128
+# Actions jobs have numeric IDs; enterprise vulnerability-sync jobs use strings.
+type_consistency_ignore_names = ["job_id"]
+
 [per-object]
+"github.rest.*" = { ignore = [
+  { code = "VGI511", kind = "domain-exemption", reason = "Generated upstream API bindings require caller-specific resource IDs, permissions and products. Official endpoint examples are linked in each declaration; all generated routes are tested offline and representative calls are tested through SQL." },
+  { code = "VGI520", kind = "domain-exemption", reason = "The exhaustive generated API surface is not a curated analytical task set. Agent tasks cover discovery and generic dispatch; all generated operations have transport tests." },
+] }
+"github.api.*endpoints" = { ignore = [
+  { code = "VGI327", kind = "domain-exemption", reason = "This is the pinned upstream OpenAPI inventory used by api.rest dispatch, including HTTP paths, operation IDs, query parameter schemas and product availability that duckdb_functions does not supply." },
+] }
 # GitHub lists a repository's stargazers only to tokens that administer it, so
 # no task can be written that every agent's credentials can complete; a task
 # against someone else's repository would be graded on an error.

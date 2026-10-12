@@ -1,0 +1,2825 @@
+{
+  "format": "vgi-github.semantic-source-inventory",
+  "version": 1,
+  "provenance": {
+    "method": "Static AST extraction; no worker imports or execution. Semantic grain/classification recommendations authored separately.",
+    "native_argument_mapping": {
+      "str": "VARCHAR",
+      "int": "BIGINT",
+      "bool": "BOOLEAN"
+    },
+    "source_nullability": "Preserves Arrow declarations. required_nonnull_columns are proposed reporting requirements, not claims about current worker validation."
+  },
+  "functions": [
+    {
+      "name": "repo",
+      "dataset": "repo",
+      "schema": "main",
+      "class": "RepoFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 175,
+      "description": "One GitHub repository by 'owner/name'",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name', e.g. 'duckdb/duckdb'"
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "REPO_SCHEMA",
+      "result_columns": [
+        {
+          "name": "full_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository as 'owner/name' \u2014 the key every per-repository function takes."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's numeric repository id; survives renames and transfers."
+        },
+        {
+          "name": "owner_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the user or organization that owns the repository."
+        },
+        {
+          "name": "owner_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Whether the owner is a 'User' or an 'Organization'."
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository name without the owner."
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The one-line description shown on the repository page."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the repository on github.com."
+        },
+        {
+          "name": "homepage",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Project website the owner configured, if any."
+        },
+        {
+          "name": "language",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Dominant language by bytes, as GitHub's linguist detects it."
+        },
+        {
+          "name": "topics",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Topic tags the owner applied, e.g. ['database', 'sql']."
+        },
+        {
+          "name": "license_spdx_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "SPDX identifier of the detected license, e.g. 'MIT'."
+        },
+        {
+          "name": "visibility",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'public', 'private' or 'internal'."
+        },
+        {
+          "name": "is_private",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is private."
+        },
+        {
+          "name": "is_fork",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether this repository is a fork of another."
+        },
+        {
+          "name": "is_archived",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is archived (read-only)."
+        },
+        {
+          "name": "is_template",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is a template for new repositories."
+        },
+        {
+          "name": "default_branch",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Branch commits() lists when no sha is given, e.g. 'main'."
+        },
+        {
+          "name": "stargazers_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of users who starred the repository."
+        },
+        {
+          "name": "forks_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of forks."
+        },
+        {
+          "name": "open_issues_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Open issues PLUS open pull requests \u2014 GitHub counts both here, so this is not the open-issue count alone."
+        },
+        {
+          "name": "watchers_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Despite the name, GitHub reports the stargazer count here; kept for fidelity. Use stargazers_count."
+        },
+        {
+          "name": "size_kb",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Repository size on disk in kilobytes, as GitHub measures it."
+        },
+        {
+          "name": "has_issues",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the issue tracker is enabled."
+        },
+        {
+          "name": "has_wiki",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the wiki is enabled."
+        },
+        {
+          "name": "has_discussions",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether GitHub Discussions is enabled."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the repository was created."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the repository object last changed (including stars); not a code-activity signal."
+        },
+        {
+          "name": "pushed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When a commit was last pushed to any branch; the activity signal."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {},
+      "nested_detail_columns": [
+        "topics"
+      ],
+      "recommended_metrics": {
+        "repository_count": "COUNT(*)",
+        "repository_stars": "SUM(repo.stargazers_count)",
+        "repository_forks": "SUM(repo.forks_count)",
+        "open_issues_and_pulls": "SUM(repo.open_issues_count)",
+        "repository_size_kb": "SUM(repo.size_kb)"
+      },
+      "recommended_computed_fields": {},
+      "caveats": [
+        "open_issues_count includes PRs; watchers_count duplicates stars and must not become a separate watcher metric.",
+        "Current snapshot counts must not be summed over repeated captures.",
+        "Redirected repository full_name can differ from the input name."
+      ],
+      "recommended_dimensions": [
+        "full_name",
+        "id",
+        "owner_login",
+        "owner_type",
+        "name",
+        "language",
+        "license_spdx_id",
+        "visibility",
+        "is_private",
+        "is_fork",
+        "is_archived",
+        "is_template",
+        "default_branch",
+        "stargazers_count",
+        "forks_count",
+        "open_issues_count",
+        "watchers_count",
+        "size_kb",
+        "has_issues",
+        "has_wiki",
+        "has_discussions",
+        "created_at",
+        "updated_at",
+        "pushed_at"
+      ]
+    },
+    {
+      "name": "user",
+      "dataset": "user",
+      "schema": "main",
+      "class": "UserFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 265,
+      "description": "One GitHub user or organization profile by login",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "User or organization login, e.g. 'torvalds' or 'duckdb'"
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "USER_SCHEMA",
+      "result_columns": [
+        {
+          "name": "login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The account's handle \u2014 the key user() and repos() take."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's numeric account id; survives a login rename."
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'User', 'Organization' or 'Bot'."
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Display name, if set."
+        },
+        {
+          "name": "company",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Free-text company field, if set."
+        },
+        {
+          "name": "blog",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Website the account lists, if any."
+        },
+        {
+          "name": "location",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Free-text location, if set."
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Public email, if the account chose to publish one."
+        },
+        {
+          "name": "bio",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Profile bio, if set."
+        },
+        {
+          "name": "twitter_username",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "X/Twitter handle, if set."
+        },
+        {
+          "name": "public_repos",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of public repositories the account owns."
+        },
+        {
+          "name": "public_gists",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of public gists."
+        },
+        {
+          "name": "followers",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of followers."
+        },
+        {
+          "name": "following",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of accounts this one follows."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the profile on github.com."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the account was created."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the profile last changed."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "snapshot_detail",
+      "complete_reporting_arguments": {},
+      "nested_detail_columns": [],
+      "recommended_metrics": {},
+      "recommended_computed_fields": {},
+      "caveats": [
+        "Profile values can be NULL.",
+        "Followers/following are account relationship counts, not unique people across accounts."
+      ],
+      "recommended_dimensions": [
+        "login",
+        "id",
+        "type",
+        "name",
+        "company",
+        "location",
+        "twitter_username",
+        "public_repos",
+        "public_gists",
+        "followers",
+        "following",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "repos",
+      "dataset": "repos",
+      "schema": "main",
+      "class": "ReposFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 380,
+      "description": "Repositories owned by a GitHub user or organization",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "owner",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "User or organization login whose repositories to list"
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "owner",
+          "description": "Which repositories: owner (default), member or all",
+          "choices": [
+            "owner",
+            "member",
+            "all"
+          ]
+        },
+        {
+          "name": "sort",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "pushed",
+          "description": "Order before max_rows applies: pushed (default), updated, created or full_name",
+          "choices": [
+            "pushed",
+            "updated",
+            "created",
+            "full_name"
+          ]
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "REPO_SCHEMA",
+      "result_columns": [
+        {
+          "name": "full_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository as 'owner/name' \u2014 the key every per-repository function takes."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's numeric repository id; survives renames and transfers."
+        },
+        {
+          "name": "owner_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the user or organization that owns the repository."
+        },
+        {
+          "name": "owner_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Whether the owner is a 'User' or an 'Organization'."
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository name without the owner."
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The one-line description shown on the repository page."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the repository on github.com."
+        },
+        {
+          "name": "homepage",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Project website the owner configured, if any."
+        },
+        {
+          "name": "language",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Dominant language by bytes, as GitHub's linguist detects it."
+        },
+        {
+          "name": "topics",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Topic tags the owner applied, e.g. ['database', 'sql']."
+        },
+        {
+          "name": "license_spdx_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "SPDX identifier of the detected license, e.g. 'MIT'."
+        },
+        {
+          "name": "visibility",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'public', 'private' or 'internal'."
+        },
+        {
+          "name": "is_private",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is private."
+        },
+        {
+          "name": "is_fork",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether this repository is a fork of another."
+        },
+        {
+          "name": "is_archived",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is archived (read-only)."
+        },
+        {
+          "name": "is_template",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is a template for new repositories."
+        },
+        {
+          "name": "default_branch",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Branch commits() lists when no sha is given, e.g. 'main'."
+        },
+        {
+          "name": "stargazers_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of users who starred the repository."
+        },
+        {
+          "name": "forks_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of forks."
+        },
+        {
+          "name": "open_issues_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Open issues PLUS open pull requests \u2014 GitHub counts both here, so this is not the open-issue count alone."
+        },
+        {
+          "name": "watchers_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Despite the name, GitHub reports the stargazer count here; kept for fidelity. Use stargazers_count."
+        },
+        {
+          "name": "size_kb",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Repository size on disk in kilobytes, as GitHub measures it."
+        },
+        {
+          "name": "has_issues",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the issue tracker is enabled."
+        },
+        {
+          "name": "has_wiki",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the wiki is enabled."
+        },
+        {
+          "name": "has_discussions",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether GitHub Discussions is enabled."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the repository was created."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the repository object last changed (including stars); not a code-activity signal."
+        },
+        {
+          "name": "pushed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When a commit was last pushed to any branch; the activity signal."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0,
+        "type": "owner"
+      },
+      "nested_detail_columns": [
+        "topics"
+      ],
+      "recommended_metrics": {
+        "owned_repository_count": "COUNT(*)",
+        "owned_repository_stars": "SUM(repos.stargazers_count)",
+        "owned_repository_forks": "SUM(repos.forks_count)",
+        "owned_open_issues_and_pulls": "SUM(repos.open_issues_count)"
+      },
+      "recommended_computed_fields": {},
+      "caveats": [
+        "Use type=owner for an owned-repository inventory; member/all changes the population.",
+        "Overlapping owner calls can repeat the same repository; raw totals across calls can double-count."
+      ],
+      "recommended_dimensions": [
+        "full_name",
+        "id",
+        "owner_login",
+        "owner_type",
+        "name",
+        "language",
+        "license_spdx_id",
+        "visibility",
+        "is_private",
+        "is_fork",
+        "is_archived",
+        "is_template",
+        "default_branch",
+        "stargazers_count",
+        "forks_count",
+        "open_issues_count",
+        "watchers_count",
+        "size_kb",
+        "has_issues",
+        "has_wiki",
+        "has_discussions",
+        "created_at",
+        "updated_at",
+        "pushed_at"
+      ]
+    },
+    {
+      "name": "issues",
+      "dataset": "issues",
+      "schema": "main",
+      "class": "IssuesFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 513,
+      "description": "Issues in a GitHub repository, newest first",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name'"
+        },
+        {
+          "name": "state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "all",
+          "description": "open, closed or all (default). Filter here, not in WHERE: WHERE only sees fetched rows",
+          "choices": [
+            "open",
+            "closed",
+            "all"
+          ]
+        },
+        {
+          "name": "labels",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Comma-separated label names; an issue must carry all of them"
+        },
+        {
+          "name": "since",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Only issues updated at or after this instant, e.g. '2026-01-01'"
+        },
+        {
+          "name": "include_pull_requests",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "binding": "named",
+          "default": false,
+          "description": "Also return pull requests, which GitHub's issue listing mixes in"
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "ISSUE_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository the issue belongs to, as 'owner/name'."
+        },
+        {
+          "name": "number",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Issue number within the repository \u2014 what issue_comments() takes."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's globally unique issue id."
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Issue title."
+        },
+        {
+          "name": "state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'open' or 'closed'."
+        },
+        {
+          "name": "state_reason",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Why it is in its state: 'completed', 'not_planned', 'reopened' or 'duplicate'; NULL when unset."
+        },
+        {
+          "name": "user_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the account that opened the issue."
+        },
+        {
+          "name": "author_association",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The author's relationship to the repository: OWNER, MEMBER, COLLABORATOR, CONTRIBUTOR, FIRST_TIME_CONTRIBUTOR, FIRST_TIMER or NONE."
+        },
+        {
+          "name": "labels",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Names of the labels applied to the issue."
+        },
+        {
+          "name": "assignees",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Logins of everyone assigned to the issue."
+        },
+        {
+          "name": "milestone",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Title of the milestone the issue is filed under, if any."
+        },
+        {
+          "name": "comments",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of comments on the issue."
+        },
+        {
+          "name": "reactions_total",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Total reactions of every kind on the issue body."
+        },
+        {
+          "name": "reactions_plus_one",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Thumbs-up reactions \u2014 the usual 'me too' signal."
+        },
+        {
+          "name": "is_locked",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the conversation is locked."
+        },
+        {
+          "name": "is_pull_request",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether this row is a pull request. GitHub's issue APIs return both; issues() excludes pull requests by default, search_issues() includes them unless the query says is:issue."
+        },
+        {
+          "name": "body",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Issue body as Markdown."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the issue on github.com."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the issue was opened."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the issue last changed, including new comments."
+        },
+        {
+          "name": "closed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the issue was closed; NULL while open."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0,
+        "state": "all",
+        "include_pull_requests": false,
+        "labels": "",
+        "since": ""
+      },
+      "nested_detail_columns": [
+        "labels",
+        "assignees"
+      ],
+      "recommended_metrics": {
+        "issue_count": "COUNT(*)",
+        "open_issues": "COUNT(*) FILTER (WHERE issues.state = 'open')",
+        "closed_issues": "COUNT(*) FILTER (WHERE issues.state = 'closed')",
+        "issue_comments_total": "SUM(issues.comments)",
+        "issue_reactions": "SUM(issues.reactions_total)",
+        "mean_close_hours": "AVG(issues.close_hours) FILTER (WHERE issues.state = 'closed')"
+      },
+      "recommended_computed_fields": {
+        "close_hours": {
+          "type": "DOUBLE",
+          "expression": "DATEDIFF(millisecond, issues.created_at, issues.closed_at) / 3600000.0",
+          "unit": "hour",
+          "validation": "For current closed issues require finite non-NULL created_at/closed_at and closed_at >= created_at."
+        },
+        "created_day": {
+          "type": "DATE",
+          "expression": "CAST(issues.created_at AS DATE)"
+        },
+        "closed_day": {
+          "type": "DATE",
+          "expression": "CAST(issues.closed_at AS DATE)"
+        }
+      },
+      "caveats": [
+        "Set include_pull_requests=false; current open_issues backlog excludes PRs.",
+        "since is updated_at filtering, not created_at filtering.",
+        "Current state is not historical backlog or reopen history.",
+        "labels argument requires every specified label.",
+        "Closure duration includes waiting and reopened intervals; current closed state only."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "number",
+        "id",
+        "state",
+        "state_reason",
+        "user_login",
+        "author_association",
+        "milestone",
+        "comments",
+        "reactions_total",
+        "reactions_plus_one",
+        "is_locked",
+        "is_pull_request",
+        "created_at",
+        "updated_at",
+        "closed_at"
+      ]
+    },
+    {
+      "name": "pulls",
+      "dataset": "pulls",
+      "schema": "main",
+      "class": "PullsFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 647,
+      "description": "Pull requests in a GitHub repository, newest first",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name'"
+        },
+        {
+          "name": "state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "all",
+          "description": "open, closed or all (default). Filter here, not in WHERE: WHERE only sees fetched rows",
+          "choices": [
+            "open",
+            "closed",
+            "all"
+          ]
+        },
+        {
+          "name": "base",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Only pull requests targeting this branch"
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "PULL_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository the pull request targets, as 'owner/name'."
+        },
+        {
+          "name": "number",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Pull request number \u2014 shared with the issue namespace."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's globally unique pull request id."
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Pull request title."
+        },
+        {
+          "name": "state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'open' or 'closed'. A merged pull request is 'closed' \u2014 test merged_at IS NOT NULL for merged."
+        },
+        {
+          "name": "is_draft",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the pull request is a draft."
+        },
+        {
+          "name": "user_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the author."
+        },
+        {
+          "name": "author_association",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The author's relationship to the repository."
+        },
+        {
+          "name": "head_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Branch the changes come from."
+        },
+        {
+          "name": "head_repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository the head branch lives in ('owner/name'); differs for forks."
+        },
+        {
+          "name": "head_sha",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Commit at the tip of the head branch."
+        },
+        {
+          "name": "base_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Branch the changes would merge into."
+        },
+        {
+          "name": "labels",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Names of the labels applied."
+        },
+        {
+          "name": "assignees",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Logins of everyone assigned."
+        },
+        {
+          "name": "requested_reviewers",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Logins of reviewers still requested."
+        },
+        {
+          "name": "milestone",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Title of the milestone, if any."
+        },
+        {
+          "name": "merge_commit_sha",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The merge (or squash) commit once merged."
+        },
+        {
+          "name": "body",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Pull request description as Markdown."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the pull request on github.com."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the pull request was opened."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When it last changed."
+        },
+        {
+          "name": "closed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When it was closed or merged; NULL while open."
+        },
+        {
+          "name": "merged_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When it was merged; NULL if it was closed unmerged or is open."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0,
+        "state": "all",
+        "base": ""
+      },
+      "nested_detail_columns": [
+        "labels",
+        "assignees",
+        "requested_reviewers"
+      ],
+      "recommended_metrics": {
+        "pull_count": "COUNT(*)",
+        "open_pulls": "COUNT(*) FILTER (WHERE pulls.state = 'open')",
+        "open_draft_pulls": "COUNT(*) FILTER (WHERE pulls.state = 'open' AND pulls.is_draft = TRUE)",
+        "merged_pulls": "COUNT(*) FILTER (WHERE pulls.merged_at IS NOT NULL)",
+        "closed_unmerged_pulls": "COUNT(*) FILTER (WHERE pulls.state = 'closed' AND pulls.merged_at IS NULL)",
+        "mean_merge_hours": "AVG(pulls.merge_hours) FILTER (WHERE pulls.merged_at IS NOT NULL)",
+        "median_merge_hours": "MEDIAN(pulls.merge_hours) FILTER (WHERE pulls.merged_at IS NOT NULL)",
+        "p90_merge_hours": "PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY pulls.merge_hours) FILTER (WHERE pulls.merged_at IS NOT NULL)"
+      },
+      "recommended_computed_fields": {
+        "merge_hours": {
+          "type": "DOUBLE",
+          "expression": "DATEDIFF(millisecond, pulls.created_at, pulls.merged_at) / 3600000.0",
+          "unit": "hour",
+          "validation": "For merged rows require finite non-NULL created_at/merged_at and merged_at >= created_at."
+        },
+        "created_day": {
+          "type": "DATE",
+          "expression": "CAST(pulls.created_at AS DATE)"
+        },
+        "merged_day": {
+          "type": "DATE",
+          "expression": "CAST(pulls.merged_at AS DATE)"
+        }
+      },
+      "caveats": [
+        "Merge duration is elapsed creation-to-merge hours, including drafts and waiting; not review time, business hours or deployment lead time.",
+        "Use merge time UTC half-open [start_day,end_day) date intervals for merge reports.",
+        "Bots remain included; requested_reviewers lists outstanding requests, not actual reviews."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "number",
+        "id",
+        "state",
+        "is_draft",
+        "user_login",
+        "author_association",
+        "head_ref",
+        "head_repo",
+        "head_sha",
+        "base_ref",
+        "milestone",
+        "merge_commit_sha",
+        "created_at",
+        "updated_at",
+        "closed_at",
+        "merged_at"
+      ]
+    },
+    {
+      "name": "issue_comments",
+      "dataset": "issue_comments",
+      "schema": "main",
+      "class": "IssueCommentsFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 757,
+      "description": "Comments on a GitHub issue or pull request",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name'"
+        },
+        {
+          "name": "number",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "positional",
+          "position": 1,
+          "description": "Issue or pull request number"
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "ISSUE_COMMENT_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository the comment belongs to, as 'owner/name'."
+        },
+        {
+          "name": "issue_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Issue or pull request the comment is on."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's unique comment id."
+        },
+        {
+          "name": "user_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the commenter."
+        },
+        {
+          "name": "author_association",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The commenter's relationship to the repository."
+        },
+        {
+          "name": "body",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Comment text as Markdown."
+        },
+        {
+          "name": "reactions_total",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Total reactions on the comment."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the comment on github.com."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the comment was posted."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the comment was last edited."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0
+      },
+      "nested_detail_columns": [],
+      "recommended_metrics": {
+        "conversation_comments": "COUNT(*)",
+        "distinct_commenters": "COUNT(DISTINCT issue_comments.user_login)",
+        "comment_reactions": "SUM(issue_comments.reactions_total)"
+      },
+      "recommended_computed_fields": {
+        "comment_day": {
+          "type": "DATE",
+          "expression": "CAST(issue_comments.created_at AS DATE)"
+        }
+      },
+      "caveats": [
+        "Conversation comments include issue and PR discussion; exclude review comments and reviews.",
+        "Distinct commenter count excludes NULL logins."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "issue_number",
+        "id",
+        "user_login",
+        "author_association",
+        "reactions_total",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "commits",
+      "dataset": "commits",
+      "schema": "main",
+      "class": "CommitsFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 898,
+      "description": "Commit history of a GitHub repository, newest first",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name'"
+        },
+        {
+          "name": "sha",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Where the history starts: any ref name or commit hash (empty = default branch)"
+        },
+        {
+          "name": "path",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Only commits touching this file or directory"
+        },
+        {
+          "name": "author",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Only commits by this login or email"
+        },
+        {
+          "name": "since",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Only commits at or after this instant, e.g. '2026-01-01'"
+        },
+        {
+          "name": "until",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Only commits at or before this instant, e.g. '2026-06-30T12:00:00Z'"
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "COMMIT_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository the commit was listed from, as 'owner/name'."
+        },
+        {
+          "name": "sha",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Full 40-character commit hash."
+        },
+        {
+          "name": "message",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Full commit message; the first line is the summary."
+        },
+        {
+          "name": "author_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Author name as recorded in the commit (git metadata)."
+        },
+        {
+          "name": "author_email",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Author email as recorded in the commit."
+        },
+        {
+          "name": "author_date",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the change was originally authored."
+        },
+        {
+          "name": "author_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "GitHub account matched to the author email; NULL when the email maps to no account."
+        },
+        {
+          "name": "committer_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Committer name as recorded in the commit."
+        },
+        {
+          "name": "committer_email",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Committer email as recorded in the commit."
+        },
+        {
+          "name": "committer_date",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the commit was applied \u2014 differs from author_date after a rebase or cherry-pick."
+        },
+        {
+          "name": "committer_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "GitHub account matched to the committer email."
+        },
+        {
+          "name": "parent_shas",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Parent commit hashes; more than one means a merge commit."
+        },
+        {
+          "name": "comment_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of commit comments."
+        },
+        {
+          "name": "is_verified",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether GitHub verified the commit's signature."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the commit on github.com."
+        }
+      ],
+      "grain": [
+        "repo",
+        "sha"
+      ],
+      "required_nonnull_columns": [
+        "repo",
+        "sha"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0
+      },
+      "nested_detail_columns": [
+        "parent_shas"
+      ],
+      "recommended_metrics": {
+        "commit_count": "COUNT(*)",
+        "distinct_commit_authors": "COUNT(DISTINCT commits.author_login)",
+        "verified_commits": "COUNT(*) FILTER (WHERE commits.is_verified = TRUE)",
+        "commit_comments": "SUM(commits.comment_count)"
+      },
+      "recommended_computed_fields": {
+        "authored_day": {
+          "type": "DATE",
+          "expression": "CAST(commits.author_date AS DATE)"
+        },
+        "committed_day": {
+          "type": "DATE",
+          "expression": "CAST(commits.committer_date AS DATE)"
+        }
+      },
+      "caveats": [
+        "Scope is the chosen sha/ref (default branch if omitted), path and author.",
+        "Git author_date and committer_date differ; default history is not all branches.",
+        "Same SHA can appear in multiple repositories.",
+        "Unmatched Git author identities have NULL author_login; distinct count excludes them."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "sha",
+        "author_name",
+        "author_date",
+        "author_login",
+        "committer_name",
+        "committer_date",
+        "committer_login",
+        "comment_count",
+        "is_verified"
+      ]
+    },
+    {
+      "name": "releases",
+      "dataset": "releases",
+      "schema": "main",
+      "class": "ReleasesFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 1009,
+      "description": "Releases of a GitHub repository, newest first",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name'"
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "RELEASE_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository the release belongs to, as 'owner/name'."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's unique release id."
+        },
+        {
+          "name": "tag_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Git tag the release points at, e.g. 'v1.2.0'."
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Release title; often the same as the tag."
+        },
+        {
+          "name": "is_draft",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the release is an unpublished draft (visible only with push access)."
+        },
+        {
+          "name": "is_prerelease",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the release is marked as a pre-release."
+        },
+        {
+          "name": "author_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the account that created the release."
+        },
+        {
+          "name": "target_commitish",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Branch or commit the tag was created from."
+        },
+        {
+          "name": "assets_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of downloadable assets attached."
+        },
+        {
+          "name": "download_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Total downloads across all attached assets. Source archives GitHub generates automatically are not counted."
+        },
+        {
+          "name": "body",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Release notes as Markdown."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the release on github.com."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the release's commit was created."
+        },
+        {
+          "name": "published_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the release was published; NULL for a draft."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0
+      },
+      "nested_detail_columns": [],
+      "recommended_metrics": {
+        "release_count": "COUNT(*)",
+        "published_releases": "COUNT(*) FILTER (WHERE releases.is_draft = FALSE AND releases.published_at IS NOT NULL)",
+        "stable_published_releases": "COUNT(*) FILTER (WHERE releases.is_draft = FALSE AND releases.is_prerelease = FALSE AND releases.published_at IS NOT NULL)",
+        "release_assets": "SUM(releases.assets_count)",
+        "asset_downloads": "SUM(releases.download_count)"
+      },
+      "recommended_computed_fields": {
+        "published_day": {
+          "type": "DATE",
+          "expression": "CAST(releases.published_at AS DATE)"
+        }
+      },
+      "caveats": [
+        "download_count excludes GitHub-generated source archives.",
+        "created_at is commit creation time; published_at is publication.",
+        "Release publication is not production deployment.",
+        "Source flattener treats malformed/missing asset lists as empty and malformed per-asset downloads as zero; strict reporting should reject malformed counters before flattening."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "id",
+        "tag_name",
+        "name",
+        "is_draft",
+        "is_prerelease",
+        "author_login",
+        "target_commitish",
+        "assets_count",
+        "download_count",
+        "created_at",
+        "published_at"
+      ]
+    },
+    {
+      "name": "contributors",
+      "dataset": "contributors",
+      "schema": "main",
+      "class": "ContributorsFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 1086,
+      "description": "Contributors to a GitHub repository, most commits first",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name'"
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "CONTRIBUTOR_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository contributed to, as 'owner/name'."
+        },
+        {
+          "name": "login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Contributor's login \u2014 feed it to user() for their profile."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Contributor's numeric account id."
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'User' or 'Bot'."
+        },
+        {
+          "name": "contributions",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Commits to the default branch attributed to this account."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the contributor's profile."
+        }
+      ],
+      "grain": [
+        "repo",
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "repo",
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0
+      },
+      "nested_detail_columns": [],
+      "recommended_metrics": {
+        "repository_contributor_count": "COUNT(*)",
+        "attributed_default_branch_commits": "SUM(contributors.contributions)"
+      },
+      "recommended_computed_fields": {},
+      "caveats": [
+        "contributions is current GitHub-attributed default-branch commits, not all project contributions or period activity.",
+        "Repository/account associations repeat accounts and possibly shared commits across repositories."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "login",
+        "id",
+        "type",
+        "contributions"
+      ]
+    },
+    {
+      "name": "languages",
+      "dataset": "languages",
+      "schema": "main",
+      "class": "LanguagesFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 1162,
+      "description": "Bytes of code per language in a GitHub repository",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name', e.g. 'duckdb/duckdb'"
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "LANGUAGE_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository measured, as 'owner/name'."
+        },
+        {
+          "name": "language",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Language name as GitHub's linguist reports it."
+        },
+        {
+          "name": "bytes",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Bytes of code in this language; divide by the repo's sum for a share."
+        }
+      ],
+      "grain": [
+        "repo",
+        "language"
+      ],
+      "required_nonnull_columns": [
+        "repo",
+        "language"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {},
+      "nested_detail_columns": [],
+      "recommended_metrics": {
+        "code_bytes": "SUM(languages.bytes)",
+        "repository_language_count": "COUNT(*)"
+      },
+      "recommended_computed_fields": {},
+      "caveats": [
+        "GitHub Linguist bytes are current code size, not lines of code.",
+        "A language share needs the same selected repository denominator and NULL on zero total bytes."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "language",
+        "bytes"
+      ]
+    },
+    {
+      "name": "stargazers",
+      "dataset": "stargazers",
+      "schema": "main",
+      "class": "StargazersFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 1232,
+      "description": "Stars on a GitHub repository with when each was given, oldest first",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name'"
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "STARGAZER_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository starred, as 'owner/name'."
+        },
+        {
+          "name": "starred_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the star was given; the column a star-history chart is built on."
+        },
+        {
+          "name": "login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the account that starred."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Numeric id of that account."
+        },
+        {
+          "name": "type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'User' or 'Organization'."
+        }
+      ],
+      "grain": [
+        "repo",
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "repo",
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0
+      },
+      "nested_detail_columns": [],
+      "recommended_metrics": {
+        "current_stargazer_count": "COUNT(*)"
+      },
+      "recommended_computed_fields": {
+        "starred_day": {
+          "type": "DATE",
+          "expression": "CAST(stargazers.starred_at AS DATE)"
+        }
+      },
+      "caveats": [
+        "Only current star relationships remain. Grouping by starred_at gives cohorts of surviving stars, not historical total gains, losses or net growth.",
+        "Listing permission can differ from repository visibility."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "starred_at",
+        "login",
+        "id",
+        "type"
+      ]
+    },
+    {
+      "name": "workflow_runs",
+      "dataset": "workflow_runs",
+      "schema": "main",
+      "class": "WorkflowRunsFunction",
+      "source_file": "vgi_github/functions.py",
+      "source_line": 1371,
+      "description": "GitHub Actions workflow runs for a repository, newest first",
+      "profile": "row_map_sync_v1",
+      "arguments": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "Repository as 'owner/name'"
+        },
+        {
+          "name": "branch",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Only runs triggered on this branch"
+        },
+        {
+          "name": "event",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Only runs triggered by this event, e.g. 'push'"
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "A status (completed, in_progress, ...) or a conclusion (success, failure, ...)"
+        },
+        {
+          "name": "max_rows",
+          "type": "BIGINT",
+          "nullable": false,
+          "binding": "named",
+          "default": 100,
+          "description": "Cap on rows fetched per input row (default 100 = one request; 0 = all, up to 10,000)",
+          "minimum": 0
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "WORKFLOW_RUN_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository the run belongs to, as 'owner/name'."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's unique run id."
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Workflow name, e.g. 'CI'."
+        },
+        {
+          "name": "workflow_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Numeric id of the workflow definition that ran."
+        },
+        {
+          "name": "run_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Per-workflow sequence number."
+        },
+        {
+          "name": "run_attempt",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Attempt number; above 1 means the run was re-run."
+        },
+        {
+          "name": "event",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "What triggered the run: 'push', 'pull_request', 'schedule', ..."
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Lifecycle: 'queued', 'in_progress', 'completed', 'waiting', 'requested' or 'pending'."
+        },
+        {
+          "name": "conclusion",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Outcome once completed: 'success', 'failure', 'cancelled', 'skipped', 'timed_out', 'action_required', 'neutral' or 'stale'; NULL until the run completes."
+        },
+        {
+          "name": "head_branch",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Branch the run was triggered on."
+        },
+        {
+          "name": "head_sha",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Commit the run tested."
+        },
+        {
+          "name": "actor_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Account whose action triggered the run."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the run on github.com."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the run was queued."
+        },
+        {
+          "name": "run_started_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the current attempt started executing."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the run last changed; for a completed run, effectively when it finished."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "fact_or_snapshot_detail_and_aggregate",
+      "complete_reporting_arguments": {
+        "max_rows": 0
+      },
+      "nested_detail_columns": [],
+      "recommended_metrics": {
+        "workflow_run_count": "COUNT(*)",
+        "successful_runs": "COUNT(*) FILTER (WHERE workflow_runs.conclusion = 'success')",
+        "failed_runs": "COUNT(*) FILTER (WHERE workflow_runs.conclusion = 'failure')",
+        "timed_out_runs": "COUNT(*) FILTER (WHERE workflow_runs.conclusion = 'timed_out')",
+        "reliability_eligible_runs": "COUNT(*) FILTER (WHERE workflow_runs.conclusion IN ('success','failure','timed_out'))",
+        "success_rate": "successful_runs / NULLIF(reliability_eligible_runs, 0)",
+        "rerun_runs": "COUNT(*) FILTER (WHERE workflow_runs.run_attempt > 1)"
+      },
+      "recommended_computed_fields": {
+        "queued_day": {
+          "type": "DATE",
+          "expression": "CAST(workflow_runs.created_at AS DATE)"
+        }
+      },
+      "caveats": [
+        "One row per run with latest reported attempt/state; not all attempts.",
+        "Reliability denominator includes only success/failure/timed_out, excludes cancelled/skipped/neutral/stale/action_required/NULL.",
+        "updated_at is last modification and not an authoritative completion timestamp; do not publish exact run duration.",
+        "run_attempt>1 counts rerun runs, not total rerun events."
+      ],
+      "recommended_dimensions": [
+        "repo",
+        "id",
+        "name",
+        "workflow_id",
+        "run_number",
+        "run_attempt",
+        "event",
+        "status",
+        "conclusion",
+        "head_branch",
+        "head_sha",
+        "actor_login",
+        "created_at",
+        "run_started_at",
+        "updated_at"
+      ]
+    },
+    {
+      "name": "search_repositories",
+      "dataset": "search_repositories",
+      "schema": "main",
+      "class": "SearchRepositoriesFunction",
+      "source_file": "vgi_github/search.py",
+      "source_line": 71,
+      "description": "Search GitHub repositories with GitHub's query syntax",
+      "profile": "producer_sync_v1",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "GitHub search syntax, e.g. 'duckdb language:python stars:>100' or 'org:duckdb'"
+        },
+        {
+          "name": "sort",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Field to sort by: stars, forks, help-wanted-issues or updated; empty = best match",
+          "choices": [
+            "",
+            "stars",
+            "forks",
+            "help-wanted-issues",
+            "updated"
+          ]
+        },
+        {
+          "name": "order",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "desc",
+          "description": "desc (default) or asc; ignored for best match",
+          "choices": [
+            "desc",
+            "asc"
+          ]
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "REPO_SCHEMA",
+      "result_columns": [
+        {
+          "name": "full_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository as 'owner/name' \u2014 the key every per-repository function takes."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's numeric repository id; survives renames and transfers."
+        },
+        {
+          "name": "owner_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the user or organization that owns the repository."
+        },
+        {
+          "name": "owner_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Whether the owner is a 'User' or an 'Organization'."
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository name without the owner."
+        },
+        {
+          "name": "description",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The one-line description shown on the repository page."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the repository on github.com."
+        },
+        {
+          "name": "homepage",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Project website the owner configured, if any."
+        },
+        {
+          "name": "language",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Dominant language by bytes, as GitHub's linguist detects it."
+        },
+        {
+          "name": "topics",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Topic tags the owner applied, e.g. ['database', 'sql']."
+        },
+        {
+          "name": "license_spdx_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "SPDX identifier of the detected license, e.g. 'MIT'."
+        },
+        {
+          "name": "visibility",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'public', 'private' or 'internal'."
+        },
+        {
+          "name": "is_private",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is private."
+        },
+        {
+          "name": "is_fork",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether this repository is a fork of another."
+        },
+        {
+          "name": "is_archived",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is archived (read-only)."
+        },
+        {
+          "name": "is_template",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the repository is a template for new repositories."
+        },
+        {
+          "name": "default_branch",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Branch commits() lists when no sha is given, e.g. 'main'."
+        },
+        {
+          "name": "stargazers_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of users who starred the repository."
+        },
+        {
+          "name": "forks_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of forks."
+        },
+        {
+          "name": "open_issues_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Open issues PLUS open pull requests \u2014 GitHub counts both here, so this is not the open-issue count alone."
+        },
+        {
+          "name": "watchers_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Despite the name, GitHub reports the stargazer count here; kept for fidelity. Use stargazers_count."
+        },
+        {
+          "name": "size_kb",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Repository size on disk in kilobytes, as GitHub measures it."
+        },
+        {
+          "name": "has_issues",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the issue tracker is enabled."
+        },
+        {
+          "name": "has_wiki",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the wiki is enabled."
+        },
+        {
+          "name": "has_discussions",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether GitHub Discussions is enabled."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the repository was created."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the repository object last changed (including stars); not a code-activity signal."
+        },
+        {
+          "name": "pushed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When a commit was last pushed to any branch; the activity signal."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "discovery_detail_only",
+      "complete_reporting_arguments": {},
+      "nested_detail_columns": [
+        "topics"
+      ],
+      "recommended_metrics": {},
+      "recommended_computed_fields": {},
+      "caveats": [
+        "Search capped at 1000 with possible incomplete results; approve detail discovery only, no complete population totals."
+      ],
+      "recommended_dimensions": []
+    },
+    {
+      "name": "search_issues",
+      "dataset": "search_issues",
+      "schema": "main",
+      "class": "SearchIssuesFunction",
+      "source_file": "vgi_github/search.py",
+      "source_line": 200,
+      "description": "Search GitHub issues and pull requests with GitHub's query syntax",
+      "profile": "producer_sync_v1",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "positional",
+          "position": 0,
+          "description": "GitHub search syntax, e.g. 'repo:duckdb/duckdb is:issue is:open label:bug parquet'"
+        },
+        {
+          "name": "sort",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "",
+          "description": "Field to sort by: created, updated, comments, reactions, ...; empty = best match",
+          "choices": [
+            "",
+            "created",
+            "updated",
+            "comments",
+            "reactions",
+            "reactions-+1",
+            "interactions"
+          ]
+        },
+        {
+          "name": "order",
+          "type": "VARCHAR",
+          "nullable": false,
+          "binding": "named",
+          "default": "desc",
+          "description": "desc (default) or asc; ignored for best match",
+          "choices": [
+            "desc",
+            "asc"
+          ]
+        },
+        {
+          "name": "cache_ttl",
+          "type": "BIGINT",
+          "nullable": true,
+          "binding": "named",
+          "default": null,
+          "description": "Cache seconds; omitted/NULL inherits ATTACH, 0 = GitHub policy",
+          "minimum": 0
+        }
+      ],
+      "result_schema": "ISSUE_SCHEMA",
+      "result_columns": [
+        {
+          "name": "repo",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository the issue belongs to, as 'owner/name'."
+        },
+        {
+          "name": "number",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Issue number within the repository \u2014 what issue_comments() takes."
+        },
+        {
+          "name": "id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "GitHub's globally unique issue id."
+        },
+        {
+          "name": "title",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Issue title."
+        },
+        {
+          "name": "state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "'open' or 'closed'."
+        },
+        {
+          "name": "state_reason",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Why it is in its state: 'completed', 'not_planned', 'reopened' or 'duplicate'; NULL when unset."
+        },
+        {
+          "name": "user_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the account that opened the issue."
+        },
+        {
+          "name": "author_association",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "The author's relationship to the repository: OWNER, MEMBER, COLLABORATOR, CONTRIBUTOR, FIRST_TIME_CONTRIBUTOR, FIRST_TIMER or NONE."
+        },
+        {
+          "name": "labels",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Names of the labels applied to the issue."
+        },
+        {
+          "name": "assignees",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Logins of everyone assigned to the issue."
+        },
+        {
+          "name": "milestone",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Title of the milestone the issue is filed under, if any."
+        },
+        {
+          "name": "comments",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Number of comments on the issue."
+        },
+        {
+          "name": "reactions_total",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Total reactions of every kind on the issue body."
+        },
+        {
+          "name": "reactions_plus_one",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Thumbs-up reactions \u2014 the usual 'me too' signal."
+        },
+        {
+          "name": "is_locked",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether the conversation is locked."
+        },
+        {
+          "name": "is_pull_request",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether this row is a pull request. GitHub's issue APIs return both; issues() excludes pull requests by default, search_issues() includes them unless the query says is:issue."
+        },
+        {
+          "name": "body",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Issue body as Markdown."
+        },
+        {
+          "name": "html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Link to the issue on github.com."
+        },
+        {
+          "name": "created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the issue was opened."
+        },
+        {
+          "name": "updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the issue last changed, including new comments."
+        },
+        {
+          "name": "closed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the issue was closed; NULL while open."
+        }
+      ],
+      "grain": [
+        "id"
+      ],
+      "required_nonnull_columns": [
+        "id"
+      ],
+      "classification": "discovery_detail_only",
+      "complete_reporting_arguments": {},
+      "nested_detail_columns": [
+        "labels",
+        "assignees"
+      ],
+      "recommended_metrics": {},
+      "recommended_computed_fields": {},
+      "caveats": [
+        "Search capped at 1000 with possible incomplete results; approve detail discovery only.",
+        "Mixes issues and PRs unless query says is:issue or is:pr."
+      ],
+      "recommended_dimensions": []
+    },
+    {
+      "name": "all_rate_limit",
+      "dataset": "all_rate_limit",
+      "schema": "main",
+      "class": "RateLimitFunction",
+      "source_file": "vgi_github/reference.py",
+      "source_line": 28,
+      "description": "GitHub API rate-limit budgets (the scan backing the `rate_limit` table)",
+      "profile": "producer_sync_v1",
+      "arguments": [],
+      "result_schema": "RATE_LIMIT_SCHEMA",
+      "result_columns": [
+        {
+          "name": "resource",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Which budget this row describes: 'core' (most endpoints), 'search', 'graphql', ..."
+        },
+        {
+          "name": "request_limit",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Requests allowed per window: 60/hour anonymously, 5,000 with a token."
+        },
+        {
+          "name": "used",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Requests spent in the current window."
+        },
+        {
+          "name": "remaining",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Count of requests left before the window resets."
+        },
+        {
+          "name": "reset_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "When the window resets and remaining returns to request_limit."
+        },
+        {
+          "name": "authenticated",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Whether these figures are for a token (true) or this IP's anonymous budget (false)."
+        }
+      ],
+      "grain": [
+        "resource"
+      ],
+      "required_nonnull_columns": [
+        "resource"
+      ],
+      "classification": "diagnostic_detail_only",
+      "complete_reporting_arguments": {},
+      "nested_detail_columns": [],
+      "recommended_metrics": {},
+      "recommended_computed_fields": {},
+      "caveats": [
+        "Diagnostic current observation, never cached.",
+        "Different resource budgets are separate and should not be summed into one quota."
+      ],
+      "recommended_dimensions": []
+    }
+  ],
+  "common_contract": {
+    "identity_scope": "All identifiers are scoped to one GitHub instance. Repository names and account logins are mutable labels.",
+    "consistency": "live_explicit; no transactional GitHub snapshot or historical AT guarantee.",
+    "reporting_limits": "Keyed list reports require max_rows=0 and fail when page or row bounds prevent complete traversal.",
+    "cache": "cache_ttl omitted/NULL inherits attachment; zero follows GitHub policy, not cache bypass.",
+    "nested_columns": "VARCHAR[] detail values preserve the source row grain. No implicit UNNEST.",
+    "aggregate_nulls": "COUNT(*) returns zero for an empty ungrouped population. SUM/AVG/percentiles return NULL when no input values qualify.",
+    "duration_validation": "Merged/closed duration populations must have finite non-NULL ordered endpoints; reject invalid source rows rather than silently alter denominators."
+  },
+  "relationship_guidance": [
+    "Carry original requested repository argument as the conformed invocation scope: source listings often stamp requested names while repo lookups return redirected canonical names.",
+    "Only declare raw to-one joins with proven unique target keys. repo/number is scoped to repository; account logins and repository names are mutable.",
+    "Aggregate issues/pulls/commits/workflow runs independently before approved joining by repository/date; raw fact joins multiply measures.",
+    "head_sha does not uniquely select a workflow run or PR.",
+    "Merge day, queue day, publication day and author day describe different events; any common calendar comparison must label those meanings."
+  ],
+  "missing_source_facts": [
+    "PR reviews/review comments for first-review and approval latency",
+    "Issue timeline/state-change/reopen events for historical backlog and reopen rates",
+    "Workflow job/completion and per-attempt history for exact run/queue duration and attempt reliability",
+    "Deployments/environments/statuses for production delivery frequency and DORA metrics",
+    "PR/commit diff statistics for additions/deletions/changed files",
+    "Event or observation history for star losses/net growth and past repository snapshots",
+    "Explicit membership child facts for label/topic/assignee/reviewer grouped metrics"
+  ],
+  "window_guidance": "Calendar previous-period/moving-average recipes currently require a direct stored DATE with enforced NOT NULL. Invocation-derived timestamps cast to DATE do not satisfy that contract. General model-authored windows can use declared approved grouped grain but their invocation composition needs execution qualification; do not label previous observed row as previous calendar day or mean-of-daily-means as weighted per-PR duration."
+}

@@ -12,8 +12,9 @@ from pathlib import Path
 
 PACKAGE = Path(__file__).resolve().parent.parent / "vgi_github"
 
-#: httpx verbs that could mutate state on GitHub.
-WRITE_VERBS = {"post", "put", "patch", "delete", "request", "stream", "send"}
+#: REST write verbs and untyped dispatch are never allowed. GraphQL POST has a
+#: separate AST and runtime guard below because queries use POST on GitHub.
+WRITE_VERBS = {"put", "patch", "delete", "request", "stream", "send"}
 
 
 def test_no_http_write_calls_anywhere() -> None:
@@ -30,6 +31,46 @@ def test_single_http_chokepoint() -> None:
     """Only github_api.py may touch httpx, so there is exactly one file to audit."""
     users = sorted(p.name for p in PACKAGE.rglob("*.py") if "httpx" in p.read_text())
     assert users == ["github_api.py"], users
+
+
+def test_post_is_confined_to_validated_graphql_queries() -> None:
+    posts = []
+    all_posts = []
+    for path in PACKAGE.rglob("*.py"):
+        tree = ast.parse(path.read_text())
+        all_posts.extend(
+            (path.name, node.lineno)
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "post"
+        )
+        for function in ast.walk(tree):
+            if not isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            for node in ast.walk(function):
+                if (
+                    isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "post"
+                ):
+                    posts.append((path.name, function.name))
+                    guards = [
+                        n
+                        for n in ast.walk(function)
+                        if isinstance(n, ast.Call)
+                        and isinstance(n.func, ast.Name)
+                        and n.func.id == "validate_query"
+                    ]
+                    assert len(guards) == 1 and guards[0].lineno < node.lineno
+                    assert any(
+                        k.arg == "follow_redirects"
+                        and isinstance(k.value, ast.Constant)
+                        and k.value.value is False
+                        for k in node.keywords
+                    )
+    assert posts == [("github_api.py", "graphql_query")]
+    assert len(all_posts) == 1, "POST calls at module scope or in nested classes must also be audited"
 
 
 def test_exactly_one_get_call() -> None:

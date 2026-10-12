@@ -83,7 +83,7 @@ class RateLimitFunction(TableFunctionGenerator[None, None]):
     def process(cls, params: ProcessParams[None], state: None, out: OutputCollector) -> None:
         """Fetch the budgets. Never cached: the point is to see them move."""
         credentials = auth.for_call(params.secrets, params.attach_opaque_data)
-        with api.reporting_to(emitter(out)):
+        with api.reporting_operation(params.attach_opaque_data), api.reporting_to(emitter(out)):
             payload = api.lookup("/rate_limit", credentials=credentials)
         rows = flatten_rate_limit(payload, authenticated=credentials is not None)
         out.emit(batch_from_rows(rows, params.output_schema))

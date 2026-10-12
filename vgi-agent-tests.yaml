@@ -1,0 +1,132 @@
+# Grading data for vgi-lint; public task names/prompts live in worker.py.
+tasks:
+  - name: unanswered_discussions
+    reference_sql: >-
+      SELECT number, title, category_name FROM github.main.discussions(
+      'duckdb/duckdb', answered => false, max_rows => 10)
+    success_criteria: >-
+      Uses the typed discussions function with answered false before the cap, relying on its default updated order.
+  - name: discussion_conversation
+    reference_sql: >-
+      SELECT c.node_id, c.body AS comment_body, r.reply_to_id, r.body AS reply_body
+      FROM github.main.discussions('duckdb/duckdb', max_rows => 1) d,
+      LATERAL github.main.discussion_comments(d.repo, d.number, max_rows => 10) c
+      LEFT JOIN LATERAL github.main.discussion_replies(c.node_id, max_rows => 10) r ON true
+    success_criteria: >-
+      Passes repo and number to comments, then each comment node_id to replies. Preserves comments without replies.
+  - name: project_contents
+    reference_sql: >-
+      SELECT i.content_type, i.title FROM github.main.projects('github', max_rows => 1) p,
+      LATERAL github.main.project_items(p.owner, p.number, max_rows => 10) i
+    success_criteria: >-
+      Uses Projects v2 typed functions with the owner's project number, not a global ID.
+  - name: project_field_definitions
+    reference_sql: >-
+      SELECT f.id, f.name, f.data_type FROM github.main.projects('github', max_rows => 1) p,
+      LATERAL github.main.project_fields(p.owner, p.number, max_rows => 20) f
+    success_criteria: >-
+      Discovers the project then uses project_fields to list field IDs, names and types.
+  - name: discover_rest_reads
+    reference_sql: >-
+      SELECT operation_id, path FROM github.api.endpoints WHERE category = 'pulls' ORDER BY operation_id
+    check_sql: >-
+      SELECT count(*) = (SELECT count(*) FROM github.api.all_endpoints()) FROM github.api.endpoints
+    success_criteria: >-
+      Uses the local endpoint inventory; no GitHub requests are necessary for discovery.
+  - name: complete_repository_json
+    reference_sql: >-
+      SELECT data::JSON ->> 'full_name' AS full_name FROM github.api.rest(
+      'repos/get', '{"owner":"duckdb","repo":"duckdb"}')
+    success_criteria: >-
+      Uses the allowlisted REST operation ID with JSON path parameters, then extracts the response field.
+  - name: graphql_viewer
+    reference_sql: >-
+      SELECT data::JSON -> 'data' -> 'viewer' ->> 'login' AS login
+      FROM github.api.graphql('{ viewer { login } }', '{}')
+    success_criteria: >-
+      Uses a GraphQL query and JSON variables with the supplied credentials. Never proposes a mutation.
+  - name: find_repositories
+    reference_sql: >-
+      SELECT full_name, stargazers_count FROM github.main.search_repositories('duckdb', sort => 'stars')
+      LIMIT 5
+    success_criteria: >-
+      Uses search_repositories sorted by stars rather than guessing names.
+    unordered: true
+  - name: open_issue_hotspots
+    reference_sql: >-
+      SELECT number, title, reactions_plus_one FROM github.main.search_issues('repo:duckdb/duckdb is:issue
+      is:open', sort => 'reactions-+1') LIMIT 10
+    success_criteria: >-
+      Ranks across ALL open issues — via search_issues sorted by reactions-+1, or issues() with no row cap
+      — not just the 100 most recent, and excludes pull requests.
+  - name: merged_pull_requests
+    reference_sql: >-
+      SELECT count(*) FILTER (WHERE merged_at IS NOT NULL) FROM github.main.pulls('duckdb/duckdb')
+    success_criteria: >-
+      Counts merged_at IS NOT NULL. Filtering state = 'merged' is wrong — merged is not a state.
+  - name: contributor_profiles
+    reference_sql: >-
+      SELECT c.login, u.location FROM github.main.contributors('duckdb/duckdb', max_rows => 5) c, LATERAL
+      github.main.user(c.login) u
+    success_criteria: >-
+      Drives user() from contributors() with a LATERAL join.
+    unordered: true
+  - name: ci_health
+    reference_sql: >-
+      SELECT name, count(*) FILTER (WHERE conclusion = 'failure') AS failures FROM
+      github.main.workflow_runs('duckdb/duckdb', status => 'completed') GROUP BY name ORDER BY failures
+      DESC
+    success_criteria: >-
+      Uses workflow_runs and counts conclusion = 'failure', not status.
+  - name: language_mix
+    reference_sql: >-
+      SELECT language, bytes / sum(bytes) OVER () AS share FROM github.main.languages('duckdb/duckdb')
+    success_criteria: >-
+      Uses languages() and normalises bytes into a share.
+    unordered: true
+  - name: remaining_budget
+    reference_sql: >-
+      SELECT remaining, request_limit, authenticated FROM github.main.rate_limit WHERE resource = 'core'
+    success_criteria: >-
+      Reads the core row of rate_limit and reports authenticated.
+    check_sql: >-
+      SELECT count(*) = (SELECT count(*) FROM github.main.all_rate_limit()) FROM github.main.rate_limit
+  - name: repository_snapshot
+    reference_sql: >-
+      SELECT stargazers_count, forks_count, license_spdx_id FROM github.main.repo('duckdb/duckdb')
+    success_criteria: >-
+      Uses the repo() point lookup rather than searching.
+  - name: recently_active_repositories
+    reference_sql: >-
+      SELECT full_name, pushed_at FROM github.main.repos('duckdb') ORDER BY pushed_at DESC LIMIT 10
+    success_criteria: >-
+      Lists the organization's repositories with repos() and orders by pushed_at.
+  - name: recent_authors
+    reference_sql: >-
+      SELECT coalesce(author_login, author_name) AS author, count(*) AS commits FROM
+      github.main.commits('duckdb/duckdb', max_rows => 20) GROUP BY author ORDER BY commits DESC
+    success_criteria: >-
+      Uses commits() capped at 20 rather than contributors(), which is all-time.
+    unordered: true
+  - name: release_cadence
+    reference_sql: >-
+      SELECT tag_name, published_at FROM github.main.releases('duckdb/duckdb') WHERE NOT is_prerelease
+      ORDER BY published_at DESC LIMIT 5
+    success_criteria: >-
+      Uses releases() and excludes pre-releases.
+  - name: cross_repository_search
+    reference_sql: >-
+      SELECT repo, number, title FROM github.main.search_issues('org:duckdb is:issue is:open parquet')
+      LIMIT 20
+    success_criteria: >-
+      Uses search_issues with org:, is:issue and is:open qualifiers in the query rather than calling
+      issues() on every repository.
+    unordered: true
+  - name: who_joined_the_discussion
+    reference_sql: >-
+      SELECT DISTINCT c.user_login FROM (SELECT repo, number FROM github.main.issues('duckdb/duckdb',
+      max_rows => 20) ORDER BY comments DESC LIMIT 1) i, LATERAL github.main.issue_comments(i.repo,
+      i.number) c
+    success_criteria: >-
+      Drives issue_comments() from issues() output with both repo and number.
+    unordered: true

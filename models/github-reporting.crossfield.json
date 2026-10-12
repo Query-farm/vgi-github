@@ -1,0 +1,6361 @@
+{
+  "crossfield": 1,
+  "name": "github_reporting",
+  "id": "queryfarm.github.reporting",
+  "comment": "Approved live GitHub reporting. Complete keyed listings; search is capped discovery.",
+  "invocations": {
+    "version": 1,
+    "input_contracts": {
+      "repository_input": {
+        "id": "queryfarm.github.reporting/inputs/repository_input",
+        "dataset": {
+          "name": "repository_input",
+          "id": "queryfarm.github.reporting/datasets/repository_input",
+          "grain": [
+            "repo"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          }
+        ],
+        "max_rows": 100,
+        "max_bytes": 1048576
+      },
+      "user_input": {
+        "id": "queryfarm.github.reporting/inputs/user_input",
+        "dataset": {
+          "name": "user_input",
+          "id": "queryfarm.github.reporting/datasets/user_input",
+          "grain": [
+            "login"
+          ],
+          "fields": {
+            "login": {
+              "source_column": "login",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "login",
+            "type": "VARCHAR",
+            "nullable": false
+          }
+        ],
+        "max_rows": 100,
+        "max_bytes": 1048576
+      },
+      "repos_input": {
+        "id": "queryfarm.github.reporting/inputs/repos_input",
+        "dataset": {
+          "name": "repos_input",
+          "id": "queryfarm.github.reporting/datasets/repos_input",
+          "grain": [
+            "owner"
+          ],
+          "fields": {
+            "owner": {
+              "source_column": "owner",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "owner",
+            "type": "VARCHAR",
+            "nullable": false
+          }
+        ],
+        "max_rows": 100,
+        "max_bytes": 1048576
+      },
+      "issue_comments_input": {
+        "id": "queryfarm.github.reporting/inputs/issue_comments_input",
+        "dataset": {
+          "name": "issue_comments_input",
+          "id": "queryfarm.github.reporting/datasets/issue_comments_input",
+          "grain": [
+            "repo",
+            "number"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": false
+          }
+        ],
+        "max_rows": 100,
+        "max_bytes": 1048576
+      }
+    },
+    "sources": {
+      "repo": {
+        "id": "queryfarm.github.reporting/sources/repo",
+        "dataset": {
+          "name": "repo",
+          "id": "queryfarm.github.reporting/datasets/repo",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "full_name": {
+              "source_column": "full_name",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "owner_login": {
+              "source_column": "owner_login",
+              "dimension": true
+            },
+            "owner_type": {
+              "source_column": "owner_type",
+              "dimension": true
+            },
+            "name": {
+              "source_column": "name",
+              "dimension": true
+            },
+            "description": {
+              "source_column": "description",
+              "dimension": false
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "homepage": {
+              "source_column": "homepage",
+              "dimension": false
+            },
+            "language": {
+              "source_column": "language",
+              "dimension": true
+            },
+            "topics": {
+              "source_column": "topics",
+              "dimension": false
+            },
+            "license_spdx_id": {
+              "source_column": "license_spdx_id",
+              "dimension": true
+            },
+            "visibility": {
+              "source_column": "visibility",
+              "dimension": true
+            },
+            "is_private": {
+              "source_column": "is_private",
+              "dimension": true
+            },
+            "is_fork": {
+              "source_column": "is_fork",
+              "dimension": true
+            },
+            "is_archived": {
+              "source_column": "is_archived",
+              "dimension": true
+            },
+            "is_template": {
+              "source_column": "is_template",
+              "dimension": true
+            },
+            "default_branch": {
+              "source_column": "default_branch",
+              "dimension": true
+            },
+            "stargazers_count": {
+              "source_column": "stargazers_count",
+              "dimension": true
+            },
+            "forks_count": {
+              "source_column": "forks_count",
+              "dimension": true
+            },
+            "open_issues_count": {
+              "source_column": "open_issues_count",
+              "dimension": true
+            },
+            "watchers_count": {
+              "source_column": "watchers_count",
+              "dimension": true
+            },
+            "size_kb": {
+              "source_column": "size_kb",
+              "dimension": true
+            },
+            "has_issues": {
+              "source_column": "has_issues",
+              "dimension": true
+            },
+            "has_wiki": {
+              "source_column": "has_wiki",
+              "dimension": true
+            },
+            "has_discussions": {
+              "source_column": "has_discussions",
+              "dimension": true
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "pushed_at": {
+              "source_column": "pushed_at",
+              "dimension": true,
+              "timezone": "UTC"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "repo",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "full_name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "owner_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "owner_type",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "description",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "homepage",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "language",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "topics",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "license_spdx_id",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "visibility",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "is_private",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_fork",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_archived",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_template",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "default_branch",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "stargazers_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "forks_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "open_issues_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "watchers_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "size_kb",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "has_issues",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "has_wiki",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "has_discussions",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "pushed_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "user": {
+        "id": "queryfarm.github.reporting/sources/user",
+        "dataset": {
+          "name": "user",
+          "id": "queryfarm.github.reporting/datasets/user",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "login": {
+              "source_column": "login",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "type": {
+              "source_column": "type",
+              "dimension": true
+            },
+            "name": {
+              "source_column": "name",
+              "dimension": true
+            },
+            "company": {
+              "source_column": "company",
+              "dimension": true
+            },
+            "blog": {
+              "source_column": "blog",
+              "dimension": true
+            },
+            "location": {
+              "source_column": "location",
+              "dimension": true
+            },
+            "email": {
+              "source_column": "email",
+              "dimension": true
+            },
+            "bio": {
+              "source_column": "bio",
+              "dimension": true
+            },
+            "twitter_username": {
+              "source_column": "twitter_username",
+              "dimension": true
+            },
+            "public_repos": {
+              "source_column": "public_repos",
+              "dimension": true
+            },
+            "public_gists": {
+              "source_column": "public_gists",
+              "dimension": true
+            },
+            "followers": {
+              "source_column": "followers",
+              "dimension": true
+            },
+            "following": {
+              "source_column": "following",
+              "dimension": true
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "user",
+          "arguments": [
+            {
+              "id": "login",
+              "physical_name": "login",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "type",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "company",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "blog",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "location",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "bio",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "twitter_username",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "public_repos",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "public_gists",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "followers",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "following",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "repos": {
+        "id": "queryfarm.github.reporting/sources/repos",
+        "dataset": {
+          "name": "repos",
+          "id": "queryfarm.github.reporting/datasets/repos",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "full_name": {
+              "source_column": "full_name",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "owner_login": {
+              "source_column": "owner_login",
+              "dimension": true
+            },
+            "owner_type": {
+              "source_column": "owner_type",
+              "dimension": true
+            },
+            "name": {
+              "source_column": "name",
+              "dimension": true
+            },
+            "description": {
+              "source_column": "description",
+              "dimension": false
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "homepage": {
+              "source_column": "homepage",
+              "dimension": false
+            },
+            "language": {
+              "source_column": "language",
+              "dimension": true
+            },
+            "topics": {
+              "source_column": "topics",
+              "dimension": false
+            },
+            "license_spdx_id": {
+              "source_column": "license_spdx_id",
+              "dimension": true
+            },
+            "visibility": {
+              "source_column": "visibility",
+              "dimension": true
+            },
+            "is_private": {
+              "source_column": "is_private",
+              "dimension": true
+            },
+            "is_fork": {
+              "source_column": "is_fork",
+              "dimension": true
+            },
+            "is_archived": {
+              "source_column": "is_archived",
+              "dimension": true
+            },
+            "is_template": {
+              "source_column": "is_template",
+              "dimension": true
+            },
+            "default_branch": {
+              "source_column": "default_branch",
+              "dimension": true
+            },
+            "stargazers_count": {
+              "source_column": "stargazers_count",
+              "dimension": true
+            },
+            "forks_count": {
+              "source_column": "forks_count",
+              "dimension": true
+            },
+            "open_issues_count": {
+              "source_column": "open_issues_count",
+              "dimension": true
+            },
+            "watchers_count": {
+              "source_column": "watchers_count",
+              "dimension": true
+            },
+            "size_kb": {
+              "source_column": "size_kb",
+              "dimension": true
+            },
+            "has_issues": {
+              "source_column": "has_issues",
+              "dimension": true
+            },
+            "has_wiki": {
+              "source_column": "has_wiki",
+              "dimension": true
+            },
+            "has_discussions": {
+              "source_column": "has_discussions",
+              "dimension": true
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "pushed_at": {
+              "source_column": "pushed_at",
+              "dimension": true,
+              "timezone": "UTC"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "repos",
+          "arguments": [
+            {
+              "id": "owner",
+              "physical_name": "owner",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "type",
+              "physical_name": "type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "type",
+              "allowed_values": [
+                "owner"
+              ]
+            },
+            {
+              "id": "sort",
+              "physical_name": "sort",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "sort",
+              "allowed_values": [
+                "pushed"
+              ]
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "full_name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "owner_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "owner_type",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "description",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "homepage",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "language",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "topics",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "license_spdx_id",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "visibility",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "is_private",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_fork",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_archived",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_template",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "default_branch",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "stargazers_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "forks_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "open_issues_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "watchers_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "size_kb",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "has_issues",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "has_wiki",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "has_discussions",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "pushed_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "issues": {
+        "id": "queryfarm.github.reporting/sources/issues",
+        "dataset": {
+          "name": "issues",
+          "id": "queryfarm.github.reporting/datasets/issues",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "title": {
+              "source_column": "title",
+              "dimension": true
+            },
+            "state": {
+              "source_column": "state",
+              "dimension": true
+            },
+            "state_reason": {
+              "source_column": "state_reason",
+              "dimension": true
+            },
+            "user_login": {
+              "source_column": "user_login",
+              "dimension": true
+            },
+            "author_association": {
+              "source_column": "author_association",
+              "dimension": true
+            },
+            "labels": {
+              "source_column": "labels",
+              "dimension": false
+            },
+            "assignees": {
+              "source_column": "assignees",
+              "dimension": false
+            },
+            "milestone": {
+              "source_column": "milestone",
+              "dimension": true
+            },
+            "comments": {
+              "source_column": "comments",
+              "dimension": true
+            },
+            "reactions_total": {
+              "source_column": "reactions_total",
+              "dimension": true
+            },
+            "reactions_plus_one": {
+              "source_column": "reactions_plus_one",
+              "dimension": true
+            },
+            "is_locked": {
+              "source_column": "is_locked",
+              "dimension": true
+            },
+            "is_pull_request": {
+              "source_column": "is_pull_request",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "closed_at": {
+              "source_column": "closed_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(issues.created_at) || '-' || MONTH(issues.created_at) || '-' || DAY(issues.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            },
+            "closed_day": {
+              "expression": "TO_DATE(YEAR(issues.closed_at) || '-' || MONTH(issues.closed_at) || '-' || DAY(issues.closed_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            },
+            "close_hours": {
+              "expression": "DATEDIFF('millisecond', issues.created_at, issues.closed_at) / 3600000.0",
+              "type": "DOUBLE",
+              "dimension": false,
+              "unit": "h"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "issues",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "state",
+              "physical_name": "state",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "state",
+              "allowed_values": [
+                "all"
+              ]
+            },
+            {
+              "id": "labels",
+              "physical_name": "labels",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "labels",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "since",
+              "physical_name": "since",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "since",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "include_pull_requests",
+              "physical_name": "include_pull_requests",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "include_pull_requests",
+              "allowed_values": [
+                false
+              ]
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "state",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "state_reason",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "user_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "author_association",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "labels",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "assignees",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "milestone",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "comments",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "reactions_total",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "reactions_plus_one",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "is_locked",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_pull_request",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "closed_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "pulls": {
+        "id": "queryfarm.github.reporting/sources/pulls",
+        "dataset": {
+          "name": "pulls",
+          "id": "queryfarm.github.reporting/datasets/pulls",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "title": {
+              "source_column": "title",
+              "dimension": true
+            },
+            "state": {
+              "source_column": "state",
+              "dimension": true
+            },
+            "is_draft": {
+              "source_column": "is_draft",
+              "dimension": true
+            },
+            "user_login": {
+              "source_column": "user_login",
+              "dimension": true
+            },
+            "author_association": {
+              "source_column": "author_association",
+              "dimension": true
+            },
+            "head_ref": {
+              "source_column": "head_ref",
+              "dimension": true
+            },
+            "head_repo": {
+              "source_column": "head_repo",
+              "dimension": true
+            },
+            "head_sha": {
+              "source_column": "head_sha",
+              "dimension": true
+            },
+            "base_ref": {
+              "source_column": "base_ref",
+              "dimension": true
+            },
+            "labels": {
+              "source_column": "labels",
+              "dimension": false
+            },
+            "assignees": {
+              "source_column": "assignees",
+              "dimension": false
+            },
+            "requested_reviewers": {
+              "source_column": "requested_reviewers",
+              "dimension": false
+            },
+            "milestone": {
+              "source_column": "milestone",
+              "dimension": true
+            },
+            "merge_commit_sha": {
+              "source_column": "merge_commit_sha",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "closed_at": {
+              "source_column": "closed_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "merged_at": {
+              "source_column": "merged_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(pulls.created_at) || '-' || MONTH(pulls.created_at) || '-' || DAY(pulls.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            },
+            "merged_day": {
+              "expression": "TO_DATE(YEAR(pulls.merged_at) || '-' || MONTH(pulls.merged_at) || '-' || DAY(pulls.merged_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            },
+            "merge_hours": {
+              "expression": "DATEDIFF('millisecond', pulls.created_at, pulls.merged_at) / 3600000.0",
+              "type": "DOUBLE",
+              "dimension": false,
+              "unit": "h"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "pulls",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "state",
+              "physical_name": "state",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "state",
+              "allowed_values": [
+                "all"
+              ]
+            },
+            {
+              "id": "base",
+              "physical_name": "base",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "base",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "state",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "is_draft",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "user_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "author_association",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "head_ref",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "head_repo",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "head_sha",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "base_ref",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "labels",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "assignees",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "requested_reviewers",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "milestone",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "merge_commit_sha",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "closed_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "merged_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "issue_comments": {
+        "id": "queryfarm.github.reporting/sources/issue_comments",
+        "dataset": {
+          "name": "issue_comments",
+          "id": "queryfarm.github.reporting/datasets/issue_comments",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "issue_number": {
+              "source_column": "issue_number",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "user_login": {
+              "source_column": "user_login",
+              "dimension": true
+            },
+            "author_association": {
+              "source_column": "author_association",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "reactions_total": {
+              "source_column": "reactions_total",
+              "dimension": true
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(issue_comments.created_at) || '-' || MONTH(issue_comments.created_at) || '-' || DAY(issue_comments.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "issue_comments",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "number",
+              "physical_name": "number",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 1
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "issue_number",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "user_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "author_association",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "reactions_total",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "commits": {
+        "id": "queryfarm.github.reporting/sources/commits",
+        "dataset": {
+          "name": "commits",
+          "id": "queryfarm.github.reporting/datasets/commits",
+          "grain": [
+            "repo",
+            "sha"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "sha": {
+              "source_column": "sha",
+              "dimension": true
+            },
+            "message": {
+              "source_column": "message",
+              "dimension": false
+            },
+            "author_name": {
+              "source_column": "author_name",
+              "dimension": true
+            },
+            "author_email": {
+              "source_column": "author_email",
+              "dimension": true
+            },
+            "author_date": {
+              "source_column": "author_date",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "author_login": {
+              "source_column": "author_login",
+              "dimension": true
+            },
+            "committer_name": {
+              "source_column": "committer_name",
+              "dimension": true
+            },
+            "committer_email": {
+              "source_column": "committer_email",
+              "dimension": true
+            },
+            "committer_date": {
+              "source_column": "committer_date",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "committer_login": {
+              "source_column": "committer_login",
+              "dimension": true
+            },
+            "parent_shas": {
+              "source_column": "parent_shas",
+              "dimension": false
+            },
+            "comment_count": {
+              "source_column": "comment_count",
+              "dimension": true
+            },
+            "is_verified": {
+              "source_column": "is_verified",
+              "dimension": true
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "committer_day": {
+              "expression": "TO_DATE(YEAR(commits.committer_date) || '-' || MONTH(commits.committer_date) || '-' || DAY(commits.committer_date))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "commits",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "sha",
+              "physical_name": "sha",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "sha",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "path",
+              "physical_name": "path",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "path",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "author",
+              "physical_name": "author",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "author",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "since",
+              "physical_name": "since",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "since",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "until",
+              "physical_name": "until",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "until",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "sha",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "message",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "author_name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "author_email",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "author_date",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "author_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "committer_name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "committer_email",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "committer_date",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "committer_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "parent_shas",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "comment_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "is_verified",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "releases": {
+        "id": "queryfarm.github.reporting/sources/releases",
+        "dataset": {
+          "name": "releases",
+          "id": "queryfarm.github.reporting/datasets/releases",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "tag_name": {
+              "source_column": "tag_name",
+              "dimension": true
+            },
+            "name": {
+              "source_column": "name",
+              "dimension": true
+            },
+            "is_draft": {
+              "source_column": "is_draft",
+              "dimension": true
+            },
+            "is_prerelease": {
+              "source_column": "is_prerelease",
+              "dimension": true
+            },
+            "author_login": {
+              "source_column": "author_login",
+              "dimension": true
+            },
+            "target_commitish": {
+              "source_column": "target_commitish",
+              "dimension": true
+            },
+            "assets_count": {
+              "source_column": "assets_count",
+              "dimension": true
+            },
+            "download_count": {
+              "source_column": "download_count",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "published_at": {
+              "source_column": "published_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "published_day": {
+              "expression": "TO_DATE(YEAR(releases.published_at) || '-' || MONTH(releases.published_at) || '-' || DAY(releases.published_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "releases",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "tag_name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "is_draft",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_prerelease",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "author_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "target_commitish",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "assets_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "download_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "published_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "contributors": {
+        "id": "queryfarm.github.reporting/sources/contributors",
+        "dataset": {
+          "name": "contributors",
+          "id": "queryfarm.github.reporting/datasets/contributors",
+          "grain": [
+            "repo",
+            "id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "login": {
+              "source_column": "login",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "type": {
+              "source_column": "type",
+              "dimension": true
+            },
+            "contributions": {
+              "source_column": "contributions",
+              "dimension": true
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "contributors",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "type",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "contributions",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "languages": {
+        "id": "queryfarm.github.reporting/sources/languages",
+        "dataset": {
+          "name": "languages",
+          "id": "queryfarm.github.reporting/datasets/languages",
+          "grain": [
+            "repo",
+            "language"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "language": {
+              "source_column": "language",
+              "dimension": true
+            },
+            "bytes": {
+              "source_column": "bytes",
+              "dimension": true
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "languages",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "language",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "bytes",
+            "type": "BIGINT",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "stargazers": {
+        "id": "queryfarm.github.reporting/sources/stargazers",
+        "dataset": {
+          "name": "stargazers",
+          "id": "queryfarm.github.reporting/datasets/stargazers",
+          "grain": [
+            "repo",
+            "id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "starred_at": {
+              "source_column": "starred_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "login": {
+              "source_column": "login",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "type": {
+              "source_column": "type",
+              "dimension": true
+            },
+            "starred_day": {
+              "expression": "TO_DATE(YEAR(stargazers.starred_at) || '-' || MONTH(stargazers.starred_at) || '-' || DAY(stargazers.starred_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "stargazers",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "starred_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "type",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "workflow_runs": {
+        "id": "queryfarm.github.reporting/sources/workflow_runs",
+        "dataset": {
+          "name": "workflow_runs",
+          "id": "queryfarm.github.reporting/datasets/workflow_runs",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "name": {
+              "source_column": "name",
+              "dimension": true
+            },
+            "workflow_id": {
+              "source_column": "workflow_id",
+              "dimension": true
+            },
+            "run_number": {
+              "source_column": "run_number",
+              "dimension": true
+            },
+            "run_attempt": {
+              "source_column": "run_attempt",
+              "dimension": true
+            },
+            "event": {
+              "source_column": "event",
+              "dimension": true
+            },
+            "status": {
+              "source_column": "status",
+              "dimension": true
+            },
+            "conclusion": {
+              "source_column": "conclusion",
+              "dimension": true
+            },
+            "head_branch": {
+              "source_column": "head_branch",
+              "dimension": true
+            },
+            "head_sha": {
+              "source_column": "head_sha",
+              "dimension": true
+            },
+            "actor_login": {
+              "source_column": "actor_login",
+              "dimension": true
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "run_started_at": {
+              "source_column": "run_started_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(workflow_runs.created_at) || '-' || MONTH(workflow_runs.created_at) || '-' || DAY(workflow_runs.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "workflow_runs",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "branch",
+              "physical_name": "branch",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "branch",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "event",
+              "physical_name": "event",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "event",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "status",
+              "physical_name": "status",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "status",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "workflow_id",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "run_number",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "run_attempt",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "event",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "status",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "conclusion",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "head_branch",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "head_sha",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "actor_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "run_started_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "search_repositories": {
+        "id": "queryfarm.github.reporting/sources/search_repositories",
+        "dataset": {
+          "name": "search_repositories",
+          "id": "queryfarm.github.reporting/datasets/search_repositories",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "full_name": {
+              "source_column": "full_name",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "owner_login": {
+              "source_column": "owner_login",
+              "dimension": true
+            },
+            "owner_type": {
+              "source_column": "owner_type",
+              "dimension": true
+            },
+            "name": {
+              "source_column": "name",
+              "dimension": true
+            },
+            "description": {
+              "source_column": "description",
+              "dimension": false
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "homepage": {
+              "source_column": "homepage",
+              "dimension": false
+            },
+            "language": {
+              "source_column": "language",
+              "dimension": true
+            },
+            "topics": {
+              "source_column": "topics",
+              "dimension": false
+            },
+            "license_spdx_id": {
+              "source_column": "license_spdx_id",
+              "dimension": true
+            },
+            "visibility": {
+              "source_column": "visibility",
+              "dimension": true
+            },
+            "is_private": {
+              "source_column": "is_private",
+              "dimension": true
+            },
+            "is_fork": {
+              "source_column": "is_fork",
+              "dimension": true
+            },
+            "is_archived": {
+              "source_column": "is_archived",
+              "dimension": true
+            },
+            "is_template": {
+              "source_column": "is_template",
+              "dimension": true
+            },
+            "default_branch": {
+              "source_column": "default_branch",
+              "dimension": true
+            },
+            "stargazers_count": {
+              "source_column": "stargazers_count",
+              "dimension": true
+            },
+            "forks_count": {
+              "source_column": "forks_count",
+              "dimension": true
+            },
+            "open_issues_count": {
+              "source_column": "open_issues_count",
+              "dimension": true
+            },
+            "watchers_count": {
+              "source_column": "watchers_count",
+              "dimension": true
+            },
+            "size_kb": {
+              "source_column": "size_kb",
+              "dimension": true
+            },
+            "has_issues": {
+              "source_column": "has_issues",
+              "dimension": true
+            },
+            "has_wiki": {
+              "source_column": "has_wiki",
+              "dimension": true
+            },
+            "has_discussions": {
+              "source_column": "has_discussions",
+              "dimension": true
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "pushed_at": {
+              "source_column": "pushed_at",
+              "dimension": true,
+              "timezone": "UTC"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "search_repositories",
+          "arguments": [
+            {
+              "id": "query",
+              "physical_name": "query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "position": 0
+            },
+            {
+              "id": "sort",
+              "physical_name": "sort",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "sort",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "order",
+              "physical_name": "order",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "order",
+              "allowed_values": [
+                "desc"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "producer_sync_v1",
+        "result_columns": [
+          {
+            "name": "full_name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "owner_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "owner_type",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "description",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "homepage",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "language",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "topics",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "license_spdx_id",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "visibility",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "is_private",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_fork",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_archived",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_template",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "default_branch",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "stargazers_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "forks_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "open_issues_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "watchers_count",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "size_kb",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "has_issues",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "has_wiki",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "has_discussions",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "pushed_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": false,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "search_issues": {
+        "id": "queryfarm.github.reporting/sources/search_issues",
+        "dataset": {
+          "name": "search_issues",
+          "id": "queryfarm.github.reporting/datasets/search_issues",
+          "grain": [
+            "id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "title": {
+              "source_column": "title",
+              "dimension": true
+            },
+            "state": {
+              "source_column": "state",
+              "dimension": true
+            },
+            "state_reason": {
+              "source_column": "state_reason",
+              "dimension": true
+            },
+            "user_login": {
+              "source_column": "user_login",
+              "dimension": true
+            },
+            "author_association": {
+              "source_column": "author_association",
+              "dimension": true
+            },
+            "labels": {
+              "source_column": "labels",
+              "dimension": false
+            },
+            "assignees": {
+              "source_column": "assignees",
+              "dimension": false
+            },
+            "milestone": {
+              "source_column": "milestone",
+              "dimension": true
+            },
+            "comments": {
+              "source_column": "comments",
+              "dimension": true
+            },
+            "reactions_total": {
+              "source_column": "reactions_total",
+              "dimension": true
+            },
+            "reactions_plus_one": {
+              "source_column": "reactions_plus_one",
+              "dimension": true
+            },
+            "is_locked": {
+              "source_column": "is_locked",
+              "dimension": true
+            },
+            "is_pull_request": {
+              "source_column": "is_pull_request",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "closed_at": {
+              "source_column": "closed_at",
+              "dimension": true,
+              "timezone": "UTC"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "search_issues",
+          "arguments": [
+            {
+              "id": "query",
+              "physical_name": "query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "position": 0
+            },
+            {
+              "id": "sort",
+              "physical_name": "sort",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "sort",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "order",
+              "physical_name": "order",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "order",
+              "allowed_values": [
+                "desc"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "producer_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "state",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "state_reason",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "user_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "author_association",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "labels",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "assignees",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "milestone",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "comments",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "reactions_total",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "reactions_plus_one",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "is_locked",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "is_pull_request",
+            "type": "BOOLEAN",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "closed_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": false,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      },
+      "all_rate_limit": {
+        "id": "queryfarm.github.reporting/sources/all_rate_limit",
+        "dataset": {
+          "name": "all_rate_limit",
+          "id": "queryfarm.github.reporting/datasets/all_rate_limit",
+          "grain": [
+            "resource"
+          ],
+          "fields": {
+            "resource": {
+              "source_column": "resource",
+              "dimension": true
+            },
+            "request_limit": {
+              "source_column": "request_limit",
+              "dimension": true
+            },
+            "used": {
+              "source_column": "used",
+              "dimension": true
+            },
+            "remaining": {
+              "source_column": "remaining",
+              "dimension": true
+            },
+            "reset_at": {
+              "source_column": "reset_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "authenticated": {
+              "source_column": "authenticated",
+              "dimension": true
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "all_rate_limit",
+          "arguments": []
+        },
+        "profile": "producer_sync_v1",
+        "result_columns": [
+          {
+            "name": "resource",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "request_limit",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "used",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "remaining",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "reset_at",
+            "type": "TIMESTAMP WITH TIME ZONE",
+            "nullable": true
+          },
+          {
+            "name": "authenticated",
+            "type": "BOOLEAN",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": false,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        },
+        "limits": {
+          "max_driver_rows": 100,
+          "max_driver_bytes": 1048576,
+          "max_output_rows": 10000,
+          "max_retained_bytes": 67108864
+        }
+      }
+    }
+  },
+  "metrics": {
+    "repository_count": {
+      "expression": "COUNT(*)"
+    },
+    "repository_stars": {
+      "expression": "MAX(repo.stargazers_count)"
+    },
+    "repository_forks": {
+      "expression": "MAX(repo.forks_count)"
+    },
+    "issue_count": {
+      "expression": "COUNT(*)"
+    },
+    "open_issues": {
+      "expression": "COUNT(*)"
+    },
+    "closed_issues": {
+      "expression": "COUNT(*)"
+    },
+    "mean_issue_close_hours": {
+      "expression": "AVG(issues.close_hours)"
+    },
+    "pull_request_count": {
+      "expression": "COUNT(*)"
+    },
+    "open_pull_requests": {
+      "expression": "COUNT(*)"
+    },
+    "open_draft_pull_requests": {
+      "expression": "COUNT(*)"
+    },
+    "closed_unmerged_pull_requests": {
+      "expression": "COUNT(*)"
+    },
+    "merged_prs": {
+      "expression": "COUNT(*)"
+    },
+    "mean_merge_hours": {
+      "expression": "AVG(pulls.merge_hours)"
+    },
+    "median_merge_hours": {
+      "expression": "MEDIAN(pulls.merge_hours)"
+    },
+    "p90_merge_hours": {
+      "expression": "PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY pulls.merge_hours)"
+    },
+    "total_merge_hours": {
+      "expression": "SUM(pulls.merge_hours)"
+    },
+    "issue_comment_count": {
+      "expression": "COUNT(*)"
+    },
+    "commit_count": {
+      "expression": "COUNT(*)"
+    },
+    "verified_commit_count": {
+      "expression": "COUNT(*)"
+    },
+    "published_releases": {
+      "expression": "COUNT(*)"
+    },
+    "prereleases": {
+      "expression": "COUNT(*)"
+    },
+    "release_asset_downloads": {
+      "expression": "SUM(releases.download_count)"
+    },
+    "contributor_count": {
+      "expression": "COUNT(*)"
+    },
+    "attributed_commits": {
+      "expression": "SUM(contributors.contributions)"
+    },
+    "language_count": {
+      "expression": "COUNT(*)"
+    },
+    "language_bytes": {
+      "expression": "SUM(languages.bytes)"
+    },
+    "current_stargazers": {
+      "expression": "COUNT(*)"
+    },
+    "workflow_run_count": {
+      "expression": "COUNT(*)"
+    },
+    "successful_runs": {
+      "expression": "COUNT(*)"
+    },
+    "failed_runs": {
+      "expression": "COUNT(*)"
+    },
+    "timed_out_runs": {
+      "expression": "COUNT(*)"
+    },
+    "cancelled_runs": {
+      "expression": "COUNT(*)"
+    },
+    "eligible_runs": {
+      "expression": "COUNT(*)"
+    },
+    "ci_success_rate": {
+      "expression": "successful_runs * 1.0 / NULLIF(eligible_runs, 0)"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "metrics": [
+      "repository_count",
+      "repository_stars",
+      "repository_forks",
+      "issue_count",
+      "open_issues",
+      "closed_issues",
+      "mean_issue_close_hours",
+      "pull_request_count",
+      "open_pull_requests",
+      "open_draft_pull_requests",
+      "closed_unmerged_pull_requests",
+      "merged_prs",
+      "mean_merge_hours",
+      "median_merge_hours",
+      "p90_merge_hours",
+      "total_merge_hours",
+      "issue_comment_count",
+      "commit_count",
+      "verified_commit_count",
+      "published_releases",
+      "prereleases",
+      "release_asset_downloads",
+      "contributor_count",
+      "attributed_commits",
+      "language_count",
+      "language_bytes",
+      "current_stargazers",
+      "workflow_run_count",
+      "successful_runs",
+      "failed_runs",
+      "timed_out_runs",
+      "cancelled_runs",
+      "eligible_runs",
+      "ci_success_rate"
+    ],
+    "dimensions": [
+      "repository_input.repo",
+      "repo.full_name",
+      "repo.id",
+      "repo.owner_login",
+      "repo.owner_type",
+      "repo.name",
+      "repo.language",
+      "repo.license_spdx_id",
+      "repo.visibility",
+      "repo.is_private",
+      "repo.is_fork",
+      "repo.is_archived",
+      "repo.is_template",
+      "repo.default_branch",
+      "repo.stargazers_count",
+      "repo.forks_count",
+      "repo.open_issues_count",
+      "repo.watchers_count",
+      "repo.size_kb",
+      "repo.has_issues",
+      "repo.has_wiki",
+      "repo.has_discussions",
+      "repo.created_at",
+      "repo.updated_at",
+      "repo.pushed_at",
+      "user_input.login",
+      "user.login",
+      "user.id",
+      "user.type",
+      "user.name",
+      "user.company",
+      "user.blog",
+      "user.location",
+      "user.email",
+      "user.bio",
+      "user.twitter_username",
+      "user.public_repos",
+      "user.public_gists",
+      "user.followers",
+      "user.following",
+      "user.created_at",
+      "user.updated_at",
+      "repos_input.owner",
+      "repos.full_name",
+      "repos.id",
+      "repos.owner_login",
+      "repos.owner_type",
+      "repos.name",
+      "repos.language",
+      "repos.license_spdx_id",
+      "repos.visibility",
+      "repos.is_private",
+      "repos.is_fork",
+      "repos.is_archived",
+      "repos.is_template",
+      "repos.default_branch",
+      "repos.stargazers_count",
+      "repos.forks_count",
+      "repos.open_issues_count",
+      "repos.watchers_count",
+      "repos.size_kb",
+      "repos.has_issues",
+      "repos.has_wiki",
+      "repos.has_discussions",
+      "repos.created_at",
+      "repos.updated_at",
+      "repos.pushed_at",
+      "issues.repo",
+      "issues.number",
+      "issues.id",
+      "issues.title",
+      "issues.state",
+      "issues.state_reason",
+      "issues.user_login",
+      "issues.author_association",
+      "issues.milestone",
+      "issues.comments",
+      "issues.reactions_total",
+      "issues.reactions_plus_one",
+      "issues.is_locked",
+      "issues.is_pull_request",
+      "issues.created_at",
+      "issues.updated_at",
+      "issues.closed_at",
+      "pulls.repo",
+      "pulls.number",
+      "pulls.id",
+      "pulls.title",
+      "pulls.state",
+      "pulls.is_draft",
+      "pulls.user_login",
+      "pulls.author_association",
+      "pulls.head_ref",
+      "pulls.head_repo",
+      "pulls.head_sha",
+      "pulls.base_ref",
+      "pulls.milestone",
+      "pulls.merge_commit_sha",
+      "pulls.created_at",
+      "pulls.updated_at",
+      "pulls.closed_at",
+      "pulls.merged_at",
+      "issue_comments_input.repo",
+      "issue_comments_input.number",
+      "issue_comments.repo",
+      "issue_comments.issue_number",
+      "issue_comments.id",
+      "issue_comments.user_login",
+      "issue_comments.author_association",
+      "issue_comments.reactions_total",
+      "issue_comments.created_at",
+      "issue_comments.updated_at",
+      "commits.repo",
+      "commits.sha",
+      "commits.author_name",
+      "commits.author_email",
+      "commits.author_date",
+      "commits.author_login",
+      "commits.committer_name",
+      "commits.committer_email",
+      "commits.committer_date",
+      "commits.committer_login",
+      "commits.comment_count",
+      "commits.is_verified",
+      "releases.repo",
+      "releases.id",
+      "releases.tag_name",
+      "releases.name",
+      "releases.is_draft",
+      "releases.is_prerelease",
+      "releases.author_login",
+      "releases.target_commitish",
+      "releases.assets_count",
+      "releases.download_count",
+      "releases.created_at",
+      "releases.published_at",
+      "contributors.repo",
+      "contributors.login",
+      "contributors.id",
+      "contributors.type",
+      "contributors.contributions",
+      "languages.repo",
+      "languages.language",
+      "languages.bytes",
+      "stargazers.repo",
+      "stargazers.starred_at",
+      "stargazers.login",
+      "stargazers.id",
+      "stargazers.type",
+      "workflow_runs.repo",
+      "workflow_runs.id",
+      "workflow_runs.name",
+      "workflow_runs.workflow_id",
+      "workflow_runs.run_number",
+      "workflow_runs.run_attempt",
+      "workflow_runs.event",
+      "workflow_runs.status",
+      "workflow_runs.conclusion",
+      "workflow_runs.head_branch",
+      "workflow_runs.head_sha",
+      "workflow_runs.actor_login",
+      "workflow_runs.created_at",
+      "workflow_runs.run_started_at",
+      "workflow_runs.updated_at",
+      "search_repositories.full_name",
+      "search_repositories.id",
+      "search_repositories.owner_login",
+      "search_repositories.owner_type",
+      "search_repositories.name",
+      "search_repositories.language",
+      "search_repositories.license_spdx_id",
+      "search_repositories.visibility",
+      "search_repositories.is_private",
+      "search_repositories.is_fork",
+      "search_repositories.is_archived",
+      "search_repositories.is_template",
+      "search_repositories.default_branch",
+      "search_repositories.stargazers_count",
+      "search_repositories.forks_count",
+      "search_repositories.open_issues_count",
+      "search_repositories.watchers_count",
+      "search_repositories.size_kb",
+      "search_repositories.has_issues",
+      "search_repositories.has_wiki",
+      "search_repositories.has_discussions",
+      "search_repositories.created_at",
+      "search_repositories.updated_at",
+      "search_repositories.pushed_at",
+      "search_issues.repo",
+      "search_issues.number",
+      "search_issues.id",
+      "search_issues.title",
+      "search_issues.state",
+      "search_issues.state_reason",
+      "search_issues.user_login",
+      "search_issues.author_association",
+      "search_issues.milestone",
+      "search_issues.comments",
+      "search_issues.reactions_total",
+      "search_issues.reactions_plus_one",
+      "search_issues.is_locked",
+      "search_issues.is_pull_request",
+      "search_issues.created_at",
+      "search_issues.updated_at",
+      "search_issues.closed_at",
+      "all_rate_limit.resource",
+      "all_rate_limit.request_limit",
+      "all_rate_limit.used",
+      "all_rate_limit.remaining",
+      "all_rate_limit.reset_at",
+      "all_rate_limit.authenticated",
+      "pulls.created_day",
+      "pulls.merged_day",
+      "issues.created_day",
+      "issues.closed_day",
+      "issue_comments.created_day",
+      "commits.committer_day",
+      "releases.published_day",
+      "stargazers.starred_day",
+      "workflow_runs.created_day"
+    ],
+    "filter_dimensions": [
+      "repository_input.repo",
+      "repo.full_name",
+      "repo.id",
+      "repo.owner_login",
+      "repo.owner_type",
+      "repo.name",
+      "repo.language",
+      "repo.license_spdx_id",
+      "repo.visibility",
+      "repo.is_private",
+      "repo.is_fork",
+      "repo.is_archived",
+      "repo.is_template",
+      "repo.default_branch",
+      "repo.stargazers_count",
+      "repo.forks_count",
+      "repo.open_issues_count",
+      "repo.watchers_count",
+      "repo.size_kb",
+      "repo.has_issues",
+      "repo.has_wiki",
+      "repo.has_discussions",
+      "repo.created_at",
+      "repo.updated_at",
+      "repo.pushed_at",
+      "user_input.login",
+      "user.login",
+      "user.id",
+      "user.type",
+      "user.name",
+      "user.company",
+      "user.blog",
+      "user.location",
+      "user.email",
+      "user.bio",
+      "user.twitter_username",
+      "user.public_repos",
+      "user.public_gists",
+      "user.followers",
+      "user.following",
+      "user.created_at",
+      "user.updated_at",
+      "repos_input.owner",
+      "repos.full_name",
+      "repos.id",
+      "repos.owner_login",
+      "repos.owner_type",
+      "repos.name",
+      "repos.language",
+      "repos.license_spdx_id",
+      "repos.visibility",
+      "repos.is_private",
+      "repos.is_fork",
+      "repos.is_archived",
+      "repos.is_template",
+      "repos.default_branch",
+      "repos.stargazers_count",
+      "repos.forks_count",
+      "repos.open_issues_count",
+      "repos.watchers_count",
+      "repos.size_kb",
+      "repos.has_issues",
+      "repos.has_wiki",
+      "repos.has_discussions",
+      "repos.created_at",
+      "repos.updated_at",
+      "repos.pushed_at",
+      "issues.repo",
+      "issues.number",
+      "issues.id",
+      "issues.title",
+      "issues.state",
+      "issues.state_reason",
+      "issues.user_login",
+      "issues.author_association",
+      "issues.milestone",
+      "issues.comments",
+      "issues.reactions_total",
+      "issues.reactions_plus_one",
+      "issues.is_locked",
+      "issues.is_pull_request",
+      "issues.created_at",
+      "issues.updated_at",
+      "issues.closed_at",
+      "pulls.repo",
+      "pulls.number",
+      "pulls.id",
+      "pulls.title",
+      "pulls.state",
+      "pulls.is_draft",
+      "pulls.user_login",
+      "pulls.author_association",
+      "pulls.head_ref",
+      "pulls.head_repo",
+      "pulls.head_sha",
+      "pulls.base_ref",
+      "pulls.milestone",
+      "pulls.merge_commit_sha",
+      "pulls.created_at",
+      "pulls.updated_at",
+      "pulls.closed_at",
+      "pulls.merged_at",
+      "issue_comments_input.repo",
+      "issue_comments_input.number",
+      "issue_comments.repo",
+      "issue_comments.issue_number",
+      "issue_comments.id",
+      "issue_comments.user_login",
+      "issue_comments.author_association",
+      "issue_comments.reactions_total",
+      "issue_comments.created_at",
+      "issue_comments.updated_at",
+      "commits.repo",
+      "commits.sha",
+      "commits.author_name",
+      "commits.author_email",
+      "commits.author_date",
+      "commits.author_login",
+      "commits.committer_name",
+      "commits.committer_email",
+      "commits.committer_date",
+      "commits.committer_login",
+      "commits.comment_count",
+      "commits.is_verified",
+      "releases.repo",
+      "releases.id",
+      "releases.tag_name",
+      "releases.name",
+      "releases.is_draft",
+      "releases.is_prerelease",
+      "releases.author_login",
+      "releases.target_commitish",
+      "releases.assets_count",
+      "releases.download_count",
+      "releases.created_at",
+      "releases.published_at",
+      "contributors.repo",
+      "contributors.login",
+      "contributors.id",
+      "contributors.type",
+      "contributors.contributions",
+      "languages.repo",
+      "languages.language",
+      "languages.bytes",
+      "stargazers.repo",
+      "stargazers.starred_at",
+      "stargazers.login",
+      "stargazers.id",
+      "stargazers.type",
+      "workflow_runs.repo",
+      "workflow_runs.id",
+      "workflow_runs.name",
+      "workflow_runs.workflow_id",
+      "workflow_runs.run_number",
+      "workflow_runs.run_attempt",
+      "workflow_runs.event",
+      "workflow_runs.status",
+      "workflow_runs.conclusion",
+      "workflow_runs.head_branch",
+      "workflow_runs.head_sha",
+      "workflow_runs.actor_login",
+      "workflow_runs.created_at",
+      "workflow_runs.run_started_at",
+      "workflow_runs.updated_at",
+      "search_repositories.full_name",
+      "search_repositories.id",
+      "search_repositories.owner_login",
+      "search_repositories.owner_type",
+      "search_repositories.name",
+      "search_repositories.language",
+      "search_repositories.license_spdx_id",
+      "search_repositories.visibility",
+      "search_repositories.is_private",
+      "search_repositories.is_fork",
+      "search_repositories.is_archived",
+      "search_repositories.is_template",
+      "search_repositories.default_branch",
+      "search_repositories.stargazers_count",
+      "search_repositories.forks_count",
+      "search_repositories.open_issues_count",
+      "search_repositories.watchers_count",
+      "search_repositories.size_kb",
+      "search_repositories.has_issues",
+      "search_repositories.has_wiki",
+      "search_repositories.has_discussions",
+      "search_repositories.created_at",
+      "search_repositories.updated_at",
+      "search_repositories.pushed_at",
+      "search_issues.repo",
+      "search_issues.number",
+      "search_issues.id",
+      "search_issues.title",
+      "search_issues.state",
+      "search_issues.state_reason",
+      "search_issues.user_login",
+      "search_issues.author_association",
+      "search_issues.milestone",
+      "search_issues.comments",
+      "search_issues.reactions_total",
+      "search_issues.reactions_plus_one",
+      "search_issues.is_locked",
+      "search_issues.is_pull_request",
+      "search_issues.created_at",
+      "search_issues.updated_at",
+      "search_issues.closed_at",
+      "all_rate_limit.resource",
+      "all_rate_limit.request_limit",
+      "all_rate_limit.used",
+      "all_rate_limit.remaining",
+      "all_rate_limit.reset_at",
+      "all_rate_limit.authenticated",
+      "pulls.created_day",
+      "pulls.merged_day",
+      "issues.created_day",
+      "issues.closed_day",
+      "issue_comments.created_day",
+      "commits.committer_day",
+      "releases.published_day",
+      "stargazers.starred_day",
+      "workflow_runs.created_day"
+    ],
+    "detail_fields": [
+      "repository_input.repo",
+      "repo.full_name",
+      "repo.id",
+      "repo.owner_login",
+      "repo.owner_type",
+      "repo.name",
+      "repo.description",
+      "repo.html_url",
+      "repo.homepage",
+      "repo.language",
+      "repo.topics",
+      "repo.license_spdx_id",
+      "repo.visibility",
+      "repo.is_private",
+      "repo.is_fork",
+      "repo.is_archived",
+      "repo.is_template",
+      "repo.default_branch",
+      "repo.stargazers_count",
+      "repo.forks_count",
+      "repo.open_issues_count",
+      "repo.watchers_count",
+      "repo.size_kb",
+      "repo.has_issues",
+      "repo.has_wiki",
+      "repo.has_discussions",
+      "repo.created_at",
+      "repo.updated_at",
+      "repo.pushed_at",
+      "user_input.login",
+      "user.login",
+      "user.id",
+      "user.type",
+      "user.name",
+      "user.company",
+      "user.blog",
+      "user.location",
+      "user.email",
+      "user.bio",
+      "user.twitter_username",
+      "user.public_repos",
+      "user.public_gists",
+      "user.followers",
+      "user.following",
+      "user.html_url",
+      "user.created_at",
+      "user.updated_at",
+      "repos_input.owner",
+      "repos.full_name",
+      "repos.id",
+      "repos.owner_login",
+      "repos.owner_type",
+      "repos.name",
+      "repos.description",
+      "repos.html_url",
+      "repos.homepage",
+      "repos.language",
+      "repos.topics",
+      "repos.license_spdx_id",
+      "repos.visibility",
+      "repos.is_private",
+      "repos.is_fork",
+      "repos.is_archived",
+      "repos.is_template",
+      "repos.default_branch",
+      "repos.stargazers_count",
+      "repos.forks_count",
+      "repos.open_issues_count",
+      "repos.watchers_count",
+      "repos.size_kb",
+      "repos.has_issues",
+      "repos.has_wiki",
+      "repos.has_discussions",
+      "repos.created_at",
+      "repos.updated_at",
+      "repos.pushed_at",
+      "issues.repo",
+      "issues.number",
+      "issues.id",
+      "issues.title",
+      "issues.state",
+      "issues.state_reason",
+      "issues.user_login",
+      "issues.author_association",
+      "issues.labels",
+      "issues.assignees",
+      "issues.milestone",
+      "issues.comments",
+      "issues.reactions_total",
+      "issues.reactions_plus_one",
+      "issues.is_locked",
+      "issues.is_pull_request",
+      "issues.body",
+      "issues.html_url",
+      "issues.created_at",
+      "issues.updated_at",
+      "issues.closed_at",
+      "pulls.repo",
+      "pulls.number",
+      "pulls.id",
+      "pulls.title",
+      "pulls.state",
+      "pulls.is_draft",
+      "pulls.user_login",
+      "pulls.author_association",
+      "pulls.head_ref",
+      "pulls.head_repo",
+      "pulls.head_sha",
+      "pulls.base_ref",
+      "pulls.labels",
+      "pulls.assignees",
+      "pulls.requested_reviewers",
+      "pulls.milestone",
+      "pulls.merge_commit_sha",
+      "pulls.body",
+      "pulls.html_url",
+      "pulls.created_at",
+      "pulls.updated_at",
+      "pulls.closed_at",
+      "pulls.merged_at",
+      "issue_comments_input.repo",
+      "issue_comments_input.number",
+      "issue_comments.repo",
+      "issue_comments.issue_number",
+      "issue_comments.id",
+      "issue_comments.user_login",
+      "issue_comments.author_association",
+      "issue_comments.body",
+      "issue_comments.reactions_total",
+      "issue_comments.html_url",
+      "issue_comments.created_at",
+      "issue_comments.updated_at",
+      "commits.repo",
+      "commits.sha",
+      "commits.message",
+      "commits.author_name",
+      "commits.author_email",
+      "commits.author_date",
+      "commits.author_login",
+      "commits.committer_name",
+      "commits.committer_email",
+      "commits.committer_date",
+      "commits.committer_login",
+      "commits.parent_shas",
+      "commits.comment_count",
+      "commits.is_verified",
+      "commits.html_url",
+      "releases.repo",
+      "releases.id",
+      "releases.tag_name",
+      "releases.name",
+      "releases.is_draft",
+      "releases.is_prerelease",
+      "releases.author_login",
+      "releases.target_commitish",
+      "releases.assets_count",
+      "releases.download_count",
+      "releases.body",
+      "releases.html_url",
+      "releases.created_at",
+      "releases.published_at",
+      "contributors.repo",
+      "contributors.login",
+      "contributors.id",
+      "contributors.type",
+      "contributors.contributions",
+      "contributors.html_url",
+      "languages.repo",
+      "languages.language",
+      "languages.bytes",
+      "stargazers.repo",
+      "stargazers.starred_at",
+      "stargazers.login",
+      "stargazers.id",
+      "stargazers.type",
+      "workflow_runs.repo",
+      "workflow_runs.id",
+      "workflow_runs.name",
+      "workflow_runs.workflow_id",
+      "workflow_runs.run_number",
+      "workflow_runs.run_attempt",
+      "workflow_runs.event",
+      "workflow_runs.status",
+      "workflow_runs.conclusion",
+      "workflow_runs.head_branch",
+      "workflow_runs.head_sha",
+      "workflow_runs.actor_login",
+      "workflow_runs.html_url",
+      "workflow_runs.created_at",
+      "workflow_runs.run_started_at",
+      "workflow_runs.updated_at",
+      "search_repositories.full_name",
+      "search_repositories.id",
+      "search_repositories.owner_login",
+      "search_repositories.owner_type",
+      "search_repositories.name",
+      "search_repositories.description",
+      "search_repositories.html_url",
+      "search_repositories.homepage",
+      "search_repositories.language",
+      "search_repositories.topics",
+      "search_repositories.license_spdx_id",
+      "search_repositories.visibility",
+      "search_repositories.is_private",
+      "search_repositories.is_fork",
+      "search_repositories.is_archived",
+      "search_repositories.is_template",
+      "search_repositories.default_branch",
+      "search_repositories.stargazers_count",
+      "search_repositories.forks_count",
+      "search_repositories.open_issues_count",
+      "search_repositories.watchers_count",
+      "search_repositories.size_kb",
+      "search_repositories.has_issues",
+      "search_repositories.has_wiki",
+      "search_repositories.has_discussions",
+      "search_repositories.created_at",
+      "search_repositories.updated_at",
+      "search_repositories.pushed_at",
+      "search_issues.repo",
+      "search_issues.number",
+      "search_issues.id",
+      "search_issues.title",
+      "search_issues.state",
+      "search_issues.state_reason",
+      "search_issues.user_login",
+      "search_issues.author_association",
+      "search_issues.labels",
+      "search_issues.assignees",
+      "search_issues.milestone",
+      "search_issues.comments",
+      "search_issues.reactions_total",
+      "search_issues.reactions_plus_one",
+      "search_issues.is_locked",
+      "search_issues.is_pull_request",
+      "search_issues.body",
+      "search_issues.html_url",
+      "search_issues.created_at",
+      "search_issues.updated_at",
+      "search_issues.closed_at",
+      "all_rate_limit.resource",
+      "all_rate_limit.request_limit",
+      "all_rate_limit.used",
+      "all_rate_limit.remaining",
+      "all_rate_limit.reset_at",
+      "all_rate_limit.authenticated",
+      "pulls.created_day",
+      "pulls.merged_day",
+      "issues.created_day",
+      "issues.closed_day",
+      "issue_comments.created_day",
+      "commits.committer_day",
+      "releases.published_day",
+      "stargazers.starred_day",
+      "workflow_runs.created_day",
+      "pulls.merge_hours",
+      "issues.close_hours"
+    ],
+    "metric_semantics": {
+      "repository_count": {
+        "dataset": "repos",
+        "additivity": "additive",
+        "comment": "Visible repositories owned by the selected account, in a complete listing."
+      },
+      "repository_stars": {
+        "dataset": "repo",
+        "additivity": "non_additive",
+        "comment": "Current repository stars; one observation, never a historical sum."
+      },
+      "repository_forks": {
+        "dataset": "repo",
+        "additivity": "non_additive",
+        "comment": "Current repository forks; one observation."
+      },
+      "issue_count": {
+        "dataset": "issues",
+        "additivity": "additive",
+        "comment": "All listed issues, excluding pull requests."
+      },
+      "open_issues": {
+        "dataset": "issues",
+        "additivity": "additive",
+        "comment": "Current open issues; not historical backlog.",
+        "population": "issues.state = 'open'",
+        "population_id": "issues/17d0090774aa"
+      },
+      "closed_issues": {
+        "dataset": "issues",
+        "additivity": "additive",
+        "comment": "Issues currently closed, including repeated reopening/closing as one issue.",
+        "population": "issues.state = 'closed'",
+        "population_id": "issues/3887fa2b73ec"
+      },
+      "mean_issue_close_hours": {
+        "dataset": "issues",
+        "additivity": "non_additive",
+        "comment": "Mean recorded closure duration for currently closed issues.",
+        "population": "issues.state = 'closed' AND issues.closed_at IS NOT NULL",
+        "population_id": "issues/ad4e54b27aac",
+        "unit": "h"
+      },
+      "pull_request_count": {
+        "dataset": "pulls",
+        "additivity": "additive",
+        "comment": "All pull requests in the complete selected repository population."
+      },
+      "open_pull_requests": {
+        "dataset": "pulls",
+        "additivity": "additive",
+        "comment": "Current open pull requests, including drafts.",
+        "population": "pulls.state = 'open'",
+        "population_id": "pulls/4ab403c3a3a8"
+      },
+      "open_draft_pull_requests": {
+        "dataset": "pulls",
+        "additivity": "additive",
+        "comment": "Current open draft pull requests.",
+        "population": "pulls.state = 'open' AND pulls.is_draft = TRUE",
+        "population_id": "pulls/0bded6f93efe"
+      },
+      "closed_unmerged_pull_requests": {
+        "dataset": "pulls",
+        "additivity": "additive",
+        "comment": "Closed pull requests with no merge timestamp.",
+        "population": "pulls.state = 'closed' AND pulls.merged_at IS NULL",
+        "population_id": "pulls/fe530c453db2"
+      },
+      "merged_prs": {
+        "dataset": "pulls",
+        "additivity": "additive",
+        "comment": "Merged pull requests, including bots and draft waiting time.",
+        "population": "pulls.merged_at IS NOT NULL",
+        "population_id": "pulls/f8e91a028e1b"
+      },
+      "mean_merge_hours": {
+        "dataset": "pulls",
+        "additivity": "non_additive",
+        "comment": "Mean elapsed hours; NULL for an empty merge cohort.",
+        "population": "pulls.merged_at IS NOT NULL",
+        "population_id": "pulls/f8e91a028e1b",
+        "unit": "h"
+      },
+      "median_merge_hours": {
+        "dataset": "pulls",
+        "additivity": "non_additive",
+        "comment": "Exact continuous median elapsed hours; NULL for empty cohort.",
+        "population": "pulls.merged_at IS NOT NULL",
+        "population_id": "pulls/f8e91a028e1b",
+        "unit": "h"
+      },
+      "p90_merge_hours": {
+        "dataset": "pulls",
+        "additivity": "non_additive",
+        "comment": "Exact continuous 90th percentile elapsed hours; non-additive.",
+        "population": "pulls.merged_at IS NOT NULL",
+        "population_id": "pulls/f8e91a028e1b",
+        "unit": "h"
+      },
+      "total_merge_hours": {
+        "dataset": "pulls",
+        "additivity": "additive",
+        "comment": "Sum elapsed hours; combine with merged_prs for a weighted mean.",
+        "population": "pulls.merged_at IS NOT NULL",
+        "population_id": "pulls/f8e91a028e1b",
+        "unit": "h"
+      },
+      "issue_comment_count": {
+        "dataset": "issue_comments",
+        "additivity": "additive",
+        "comment": "Conversation comments on the selected issue or PR; excludes review comments."
+      },
+      "commit_count": {
+        "dataset": "commits",
+        "additivity": "additive",
+        "comment": "Distinct listed commit identities on the default branch, using committer date for date reports."
+      },
+      "verified_commit_count": {
+        "dataset": "commits",
+        "additivity": "additive",
+        "comment": "Listed commits whose signatures GitHub reports verified.",
+        "population": "commits.is_verified = TRUE",
+        "population_id": "commits/2e8590c1376b"
+      },
+      "published_releases": {
+        "dataset": "releases",
+        "additivity": "additive",
+        "comment": "Published stable releases; excludes drafts and prereleases.",
+        "population": "releases.is_draft = FALSE AND releases.is_prerelease = FALSE AND releases.published_at IS NOT NULL",
+        "population_id": "releases/f4898abb4528"
+      },
+      "prereleases": {
+        "dataset": "releases",
+        "additivity": "additive",
+        "comment": "Published prereleases; excludes drafts.",
+        "population": "releases.is_draft = FALSE AND releases.is_prerelease = TRUE AND releases.published_at IS NOT NULL",
+        "population_id": "releases/e135f09408a0"
+      },
+      "release_asset_downloads": {
+        "dataset": "releases",
+        "additivity": "non_additive",
+        "comment": "Current cumulative downloads of attached assets, excluding generated source archives; not downloads during the report interval.",
+        "population": "releases.is_draft = FALSE",
+        "population_id": "releases/1a4711bacd9f"
+      },
+      "contributor_count": {
+        "dataset": "contributors",
+        "additivity": "additive",
+        "comment": "Contributors returned by GitHub's attributed default-branch contributor endpoint."
+      },
+      "attributed_commits": {
+        "dataset": "contributors",
+        "additivity": "additive",
+        "comment": "GitHub contributor contributions; not interchangeable with commit-history row count."
+      },
+      "language_count": {
+        "dataset": "languages",
+        "additivity": "additive",
+        "comment": "Languages with entries in the current repository language response."
+      },
+      "language_bytes": {
+        "dataset": "languages",
+        "additivity": "additive",
+        "comment": "Current linguist-attributed bytes; not lines of code."
+      },
+      "current_stargazers": {
+        "dataset": "stargazers",
+        "additivity": "additive",
+        "comment": "Currently visible stargazers; unstars disappear and no historical net-star metric is implied."
+      },
+      "workflow_run_count": {
+        "dataset": "workflow_runs",
+        "additivity": "additive",
+        "comment": "Latest reported attempt of each run, one row per run ID; not all attempts."
+      },
+      "successful_runs": {
+        "dataset": "workflow_runs",
+        "additivity": "additive",
+        "comment": "Runs whose latest reported conclusion is success.",
+        "population": "workflow_runs.conclusion = 'success'",
+        "population_id": "workflow_runs/5233de7c7b2a"
+      },
+      "failed_runs": {
+        "dataset": "workflow_runs",
+        "additivity": "additive",
+        "comment": "Runs whose latest reported conclusion is failure.",
+        "population": "workflow_runs.conclusion = 'failure'",
+        "population_id": "workflow_runs/eb3a0a3b565f"
+      },
+      "timed_out_runs": {
+        "dataset": "workflow_runs",
+        "additivity": "additive",
+        "comment": "Runs whose latest reported conclusion is timed_out.",
+        "population": "workflow_runs.conclusion = 'timed_out'",
+        "population_id": "workflow_runs/f1be80332ef3"
+      },
+      "cancelled_runs": {
+        "dataset": "workflow_runs",
+        "additivity": "additive",
+        "comment": "Runs whose latest reported conclusion is cancelled.",
+        "population": "workflow_runs.conclusion = 'cancelled'",
+        "population_id": "workflow_runs/16a5e09a8a31"
+      },
+      "eligible_runs": {
+        "dataset": "workflow_runs",
+        "additivity": "additive",
+        "comment": "Reliability denominator: success, failure and timed_out only.",
+        "population": "workflow_runs.conclusion IN ('success', 'failure', 'timed_out')",
+        "population_id": "workflow_runs/a87b0538a57f"
+      },
+      "ci_success_rate": {
+        "dataset": "workflow_runs",
+        "additivity": "non_additive",
+        "comment": "Success / (success + failure + timed_out), from latest reported run outcomes; NULL for zero denominator."
+      }
+    },
+    "field_semantics": {
+      "repository_input.repo": {
+        "comment": "Repository as 'owner/name', e.g. 'duckdb/duckdb'",
+        "sql_name": "repository_input_repo"
+      },
+      "repo.full_name": {
+        "comment": "Repository as 'owner/name' — the key every per-repository function takes.",
+        "sql_name": "repo_full_name"
+      },
+      "repo.id": {
+        "comment": "GitHub's numeric repository id; survives renames and transfers.",
+        "sql_name": "repo_id"
+      },
+      "repo.owner_login": {
+        "comment": "Login of the user or organization that owns the repository.",
+        "sql_name": "repo_owner_login"
+      },
+      "repo.owner_type": {
+        "comment": "Whether the owner is a 'User' or an 'Organization'.",
+        "sql_name": "repo_owner_type"
+      },
+      "repo.name": {
+        "comment": "Repository name without the owner.",
+        "sql_name": "repo_name"
+      },
+      "repo.description": {
+        "comment": "The one-line description shown on the repository page.",
+        "sql_name": "repo_description"
+      },
+      "repo.html_url": {
+        "comment": "Link to the repository on github.com.",
+        "sql_name": "repo_html_url"
+      },
+      "repo.homepage": {
+        "comment": "Project website the owner configured, if any.",
+        "sql_name": "repo_homepage"
+      },
+      "repo.language": {
+        "comment": "Dominant language by bytes, as GitHub's linguist detects it.",
+        "sql_name": "repo_language"
+      },
+      "repo.topics": {
+        "comment": "Topic tags the owner applied, e.g. ['database', 'sql'].",
+        "sql_name": "repo_topics"
+      },
+      "repo.license_spdx_id": {
+        "comment": "SPDX identifier of the detected license, e.g. 'MIT'.",
+        "sql_name": "repo_license_spdx_id"
+      },
+      "repo.visibility": {
+        "comment": "'public', 'private' or 'internal'.",
+        "sql_name": "repo_visibility"
+      },
+      "repo.is_private": {
+        "comment": "Whether the repository is private.",
+        "sql_name": "repo_is_private"
+      },
+      "repo.is_fork": {
+        "comment": "Whether this repository is a fork of another.",
+        "sql_name": "repo_is_fork"
+      },
+      "repo.is_archived": {
+        "comment": "Whether the repository is archived (read-only).",
+        "sql_name": "repo_is_archived"
+      },
+      "repo.is_template": {
+        "comment": "Whether the repository is a template for new repositories.",
+        "sql_name": "repo_is_template"
+      },
+      "repo.default_branch": {
+        "comment": "Branch commits() lists when no sha is given, e.g. 'main'.",
+        "sql_name": "repo_default_branch"
+      },
+      "repo.stargazers_count": {
+        "comment": "Number of users who starred the repository.",
+        "sql_name": "repo_stargazers_count"
+      },
+      "repo.forks_count": {
+        "comment": "Number of forks.",
+        "sql_name": "repo_forks_count"
+      },
+      "repo.open_issues_count": {
+        "comment": "Open issues PLUS open pull requests — GitHub counts both here, so this is not the open-issue count alone.",
+        "sql_name": "repo_open_issues_count"
+      },
+      "repo.watchers_count": {
+        "comment": "Despite the name, GitHub reports the stargazer count here; kept for fidelity. Use stargazers_count.",
+        "sql_name": "repo_watchers_count"
+      },
+      "repo.size_kb": {
+        "comment": "Repository size on disk in kilobytes, as GitHub measures it.",
+        "sql_name": "repo_size_kb"
+      },
+      "repo.has_issues": {
+        "comment": "Whether the issue tracker is enabled.",
+        "sql_name": "repo_has_issues"
+      },
+      "repo.has_wiki": {
+        "comment": "Whether the wiki is enabled.",
+        "sql_name": "repo_has_wiki"
+      },
+      "repo.has_discussions": {
+        "comment": "Whether GitHub Discussions is enabled.",
+        "sql_name": "repo_has_discussions"
+      },
+      "repo.created_at": {
+        "comment": "When the repository was created.",
+        "sql_name": "repo_created_at"
+      },
+      "repo.updated_at": {
+        "comment": "When the repository object last changed (including stars); not a code-activity signal.",
+        "sql_name": "repo_updated_at"
+      },
+      "repo.pushed_at": {
+        "comment": "When a commit was last pushed to any branch; the activity signal.",
+        "sql_name": "repo_pushed_at"
+      },
+      "user_input.login": {
+        "comment": "User or organization login, e.g. 'torvalds' or 'duckdb'",
+        "sql_name": "user_input_login"
+      },
+      "user.login": {
+        "comment": "The account's handle — the key user() and repos() take.",
+        "sql_name": "user_login"
+      },
+      "user.id": {
+        "comment": "GitHub's numeric account id; survives a login rename.",
+        "sql_name": "user_id"
+      },
+      "user.type": {
+        "comment": "'User', 'Organization' or 'Bot'.",
+        "sql_name": "user_type"
+      },
+      "user.name": {
+        "comment": "Display name, if set.",
+        "sql_name": "user_name"
+      },
+      "user.company": {
+        "comment": "Free-text company field, if set.",
+        "sql_name": "user_company"
+      },
+      "user.blog": {
+        "comment": "Website the account lists, if any.",
+        "sql_name": "user_blog"
+      },
+      "user.location": {
+        "comment": "Free-text location, if set.",
+        "sql_name": "user_location"
+      },
+      "user.email": {
+        "comment": "Public email, if the account chose to publish one.",
+        "sql_name": "user_email"
+      },
+      "user.bio": {
+        "comment": "Profile bio, if set.",
+        "sql_name": "user_bio"
+      },
+      "user.twitter_username": {
+        "comment": "X/Twitter handle, if set.",
+        "sql_name": "user_twitter_username"
+      },
+      "user.public_repos": {
+        "comment": "Number of public repositories the account owns.",
+        "sql_name": "user_public_repos"
+      },
+      "user.public_gists": {
+        "comment": "Number of public gists.",
+        "sql_name": "user_public_gists"
+      },
+      "user.followers": {
+        "comment": "Number of followers.",
+        "sql_name": "user_followers"
+      },
+      "user.following": {
+        "comment": "Number of accounts this one follows.",
+        "sql_name": "user_following"
+      },
+      "user.html_url": {
+        "comment": "Link to the profile on github.com.",
+        "sql_name": "user_html_url"
+      },
+      "user.created_at": {
+        "comment": "When the account was created.",
+        "sql_name": "user_created_at"
+      },
+      "user.updated_at": {
+        "comment": "When the profile last changed.",
+        "sql_name": "user_updated_at"
+      },
+      "repos_input.owner": {
+        "comment": "User or organization login whose repositories to list",
+        "sql_name": "repos_input_owner"
+      },
+      "repos.full_name": {
+        "comment": "Repository as 'owner/name' — the key every per-repository function takes.",
+        "sql_name": "repos_full_name"
+      },
+      "repos.id": {
+        "comment": "GitHub's numeric repository id; survives renames and transfers.",
+        "sql_name": "repos_id"
+      },
+      "repos.owner_login": {
+        "comment": "Login of the user or organization that owns the repository.",
+        "sql_name": "repos_owner_login"
+      },
+      "repos.owner_type": {
+        "comment": "Whether the owner is a 'User' or an 'Organization'.",
+        "sql_name": "repos_owner_type"
+      },
+      "repos.name": {
+        "comment": "Repository name without the owner.",
+        "sql_name": "repos_name"
+      },
+      "repos.description": {
+        "comment": "The one-line description shown on the repository page.",
+        "sql_name": "repos_description"
+      },
+      "repos.html_url": {
+        "comment": "Link to the repository on github.com.",
+        "sql_name": "repos_html_url"
+      },
+      "repos.homepage": {
+        "comment": "Project website the owner configured, if any.",
+        "sql_name": "repos_homepage"
+      },
+      "repos.language": {
+        "comment": "Dominant language by bytes, as GitHub's linguist detects it.",
+        "sql_name": "repos_language"
+      },
+      "repos.topics": {
+        "comment": "Topic tags the owner applied, e.g. ['database', 'sql'].",
+        "sql_name": "repos_topics"
+      },
+      "repos.license_spdx_id": {
+        "comment": "SPDX identifier of the detected license, e.g. 'MIT'.",
+        "sql_name": "repos_license_spdx_id"
+      },
+      "repos.visibility": {
+        "comment": "'public', 'private' or 'internal'.",
+        "sql_name": "repos_visibility"
+      },
+      "repos.is_private": {
+        "comment": "Whether the repository is private.",
+        "sql_name": "repos_is_private"
+      },
+      "repos.is_fork": {
+        "comment": "Whether this repository is a fork of another.",
+        "sql_name": "repos_is_fork"
+      },
+      "repos.is_archived": {
+        "comment": "Whether the repository is archived (read-only).",
+        "sql_name": "repos_is_archived"
+      },
+      "repos.is_template": {
+        "comment": "Whether the repository is a template for new repositories.",
+        "sql_name": "repos_is_template"
+      },
+      "repos.default_branch": {
+        "comment": "Branch commits() lists when no sha is given, e.g. 'main'.",
+        "sql_name": "repos_default_branch"
+      },
+      "repos.stargazers_count": {
+        "comment": "Number of users who starred the repository.",
+        "sql_name": "repos_stargazers_count"
+      },
+      "repos.forks_count": {
+        "comment": "Number of forks.",
+        "sql_name": "repos_forks_count"
+      },
+      "repos.open_issues_count": {
+        "comment": "Open issues PLUS open pull requests — GitHub counts both here, so this is not the open-issue count alone.",
+        "sql_name": "repos_open_issues_count"
+      },
+      "repos.watchers_count": {
+        "comment": "Despite the name, GitHub reports the stargazer count here; kept for fidelity. Use stargazers_count.",
+        "sql_name": "repos_watchers_count"
+      },
+      "repos.size_kb": {
+        "comment": "Repository size on disk in kilobytes, as GitHub measures it.",
+        "sql_name": "repos_size_kb"
+      },
+      "repos.has_issues": {
+        "comment": "Whether the issue tracker is enabled.",
+        "sql_name": "repos_has_issues"
+      },
+      "repos.has_wiki": {
+        "comment": "Whether the wiki is enabled.",
+        "sql_name": "repos_has_wiki"
+      },
+      "repos.has_discussions": {
+        "comment": "Whether GitHub Discussions is enabled.",
+        "sql_name": "repos_has_discussions"
+      },
+      "repos.created_at": {
+        "comment": "When the repository was created.",
+        "sql_name": "repos_created_at"
+      },
+      "repos.updated_at": {
+        "comment": "When the repository object last changed (including stars); not a code-activity signal.",
+        "sql_name": "repos_updated_at"
+      },
+      "repos.pushed_at": {
+        "comment": "When a commit was last pushed to any branch; the activity signal.",
+        "sql_name": "repos_pushed_at"
+      },
+      "issues.repo": {
+        "comment": "Repository the issue belongs to, as 'owner/name'.",
+        "sql_name": "issues_repo"
+      },
+      "issues.number": {
+        "comment": "Issue number within the repository — what issue_comments() takes.",
+        "sql_name": "issues_number"
+      },
+      "issues.id": {
+        "comment": "GitHub's globally unique issue id.",
+        "sql_name": "issues_id"
+      },
+      "issues.title": {
+        "comment": "Issue title.",
+        "sql_name": "issues_title"
+      },
+      "issues.state": {
+        "comment": "'open' or 'closed'.",
+        "sql_name": "issues_state"
+      },
+      "issues.state_reason": {
+        "comment": "Why it is in its state: 'completed', 'not_planned', 'reopened' or 'duplicate'; NULL when unset.",
+        "sql_name": "issues_state_reason"
+      },
+      "issues.user_login": {
+        "comment": "Login of the account that opened the issue.",
+        "sql_name": "issues_user_login"
+      },
+      "issues.author_association": {
+        "comment": "The author's relationship to the repository: OWNER, MEMBER, COLLABORATOR, CONTRIBUTOR, FIRST_TIME_CONTRIBUTOR, FIRST_TIMER or NONE.",
+        "sql_name": "issues_author_association"
+      },
+      "issues.labels": {
+        "comment": "Names of the labels applied to the issue.",
+        "sql_name": "issues_labels"
+      },
+      "issues.assignees": {
+        "comment": "Logins of everyone assigned to the issue.",
+        "sql_name": "issues_assignees"
+      },
+      "issues.milestone": {
+        "comment": "Title of the milestone the issue is filed under, if any.",
+        "sql_name": "issues_milestone"
+      },
+      "issues.comments": {
+        "comment": "Number of comments on the issue.",
+        "sql_name": "issues_comments"
+      },
+      "issues.reactions_total": {
+        "comment": "Total reactions of every kind on the issue body.",
+        "sql_name": "issues_reactions_total"
+      },
+      "issues.reactions_plus_one": {
+        "comment": "Thumbs-up reactions — the usual 'me too' signal.",
+        "sql_name": "issues_reactions_plus_one"
+      },
+      "issues.is_locked": {
+        "comment": "Whether the conversation is locked.",
+        "sql_name": "issues_is_locked"
+      },
+      "issues.is_pull_request": {
+        "comment": "Whether this row is a pull request. GitHub's issue APIs return both; issues() excludes pull requests by default, search_issues() includes them unless the query says is:issue.",
+        "sql_name": "issues_is_pull_request"
+      },
+      "issues.body": {
+        "comment": "Issue body as Markdown.",
+        "sql_name": "issues_body"
+      },
+      "issues.html_url": {
+        "comment": "Link to the issue on github.com.",
+        "sql_name": "issues_html_url"
+      },
+      "issues.created_at": {
+        "comment": "When the issue was opened.",
+        "sql_name": "issues_created_at"
+      },
+      "issues.updated_at": {
+        "comment": "When the issue last changed, including new comments.",
+        "sql_name": "issues_updated_at"
+      },
+      "issues.closed_at": {
+        "comment": "When the issue was closed; NULL while open.",
+        "sql_name": "issues_closed_at"
+      },
+      "pulls.repo": {
+        "comment": "Repository the pull request targets, as 'owner/name'.",
+        "sql_name": "pulls_repo"
+      },
+      "pulls.number": {
+        "comment": "Pull request number — shared with the issue namespace.",
+        "sql_name": "pulls_number"
+      },
+      "pulls.id": {
+        "comment": "GitHub's globally unique pull request id.",
+        "sql_name": "pulls_id"
+      },
+      "pulls.title": {
+        "comment": "Pull request title.",
+        "sql_name": "pulls_title"
+      },
+      "pulls.state": {
+        "comment": "'open' or 'closed'. A merged pull request is 'closed' — test merged_at IS NOT NULL for merged.",
+        "sql_name": "pulls_state"
+      },
+      "pulls.is_draft": {
+        "comment": "Whether the pull request is a draft.",
+        "sql_name": "pulls_is_draft"
+      },
+      "pulls.user_login": {
+        "comment": "Login of the author.",
+        "sql_name": "pulls_user_login"
+      },
+      "pulls.author_association": {
+        "comment": "The author's relationship to the repository.",
+        "sql_name": "pulls_author_association"
+      },
+      "pulls.head_ref": {
+        "comment": "Branch the changes come from.",
+        "sql_name": "pulls_head_ref"
+      },
+      "pulls.head_repo": {
+        "comment": "Repository the head branch lives in ('owner/name'); differs for forks.",
+        "sql_name": "pulls_head_repo"
+      },
+      "pulls.head_sha": {
+        "comment": "Commit at the tip of the head branch.",
+        "sql_name": "pulls_head_sha"
+      },
+      "pulls.base_ref": {
+        "comment": "Branch the changes would merge into.",
+        "sql_name": "pulls_base_ref"
+      },
+      "pulls.labels": {
+        "comment": "Names of the labels applied.",
+        "sql_name": "pulls_labels"
+      },
+      "pulls.assignees": {
+        "comment": "Logins of everyone assigned.",
+        "sql_name": "pulls_assignees"
+      },
+      "pulls.requested_reviewers": {
+        "comment": "Logins of reviewers still requested.",
+        "sql_name": "pulls_requested_reviewers"
+      },
+      "pulls.milestone": {
+        "comment": "Title of the milestone, if any.",
+        "sql_name": "pulls_milestone"
+      },
+      "pulls.merge_commit_sha": {
+        "comment": "The merge (or squash) commit once merged.",
+        "sql_name": "pulls_merge_commit_sha"
+      },
+      "pulls.body": {
+        "comment": "Pull request description as Markdown.",
+        "sql_name": "pulls_body"
+      },
+      "pulls.html_url": {
+        "comment": "Link to the pull request on github.com.",
+        "sql_name": "pulls_html_url"
+      },
+      "pulls.created_at": {
+        "comment": "When the pull request was opened.",
+        "sql_name": "pulls_created_at"
+      },
+      "pulls.updated_at": {
+        "comment": "When it last changed.",
+        "sql_name": "pulls_updated_at"
+      },
+      "pulls.closed_at": {
+        "comment": "When it was closed or merged; NULL while open.",
+        "sql_name": "pulls_closed_at"
+      },
+      "pulls.merged_at": {
+        "comment": "When it was merged; NULL if it was closed unmerged or is open.",
+        "sql_name": "pulls_merged_at"
+      },
+      "issue_comments_input.repo": {
+        "comment": "Repository as 'owner/name'",
+        "sql_name": "issue_comments_input_repo"
+      },
+      "issue_comments_input.number": {
+        "comment": "Issue or pull request number",
+        "sql_name": "issue_comments_input_number"
+      },
+      "issue_comments.repo": {
+        "comment": "Repository the comment belongs to, as 'owner/name'.",
+        "sql_name": "issue_comments_repo"
+      },
+      "issue_comments.issue_number": {
+        "comment": "Issue or pull request the comment is on.",
+        "sql_name": "issue_comments_issue_number"
+      },
+      "issue_comments.id": {
+        "comment": "GitHub's unique comment id.",
+        "sql_name": "issue_comments_id"
+      },
+      "issue_comments.user_login": {
+        "comment": "Login of the commenter.",
+        "sql_name": "issue_comments_user_login"
+      },
+      "issue_comments.author_association": {
+        "comment": "The commenter's relationship to the repository.",
+        "sql_name": "issue_comments_author_association"
+      },
+      "issue_comments.body": {
+        "comment": "Comment text as Markdown.",
+        "sql_name": "issue_comments_body"
+      },
+      "issue_comments.reactions_total": {
+        "comment": "Total reactions on the comment.",
+        "sql_name": "issue_comments_reactions_total"
+      },
+      "issue_comments.html_url": {
+        "comment": "Link to the comment on github.com.",
+        "sql_name": "issue_comments_html_url"
+      },
+      "issue_comments.created_at": {
+        "comment": "When the comment was posted.",
+        "sql_name": "issue_comments_created_at"
+      },
+      "issue_comments.updated_at": {
+        "comment": "When the comment was last edited.",
+        "sql_name": "issue_comments_updated_at"
+      },
+      "commits.repo": {
+        "comment": "Repository the commit was listed from, as 'owner/name'.",
+        "sql_name": "commits_repo"
+      },
+      "commits.sha": {
+        "comment": "Full 40-character commit hash.",
+        "sql_name": "commits_sha"
+      },
+      "commits.message": {
+        "comment": "Full commit message; the first line is the summary.",
+        "sql_name": "commits_message"
+      },
+      "commits.author_name": {
+        "comment": "Author name as recorded in the commit (git metadata).",
+        "sql_name": "commits_author_name"
+      },
+      "commits.author_email": {
+        "comment": "Author email as recorded in the commit.",
+        "sql_name": "commits_author_email"
+      },
+      "commits.author_date": {
+        "comment": "When the change was originally authored.",
+        "sql_name": "commits_author_date"
+      },
+      "commits.author_login": {
+        "comment": "GitHub account matched to the author email; NULL when the email maps to no account.",
+        "sql_name": "commits_author_login"
+      },
+      "commits.committer_name": {
+        "comment": "Committer name as recorded in the commit.",
+        "sql_name": "commits_committer_name"
+      },
+      "commits.committer_email": {
+        "comment": "Committer email as recorded in the commit.",
+        "sql_name": "commits_committer_email"
+      },
+      "commits.committer_date": {
+        "comment": "When the commit was applied — differs from author_date after a rebase or cherry-pick.",
+        "sql_name": "commits_committer_date"
+      },
+      "commits.committer_login": {
+        "comment": "GitHub account matched to the committer email.",
+        "sql_name": "commits_committer_login"
+      },
+      "commits.parent_shas": {
+        "comment": "Parent commit hashes; more than one means a merge commit.",
+        "sql_name": "commits_parent_shas"
+      },
+      "commits.comment_count": {
+        "comment": "Number of commit comments.",
+        "sql_name": "commits_comment_count"
+      },
+      "commits.is_verified": {
+        "comment": "Whether GitHub verified the commit's signature.",
+        "sql_name": "commits_is_verified"
+      },
+      "commits.html_url": {
+        "comment": "Link to the commit on github.com.",
+        "sql_name": "commits_html_url"
+      },
+      "releases.repo": {
+        "comment": "Repository the release belongs to, as 'owner/name'.",
+        "sql_name": "releases_repo"
+      },
+      "releases.id": {
+        "comment": "GitHub's unique release id.",
+        "sql_name": "releases_id"
+      },
+      "releases.tag_name": {
+        "comment": "Git tag the release points at, e.g. 'v1.2.0'.",
+        "sql_name": "releases_tag_name"
+      },
+      "releases.name": {
+        "comment": "Release title; often the same as the tag.",
+        "sql_name": "releases_name"
+      },
+      "releases.is_draft": {
+        "comment": "Whether the release is an unpublished draft (visible only with push access).",
+        "sql_name": "releases_is_draft"
+      },
+      "releases.is_prerelease": {
+        "comment": "Whether the release is marked as a pre-release.",
+        "sql_name": "releases_is_prerelease"
+      },
+      "releases.author_login": {
+        "comment": "Login of the account that created the release.",
+        "sql_name": "releases_author_login"
+      },
+      "releases.target_commitish": {
+        "comment": "Branch or commit the tag was created from.",
+        "sql_name": "releases_target_commitish"
+      },
+      "releases.assets_count": {
+        "comment": "Number of downloadable assets attached.",
+        "sql_name": "releases_assets_count"
+      },
+      "releases.download_count": {
+        "comment": "Total downloads across all attached assets. Source archives GitHub generates automatically are not counted.",
+        "sql_name": "releases_download_count"
+      },
+      "releases.body": {
+        "comment": "Release notes as Markdown.",
+        "sql_name": "releases_body"
+      },
+      "releases.html_url": {
+        "comment": "Link to the release on github.com.",
+        "sql_name": "releases_html_url"
+      },
+      "releases.created_at": {
+        "comment": "When the release's commit was created.",
+        "sql_name": "releases_created_at"
+      },
+      "releases.published_at": {
+        "comment": "When the release was published; NULL for a draft.",
+        "sql_name": "releases_published_at"
+      },
+      "contributors.repo": {
+        "comment": "Repository contributed to, as 'owner/name'.",
+        "sql_name": "contributors_repo"
+      },
+      "contributors.login": {
+        "comment": "Contributor's login — feed it to user() for their profile.",
+        "sql_name": "contributors_login"
+      },
+      "contributors.id": {
+        "comment": "Contributor's numeric account id.",
+        "sql_name": "contributors_id"
+      },
+      "contributors.type": {
+        "comment": "'User' or 'Bot'.",
+        "sql_name": "contributors_type"
+      },
+      "contributors.contributions": {
+        "comment": "Commits to the default branch attributed to this account.",
+        "sql_name": "contributors_contributions"
+      },
+      "contributors.html_url": {
+        "comment": "Link to the contributor's profile.",
+        "sql_name": "contributors_html_url"
+      },
+      "languages.repo": {
+        "comment": "Repository measured, as 'owner/name'.",
+        "sql_name": "languages_repo"
+      },
+      "languages.language": {
+        "comment": "Language name as GitHub's linguist reports it.",
+        "sql_name": "languages_language"
+      },
+      "languages.bytes": {
+        "comment": "Bytes of code in this language; divide by the repo's sum for a share.",
+        "sql_name": "languages_bytes"
+      },
+      "stargazers.repo": {
+        "comment": "Repository starred, as 'owner/name'.",
+        "sql_name": "stargazers_repo"
+      },
+      "stargazers.starred_at": {
+        "comment": "When the star was given; the column a star-history chart is built on.",
+        "sql_name": "stargazers_starred_at"
+      },
+      "stargazers.login": {
+        "comment": "Login of the account that starred.",
+        "sql_name": "stargazers_login"
+      },
+      "stargazers.id": {
+        "comment": "Numeric id of that account.",
+        "sql_name": "stargazers_id"
+      },
+      "stargazers.type": {
+        "comment": "'User' or 'Organization'.",
+        "sql_name": "stargazers_type"
+      },
+      "workflow_runs.repo": {
+        "comment": "Repository the run belongs to, as 'owner/name'.",
+        "sql_name": "workflow_runs_repo"
+      },
+      "workflow_runs.id": {
+        "comment": "GitHub's unique run id.",
+        "sql_name": "workflow_runs_id"
+      },
+      "workflow_runs.name": {
+        "comment": "Workflow name, e.g. 'CI'.",
+        "sql_name": "workflow_runs_name"
+      },
+      "workflow_runs.workflow_id": {
+        "comment": "Numeric id of the workflow definition that ran.",
+        "sql_name": "workflow_runs_workflow_id"
+      },
+      "workflow_runs.run_number": {
+        "comment": "Per-workflow sequence number.",
+        "sql_name": "workflow_runs_run_number"
+      },
+      "workflow_runs.run_attempt": {
+        "comment": "Attempt number; above 1 means the run was re-run.",
+        "sql_name": "workflow_runs_run_attempt"
+      },
+      "workflow_runs.event": {
+        "comment": "What triggered the run: 'push', 'pull_request', 'schedule', ...",
+        "sql_name": "workflow_runs_event"
+      },
+      "workflow_runs.status": {
+        "comment": "Lifecycle: 'queued', 'in_progress', 'completed', 'waiting', 'requested' or 'pending'.",
+        "sql_name": "workflow_runs_status"
+      },
+      "workflow_runs.conclusion": {
+        "comment": "Outcome once completed: 'success', 'failure', 'cancelled', 'skipped', 'timed_out', 'action_required', 'neutral' or 'stale'; NULL until the run completes.",
+        "sql_name": "workflow_runs_conclusion"
+      },
+      "workflow_runs.head_branch": {
+        "comment": "Branch the run was triggered on.",
+        "sql_name": "workflow_runs_head_branch"
+      },
+      "workflow_runs.head_sha": {
+        "comment": "Commit the run tested.",
+        "sql_name": "workflow_runs_head_sha"
+      },
+      "workflow_runs.actor_login": {
+        "comment": "Account whose action triggered the run.",
+        "sql_name": "workflow_runs_actor_login"
+      },
+      "workflow_runs.html_url": {
+        "comment": "Link to the run on github.com.",
+        "sql_name": "workflow_runs_html_url"
+      },
+      "workflow_runs.created_at": {
+        "comment": "When the run was queued.",
+        "sql_name": "workflow_runs_created_at"
+      },
+      "workflow_runs.run_started_at": {
+        "comment": "When the current attempt started executing.",
+        "sql_name": "workflow_runs_run_started_at"
+      },
+      "workflow_runs.updated_at": {
+        "comment": "When the run last changed; for a completed run, effectively when it finished.",
+        "sql_name": "workflow_runs_updated_at"
+      },
+      "search_repositories.full_name": {
+        "comment": "Repository as 'owner/name' — the key every per-repository function takes.",
+        "sql_name": "search_repositories_full_name"
+      },
+      "search_repositories.id": {
+        "comment": "GitHub's numeric repository id; survives renames and transfers.",
+        "sql_name": "search_repositories_id"
+      },
+      "search_repositories.owner_login": {
+        "comment": "Login of the user or organization that owns the repository.",
+        "sql_name": "search_repositories_owner_login"
+      },
+      "search_repositories.owner_type": {
+        "comment": "Whether the owner is a 'User' or an 'Organization'.",
+        "sql_name": "search_repositories_owner_type"
+      },
+      "search_repositories.name": {
+        "comment": "Repository name without the owner.",
+        "sql_name": "search_repositories_name"
+      },
+      "search_repositories.description": {
+        "comment": "The one-line description shown on the repository page.",
+        "sql_name": "search_repositories_description"
+      },
+      "search_repositories.html_url": {
+        "comment": "Link to the repository on github.com.",
+        "sql_name": "search_repositories_html_url"
+      },
+      "search_repositories.homepage": {
+        "comment": "Project website the owner configured, if any.",
+        "sql_name": "search_repositories_homepage"
+      },
+      "search_repositories.language": {
+        "comment": "Dominant language by bytes, as GitHub's linguist detects it.",
+        "sql_name": "search_repositories_language"
+      },
+      "search_repositories.topics": {
+        "comment": "Topic tags the owner applied, e.g. ['database', 'sql'].",
+        "sql_name": "search_repositories_topics"
+      },
+      "search_repositories.license_spdx_id": {
+        "comment": "SPDX identifier of the detected license, e.g. 'MIT'.",
+        "sql_name": "search_repositories_license_spdx_id"
+      },
+      "search_repositories.visibility": {
+        "comment": "'public', 'private' or 'internal'.",
+        "sql_name": "search_repositories_visibility"
+      },
+      "search_repositories.is_private": {
+        "comment": "Whether the repository is private.",
+        "sql_name": "search_repositories_is_private"
+      },
+      "search_repositories.is_fork": {
+        "comment": "Whether this repository is a fork of another.",
+        "sql_name": "search_repositories_is_fork"
+      },
+      "search_repositories.is_archived": {
+        "comment": "Whether the repository is archived (read-only).",
+        "sql_name": "search_repositories_is_archived"
+      },
+      "search_repositories.is_template": {
+        "comment": "Whether the repository is a template for new repositories.",
+        "sql_name": "search_repositories_is_template"
+      },
+      "search_repositories.default_branch": {
+        "comment": "Branch commits() lists when no sha is given, e.g. 'main'.",
+        "sql_name": "search_repositories_default_branch"
+      },
+      "search_repositories.stargazers_count": {
+        "comment": "Number of users who starred the repository.",
+        "sql_name": "search_repositories_stargazers_count"
+      },
+      "search_repositories.forks_count": {
+        "comment": "Number of forks.",
+        "sql_name": "search_repositories_forks_count"
+      },
+      "search_repositories.open_issues_count": {
+        "comment": "Open issues PLUS open pull requests — GitHub counts both here, so this is not the open-issue count alone.",
+        "sql_name": "search_repositories_open_issues_count"
+      },
+      "search_repositories.watchers_count": {
+        "comment": "Despite the name, GitHub reports the stargazer count here; kept for fidelity. Use stargazers_count.",
+        "sql_name": "search_repositories_watchers_count"
+      },
+      "search_repositories.size_kb": {
+        "comment": "Repository size on disk in kilobytes, as GitHub measures it.",
+        "sql_name": "search_repositories_size_kb"
+      },
+      "search_repositories.has_issues": {
+        "comment": "Whether the issue tracker is enabled.",
+        "sql_name": "search_repositories_has_issues"
+      },
+      "search_repositories.has_wiki": {
+        "comment": "Whether the wiki is enabled.",
+        "sql_name": "search_repositories_has_wiki"
+      },
+      "search_repositories.has_discussions": {
+        "comment": "Whether GitHub Discussions is enabled.",
+        "sql_name": "search_repositories_has_discussions"
+      },
+      "search_repositories.created_at": {
+        "comment": "When the repository was created.",
+        "sql_name": "search_repositories_created_at"
+      },
+      "search_repositories.updated_at": {
+        "comment": "When the repository object last changed (including stars); not a code-activity signal.",
+        "sql_name": "search_repositories_updated_at"
+      },
+      "search_repositories.pushed_at": {
+        "comment": "When a commit was last pushed to any branch; the activity signal.",
+        "sql_name": "search_repositories_pushed_at"
+      },
+      "search_issues.repo": {
+        "comment": "Repository the issue belongs to, as 'owner/name'.",
+        "sql_name": "search_issues_repo"
+      },
+      "search_issues.number": {
+        "comment": "Issue number within the repository — what issue_comments() takes.",
+        "sql_name": "search_issues_number"
+      },
+      "search_issues.id": {
+        "comment": "GitHub's globally unique issue id.",
+        "sql_name": "search_issues_id"
+      },
+      "search_issues.title": {
+        "comment": "Issue title.",
+        "sql_name": "search_issues_title"
+      },
+      "search_issues.state": {
+        "comment": "'open' or 'closed'.",
+        "sql_name": "search_issues_state"
+      },
+      "search_issues.state_reason": {
+        "comment": "Why it is in its state: 'completed', 'not_planned', 'reopened' or 'duplicate'; NULL when unset.",
+        "sql_name": "search_issues_state_reason"
+      },
+      "search_issues.user_login": {
+        "comment": "Login of the account that opened the issue.",
+        "sql_name": "search_issues_user_login"
+      },
+      "search_issues.author_association": {
+        "comment": "The author's relationship to the repository: OWNER, MEMBER, COLLABORATOR, CONTRIBUTOR, FIRST_TIME_CONTRIBUTOR, FIRST_TIMER or NONE.",
+        "sql_name": "search_issues_author_association"
+      },
+      "search_issues.labels": {
+        "comment": "Names of the labels applied to the issue.",
+        "sql_name": "search_issues_labels"
+      },
+      "search_issues.assignees": {
+        "comment": "Logins of everyone assigned to the issue.",
+        "sql_name": "search_issues_assignees"
+      },
+      "search_issues.milestone": {
+        "comment": "Title of the milestone the issue is filed under, if any.",
+        "sql_name": "search_issues_milestone"
+      },
+      "search_issues.comments": {
+        "comment": "Number of comments on the issue.",
+        "sql_name": "search_issues_comments"
+      },
+      "search_issues.reactions_total": {
+        "comment": "Total reactions of every kind on the issue body.",
+        "sql_name": "search_issues_reactions_total"
+      },
+      "search_issues.reactions_plus_one": {
+        "comment": "Thumbs-up reactions — the usual 'me too' signal.",
+        "sql_name": "search_issues_reactions_plus_one"
+      },
+      "search_issues.is_locked": {
+        "comment": "Whether the conversation is locked.",
+        "sql_name": "search_issues_is_locked"
+      },
+      "search_issues.is_pull_request": {
+        "comment": "Whether this row is a pull request. GitHub's issue APIs return both; issues() excludes pull requests by default, search_issues() includes them unless the query says is:issue.",
+        "sql_name": "search_issues_is_pull_request"
+      },
+      "search_issues.body": {
+        "comment": "Issue body as Markdown.",
+        "sql_name": "search_issues_body"
+      },
+      "search_issues.html_url": {
+        "comment": "Link to the issue on github.com.",
+        "sql_name": "search_issues_html_url"
+      },
+      "search_issues.created_at": {
+        "comment": "When the issue was opened.",
+        "sql_name": "search_issues_created_at"
+      },
+      "search_issues.updated_at": {
+        "comment": "When the issue last changed, including new comments.",
+        "sql_name": "search_issues_updated_at"
+      },
+      "search_issues.closed_at": {
+        "comment": "When the issue was closed; NULL while open.",
+        "sql_name": "search_issues_closed_at"
+      },
+      "all_rate_limit.resource": {
+        "comment": "Which budget this row describes: 'core' (most endpoints), 'search', 'graphql', ...",
+        "sql_name": "all_rate_limit_resource"
+      },
+      "all_rate_limit.request_limit": {
+        "comment": "Requests allowed per window: 60/hour anonymously, 5,000 with a token.",
+        "sql_name": "all_rate_limit_request_limit"
+      },
+      "all_rate_limit.used": {
+        "comment": "Requests spent in the current window.",
+        "sql_name": "all_rate_limit_used"
+      },
+      "all_rate_limit.remaining": {
+        "comment": "Count of requests left before the window resets.",
+        "sql_name": "all_rate_limit_remaining"
+      },
+      "all_rate_limit.reset_at": {
+        "comment": "When the window resets and remaining returns to request_limit.",
+        "sql_name": "all_rate_limit_reset_at"
+      },
+      "all_rate_limit.authenticated": {
+        "comment": "Whether these figures are for a token (true) or this IP's anonymous budget (false).",
+        "sql_name": "all_rate_limit_authenticated"
+      },
+      "pulls.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "pulls_created_day"
+      },
+      "pulls.merged_day": {
+        "comment": "UTC calendar date of merged_at.",
+        "sql_name": "pulls_merged_day"
+      },
+      "issues.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "issues_created_day"
+      },
+      "issues.closed_day": {
+        "comment": "UTC calendar date of closed_at.",
+        "sql_name": "issues_closed_day"
+      },
+      "issue_comments.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "issue_comments_created_day"
+      },
+      "commits.committer_day": {
+        "comment": "UTC calendar date of committer_date.",
+        "sql_name": "commits_committer_day"
+      },
+      "releases.published_day": {
+        "comment": "UTC calendar date of published_at.",
+        "sql_name": "releases_published_day"
+      },
+      "stargazers.starred_day": {
+        "comment": "UTC calendar date of starred_at.",
+        "sql_name": "stargazers_starred_day"
+      },
+      "workflow_runs.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "workflow_runs_created_day"
+      },
+      "pulls.merge_hours": {
+        "comment": "Elapsed creation-to-merge hours, including draft and waiting time; not review or business hours.",
+        "sql_name": "pulls_merge_hours"
+      },
+      "issues.close_hours": {
+        "comment": "Elapsed creation to currently recorded closure; not time spent in open state across reopenings.",
+        "sql_name": "issues_close_hours"
+      }
+    },
+    "dataset_semantics": {
+      "repo": {
+        "comment": "One GitHub repository by 'owner/name'",
+        "tags": {
+          "source_function": "repo",
+          "observation": "live"
+        }
+      },
+      "user": {
+        "comment": "One GitHub user or organization profile by login",
+        "tags": {
+          "source_function": "user",
+          "observation": "live"
+        }
+      },
+      "repos": {
+        "comment": "Repositories owned by a GitHub user or organization",
+        "tags": {
+          "source_function": "repos",
+          "observation": "live"
+        }
+      },
+      "issues": {
+        "comment": "Issues in a GitHub repository, newest first",
+        "tags": {
+          "source_function": "issues",
+          "observation": "live"
+        }
+      },
+      "pulls": {
+        "comment": "Pull requests in a GitHub repository, newest first",
+        "tags": {
+          "source_function": "pulls",
+          "observation": "live"
+        }
+      },
+      "issue_comments": {
+        "comment": "Comments on a GitHub issue or pull request",
+        "tags": {
+          "source_function": "issue_comments",
+          "observation": "live"
+        }
+      },
+      "commits": {
+        "comment": "Commit history of a GitHub repository, newest first",
+        "tags": {
+          "source_function": "commits",
+          "observation": "live"
+        }
+      },
+      "releases": {
+        "comment": "Releases of a GitHub repository, newest first",
+        "tags": {
+          "source_function": "releases",
+          "observation": "live"
+        }
+      },
+      "contributors": {
+        "comment": "Contributors to a GitHub repository, most commits first",
+        "tags": {
+          "source_function": "contributors",
+          "observation": "live"
+        }
+      },
+      "languages": {
+        "comment": "Bytes of code per language in a GitHub repository",
+        "tags": {
+          "source_function": "languages",
+          "observation": "live"
+        }
+      },
+      "stargazers": {
+        "comment": "Stars on a GitHub repository with when each was given, oldest first",
+        "tags": {
+          "source_function": "stargazers",
+          "observation": "live"
+        }
+      },
+      "workflow_runs": {
+        "comment": "GitHub Actions workflow runs for a repository, newest first",
+        "tags": {
+          "source_function": "workflow_runs",
+          "observation": "live"
+        }
+      },
+      "search_repositories": {
+        "comment": "Search GitHub repositories with GitHub's query syntax",
+        "tags": {
+          "source_function": "search_repositories",
+          "observation": "live"
+        }
+      },
+      "search_issues": {
+        "comment": "Search GitHub issues and pull requests with GitHub's query syntax",
+        "tags": {
+          "source_function": "search_issues",
+          "observation": "live"
+        }
+      },
+      "all_rate_limit": {
+        "comment": "GitHub API rate-limit budgets (the scan backing the `rate_limit` table)",
+        "tags": {
+          "source_function": "all_rate_limit",
+          "observation": "live"
+        }
+      }
+    },
+    "invocation_sources": [
+      "repo",
+      "user",
+      "repos",
+      "issues",
+      "pulls",
+      "issue_comments",
+      "commits",
+      "releases",
+      "contributors",
+      "languages",
+      "stargazers",
+      "workflow_runs",
+      "search_repositories",
+      "search_issues",
+      "all_rate_limit"
+    ],
+    "driving_grain_reduction": [
+      "repo",
+      "user",
+      "repos",
+      "issues",
+      "pulls",
+      "issue_comments",
+      "commits",
+      "releases",
+      "contributors",
+      "languages",
+      "stargazers",
+      "workflow_runs"
+    ],
+    "invocation_limits": {
+      "defaults": {
+        "max_retained_bytes": 268435456,
+        "deadline_ms": 180000
+      },
+      "ceilings": {
+        "max_retained_bytes": 268435456,
+        "deadline_ms": 180000
+      }
+    }
+  },
+  "semantic_query": {
+    "parameters": {
+      "repository": {
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Repository as 'owner/name'"
+      },
+      "issue_number": {
+        "type": "BIGINT",
+        "nullable": false,
+        "comment": "Issue or pull request number"
+      },
+      "owner": {
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "User or organization login whose repositories to list"
+      }
+    },
+    "request": {
+      "version": 1,
+      "inputs": {
+        "repository_input": {
+          "definition": "repository_input",
+          "rows": [
+            [
+              {
+                "parameter": "repository"
+              }
+            ]
+          ]
+        },
+        "issue_comments_input": {
+          "definition": "issue_comments_input",
+          "rows": [
+            [
+              {
+                "parameter": "repository"
+              },
+              {
+                "parameter": "issue_number"
+              }
+            ]
+          ]
+        },
+        "repos_input": {
+          "definition": "repos_input",
+          "rows": [
+            [
+              {
+                "parameter": "owner"
+              }
+            ]
+          ]
+        }
+      },
+      "source_bindings": {
+        "commits": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "sha": {
+              "literal": ""
+            },
+            "path": {
+              "literal": ""
+            },
+            "author": {
+              "literal": ""
+            },
+            "since": {
+              "literal": ""
+            },
+            "until": {
+              "literal": ""
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "contributors": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "issue_comments": {
+          "arguments": {
+            "repo": {
+              "member": "issue_comments_input.repo"
+            },
+            "number": {
+              "member": "issue_comments_input.number"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "issue_comments_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "issues": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "state": {
+              "literal": "all"
+            },
+            "labels": {
+              "literal": ""
+            },
+            "since": {
+              "literal": ""
+            },
+            "include_pull_requests": {
+              "literal": false
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "languages": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "pulls": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "state": {
+              "literal": "all"
+            },
+            "base": {
+              "literal": ""
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "releases": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "repo": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "repos": {
+          "arguments": {
+            "owner": {
+              "member": "repos_input.owner"
+            },
+            "type": {
+              "literal": "owner"
+            },
+            "sort": {
+              "literal": "pushed"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repos_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "stargazers": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "workflow_runs": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "branch": {
+              "literal": ""
+            },
+            "event": {
+              "literal": ""
+            },
+            "status": {
+              "literal": ""
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        }
+      }
+    }
+  }
+}

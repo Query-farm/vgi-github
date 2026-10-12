@@ -1,9 +1,10 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "vgi-python[http,haybarn]>=0.37.3",
-#     "vgi-rpc>=0.47.2",
-#     "httpx>=0.27",
+#     "vgi-python[http,haybarn]>=0.40.0",
+#     "vgi-rpc>=0.48.0",
+#     "httpx>=0.28.1",
+#     "graphql-core>=3.2.6,<3.3",
 # ]
 # ///
 """Stdio entry point for the GitHub VGI worker (``uv run``).

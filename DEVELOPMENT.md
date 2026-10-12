@@ -4,9 +4,12 @@ How the worker is built, and why. For using it, see the [README](README.md).
 
 ## Read-only, by construction
 
-Every request goes through one `GET` chokepoint in
-`github_api.py` — the only module in the package that so much as imports `httpx` — and a CI
-guard (`tests/test_readonly_guard.py`) fails the build if a write verb appears anywhere. That
+Every REST request goes through one `GET` chokepoint in
+`github_api.py` — the only module in the package that imports `httpx`. The only POST is
+GitHub's GraphQL query transport: `graphql_query()` first parses the entire document and
+rejects every mutation, subscription and schema definition, including unselected operations.
+It fixes the endpoint to the configured GitHub host and refuses redirects. A CI
+guard (`tests/test_readonly_guard.py`) checks these transport boundaries. That
 matters more here than on most APIs: GitHub's write endpoints share a host, a path and an
 `Authorization` header with the reads, so a token with write scope would happily authorize a
 `POST`. Names from user SQL are validated and percent-encoded so they cannot leave their path
@@ -20,7 +23,7 @@ git clone https://github.com/Query-farm/vgi-github
 cd vgi-github
 
 uv sync --all-extras     # Install dependencies
-uv run pytest            # 128 offline tests
+uv run pytest            # Offline suite, including every generated REST operation
 uv run ruff check .      # Lint
 ```
 
@@ -33,6 +36,52 @@ uv pip install -e ../vgi-python -e ../vgi-rpc
 ```
 
 ## Function shapes
+
+The curated `main` schema follows the contracts below. The generated `rest` schema
+uses the same blended contract for operations with path parameters, and a single-worker
+scan for operations without them. Results preserve whole response pages as JSON text
+and bytes instead of flattening away fields. `api.rest()` dispatches only manifest GET
+operation IDs; it cannot accept a URL or an HTTP method. `api.graphql()` accepts only
+parsed queries and JSON variables. Both compose under `LATERAL`.
+
+The checked-in `vgi_github/rest_manifest.json` is generated from GitHub's MIT-licensed
+OpenAPI descriptions at a pinned revision. It includes source hashes and per-product
+endpoint counts. There is no discovery-time network dependency. Regenerate or verify it:
+
+```bash
+python scripts/generate_rest_catalog.py
+python scripts/generate_rest_catalog.py --check
+```
+
+`--source-dir` reads the two pinned source files locally. The manifest is the source of truth
+for the pinned commit and request API version. To check upstream without writing files, run
+`python scripts/generate_rest_catalog.py --check-upstream`. To refresh, run
+`python scripts/generate_rest_catalog.py --revision latest`, or supply a full commit SHA.
+The generator resolves `latest` once so both products use the same immutable commit; it reports
+added, removed and changed operations. Review the manifest diff and run the offline suite and
+catalog lint before accepting it. The request API version changes only with `--api-version`.
+The read-only `api-coverage.yml` workflow verifies pinned generation on relevant PRs and checks
+upstream weekly; drift fails the check without creating commits, issues or pull requests.
+GET-only generation, unknown
+operation rejection, encoded path parameters and the central HTTP boundary are independent
+parts of the read-only contract. Query parameters are restricted to each operation's
+published definitions. The additional functions do not expand the approved Crossfield model.
+
+`tests/test_rest.py` drives every generated endpoint against a mock transport. It also
+tests lossless binary and JSON responses, cursor preservation, ETags, token isolation on
+download redirects and incomplete-result failures. `tests/test_graphql_reads.py` checks
+parser-based mutation rejection and partial GraphQL errors. `tests/test_api_sql.py` runs
+real SQL through the subprocess worker against a local fake GitHub server.
+
+`datasets.py` adds six typed `main` functions: Projects, project items and field definitions
+use REST; Discussions, comments and replies use GraphQL. Prefer REST for new typed datasets
+when it supplies the needed data, and keep the transport behind typed columns and named filters.
+GraphQL connection pagination is bounded, preserves opaque cursors, rejects malformed or repeated
+cursors and fails on partial errors. Replies are a separate function so nested connection limits
+cannot silently hide conversation data. Custom Project field values remain JSON because their
+shape depends on each board. The new functions share keyed provenance and cache policy with
+existing functions, but are excluded from the original Crossfield model and reject reporting mode.
+`tests/test_datasets.py` covers these contracts; real subprocess SQL joins live in `test_api_sql.py`.
 
 Functions come in two shapes, and the job decides which.
 
@@ -219,6 +268,16 @@ SELECT resource, remaining, request_limit, reset_at, authenticated FROM github.r
 
 ## Catalog metadata
 
+VGI Python 0.40.0 enables `catalog_contents`: clients supporting VGI protocol 2.1.0
+can load all schemas, tables, functions, and their metadata in one RPC after ATTACH.
+`GitHubCatalog` inherits this capability from `ReadOnlyCatalogInterface`; the existing
+per-schema APIs remain available. Its catalog version stays frozen at 1.
+
+We set `catalog_contents_attach_independent = False` because serialized schema records
+include each attachment's auth mode, token source, and default cache TTL. Reusing VGI's
+default shared snapshot would give later clients the first attachment's settings.
+Bulk discovery reads only local declarations and makes no GitHub API requests.
+
 Everything a client sees on `ATTACH` — object descriptions, column comments, result schemas,
 examples, categories, agent test tasks — is published as `vgi.*` tags and checked by
 [vgi-lint](https://github.com/Query-farm/vgi-lint-check):
@@ -228,8 +287,12 @@ vgi-lint lint                     # config lives in vgi-lint.toml
 vgi-lint lint --audit-waivers     # prove the waivers still buy something
 ```
 
-The catalog scores 99/100 with no findings, structural and behavioural — the behavioural tier
-executes every documented example against the live API.
+Agent task metadata contains only names and prompts. Reference SQL and grading criteria
+live in `vgi-agent-tests.yaml`, which vgi-lint discovers beside `vgi-lint.toml`.
+
+The structural tier validates the catalog and its documented exemptions. The behavioural tier
+executes curated examples against the live API; generated endpoint coverage is exercised
+with mock responses so it does not require access to every GitHub product and private resource.
 
 Column documentation has a single source: `vgi_github/schemas.py` attaches a comment to every
 Arrow field via `meta.field()`, and `meta.result_columns_schema()` reads those same strings back
@@ -237,13 +300,20 @@ out to build each function's declared result schema. A column documented once sh
 `DESCRIBE`, in `duckdb_columns()` and in `vgi.result_columns_schema`, and cannot drift between
 them.
 
-Three waivers live in `vgi-lint.toml`, each with a recorded kind and reason that
+Waivers live in `vgi-lint.toml`, each with a recorded kind and reason that
 `--audit-waivers` re-checks. VGI311 asks that a parameterless scan be exposed as a table, which
 `all_rate_limit` is — as `rate_limit`; the rule matches on name, and a function and a table
-cannot share one. The other two are on `stargazers`, and both come from GitHub listing
+cannot share one. Two are on `stargazers`, and both come from GitHub listing
 stargazers only to tokens that administer the repository: no agent test task can be written
 that every caller's credentials can complete (VGI520), and VGI911's bare-`LIMIT` probe sees the
 function's deliberate error for any token without that access — CI's workflow token included.
+
+Generated REST bindings have two further exemptions: examples and analytical agent tasks
+cannot be portable across hundreds of account-specific resources and product permissions.
+The dispatcher and discovery have examples and agent tasks; every generated operation has
+an offline transport test. The endpoint inventory also has an exemption from the rule
+against duplicating `duckdb_functions()`: it supplies upstream paths, operation IDs, product
+availability and query-parameter schemas required by generic dispatch.
 
 ## CI
 
@@ -266,7 +336,7 @@ and an example that wedged the client — none of which an offline test could se
 ## Tests
 
 ```bash
-uv run pytest                                              # 128 offline tests
+uv run pytest                                            # Offline tests
 VGI_GITHUB_TOKEN=$(gh auth token) uv run pytest -m live    # 48 tests against the real API
 ```
 

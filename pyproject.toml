@@ -1,7 +1,7 @@
 [project]
 name = "vgi-github"
 dynamic = ["version"]
-description = "A read-only VGI (Vector Gateway Interface) worker exposing the GitHub REST API to DuckDB/SQL"
+description = "A read-only VGI (Vector Gateway Interface) worker exposing GitHub REST and GraphQL to DuckDB/SQL"
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Query Farm", email = "hello@query.farm" }]
@@ -23,24 +23,25 @@ dependencies = [
     # an in-process DuckDB engine, and without one every filtered scan fails at
     # runtime with "No DuckDB-compatible engine is installed". The offline tests
     # cannot see this, because the dev group brings in `duckdb` as a fallback.
-    "vgi-python[http,haybarn]>=0.37.3",
-    "httpx>=0.27",
+    "vgi-python[http,haybarn]>=0.40.0",
+    "httpx>=0.28.1",
+    "graphql-core>=3.2.6,<3.3",
 ]
 
 [project.optional-dependencies]
-serve = ["vgi-python[http,haybarn,oauth]>=0.37.3", "vgi-rpc[sentry]>=0.47.2"]
+serve = ["vgi-python[http,haybarn,oauth]>=0.40.0", "vgi-rpc[sentry]>=0.48.0"]
 
 [dependency-groups]
 dev = [
-    "pytest>=8",
+    "pytest>=9.1.1",
     # Pinned to a minor: the rule set is version-dependent, so an unpinned ruff
     # means CI can fail on a commit that was clean locally.
-    "ruff>=0.16,<0.17",
+    "ruff>=0.16.10,<0.17",
     # Drives a real ATTACH in tests/test_end_to_end.py.
-    "duckdb>=1.1",
+    "duckdb>=1.5.6",
     # DuckDB materializes TIMESTAMP WITH TIME ZONE through pytz; without it a
     # scan that returns one fails at fetch time, not at bind.
-    "pytz>=2024.1",
+    "pytz>=2026.5",
 ]
 
 [project.urls]
@@ -54,7 +55,7 @@ vgi-github = "vgi_github.worker:main"
 vgi-github-http = "vgi_github.worker:main_http"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.32.4"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]

@@ -1,0 +1,2909 @@
+From 1599d86632e092ad4a53497d49960dc10aff1fc3 Mon Sep 17 00:00:00 2001
+From: Rusty Conover <rusty@conover.me>
+Date: Wed, 7 Oct 2026 03:13:17 -0400
+Subject: [PATCH] Add isolated DuckDB 2 invocation interoperability profile
+
+---
+ CMakeLists.txt                             |  59 ++++++++++--
+ docs/duckdb2_invocation_profile.md         |  53 ++++++++++
+ src/include/storage/vgi_catalog.hpp        |   2 +-
+ src/include/storage/vgi_table_entry.hpp    |   3 +
+ src/include/vgi_arrow_ipc.hpp              |   3 +-
+ src/include/vgi_http_client.hpp            |   6 +-
+ src/include/vgi_rpc_client.hpp             |   4 +-
+ src/include/vgi_secret_storage.hpp         |   2 +-
+ src/include/vgi_table_function_impl.hpp    |   2 +
+ src/storage/vgi_aggregate_function_set.cpp |  12 ++-
+ src/storage/vgi_catalog.cpp                |  55 ++++++++++-
+ src/storage/vgi_catalog_set.cpp            |   4 +-
+ src/storage/vgi_macro_set.cpp              |   8 ++
+ src/storage/vgi_scalar_function_set.cpp    |  14 ++-
+ src/storage/vgi_schema_entry.cpp           |  40 ++++++--
+ src/storage/vgi_schema_set.cpp             |   4 +-
+ src/storage/vgi_table_entry.cpp            |  44 ++++++++-
+ src/storage/vgi_table_function_set.cpp     |  56 ++++++++---
+ src/storage/vgi_table_set.cpp              |  22 ++---
+ src/storage/vgi_view_set.cpp               |  12 ++-
+ src/vgi_arrow_ipc.cpp                      |  72 +++++++++++++-
+ src/vgi_arrow_utils.cpp                    |   6 +-
+ src/vgi_cancel_dispatcher.cpp              |  12 +++
+ src/vgi_catalog_api.cpp                    |  17 +++-
+ src/vgi_copy_from_impl.cpp                 |   2 +
+ src/vgi_exchange_cache_key.cpp             |   2 +-
+ src/vgi_extension.cpp                      |  91 ++++++++++++++----
+ src/vgi_function_connection.cpp            |  24 ++++-
+ src/vgi_global_functions.cpp               |   2 +-
+ src/vgi_http_client.cpp                    |  18 ++--
+ src/vgi_http_function_connection.cpp       |  34 +++++--
+ src/vgi_iroh_config.cpp                    |   3 +-
+ src/vgi_iroh_native.cpp                    |   6 +-
+ src/vgi_rpc_client.cpp                     |   8 +-
+ src/vgi_sab_stream.cpp                     |   4 +-
+ src/vgi_secret_storage.cpp                 |  10 +-
+ src/vgi_settings.cpp                       |   5 +
+ src/vgi_subprocess.cpp                     |  10 +-
+ src/vgi_table_buffering_impl.cpp           |   2 +-
+ src/vgi_table_function_impl.cpp            |  63 +++++++++++-
+ src/vgi_table_in_out_impl.cpp              |   4 +-
+ src/vgi_unary_rpc.cpp                      |  24 ++---
+ test/duckdb2/build_io.py                   |  34 +++++++
+ test/duckdb2/invocation_io.cpp             | 107 +++++++++++++++++++++
+ 44 files changed, 809 insertions(+), 156 deletions(-)
+ create mode 100644 docs/duckdb2_invocation_profile.md
+ create mode 100644 test/duckdb2/build_io.py
+ create mode 100644 test/duckdb2/invocation_io.cpp
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 95b4840..8a5d2f3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -275,11 +275,16 @@ if(MSVC)
+   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ endif()
+ 
++option(VGI_DUCKDB2_INVOCATION_PROFILE "Build the isolated read-only DuckDB 2.0 invocation interoperability profile" ON)
++if(VGI_DUCKDB2_INVOCATION_PROFILE)
++  add_compile_definitions(VGI_DUCKDB2_INVOCATION_PROFILE=1 VGI_ASYNC_INIT_ENABLED=0)
++endif()
++
+ include_directories(src/include)
+-include_directories(duckdb/third_party/mbedtls/include)
+-include_directories(duckdb/third_party/httplib)
+-include_directories(duckdb/third_party/zstd/include)
+-include_directories(duckdb/third_party/miniz)
++include_directories(${CMAKE_SOURCE_DIR}/third_party/mbedtls/include)
++include_directories(${CMAKE_SOURCE_DIR}/third_party/httplib)
++include_directories(${CMAKE_SOURCE_DIR}/third_party/zstd/include)
++include_directories(${CMAKE_SOURCE_DIR}/third_party/miniz)
+ 
+ set(EXTENSION_SOURCES
+ src/vgi_extension.cpp
+@@ -387,12 +392,43 @@ if(EMSCRIPTEN)
+     src/vgi_sab_stream.cpp)
+ endif()
+ 
+-build_static_extension(${TARGET_NAME} ${EXTENSION_SOURCES})
+-build_loadable_extension(${TARGET_NAME} " " ${EXTENSION_SOURCES})
++if(VGI_DUCKDB2_INVOCATION_PROFILE)
++  list(REMOVE_ITEM EXTENSION_SOURCES
++    src/vgi_streaming_window_operator.cpp
++    src/vgi_lateral_batch_operator.cpp
++    src/vgi_multi_scan_rewriter.cpp
++    src/vgi_table_buffering_builders.cpp
++    src/vgi_table_buffering_impl.cpp
++    src/vgi_scalar_function_impl.cpp
++    src/vgi_aggregate_function_impl.cpp
++    src/vgi_aggregate_streaming_impl.cpp
++    src/vgi_aggregate_window_impl.cpp
++    src/vgi_catalogs.cpp
++    src/vgi_table_branches_function.cpp
++    src/vgi_function_arguments_function.cpp
++    src/vgi_copy_from_impl.cpp
++    src/vgi_copy_to_impl.cpp
++    src/vgi_worker_pool_functions.cpp
++    src/vgi_result_cache_functions.cpp
++    src/vgi_worker_package_functions.cpp
++    src/vgi_github_functions.cpp
++    src/vgi_table_statistics_function.cpp
++    src/vgi_clear_cache.cpp
++    src/vgi_catalog_contents_function.cpp
++    src/storage/vgi_physical_write.cpp)
++endif()
++
++build_extension_library(${TARGET_NAME} ${EXTENSION_SOURCES})
++get_target_property(VGI_ARCHIVE_INTERFACE ${EXTENSION_NAME} INTERFACE_LINK_LIBRARIES)
++list(REMOVE_ITEM VGI_ARCHIVE_INTERFACE duckdb_static)
++set_property(TARGET ${EXTENSION_NAME} PROPERTY INTERFACE_LINK_LIBRARIES "${VGI_ARCHIVE_INTERFACE}")
++get_target_property(VGI_ARCHIVE_LINKS ${EXTENSION_NAME} LINK_LIBRARIES)
++list(REMOVE_ITEM VGI_ARCHIVE_LINKS duckdb_static)
++set_property(TARGET ${EXTENSION_NAME} PROPERTY LINK_LIBRARIES "${VGI_ARCHIVE_LINKS}")
+ 
+ # Link OpenSSL in both the static library as the loadable extension
+ target_link_libraries(${EXTENSION_NAME} ${VGI_SSL_LIBS} ${VGI_ARROW_LIB})
+-target_link_libraries(${LOADABLE_EXTENSION_NAME} ${VGI_SSL_LIBS} ${VGI_ARROW_LIB})
++target_link_libraries(${LOADABLE_EXTENSION_NAME} ${VGI_SSL_LIBS} ${VGI_ARROW_LIB} duckdb_mbedtls duckdb_yyjson duckdb_zstd)
+ 
+ if(VGI_ENABLE_IROH)
+   add_dependencies(${EXTENSION_NAME} vgi_iroh_rust)
+@@ -626,3 +662,12 @@ if((BUILD_VGI_HTTP_INTERRUPT_TESTS OR DEFINED ENV{BUILD_VGI_HTTP_INTERRUPT_TESTS
+     duckdb_static
+     dummy_static_extension_loader)
+ endif()
++
++option(VGI_DUCKDB2_PROFILE_TESTS "Build isolated invocation transport tests" OFF)
++if(VGI_DUCKDB2_PROFILE_TESTS)
++  if(NOT VGI_DUCKDB2_INVOCATION_PROFILE OR WIN32 OR EMSCRIPTEN)
++    message(FATAL_ERROR "Invocation profile I/O tests require the POSIX profile")
++  endif()
++  add_executable(vgi_invocation_io_test test/duckdb2/invocation_io.cpp)
++  target_link_libraries(vgi_invocation_io_test PRIVATE ${EXTENSION_NAME} duckdb)
++endif()
+diff --git a/docs/duckdb2_invocation_profile.md b/docs/duckdb2_invocation_profile.md
+new file mode 100644
+index 0000000..dee5ed4
+--- /dev/null
++++ b/docs/duckdb2_invocation_profile.md
+@@ -0,0 +1,53 @@
++# Isolated DuckDB 2 invocation interoperability profile
++
++This checkout is an interoperability fixture derived from VGI commit
++`de68c1786d517ad65bce535bc00d3c2e54d18c1e` and compiled against DuckDB source
++`5070de3585e846718fac121b5b149f4236e6a58a` with the Crossfield engine patches.
++It does not claim to port the complete VGI extension to DuckDB 2. The original
++VGI checkout is unchanged. VGI retains its original license and notices; it is
++not a source dependency of the Crossfield extension.
++
++`VGI_DUCKDB2_INVOCATION_PROFILE=ON` selects this explicit read-only profile.
++The tested platform scope is native POSIX. `VGI_ENABLE_IROH=OFF` remains required
++for the interoperability build. The profile preserves actual VGI attachment,
++metadata RPCs, opaque attachment/transaction state, original native producer and
++`input_from_args` row-map callbacks, Arrow conversion, worker pooling, settings,
++and required local DuckDB secret forwarding.
++
++DuckDB 2 adapters use explicit `Identifier` names, native function signatures,
++`vector<Identifier>` callback output names, and `ClientContext::IsInterrupted()`.
++Both asynchronous producer initialization and async prefetch are disabled in
++code. Enabling async prefetch raises an explicit unsupported-capability error.
++Producers must declare at most one worker and return exactly one worker at init.
++Arguments must be explicit and fixed; variadic arguments, defaults, classic
++TABLE arguments, finalizers, and order-dependent/buffering profiles are rejected.
++
++The fixture supports synchronous subprocess, Unix socket, and TCP worker byte
++streams. Every Arrow read and write uses nonblocking POSIX I/O, checks the live
++query interrupt at 100 ms polling intervals, and fails after 30 seconds without
++byte progress. Partial-frame reads are included. Original descriptor flags are
++restored before reuse. The first-byte readiness path retains interruption
++polling at 250 ms and gains the same 30-second idle ceiling. These are idle I/O
++bounds, not a total query deadline. Crossfield applies its separate query budget.
++
++HTTP/httpi/Iroh worker paths are rejected before attach RPCs (including resolved
++paths). Query-bound external-location transfers are rejected. The pinned engine
++removed the request-cancellation hooks used by the original VGI HTTP transport;
++this profile does not claim that merely checking interruption after HTTP returns
++provides cooperative cancellation. HTTP credential brokers are outside this
++profile; local registered secret types and existing DuckDB secrets remain real.
++
++Optimizer rewrites, filter pushdown, partition/split scans, result-cache serving,
++DuckDB window/aggregate/scalar functions, macros/views/stored-table scans, write
++planning, COPY formats, global function publishing, and companion attachments
++are not supported by this profile. Unsupported executable capabilities fail
++explicitly. SQL diagnostic helper functions are omitted. A worker advertising
++global functions or companions can opt out using the original explicit ATTACH
++options `global_functions false` and `attach_companions false`.
++
++The optional CMake target `vgi_invocation_io_test` requires
++`VGI_DUCKDB2_PROFILE_TESTS=ON`. It tests blocked read, partial read, and blocked
++write interruption; descriptor-flag restoration; and unchanged healthy bytes.
++Passing any argument additionally exercises both real 30-second idle ceilings.
++This document describes the implementation contract; build/load/live numerical
++results must be recorded separately after execution.
+diff --git a/src/include/storage/vgi_catalog.hpp b/src/include/storage/vgi_catalog.hpp
+index f07eb07..2b98084 100644
+--- a/src/include/storage/vgi_catalog.hpp
++++ b/src/include/storage/vgi_catalog.hpp
+@@ -37,7 +37,7 @@ public:
+ 		return "vgi";
+ 	}
+ 
+-	std::string GetDefaultSchema() const override;
++	optional<Identifier> GetDefaultSchema() const override;
+ 
+ 	bool SupportsTimeTravel() const override {
+ 		return attach_result_ && attach_result_->supports_time_travel;
+diff --git a/src/include/storage/vgi_table_entry.hpp b/src/include/storage/vgi_table_entry.hpp
+index 70c580f..8ba69df 100644
+--- a/src/include/storage/vgi_table_entry.hpp
++++ b/src/include/storage/vgi_table_entry.hpp
+@@ -72,12 +72,15 @@ struct VgiNativeDelegationMarkerBindData : public duckdb::TableFunctionData {
+ TableFunction MakeNativeDelegationMarkerFunction();
+ 
+ class VgiTableEntry : public TableCatalogEntry {
++private:
++	ColumnList columns_;
+ public:
+ 	VgiTableEntry(Catalog &catalog, SchemaCatalogEntry &schema, CreateTableInfo &info,
+ 	              const vgi::VgiTableInfo &table_info);
+ 	~VgiTableEntry() override;
+ 
+ public:
++	const ColumnList &GetColumns() const override { return columns_; }
+ 	unique_ptr<BaseStatistics> GetStatistics(ClientContext &context, column_t column_id) override;
+ 
+ 	TableFunction GetScanFunction(ClientContext &context, unique_ptr<FunctionData> &bind_data) override;
+diff --git a/src/include/vgi_arrow_ipc.hpp b/src/include/vgi_arrow_ipc.hpp
+index 2b0db59..1c64a9e 100644
+--- a/src/include/vgi_arrow_ipc.hpp
++++ b/src/include/vgi_arrow_ipc.hpp
+@@ -105,7 +105,7 @@ private:
+ // NON-OWNING: Does not close the fd on destruction. The caller retains ownership.
+ class FdOutputStream : public arrow::io::OutputStream {
+ public:
+-	explicit FdOutputStream(int fd);
++	explicit FdOutputStream(int fd, ClientContext *context = nullptr);
+ 	~FdOutputStream() override = default;
+ 
+ 	arrow::Status Close() override;
+@@ -118,6 +118,7 @@ private:
+ 	int fd_;
+ 	int64_t position_;
+ 	bool is_open_;
++	ClientContext *context_;
+ };
+ 
+ // Extract string values from a result batch column
+diff --git a/src/include/vgi_http_client.hpp b/src/include/vgi_http_client.hpp
+index 222290a..1efbdcb 100644
+--- a/src/include/vgi_http_client.hpp
++++ b/src/include/vgi_http_client.hpp
+@@ -152,13 +152,13 @@ std::string HttpPostArrowIpc(ClientContext &context,
+                               duckdb::unique_ptr<HTTPClient> *client_holder = nullptr,
+                               ServerCapabilities *harvested_caps = nullptr,
+                               const std::shared_ptr<IrohClientConfig> &iroh_config = nullptr,
+-                              const std::atomic<bool> *cancellation = nullptr);
++                              ClientContext *cancellation = nullptr);
+ 
+ // HTTP GET raw bytes from a URL. Used for fetching externalized batches.
+ // Handles X-VGI-Content-Encoding decompression (zstd or gzip). No auth
+ // headers sent. cancellation: as for HttpPostArrowIpc.
+ std::string HttpGetBytes(ClientContext &context, const std::string &url,
+-                         const std::atomic<bool> *cancellation = nullptr);
++                         ClientContext *cancellation = nullptr);
+ 
+ // Resolve an external location pointer batch by fetching and parsing the URL.
+ // Returns the resolved data batch. Throws on redirect loops or fetch failures.
+@@ -172,7 +172,7 @@ UnaryResponseResult ResolveExternalLocation(ClientContext &context,
+                                              const std::string &invocation_id_hex = "",
+                                              const std::string &attach_opaque_data_hex = "",
+                                              const std::shared_ptr<arrow::KeyValueMetadata> &pointer_metadata = nullptr,
+-                                             const std::atomic<bool> *cancellation = nullptr);
++                                             ClientContext *cancellation = nullptr);
+ 
+ // Check if a batch result is a pointer batch and resolve it if so.
+ // Returns the original result if not a pointer batch, or the resolved result.
+diff --git a/src/include/vgi_rpc_client.hpp b/src/include/vgi_rpc_client.hpp
+index 8acbae7..9b49cde 100644
+--- a/src/include/vgi_rpc_client.hpp
++++ b/src/include/vgi_rpc_client.hpp
+@@ -182,7 +182,7 @@ RpcBatchType ClassifyBatch(const std::shared_ptr<arrow::RecordBatch> &batch,
+ void WriteRpcRequest(int fd, const std::string &method_name,
+                      const std::shared_ptr<arrow::RecordBatch> &params_batch,
+                      const std::shared_ptr<arrow::KeyValueMetadata> &extra_metadata = nullptr,
+-                     const VgiProtocolId &protocol = VGI_MAIN_PROTOCOL);
++                     const VgiProtocolId &protocol = VGI_MAIN_PROTOCOL, ClientContext *context = nullptr);
+ 
+ // Stream-based form used by transports that are not represented by an OS file
+ // descriptor (notably native Iroh QUIC streams). The framing is byte-for-byte
+@@ -196,7 +196,7 @@ void WriteRpcRequest(const std::shared_ptr<arrow::io::OutputStream> &sink,
+ // Write an RPC request with no parameters (zero-field schema, 1-row batch).
+ // Used for parameterless methods like catalog_catalogs.
+ void WriteEmptyRpcRequest(int fd, const std::string &method_name,
+-                          const VgiProtocolId &protocol = VGI_MAIN_PROTOCOL);
++                          const VgiProtocolId &protocol = VGI_MAIN_PROTOCOL, ClientContext *context = nullptr);
+ 
+ // ============================================================================
+ // Response Reading
+diff --git a/src/include/vgi_secret_storage.hpp b/src/include/vgi_secret_storage.hpp
+index 850c6a6..329ab4d 100644
+--- a/src/include/vgi_secret_storage.hpp
++++ b/src/include/vgi_secret_storage.hpp
+@@ -56,7 +56,7 @@ public:
+ 	//! The one allowed throw: a `CREATE SECRET (STORAGE <ours>)` is not supported.
+ 	unique_ptr<SecretEntry> StoreSecret(unique_ptr<const BaseSecret> secret, OnCreateConflict on_conflict,
+ 	                                    optional_ptr<CatalogTransaction> transaction = nullptr) override;
+-	void DropSecretByName(const string &name, OnEntryNotFound on_entry_not_found,
++	void DropSecretByName(const Identifier &name, OnEntryNotFound on_entry_not_found,
+ 	                      optional_ptr<CatalogTransaction> transaction = nullptr) override;
+ 	bool IncludeInLookups() override {
+ 		return active_.load();
+diff --git a/src/include/vgi_table_function_impl.hpp b/src/include/vgi_table_function_impl.hpp
+index fbc9f0e..1030f3a 100644
+--- a/src/include/vgi_table_function_impl.hpp
++++ b/src/include/vgi_table_function_impl.hpp
+@@ -931,7 +931,9 @@ InsertionOrderPreservingMap<string> VgiTableFunctionToString(TableFunctionToStri
+ //! the function can return diagnostics it persisted during process(). Always also surfaces
+ //! intrinsic keys (Worker, Function, Rows Read, Threads). Best-effort: any RPC failure is
+ //! logged and degrades to just the intrinsic keys.
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ InsertionOrderPreservingMap<string> VgiTableFunctionDynamicToString(TableFunctionDynamicToStringInput &input);
++#endif
+ 
+ //! Get bind info callback for returning table entry reference
+ BindInfo VgiTableScanGetBindInfo(const optional_ptr<FunctionData> bind_data_p);
+diff --git a/src/storage/vgi_aggregate_function_set.cpp b/src/storage/vgi_aggregate_function_set.cpp
+index e013fe9..2e511bb 100644
+--- a/src/storage/vgi_aggregate_function_set.cpp
++++ b/src/storage/vgi_aggregate_function_set.cpp
+@@ -32,6 +32,10 @@ AggregateFunctionSet BuildVgiAggregateFunctionSet(ClientContext &context, const
+                                                   const std::vector<vgi::VgiFunctionInfo> &overloads,
+                                                   const VgiFunctionRegistrationTarget &target,
+                                                   vector<FunctionDescription> &descriptions) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile supports table functions only");
++#else
++
+ 	AggregateFunctionSet func_set(registered_name);
+ 
+ 	for (const auto &func_info : overloads) {
+@@ -169,6 +173,8 @@ AggregateFunctionSet BuildVgiAggregateFunctionSet(ClientContext &context, const
+ 	}
+ 
+ 	return func_set;
++
++#endif
+ }
+ 
+ } // namespace vgi
+@@ -190,7 +196,7 @@ void VgiAggregateFunctionSet::LoadEntries(ClientContext &context, const std::loc
+ 	auto &vgi_tx_load = VgiTransaction::Get(context, catalog_);
+ 	vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx_load.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "schema";
+-	rpc_ctx.entity_qualifier = schema_.name;
++	rpc_ctx.entity_qualifier = schema_.name.GetIdentifierName();
+ 
+ 	auto function_list = schema_.GetFunctionInventory(rpc_ctx, CatalogType::AGGREGATE_FUNCTION_ENTRY, context);
+ 
+@@ -211,7 +217,7 @@ void VgiAggregateFunctionSet::LoadEntries(ClientContext &context, const std::loc
+ 	// empty and DispatchSchema() falls through to func_info.schema_name.
+ 	vgi::VgiFunctionRegistrationTarget target;
+ 	target.catalog = &catalog_;
+-	target.catalog_name = catalog_.GetName();
++	target.catalog_name = catalog_.GetName().GetIdentifierName();
+ 	target.attach_params = attach_params;
+ 	target.attach_opaque_data = attach_result->attach_opaque_data;
+ 	target.setting_names = setting_names;
+@@ -221,7 +227,7 @@ void VgiAggregateFunctionSet::LoadEntries(ClientContext &context, const std::loc
+ 		auto func_set = vgi::BuildVgiAggregateFunctionSet(context, pair.first, pair.second, target, descriptions);
+ 
+ 		CreateAggregateFunctionInfo info(func_set);
+-		info.schema = schema_.name;
++		info.SetSchema(schema_.name);
+ 		info.internal = true;
+ 		info.descriptions = std::move(descriptions);
+ 
+diff --git a/src/storage/vgi_catalog.cpp b/src/storage/vgi_catalog.cpp
+index 6651ada..4bc2e91 100644
+--- a/src/storage/vgi_catalog.cpp
++++ b/src/storage/vgi_catalog.cpp
+@@ -91,14 +91,15 @@ void VgiCatalog::Initialize(bool load_builtin) {
+ 	// Nothing to do - schemas are loaded lazily
+ }
+ 
+-std::string VgiCatalog::GetDefaultSchema() const {
+-	if (attach_result_) {
+-		return attach_result_->default_schema;
+-	}
+-	return "main";
++optional<Identifier> VgiCatalog::GetDefaultSchema() const {
++	return Identifier(attach_result_ ? attach_result_->default_schema : "main");
+ }
+ 
+ optional_ptr<CatalogEntry> VgiCatalog::CreateSchema(CatalogTransaction transaction, CreateSchemaInfo &info) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	if (access_mode_ == AccessMode::READ_ONLY) {
+ 		throw BinderException("Cannot CREATE SCHEMA in read-only VGI catalog '%s'", GetName());
+ 	}
+@@ -119,6 +120,8 @@ optional_ptr<CatalogEntry> VgiCatalog::CreateSchema(CatalogTransaction transacti
+ 	// dangle.
+ 	ClearCache(/*force=*/false);
+ 	return nullptr;
++
++#endif
+ }
+ 
+ void VgiCatalog::ScanSchemas(ClientContext &context, std::function<void(SchemaCatalogEntry &)> callback) {
+@@ -146,15 +149,25 @@ optional_ptr<SchemaCatalogEntry> VgiCatalog::LookupSchema(CatalogTransaction tra
+ 
+ PhysicalOperator &VgiCatalog::PlanCreateTableAs(ClientContext &context, PhysicalPlanGenerator &planner,
+                                                 LogicalCreateTable &op, PhysicalOperator &plan) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	// CREATE TABLE AS SELECT: create table at execution time (inside the transaction),
+ 	// then insert the SELECT results. Follows the Airport extension pattern.
+ 	auto &insert = planner.Make<VgiPhysicalInsert>(op, op.schema, std::move(op.info));
+ 	insert.children.push_back(plan);
+ 	return insert;
++
++#endif
+ }
+ 
+ PhysicalOperator &VgiCatalog::PlanInsert(ClientContext &context, PhysicalPlanGenerator &planner, LogicalInsert &op,
+                                          optional_ptr<PhysicalOperator> plan) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	auto &table = op.table.Cast<VgiTableEntry>();
+ 	RequireWriteResultMode(table, "insert", op.return_chunk);
+ 	// Use DuckDB's built-in default resolution: insert a PhysicalProjection child
+@@ -169,31 +182,49 @@ PhysicalOperator &VgiCatalog::PlanInsert(ClientContext &context, PhysicalPlanGen
+ 		insert.children.push_back(*plan);
+ 	}
+ 	return insert;
++
++#endif
+ }
+ 
+ PhysicalOperator &VgiCatalog::PlanDelete(ClientContext &context, PhysicalPlanGenerator &planner, LogicalDelete &op,
+                                          PhysicalOperator &plan) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	auto &table = op.table.Cast<VgiTableEntry>();
+ 	RequireWriteResultMode(table, "delete", op.return_chunk);
+ 	auto &bound_ref = op.expressions[0]->Cast<BoundReferenceExpression>();
+ 	auto &del = planner.Make<VgiPhysicalDelete>(op, table, op.return_chunk, bound_ref.index);
+ 	del.children.push_back(plan);
+ 	return del;
++
++#endif
+ }
+ 
+ PhysicalOperator &VgiCatalog::PlanUpdate(ClientContext &context, PhysicalPlanGenerator &planner, LogicalUpdate &op,
+                                          PhysicalOperator &plan) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	auto &table = op.table.Cast<VgiTableEntry>();
+ 	RequireWriteResultMode(table, "update", op.return_chunk);
+ 	auto &upd = planner.Make<VgiPhysicalUpdate>(op, table, op.return_chunk);
+ 	upd.children.push_back(plan);
+ 	return upd;
++
++#endif
+ }
+ 
+ // Helper: plan a single merge action using VGI physical operators
+ static unique_ptr<MergeIntoOperator> VgiPlanMergeIntoAction(ClientContext &context, LogicalMergeInto &op,
+                                                              PhysicalPlanGenerator &planner,
+                                                              BoundMergeIntoAction &action) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	auto result = make_uniq<MergeIntoOperator>();
+ 	result->action_type = action.action_type;
+ 	result->condition = std::move(action.condition);
+@@ -243,10 +274,16 @@ static unique_ptr<MergeIntoOperator> VgiPlanMergeIntoAction(ClientContext &conte
+ 		throw InternalException("Unsupported merge action");
+ 	}
+ 	return result;
++
++#endif
+ }
+ 
+ PhysicalOperator &VgiCatalog::PlanMergeInto(ClientContext &context, PhysicalPlanGenerator &planner,
+                                              LogicalMergeInto &op, PhysicalOperator &plan) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	auto &table_for_returning = op.table.Cast<VgiTableEntry>();
+ 
+ 	// Refuse MERGE on multi-branch tables, regardless of which clauses the
+@@ -298,6 +335,8 @@ PhysicalOperator &VgiCatalog::PlanMergeInto(ClientContext &context, PhysicalPlan
+ 	                                               parallel, op.return_chunk);
+ 	result.children.push_back(plan);
+ 	return result;
++
++#endif
+ }
+ 
+ unique_ptr<LogicalOperator> VgiCatalog::BindCreateIndex(Binder &binder, CreateStatement &stmt, TableCatalogEntry &table,
+@@ -595,6 +634,10 @@ std::optional<bool> VgiCatalog::RevalidateContents(ClientContext &context, const
+ }
+ 
+ void VgiCatalog::DropSchema(ClientContext &context, DropInfo &info) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	if (access_mode_ == AccessMode::READ_ONLY) {
+ 		throw BinderException("Cannot DROP SCHEMA in read-only VGI catalog '%s'", GetName());
+ 	}
+@@ -613,6 +656,8 @@ void VgiCatalog::DropSchema(ClientContext &context, DropInfo &info) {
+ 	// Invalidate schema cache via the deferred path so any bound query
+ 	// holding a CatalogEntry* doesn't dangle.
+ 	ClearCache(/*force=*/false);
++
++#endif
+ }
+ 
+ } // namespace duckdb
+diff --git a/src/storage/vgi_catalog_set.cpp b/src/storage/vgi_catalog_set.cpp
+index f52bae4..10bc2c3 100644
+--- a/src/storage/vgi_catalog_set.cpp
++++ b/src/storage/vgi_catalog_set.cpp
+@@ -204,10 +204,10 @@ void VgiCatalogSet::CreateEntryLocked(unique_ptr<CatalogEntry> entry) {
+ 	// see ColumnIsGenerated → ColumnList::GetColumn(0) UAF that surfaces as
+ 	// "Logical column index 0 out of range". Refresh goes through
+ 	// ClearEntries() / vgi_clear_cache() at safe points instead.
+-	if (entries_.find(entry->name) != entries_.end()) {
++	if (entries_.find(entry->name.GetIdentifierName()) != entries_.end()) {
+ 		return;
+ 	}
+-	entries_[entry->name] = std::move(entry);
++	entries_[entry->name.GetIdentifierName()] = std::move(entry);
+ 	generation_.fetch_add(1, std::memory_order_release);
+ }
+ 
+diff --git a/src/storage/vgi_macro_set.cpp b/src/storage/vgi_macro_set.cpp
+index d85834a..641f9c4 100644
+--- a/src/storage/vgi_macro_set.cpp
++++ b/src/storage/vgi_macro_set.cpp
+@@ -28,6 +28,7 @@
+ 
+ namespace duckdb {
+ 
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ static void QualifyWorkerFunctions(QueryNode &node, const case_insensitive_set_t &worker_functions,
+                                    const string &catalog_name, const string &schema_name);
+ 
+@@ -60,6 +61,7 @@ static void QualifyWorkerFunctions(QueryNode &node, const case_insensitive_set_t
+ 	    });
+ }
+ 
++#endif
+ VgiMacroSet::VgiMacroSet(Catalog &catalog, VgiSchemaEntry &schema, CatalogType macro_type)
+     : VgiCatalogSet(catalog, &schema), schema_(schema), macro_catalog_type_(macro_type) {
+ }
+@@ -106,6 +108,10 @@ static Value ExtractDefaultValue(const std::shared_ptr<arrow::Array> &array, int
+ }
+ 
+ void VgiMacroSet::LoadEntries(ClientContext &context, const std::lock_guard<std::mutex> &/*_load_lock*/) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not expose macros");
++#else
++
+ 	auto &vgi_catalog = catalog_.Cast<VgiCatalog>();
+ 	auto &attach_params = vgi_catalog.attach_parameters();
+ 	auto &attach_result = vgi_catalog.attach_result();
+@@ -205,6 +211,8 @@ void VgiMacroSet::LoadEntries(ClientContext &context, const std::lock_guard<std:
+ 			VGI_STDERR_DEBUG("[VGI] macro.parse_error name=%s error=unknown\n", macro_info.name.c_str());
+ 		}
+ 	}
++
++#endif
+ }
+ 
+ } // namespace duckdb
+diff --git a/src/storage/vgi_scalar_function_set.cpp b/src/storage/vgi_scalar_function_set.cpp
+index f4133c2..5264c82 100644
+--- a/src/storage/vgi_scalar_function_set.cpp
++++ b/src/storage/vgi_scalar_function_set.cpp
+@@ -31,6 +31,10 @@ ScalarFunctionSet BuildVgiScalarFunctionSet(ClientContext &context, const std::s
+                                             const std::vector<vgi::VgiFunctionInfo> &overloads,
+                                             const VgiFunctionRegistrationTarget &target,
+                                             vector<FunctionDescription> &descriptions) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile supports table functions only");
++#else
++
+ 	ScalarFunctionSet func_set(registered_name);
+ 
+ 	for (const auto &func_info : overloads) {
+@@ -156,6 +160,8 @@ ScalarFunctionSet BuildVgiScalarFunctionSet(ClientContext &context, const std::s
+ 	}
+ 
+ 	return func_set;
++
++#endif
+ }
+ 
+ } // namespace vgi
+@@ -180,7 +186,7 @@ void VgiScalarFunctionSet::LoadEntries(ClientContext &context, const std::lock_g
+ 	auto &vgi_tx_load = VgiTransaction::Get(context, catalog_);
+ 	vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx_load.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "schema";
+-	rpc_ctx.entity_qualifier = schema_.name;
++	rpc_ctx.entity_qualifier = schema_.name.GetIdentifierName();
+ 
+ 	auto function_list = schema_.GetFunctionInventory(rpc_ctx, CatalogType::SCALAR_FUNCTION_ENTRY, context);
+ 
+@@ -198,11 +204,11 @@ void VgiScalarFunctionSet::LoadEntries(ClientContext &context, const std::lock_g
+ 	// Registration target: this catalog's own schema.
+ 	vgi::VgiFunctionRegistrationTarget target;
+ 	target.catalog = &catalog_;
+-	target.catalog_name = catalog_.GetName();
++	target.catalog_name = catalog_.GetName().GetIdentifierName();
+ 	target.attach_params = attach_params;
+ 	target.attach_opaque_data = attach_result->attach_opaque_data;
+ 	target.setting_names = setting_names;
+-	target.schema_name = schema_.name;
++	target.schema_name = schema_.name.GetIdentifierName();
+ 
+ 	// Create function entries
+ 	for (const auto &pair : functions_by_name) {
+@@ -212,7 +218,7 @@ void VgiScalarFunctionSet::LoadEntries(ClientContext &context, const std::lock_g
+ 
+ 		// Create function info and entry
+ 		CreateScalarFunctionInfo info(func_set);
+-		info.schema = schema_.name;
++		info.SetSchema(schema_.name);
+ 		info.internal = true;
+ 		info.descriptions = std::move(descriptions);
+ 
+diff --git a/src/storage/vgi_schema_entry.cpp b/src/storage/vgi_schema_entry.cpp
+index 381c7dc..23a3404 100644
+--- a/src/storage/vgi_schema_entry.cpp
++++ b/src/storage/vgi_schema_entry.cpp
+@@ -110,33 +110,33 @@ std::vector<T> LogSeedDecode(ClientContext &context, const std::string &schema,
+ std::vector<vgi::VgiTableInfo> VgiSchemaEntry::TakeTables(const vgi::CatalogRpcContext &rpc_ctx,
+                                                           ClientContext &context) {
+ 	if (auto seed = ClaimSeed("table")) {
+-		return LogSeedDecode(context, name, "table", vgi::DecodeContentsTables(*seed, context));
++		return LogSeedDecode(context, name.GetIdentifierName(), "table", vgi::DecodeContentsTables(*seed, context));
+ 	}
+-	return vgi::InvokeCatalogSchemaContentsTables(rpc_ctx, name, context);
++	return vgi::InvokeCatalogSchemaContentsTables(rpc_ctx, name.GetIdentifierName(), context);
+ }
+ 
+ std::vector<vgi::VgiViewInfo> VgiSchemaEntry::TakeViews(const vgi::CatalogRpcContext &rpc_ctx,
+                                                         ClientContext &context) {
+ 	if (auto seed = ClaimSeed("view")) {
+-		return LogSeedDecode(context, name, "view", vgi::DecodeContentsViews(*seed));
++		return LogSeedDecode(context, name.GetIdentifierName(), "view", vgi::DecodeContentsViews(*seed));
+ 	}
+-	return vgi::InvokeCatalogSchemaContentsViews(rpc_ctx, name, context);
++	return vgi::InvokeCatalogSchemaContentsViews(rpc_ctx, name.GetIdentifierName(), context);
+ }
+ 
+ std::vector<vgi::VgiFunctionInfo> VgiSchemaEntry::FetchFunctions(const vgi::CatalogRpcContext &rpc_ctx,
+                                                                  const char *rpc_type, ClientContext &context) {
+ 	if (auto seed = ClaimSeed(rpc_type)) {
+-		return LogSeedDecode(context, name, rpc_type, vgi::DecodeContentsFunctions(*seed, rpc_type));
++		return LogSeedDecode(context, name.GetIdentifierName(), rpc_type, vgi::DecodeContentsFunctions(*seed, rpc_type));
+ 	}
+-	return vgi::InvokeCatalogSchemaContentsFunctions(rpc_ctx, name, rpc_type, context);
++	return vgi::InvokeCatalogSchemaContentsFunctions(rpc_ctx, name.GetIdentifierName(), rpc_type, context);
+ }
+ 
+ std::vector<vgi::VgiMacroInfo> VgiSchemaEntry::FetchMacros(const vgi::CatalogRpcContext &rpc_ctx,
+                                                            const char *rpc_type, ClientContext &context) {
+ 	if (auto seed = ClaimSeed(rpc_type)) {
+-		return LogSeedDecode(context, name, rpc_type, vgi::DecodeContentsMacros(*seed, rpc_type));
++		return LogSeedDecode(context, name.GetIdentifierName(), rpc_type, vgi::DecodeContentsMacros(*seed, rpc_type));
+ 	}
+-	return vgi::InvokeCatalogSchemaContentsMacros(rpc_ctx, name, rpc_type, context);
++	return vgi::InvokeCatalogSchemaContentsMacros(rpc_ctx, name.GetIdentifierName(), rpc_type, context);
+ }
+ 
+ std::vector<vgi::VgiMacroInfo> VgiSchemaEntry::GetMacroInventory(const vgi::CatalogRpcContext &rpc_ctx,
+@@ -255,6 +255,10 @@ void DeferDrop(Catalog &catalog, unique_ptr<CatalogEntry> entry) {
+ } // namespace
+ 
+ optional_ptr<CatalogEntry> VgiSchemaEntry::CreateTable(CatalogTransaction transaction, BoundCreateTableInfo &info) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	auto &vgi_catalog = catalog.Cast<VgiCatalog>();
+ 	if (vgi_catalog.GetAccessMode() == AccessMode::READ_ONLY) {
+ 		throw BinderException("Cannot CREATE TABLE in read-only VGI catalog '%s'", catalog.GetName());
+@@ -361,6 +365,8 @@ optional_ptr<CatalogEntry> VgiSchemaEntry::CreateTable(CatalogTransaction transa
+ 		DeferDrop(catalog, views_.HarvestEntries());
+ 	}
+ 	return tables_.GetEntry(context, create_info.table);
++
++#endif
+ }
+ 
+ optional_ptr<CatalogEntry> VgiSchemaEntry::CreateFunction(CatalogTransaction transaction, CreateFunctionInfo &info) {
+@@ -373,6 +379,10 @@ optional_ptr<CatalogEntry> VgiSchemaEntry::CreateIndex(CatalogTransaction transa
+ }
+ 
+ optional_ptr<CatalogEntry> VgiSchemaEntry::CreateView(CatalogTransaction transaction, CreateViewInfo &info) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	auto &vgi_catalog = catalog.Cast<VgiCatalog>();
+ 	if (vgi_catalog.GetAccessMode() == AccessMode::READ_ONLY) {
+ 		throw BinderException("Cannot CREATE VIEW in read-only VGI catalog '%s'", catalog.GetName());
+@@ -403,6 +413,8 @@ optional_ptr<CatalogEntry> VgiSchemaEntry::CreateView(CatalogTransaction transac
+ 	// emptiness so the next view lookup doesn't get short-circuited.
+ 	views_.MarkPopulatedLocked();
+ 	return nullptr;
++
++#endif
+ }
+ 
+ optional_ptr<CatalogEntry> VgiSchemaEntry::CreateSequence(CatalogTransaction transaction, CreateSequenceInfo &info) {
+@@ -433,6 +445,10 @@ optional_ptr<CatalogEntry> VgiSchemaEntry::CreateType(CatalogTransaction transac
+ }
+ 
+ void VgiSchemaEntry::Alter(CatalogTransaction transaction, AlterInfo &info) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	auto &vgi_catalog = catalog.Cast<VgiCatalog>();
+ 	if (vgi_catalog.GetAccessMode() == AccessMode::READ_ONLY) {
+ 		throw BinderException("Cannot alter objects in read-only VGI catalog '%s'", catalog.GetName());
+@@ -585,6 +601,8 @@ void VgiSchemaEntry::Alter(CatalogTransaction transaction, AlterInfo &info) {
+ 	default:
+ 		break;
+ 	}
++
++#endif
+ }
+ 
+ void VgiSchemaEntry::Scan(ClientContext &context, CatalogType type,
+@@ -636,6 +654,10 @@ void VgiSchemaEntry::Scan(CatalogType type, const std::function<void(CatalogEntr
+ }
+ 
+ void VgiSchemaEntry::DropEntry(ClientContext &context, DropInfo &info) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile is read-only");
++#else
++
+ 	if (info.type != CatalogType::TABLE_ENTRY && info.type != CatalogType::VIEW_ENTRY) {
+ 		throw BinderException("DROP %s is not supported for VGI catalogs", EnumUtil::ToString(info.type));
+ 	}
+@@ -671,6 +693,8 @@ void VgiSchemaEntry::DropEntry(ClientContext &context, DropInfo &info) {
+ 	// Views referencing the dropped table are now stale; clear to force re-fetch.
+ 	// With cascade, the worker may have also dropped dependent views.
+ 	DeferDrop(catalog, views_.HarvestEntries());
++
++#endif
+ }
+ 
+ optional_ptr<CatalogEntry> VgiSchemaEntry::LookupEntry(CatalogTransaction transaction,
+diff --git a/src/storage/vgi_schema_set.cpp b/src/storage/vgi_schema_set.cpp
+index 08b63ff..947cc10 100644
+--- a/src/storage/vgi_schema_set.cpp
++++ b/src/storage/vgi_schema_set.cpp
+@@ -56,7 +56,7 @@ void VgiSchemaSet::LoadEntries(ClientContext &context, const std::lock_guard<std
+ 		// on first use. Every entry shares the snapshot's response buffers.
+ 		for (auto &contents : snapshot->schemas) {
+ 			CreateSchemaInfo info;
+-			info.schema = contents.name;
++			info.SetSchema(Identifier(contents.name));
+ 			auto seed = std::make_shared<const vgi::VgiSchemaContents>(std::move(contents));
+ 			auto schema_entry = make_uniq<VgiSchemaEntry>(catalog_, info, std::move(seed));
+ 			std::lock_guard<std::mutex> entry_lk(entry_lock_);
+@@ -67,7 +67,7 @@ void VgiSchemaSet::LoadEntries(ClientContext &context, const std::lock_guard<std
+ 
+ 	for (auto &schema_info : vgi::InvokeCatalogSchemas(rpc_ctx, context)) {
+ 		CreateSchemaInfo info;
+-		info.schema = schema_info.name;
++		info.SetSchema(Identifier(schema_info.name));
+ 		if (!schema_info.comment.empty()) {
+ 			info.comment = Value(schema_info.comment);
+ 		}
+diff --git a/src/storage/vgi_table_entry.cpp b/src/storage/vgi_table_entry.cpp
+index 76a089d..6490066 100644
+--- a/src/storage/vgi_table_entry.cpp
++++ b/src/storage/vgi_table_entry.cpp
+@@ -58,7 +58,7 @@ TableFunction MakeNativeDelegationMarkerFunction() {
+ 
+ VgiTableEntry::VgiTableEntry(Catalog &catalog, SchemaCatalogEntry &schema, CreateTableInfo &info,
+                              const vgi::VgiTableInfo &table_info)
+-    : TableCatalogEntry(catalog, schema, info), table_info_(table_info), catalog_(catalog) {
++    : TableCatalogEntry(catalog, schema, info), columns_(info.columns.Copy()), table_info_(table_info), catalog_(catalog) {
+ 	if (table_info_.row_id_column >= 0) {
+ 		rowid_type_ = table_info_.rowid_type;
+ 	}
+@@ -67,6 +67,10 @@ VgiTableEntry::VgiTableEntry(Catalog &catalog, SchemaCatalogEntry &schema, Creat
+ VgiTableEntry::~VgiTableEntry() = default;
+ 
+ unique_ptr<BaseStatistics> VgiTableEntry::GetStatistics(ClientContext &context, column_t column_id) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile supports catalog table functions, not stored table scans");
++#else
++
+ 	if (column_id == COLUMN_IDENTIFIER_ROW_ID || column_id == COLUMN_IDENTIFIER_EMPTY) {
+ 		return nullptr;
+ 	}
+@@ -153,6 +157,8 @@ unique_ptr<BaseStatistics> VgiTableEntry::GetStatistics(ClientContext &context,
+ 		return it->second->ToUnique();
+ 	}
+ 	return nullptr;
++
++#endif
+ }
+ 
+ bool VgiTableEntry::StatsCache::IsStale() const {
+@@ -173,6 +179,10 @@ bool VgiTableEntry::StatsCache::IsStale() const {
+ // method runs the worker RPC with the mutex *released* and is responsible
+ // for clearing the loading flag (and notifying waiters) on every exit.
+ void VgiTableEntry::FetchColumnStatistics(ClientContext &context) const {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile supports catalog table functions, not stored table scans");
++#else
++
+ 	std::unordered_map<std::string, unique_ptr<BaseStatistics>> fetched_entries;
+ 	int64_t fetched_max_age = -1;
+ 	bool ok = false;
+@@ -239,6 +249,8 @@ void VgiTableEntry::FetchColumnStatistics(ClientContext &context) const {
+ 		stats_cache_.loading = false;
+ 	}
+ 	stats_cache_.cv.notify_all();
++
++#endif
+ }
+ 
+ // Caller must have set stats_cache_.loading = true under the mutex. This
+@@ -247,6 +259,10 @@ void VgiTableEntry::FetchColumnStatistics(ClientContext &context) const {
+ // and is responsible for clearing the loading flag and notifying waiters
+ // on every exit path.
+ void VgiTableEntry::PopulateStatsCacheFromInline(ClientContext &context) const {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile supports catalog table functions, not stored table scans");
++#else
++
+ 	std::unordered_map<std::string, unique_ptr<BaseStatistics>> parsed_entries;
+ 	bool ok = false;
+ 
+@@ -308,6 +324,8 @@ void VgiTableEntry::PopulateStatsCacheFromInline(ClientContext &context) const {
+ 		stats_cache_.loading = false;
+ 	}
+ 	stats_cache_.cv.notify_all();
++
++#endif
+ }
+ 
+ TableFunction VgiTableEntry::GetScanFunction(ClientContext &context, unique_ptr<FunctionData> &bind_data) {
+@@ -319,7 +337,7 @@ TableFunction VgiTableEntry::GetScanFunction(ClientContext &context, unique_ptr<
+ 	string at_value;
+ 	auto at = lookup.GetAtClause();
+ 	if (at) {
+-		at_unit = at->Unit();
++		at_unit = at->Unit().GetIdentifierName();
+ 		at_value = at->GetValue().ToString();
+ 	}
+ 	return GetScanFunctionImpl(context, bind_data, at_unit, at_value);
+@@ -358,7 +376,7 @@ vgi::VgiScanBranchesResult VgiTableEntry::FetchScanBranches(ClientContext &conte
+ 	                                vgi_tx_scan.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "table";
+ 	rpc_ctx.entity_qualifier = ParentSchema().name + "." + name;
+-	auto result = vgi::InvokeCatalogTableScanBranchesGet(rpc_ctx, ParentSchema().name, name, context, at_unit, at_value);
++	auto result = vgi::InvokeCatalogTableScanBranchesGet(rpc_ctx, ParentSchema().name.GetIdentifierName(), name.GetIdentifierName(), context, at_unit, at_value);
+ 	// Populate the multi-branch hint for the no-AT case so subsequent
+ 	// write-refusal helpers can short-circuit without an RPC. AT-carrying
+ 	// fetches don't populate the hint because the count COULD differ
+@@ -372,6 +390,10 @@ vgi::VgiScanBranchesResult VgiTableEntry::FetchScanBranches(ClientContext &conte
+ 
+ TableFunction VgiTableEntry::GetScanFunctionImpl(ClientContext &context, unique_ptr<FunctionData> &bind_data,
+                                                   const string &at_unit, const string &at_value) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile supports catalog table functions, not stored table scans");
++#else
++
+ 	auto &vgi_catalog = catalog_.Cast<VgiCatalog>();
+ 	auto &attach_params = vgi_catalog.attach_parameters();
+ 	auto &attach_result = vgi_catalog.attach_result();
+@@ -897,7 +919,9 @@ TableFunction VgiTableEntry::GetScanFunctionImpl(ClientContext &context, unique_
+ 	func.cardinality = vgi::VgiTableFunctionCardinality;
+ 	func.table_scan_progress = vgi::VgiTableFunctionProgress;
+ 	func.to_string = vgi::VgiTableFunctionToString;
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ 	func.dynamic_to_string = vgi::VgiTableFunctionDynamicToString;
++#endif
+ 	func.get_bind_info = vgi::VgiTableScanGetBindInfo;
+ 	func.set_scan_order = vgi::VgiSetScanOrder;
+ 	func.statistics = vgi::VgiTableFunctionStatistics;
+@@ -949,10 +973,16 @@ TableFunction VgiTableEntry::GetScanFunctionImpl(ClientContext &context, unique_
+ 	}
+ 
+ 	return func;
++
++#endif
+ }
+ 
+ void VgiTableEntry::VgiTableScanSerialize(Serializer &serializer, const optional_ptr<FunctionData> bind_data_p,
+                                           const TableFunction &function) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile supports catalog table functions, not stored table scans");
++#else
++
+ 	// The scan function carries no callable arguments; everything needed to
+ 	// rebuild it lives in the bind data. Persist only the table identity (and
+ 	// AT clause), mirroring DuckDB's own TableScanSerialize — the heavy bind
+@@ -972,9 +1002,15 @@ void VgiTableEntry::VgiTableScanSerialize(Serializer &serializer, const optional
+ 	serializer.WriteProperty(102, "table", table.name);
+ 	serializer.WriteProperty(103, "at_unit", bind_data.at_unit);
+ 	serializer.WriteProperty(104, "at_value", bind_data.at_value);
++
++#endif
+ }
+ 
+ unique_ptr<FunctionData> VgiTableEntry::VgiTableScanDeserialize(Deserializer &deserializer, TableFunction &function) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile supports catalog table functions, not stored table scans");
++#else
++
+ 	auto catalog = deserializer.ReadProperty<string>(100, "catalog");
+ 	auto schema = deserializer.ReadProperty<string>(101, "schema");
+ 	auto table = deserializer.ReadProperty<string>(102, "table");
+@@ -994,6 +1030,8 @@ unique_ptr<FunctionData> VgiTableEntry::VgiTableScanDeserialize(Deserializer &de
+ 	unique_ptr<FunctionData> bind_data;
+ 	function = vgi_entry.GetScanFunctionImpl(context, bind_data, at_unit, at_value);
+ 	return bind_data;
++
++#endif
+ }
+ 
+ TableStorageInfo VgiTableEntry::GetStorageInfo(ClientContext &context) {
+diff --git a/src/storage/vgi_table_function_set.cpp b/src/storage/vgi_table_function_set.cpp
+index 01ad31c..e3cf1b5 100644
+--- a/src/storage/vgi_table_function_set.cpp
++++ b/src/storage/vgi_table_function_set.cpp
+@@ -26,9 +26,13 @@ namespace duckdb {
+ namespace {
+ 
+ bool SupportsVgiFilterV2(const vgi::VgiFunctionInfo &info) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	return false;
++#else
+ 	return info.filter_pushdown.value_or(false) &&
+ 	       std::find(info.filter_semantic_profiles.begin(), info.filter_semantic_profiles.end(),
+ 	                 "vgi.duckdb.standard.v1") != info.filter_semantic_profiles.end();
++#endif
+ }
+ 
+ //! Read the client-side ``vgi_split_scans`` kill switch. Defaults to true.
+@@ -57,7 +61,7 @@ std::map<std::string, Value> ExtractVgiSettings(ClientContext &context,
+ 
+ 	for (const auto &name : setting_names) {
+ 		Value value;
+-		if (context.TryGetCurrentSetting(name, value)) {
++		if (context.TryGetCurrentSetting(Identifier(name), value)) {
+ 			settings[name] = value;
+ 		}
+ 	}
+@@ -95,7 +99,8 @@ VgiTableFunctionSet::VgiTableFunctionSet(Catalog &catalog, VgiSchemaEntry &schem
+ // ============================================================================
+ 
+ static unique_ptr<FunctionData> VgiCatalogTableFunctionBind(ClientContext &context, TableFunctionBindInput &input,
+-                                                            vector<LogicalType> &return_types, vector<string> &names) {
++                                                            vector<LogicalType> &return_types, vector<Identifier> &native_names) {
++	vector<string> names;
+ 	// Access the VgiTableFunctionInfo attached to this function
+ 	auto &vgi_info = input.info->Cast<vgi::VgiTableFunctionInfo>();
+ 
+@@ -104,7 +109,7 @@ static unique_ptr<FunctionData> VgiCatalogTableFunctionBind(ClientContext &conte
+ 	// Copy connection information from the catalog function info. A function
+ 	// published into system.main outlives DETACH, so its live state is resolved
+ 	// from the attached catalog here (see ResolveVgiFunctionBinding).
+-	auto binding = vgi::ResolveVgiFunctionBinding(context, vgi_info.target(), input.table_function.name);
++	auto binding = vgi::ResolveVgiFunctionBinding(context, vgi_info.target(), input.table_function.GetName().GetIdentifierName());
+ 	bind_data->attach_params = binding.attach_params;
+ 	bind_data->attach_opaque_data = binding.attach_opaque_data;
+ 	auto &vgi_tx = VgiTransaction::Get(context, *binding.catalog);
+@@ -234,6 +239,7 @@ static unique_ptr<FunctionData> VgiCatalogTableFunctionBind(ClientContext &conte
+ 
+ 	input.table_function.projection_pushdown = bind_data->projection_pushdown;
+ 
++	for (const auto &name : names) native_names.emplace_back(name);
+ 	return bind_data;
+ }
+ 
+@@ -243,7 +249,8 @@ static unique_ptr<FunctionData> VgiCatalogTableFunctionBind(ClientContext &conte
+ 
+ static unique_ptr<FunctionData> VgiCatalogTableInOutFunctionBind(ClientContext &context, TableFunctionBindInput &input,
+                                                                  vector<LogicalType> &return_types,
+-                                                                 vector<string> &names) {
++                                                                 vector<Identifier> &native_names) {
++	vector<string> names;
+ 	// Access the VgiTableFunctionInfo attached to this function
+ 	auto &vgi_info = input.info->Cast<vgi::VgiTableFunctionInfo>();
+ 
+@@ -251,7 +258,7 @@ static unique_ptr<FunctionData> VgiCatalogTableInOutFunctionBind(ClientContext &
+ 	vgi::VgiTableInOutBindParams params;
+ 	// A function published into system.main outlives DETACH, so its live state
+ 	// is resolved from the attached catalog here (see ResolveVgiFunctionBinding).
+-	auto binding = vgi::ResolveVgiFunctionBinding(context, vgi_info.target(), input.table_function.name);
++	auto binding = vgi::ResolveVgiFunctionBinding(context, vgi_info.target(), input.table_function.GetName().GetIdentifierName());
+ 	params.attach_params = binding.attach_params;
+ 	params.function_name = vgi_info.function_info().name;
+ 	params.schema_name = vgi_info.function_info().schema_name;
+@@ -308,7 +315,9 @@ static unique_ptr<FunctionData> VgiCatalogTableInOutFunctionBind(ClientContext &
+ 	}
+ 
+ 	// Use the table-in-out bind function
+-	return vgi::VgiTableInOutBind(context, input, return_types, names, params);
++	auto result = vgi::VgiTableInOutBind(context, input, return_types, names, params);
++	for (const auto &name : names) native_names.emplace_back(name);
++	return result;
+ }
+ 
+ namespace vgi {
+@@ -317,9 +326,14 @@ TableFunctionSet BuildVgiTableFunctionSet(ClientContext &context, const std::str
+                                           const std::vector<vgi::VgiFunctionInfo> &overloads,
+                                           const VgiFunctionRegistrationTarget &target,
+                                           vector<FunctionDescription> &descriptions) {
+-	TableFunctionSet func_set(registered_name);
++	TableFunctionSet func_set {Identifier(registered_name)};
+ 
+ 	for (const auto &func_info : overloads) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++		if (func_info.function_type == vgi::VgiFunctionType::TableBuffering || func_info.has_finalize || func_info.source_order_dependent || func_info.sink_order_dependent || func_info.requires_input_batch_index || func_info.max_workers.value_or(1) > 1 || func_info.supports_positions || func_info.supports_splits || func_info.supports_batch_index || func_info.partition_kind != vgi::VgiPartitionKind::NotPartitioned) {
++			throw NotImplementedException("VGI DuckDB 2 invocation profile requires a synchronous producer or independent input_from_args row map: %s", func_info.name);
++		}
++#endif
+ 		// Parse argument types, distinguishing positional from named arguments
+ 		// Named arguments have metadata "vgi_arg: named" in the Arrow schema
+ 		vgi::FunctionArgumentTypes arg_types;
+@@ -327,6 +341,12 @@ TableFunctionSet BuildVgiTableFunctionSet(ClientContext &context, const std::str
+ 			arg_types = vgi::ParseFunctionArgumentSchema(context, func_info.arguments_schema);
+ 		}
+ 
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++		if (arg_types.has_varargs || (arg_types.HasTableInput() && !func_info.input_from_args) || !func_info.parameter_default_values_bytes.empty()) {
++			throw NotImplementedException("VGI DuckDB 2 invocation profile requires fixed explicit arguments without defaults or TABLE input: %s", func_info.name);
++		}
++#endif
++
+ 		// Check if this is a table-in-out function: either it has a TABLE input
+ 		// argument (classic), or it is a blended ("UNNEST-style") function whose
+ 		// positional args ARE its per-row input columns (input_from_args). Both
+@@ -404,14 +424,16 @@ TableFunctionSet BuildVgiTableFunctionSet(ClientContext &context, const std::str
+ 			table_func.order_preservation_type = MapOrderPreservation(func_info.order_preservation);
+ 
+ 			// Register named parameters
+-			table_func.named_parameters = arg_types.named_parameters;
++			for (const auto &parameter : arg_types.named_parameters) {
++				table_func.GetSignature().AddKeywordOnly(Identifier(parameter.first), parameter.second);
++			}
+ 
+ 			// Register varargs so DuckDB accepts a blended VARARGS call
+ 			// (row_sum(1,2,3) -> N input columns of varargs_type). Without this
+ 			// the signature would carry only the named params and DuckDB would
+ 			// reject any positional args.
+ 			if (arg_types.has_varargs) {
+-				table_func.varargs = arg_types.varargs_type;
++				table_func.GetSignature().AddArgs("args", arg_types.varargs_type);
+ 			}
+ 
+ 			// Attach function info
+@@ -435,7 +457,9 @@ TableFunctionSet BuildVgiTableFunctionSet(ClientContext &context, const std::str
+ 			table_func.statistics = vgi::VgiTableFunctionStatistics;
+ 			table_func.table_scan_progress = vgi::VgiTableFunctionProgress;
+ 			table_func.to_string = vgi::VgiTableFunctionToString;
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ 			table_func.dynamic_to_string = vgi::VgiTableFunctionDynamicToString;
++#endif
+ 			table_func.set_scan_order = vgi::VgiSetScanOrder;
+ 			// batch_index opt-in: install the partition-data callback so
+ 			// ordered sinks (BatchCollector, BatchInsert,
+@@ -492,11 +516,13 @@ TableFunctionSet BuildVgiTableFunctionSet(ClientContext &context, const std::str
+ 			// INITIALIZE_ON_SCHEDULE without sacrificing join pushdown.
+ 
+ 			// Register named parameters so DuckDB knows how to handle them
+-			table_func.named_parameters = arg_types.named_parameters;
++			for (const auto &parameter : arg_types.named_parameters) {
++				table_func.GetSignature().AddKeywordOnly(Identifier(parameter.first), parameter.second);
++			}
+ 
+ 			// Register varargs support if the function accepts additional positional arguments
+ 			if (arg_types.has_varargs) {
+-				table_func.varargs = arg_types.varargs_type;
++				table_func.GetSignature().AddArgs("args", arg_types.varargs_type);
+ 			}
+ 
+ 			// Attach VgiTableFunctionInfo so the bind function can access worker_path and function metadata
+@@ -551,7 +577,7 @@ void VgiTableFunctionSet::LoadEntries(ClientContext &context, const std::lock_gu
+ 	auto &vgi_tx_load = VgiTransaction::Get(context, catalog_);
+ 	vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx_load.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "schema";
+-	rpc_ctx.entity_qualifier = schema_.name;
++	rpc_ctx.entity_qualifier = schema_.name.GetIdentifierName();
+ 
+ 	auto function_list = schema_.GetFunctionInventory(rpc_ctx, CatalogType::TABLE_FUNCTION_ENTRY, context);
+ 
+@@ -578,11 +604,11 @@ void VgiTableFunctionSet::LoadEntries(ClientContext &context, const std::lock_gu
+ 	// Registration target: this catalog's own schema.
+ 	vgi::VgiFunctionRegistrationTarget target;
+ 	target.catalog = &catalog_;
+-	target.catalog_name = catalog_.GetName();
++	target.catalog_name = catalog_.GetName().GetIdentifierName();
+ 	target.attach_params = attach_params;
+ 	target.attach_opaque_data = attach_result->attach_opaque_data;
+ 	target.setting_names = setting_names;
+-	target.schema_name = schema_.name;
++	target.schema_name = schema_.name.GetIdentifierName();
+ 
+ 	// Create function entries
+ 	for (const auto &pair : functions_by_name) {
+@@ -592,7 +618,7 @@ void VgiTableFunctionSet::LoadEntries(ClientContext &context, const std::lock_gu
+ 
+ 		// Create function info and entry
+ 		CreateTableFunctionInfo info(func_set);
+-		info.schema = schema_.name;
++		info.SetSchema(schema_.name);
+ 		info.internal = true;
+ 		info.descriptions = std::move(descriptions);
+ 
+diff --git a/src/storage/vgi_table_set.cpp b/src/storage/vgi_table_set.cpp
+index 50c47cc..0f9c2a6 100644
+--- a/src/storage/vgi_table_set.cpp
++++ b/src/storage/vgi_table_set.cpp
+@@ -37,13 +37,13 @@ void VgiTableSet::LoadEntries(ClientContext &context,
+ 	auto &vgi_tx_load = VgiTransaction::Get(context, catalog_);
+ 	vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx_load.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "schema";
+-	rpc_ctx.entity_qualifier = schema_.name;
++	rpc_ctx.entity_qualifier = schema_.name.GetIdentifierName();
+ 	auto tables = schema_.TakeTables(rpc_ctx, context);
+ 
+ 	// Publish each entry under entry_lock_ briefly (per-entry, not whole loop).
+ 	// Mirrors UnityCatalog UCTableSet::LoadEntries.
+ 	for (auto &table_info : tables) {
+-		auto create_info = vgi::CreateTableInfoFromVgiTable(context, table_info, schema_.name);
++		auto create_info = vgi::CreateTableInfoFromVgiTable(context, table_info, schema_.name.GetIdentifierName());
+ 		auto table_entry = make_uniq<VgiTableEntry>(catalog_, schema_, create_info, table_info);
+ 		{
+ 			std::lock_guard<std::mutex> entry_lk(entry_lock_);
+@@ -63,7 +63,7 @@ void VgiTableSet::LoadEntries(ClientContext &context,
+ optional_ptr<CatalogEntry> VgiTableSet::GetEntry(ClientContext &context, const std::string &name) {
+ 	auto rpc_start = std::chrono::steady_clock::now();
+ 	uint64_t pre_gen;
+-	std::string qualifier = schema_.name + "." + name;
++	std::string qualifier = schema_.name.GetIdentifierName() + "." + name;
+ 	bool eager_path = false;
+ 	// Pre-read settings OUTSIDE entry_lock_ — DuckDB's setting registry +
+ 	// log manager both have their own mutexes; holding entry_lock_ across
+@@ -109,7 +109,7 @@ optional_ptr<CatalogEntry> VgiTableSet::GetEntry(ClientContext &context, const s
+ 			auto &vgi_tx = VgiTransaction::Get(context, catalog_);
+ 			vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx.GetTransactionOpaqueData()};
+ 			rpc_ctx.entity_kind = "schema";
+-			rpc_ctx.entity_qualifier = schema_.name;
++			rpc_ctx.entity_qualifier = schema_.name.GetIdentifierName();
+ 			auto tables = schema_.TakeTables(rpc_ctx, context);
+ 
+ 			// Build entries OUTSIDE entry_lock_ (CreateTableInfoFromVgiTable
+@@ -118,7 +118,7 @@ optional_ptr<CatalogEntry> VgiTableSet::GetEntry(ClientContext &context, const s
+ 			std::vector<unique_ptr<CatalogEntry>> built_entries;
+ 			built_entries.reserve(tables.size());
+ 			for (auto &table_info : tables) {
+-				auto create_info = vgi::CreateTableInfoFromVgiTable(context, table_info, schema_.name);
++				auto create_info = vgi::CreateTableInfoFromVgiTable(context, table_info, schema_.name.GetIdentifierName());
+ 				built_entries.push_back(make_uniq<VgiTableEntry>(catalog_, schema_, create_info, table_info));
+ 			}
+ 			{
+@@ -173,7 +173,7 @@ optional_ptr<CatalogEntry> VgiTableSet::GetEntry(ClientContext &context, const s
+ 	vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "table";
+ 	rpc_ctx.entity_qualifier = qualifier;
+-	auto table_info_opt = vgi::InvokeCatalogTableGet(rpc_ctx, schema_.name, name, context);
++	auto table_info_opt = vgi::InvokeCatalogTableGet(rpc_ctx, schema_.name.GetIdentifierName(), name, context);
+ 
+ 	auto rpc_end = std::chrono::steady_clock::now();
+ 	double rpc_ms = std::chrono::duration<double, std::milli>(rpc_end - rpc_start).count();
+@@ -189,7 +189,7 @@ optional_ptr<CatalogEntry> VgiTableSet::GetEntry(ClientContext &context, const s
+ 	}
+ 
+ 	auto &table_info = *table_info_opt;
+-	auto create_info = vgi::CreateTableInfoFromVgiTable(context, table_info, schema_.name);
++	auto create_info = vgi::CreateTableInfoFromVgiTable(context, table_info, schema_.name.GetIdentifierName());
+ 	auto table_entry = make_uniq<VgiTableEntry>(catalog_, schema_, create_info, table_info);
+ 
+ 	// Publish under entry_lock_ briefly; log AFTER releasing.
+@@ -242,7 +242,7 @@ optional_ptr<CatalogEntry> VgiTableSet::GetEntry(ClientContext &context, const E
+ 		return nullptr;
+ 	}
+ 
+-	auto at_unit = at->Unit();
++	auto at_unit = at->Unit().GetIdentifierName();
+ 	auto at_raw = at->GetValue();
+ 	if (at_raw.IsNull()) {
+ 		// AT (... => NULL) cannot reach the worker as a meaningful version
+@@ -258,8 +258,8 @@ optional_ptr<CatalogEntry> VgiTableSet::GetEntry(ClientContext &context, const E
+ 	auto &vgi_tx_at = VgiTransaction::Get(context, catalog_);
+ 	vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx_at.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "table";
+-	rpc_ctx.entity_qualifier = schema_.name + "." + entry_name;
+-	auto table_info_opt = vgi::InvokeCatalogTableGet(rpc_ctx, schema_.name, entry_name, context,
++	rpc_ctx.entity_qualifier = schema_.name.GetIdentifierName() + "." + entry_name;
++	auto table_info_opt = vgi::InvokeCatalogTableGet(rpc_ctx, schema_.name.GetIdentifierName(), entry_name, context,
+ 	                                                  at_unit, at_value);
+ 	auto rpc_end = std::chrono::steady_clock::now();
+ 	double rpc_ms = std::chrono::duration<double, std::milli>(rpc_end - rpc_start).count();
+@@ -277,7 +277,7 @@ optional_ptr<CatalogEntry> VgiTableSet::GetEntry(ClientContext &context, const E
+ 	}
+ 
+ 	auto &table_info = *table_info_opt;
+-	auto create_info = vgi::CreateTableInfoFromVgiTable(context, table_info, schema_.name);
++	auto create_info = vgi::CreateTableInfoFromVgiTable(context, table_info, schema_.name.GetIdentifierName());
+ 	auto table_entry = make_uniq<VgiTableEntry>(catalog_, schema_, create_info, table_info);
+ 
+ 	// Store on the transaction so it stays alive for the query lifetime
+diff --git a/src/storage/vgi_view_set.cpp b/src/storage/vgi_view_set.cpp
+index 3008140..b0aee48 100644
+--- a/src/storage/vgi_view_set.cpp
++++ b/src/storage/vgi_view_set.cpp
+@@ -22,6 +22,10 @@ namespace duckdb {
+ // the entry instead surfaces a clean "view not found" error to the user.
+ static unique_ptr<ViewCatalogEntry> CreateViewEntryFromInfo(Catalog &catalog, SchemaCatalogEntry &schema,
+                                                              const vgi::VgiViewInfo &view_info) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not expose views");
++#else
++
+ 	CreateViewInfo info;
+ 	info.view_name = view_info.name;
+ 	info.sql = view_info.definition;
+@@ -54,6 +58,8 @@ static unique_ptr<ViewCatalogEntry> CreateViewEntryFromInfo(Catalog &catalog, Sc
+ 		return nullptr;
+ 	}
+ 	return make_uniq<ViewCatalogEntry>(catalog, schema, info);
++
++#endif
+ }
+ 
+ VgiViewSet::VgiViewSet(Catalog &catalog, VgiSchemaEntry &schema) : VgiCatalogSet(catalog, &schema), schema_(schema) {
+@@ -121,9 +127,9 @@ optional_ptr<CatalogEntry> VgiViewSet::GetEntry(ClientContext &context, const st
+ 	auto &vgi_tx = VgiTransaction::Get(context, catalog_);
+ 	vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "view";
+-	rpc_ctx.entity_qualifier = schema_.name + "." + name;
++	rpc_ctx.entity_qualifier = schema_.name.GetIdentifierName() + "." + name;
+ 
+-	auto view_info_opt = vgi::InvokeCatalogViewGet(rpc_ctx, schema_.name, name, context);
++	auto view_info_opt = vgi::InvokeCatalogViewGet(rpc_ctx, schema_.name.GetIdentifierName(), name, context);
+ 
+ 	if (!view_info_opt) {
+ 		return nullptr;
+@@ -160,7 +166,7 @@ void VgiViewSet::LoadEntries(ClientContext &context, const std::lock_guard<std::
+ 	auto &vgi_tx_load = VgiTransaction::Get(context, catalog_);
+ 	vgi::CatalogRpcContext rpc_ctx{attach_params, attach_result->attach_opaque_data, vgi_tx_load.GetTransactionOpaqueData()};
+ 	rpc_ctx.entity_kind = "schema";
+-	rpc_ctx.entity_qualifier = schema_.name;
++	rpc_ctx.entity_qualifier = schema_.name.GetIdentifierName();
+ 	auto views = schema_.TakeViews(rpc_ctx, context);
+ 
+ 	for (auto &view_info : views) {
+diff --git a/src/vgi_arrow_ipc.cpp b/src/vgi_arrow_ipc.cpp
+index 13d7aea..0468e7a 100644
+--- a/src/vgi_arrow_ipc.cpp
++++ b/src/vgi_arrow_ipc.cpp
+@@ -12,6 +12,8 @@
+ 
+ #if VGI_POSIX_TRANSPORT
+ #include <sys/select.h>
++#include <fcntl.h>
++#include <poll.h>
+ #include <unistd.h>
+ #elif defined(_WIN32)
+ #include <io.h> // _read, _write
+@@ -52,6 +54,44 @@ namespace vgi {
+ // and keeps the extra syscalls negligible (one per GiB).
+ static constexpr int64_t kMaxIoChunkBytes = 1LL << 30; // 1 GiB
+ 
++#if VGI_POSIX_TRANSPORT && defined(VGI_DUCKDB2_INVOCATION_PROFILE)
++namespace {
++// Operation-local borrowed descriptor. Each leased worker has one caller; restore
++// its original flags before the lease can return to the pool.
++class InvocationIO {
++public:
++ explicit InvocationIO(int fd) : fd(fd), flags(fcntl(fd, F_GETFL)), last_progress(std::chrono::steady_clock::now()) {
++  if (flags < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
++   throw IOException("VGI invocation profile cannot configure nonblocking I/O: %s", strerror(errno));
++  }
++ }
++ ~InvocationIO() { fcntl(fd, F_SETFL, flags); }
++ arrow::Status Wait(short events, ClientContext *context) {
++  while (true) {
++   if (context && context->IsInterrupted()) return arrow::Status::IOError("VGI operation interrupted (query cancelled)");
++   if (std::chrono::steady_clock::now() - last_progress >= std::chrono::seconds(30)) {
++    return arrow::Status::IOError("VGI invocation profile idle I/O timeout after 30 seconds");
++   }
++   pollfd descriptor {fd, events, 0};
++   auto result = poll(&descriptor, 1, 100);
++   if (result < 0) {
++    if (errno == EINTR) continue;
++    return arrow::Status::IOError("VGI invocation I/O poll failed: ", strerror(errno));
++   }
++   if (result == 0) continue;
++   if (descriptor.revents & POLLNVAL) return arrow::Status::IOError("VGI invocation I/O descriptor is invalid");
++   return arrow::Status::OK(); // read/write reports EOF, EPIPE, and transport errors.
++  }
++ }
++ void Progress() { last_progress = std::chrono::steady_clock::now(); }
++private:
++ int fd;
++ int flags;
++ std::chrono::steady_clock::time_point last_progress;
++};
++} // namespace
++#endif
++
+ // ============================================================================
+ // Protocol State Metadata
+ // ============================================================================
+@@ -265,18 +305,28 @@ arrow::Result<int64_t> FdInputStream::Read(int64_t nbytes, void *out) {
+ 	// Pipes may return partial reads, so we must loop.
+ 	uint8_t *buffer = static_cast<uint8_t *>(out);
+ 	int64_t total_bytes_read = 0;
++#if VGI_POSIX_TRANSPORT && defined(VGI_DUCKDB2_INVOCATION_PROFILE)
++	InvocationIO io(fd_);
++#endif
+ 
+ 	while (total_bytes_read < nbytes) {
+ 		// Clamped per-syscall count; see kMaxIoChunkBytes.
+ 		const int64_t chunk = std::min<int64_t>(nbytes - total_bytes_read, kMaxIoChunkBytes);
+ #if VGI_POSIX_TRANSPORT
++		#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++		ARROW_RETURN_NOT_OK(io.Wait(POLLIN, context_));
++#endif
+ 		ssize_t bytes_read = read(fd_, buffer + total_bytes_read, static_cast<size_t>(chunk));
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++		if (bytes_read < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) continue;
++		if (bytes_read > 0) io.Progress();
++#endif
+ #else
+ 		// Windows: overlapped ReadFile so the engine thread blocks at 0% CPU and
+ 		// wakes the instant bytes arrive (poll()-equivalent), instead of
+ 		// busy-spinning and stealing a core from the worker. A non-overlapped
+ 		// handle (e.g. a socket) completes synchronously and we use that result.
+-		// Cancellation: re-check context->interrupted every 250ms.
++		// Cancellation: re-check context->IsInterrupted() every 250ms.
+ 		int bytes_read;
+ 		{
+ 			DWORD want = static_cast<DWORD>(chunk);
+@@ -313,7 +363,7 @@ arrow::Result<int64_t> FdInputStream::Read(int64_t nbytes, void *out) {
+ 							break;
+ 						}
+ 						if (w == WAIT_TIMEOUT) {
+-							if (context_ && context_->interrupted) {
++							if (context_ && context_->IsInterrupted()) {
+ 								::CancelIoEx(h, &ov);
+ 								cancelled = true;
+ 								break;
+@@ -372,7 +422,7 @@ arrow::Result<std::shared_ptr<arrow::Buffer>> FdInputStream::Read(int64_t nbytes
+ }
+ 
+ // FdOutputStream implementation
+-FdOutputStream::FdOutputStream(int fd) : fd_(fd), position_(0), is_open_(true) {
++FdOutputStream::FdOutputStream(int fd, ClientContext *context) : fd_(fd), position_(0), is_open_(true), context_(context) {
+ }
+ 
+ arrow::Status FdOutputStream::Close() {
+@@ -396,7 +446,21 @@ arrow::Status FdOutputStream::Write(const void *data, int64_t nbytes) {
+ 	const uint8_t *bytes = static_cast<const uint8_t *>(data);
+ 	int64_t total_written = 0;
+ 
+-#if VGI_POSIX_TRANSPORT
++#if VGI_POSIX_TRANSPORT && defined(VGI_DUCKDB2_INVOCATION_PROFILE)
++	InvocationIO io(fd_);
++	while (total_written < nbytes) {
++		ARROW_RETURN_NOT_OK(io.Wait(POLLOUT, context_));
++		const auto chunk = std::min<int64_t>(nbytes - total_written, 65536);
++		auto written = write(fd_, bytes + total_written, static_cast<size_t>(chunk));
++		if (written < 0) {
++			if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
++			return arrow::Status::IOError("VGI invocation write failed: ", strerror(errno));
++		}
++		if (written == 0) return arrow::Status::IOError("VGI invocation write made no progress");
++		io.Progress();
++		total_written += written;
++	}
++#elif VGI_POSIX_TRANSPORT
+ 	// Bound: an unresponsive worker that fills its kernel pipe buffer
+ 	// would otherwise block write() forever. 60s is well above any
+ 	// realistic RPC payload write time on a healthy worker. Mirrors the
+diff --git a/src/vgi_arrow_utils.cpp b/src/vgi_arrow_utils.cpp
+index 6e37868..dfa3bb1 100644
+--- a/src/vgi_arrow_utils.cpp
++++ b/src/vgi_arrow_utils.cpp
+@@ -26,7 +26,7 @@ std::map<std::string, Value> ExtractVgiSettings(ClientContext &context,
+ 	std::map<std::string, Value> settings;
+ 	for (const auto &name : setting_names) {
+ 		Value value;
+-		if (context.TryGetCurrentSetting(name, value)) {
++		if (context.TryGetCurrentSetting(Identifier(name), value)) {
+ 			settings[name] = value;
+ 		}
+ 	}
+@@ -143,7 +143,7 @@ void ArrowSchemaToColumnList(ClientContext &context, const std::shared_ptr<arrow
+ 
+ 	// Populate the ColumnList
+ 	for (idx_t i = 0; i < types.size(); i++) {
+-		columns.AddColumn(ColumnDefinition(names[i], types[i]));
++		columns.AddColumn(ColumnDefinition(Identifier(names[i]), types[i]));
+ 	}
+ }
+ 
+@@ -153,7 +153,7 @@ std::shared_ptr<arrow::Schema> DuckDBColumnsToArrowSchema(ClientContext &context
+ 
+ 	for (auto &col : columns.Logical()) {
+ 		types.push_back(col.GetType());
+-		names.push_back(col.GetName());
++		names.push_back(col.GetName().GetIdentifierName());
+ 	}
+ 
+ 	return BuildArrowSchemaFromDuckDB(context, types, names);
+diff --git a/src/vgi_cancel_dispatcher.cpp b/src/vgi_cancel_dispatcher.cpp
+index 330e773..062d7a9 100644
+--- a/src/vgi_cancel_dispatcher.cpp
++++ b/src/vgi_cancel_dispatcher.cpp
+@@ -110,6 +110,10 @@ bool VgiCancelDispatcher::Enqueue(CancelRequest req) noexcept {
+ }
+ 
+ bool VgiCancelDispatcher::EnqueueStreamingClose(StreamingCloseRequest req) noexcept {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++return false; // Aggregate profiles cannot register in the invocation-only build.
++#else
++
+ 	if (shutdown_.load(std::memory_order_acquire)) {
+ 		return false;
+ 	}
+@@ -129,6 +133,8 @@ bool VgiCancelDispatcher::EnqueueStreamingClose(StreamingCloseRequest req) noexc
+ 		cv_.notify_one();
+ 	}
+ 	return true;
++
++#endif
+ }
+ 
+ bool VgiCancelDispatcher::EnsureWorkerStarted() {
+@@ -230,6 +236,10 @@ void VgiCancelDispatcher::ProcessOne(CancelRequest &req) noexcept {
+ }
+ 
+ void VgiCancelDispatcher::ProcessStreamingClose(StreamingCloseRequest &req) noexcept {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++return; // EnqueueStreamingClose rejects this excluded capability.
++#else
++
+ 	try {
+ 		if (!req.attach_params) {
+ 			return;
+@@ -265,6 +275,8 @@ void VgiCancelDispatcher::ProcessStreamingClose(StreamingCloseRequest &req) noex
+ 		} catch (...) {
+ 		}
+ 	}
++
++#endif
+ }
+ 
+ void VgiCancelDispatcher::DrainForTesting() {
+diff --git a/src/vgi_catalog_api.cpp b/src/vgi_catalog_api.cpp
+index bb60acf..7558ed1 100644
+--- a/src/vgi_catalog_api.cpp
++++ b/src/vgi_catalog_api.cpp
+@@ -1430,7 +1430,7 @@ VgiScanPlan InvokeTableFunctionPlan(const CatalogRpcContext &ctx,
+ 	idx_t pages = 0;
+ 
+ 	while (true) {
+-		if (context.interrupted) {
++		if (context.IsInterrupted()) {
+ 			throw InterruptException();
+ 		}
+ 		if (pages >= max_pages) {
+@@ -1525,7 +1525,7 @@ static unique_ptr<BaseStatistics> BuildColumnStatistics(
+ 			// the value with the target logical type (e.g., BLOB → GEOMETRY)
+ 			if (val.type().InternalType() == duck_type.InternalType()) {
+ 				auto reinterpreted = val;
+-				reinterpreted.Reinterpret(duck_type);
++				throw NotImplementedException("VGI DuckDB 2 invocation profile does not reinterpret statistic value types");
+ 				return reinterpreted;
+ 			}
+ 			return val;
+@@ -2766,7 +2766,8 @@ VgiScanBranchesResult ParseScanBranchesResult(ClientContext &context,
+ 		branch.branch_filter = filter_opt;
+ 		if (!branch.branch_filter.empty()) {
+ 			try {
+-				auto exprs = Parser::ParseExpressionList(branch.branch_filter);
++				Parser parser(context);
++				auto exprs = parser.ParseExpressionList(branch.branch_filter);
+ 				if (exprs.empty()) {
+ 					throw BinderException("VGI branch_filter parsed to no expressions [worker: " + worker_path +
+ 					                       ", filter: " + branch.branch_filter + "]");
+@@ -2920,6 +2921,10 @@ static std::string RenderRequiredFiltersJson(const std::vector<std::vector<std::
+ 
+ CreateTableInfo CreateTableInfoFromVgiTable(ClientContext &context, VgiTableInfo &table_info,
+                                             const std::string &schema_name) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not expose stored tables");
++#else
++
+ 	CreateTableInfo create_info;
+ 	create_info.table = table_info.name;
+ 	create_info.schema = schema_name;
+@@ -3094,6 +3099,8 @@ CreateTableInfo CreateTableInfoFromVgiTable(ClientContext &context, VgiTableInfo
+ 	}
+ 
+ 	return create_info;
++
++#endif
+ }
+ 
+ VgiFunctionInfo ParseFunctionInfo(const std::shared_ptr<arrow::RecordBatch> &batch, int64_t row_idx,
+@@ -3472,7 +3479,7 @@ static std::map<std::string, Value> ExtractSecretKeyValues(const KeyValueSecret
+ 	kv_pairs["name"] = Value(kv_secret.GetName());
+ 	// Add all custom key-value entries
+ 	for (const auto &[k, v] : kv_secret.secret_map) {
+-		kv_pairs[k] = v;
++		kv_pairs[k.GetIdentifierName()] = v;
+ 	}
+ 	// Add the secret's scope prefixes (newline-joined), set AFTER the secret_map
+ 	// loop so it is reliable for worker-side scope matching. Lets a worker that
+@@ -3498,7 +3505,7 @@ static std::map<std::string, Value> ExtractSecretKeyValues(const KeyValueSecret
+ // type to avoid an empty key colliding.)
+ static void InsertResolvedSecret(std::map<std::string, std::map<std::string, Value>> &result,
+                                  const std::string &secret_type, const KeyValueSecret &kv_secret) {
+-	std::string key = kv_secret.GetName();
++	std::string key = kv_secret.GetName().GetIdentifierName();
+ 	if (key.empty()) {
+ 		key = secret_type;
+ 	}
+diff --git a/src/vgi_copy_from_impl.cpp b/src/vgi_copy_from_impl.cpp
+index 2e33069..90315c5 100644
+--- a/src/vgi_copy_from_impl.cpp
++++ b/src/vgi_copy_from_impl.cpp
+@@ -24,7 +24,9 @@ TableFunction MakeVgiCopyFromTableFunction() {
+ 	func.cardinality = vgi::VgiTableFunctionCardinality;
+ 	func.table_scan_progress = vgi::VgiTableFunctionProgress;
+ 	func.to_string = vgi::VgiTableFunctionToString;
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ 	func.dynamic_to_string = vgi::VgiTableFunctionDynamicToString;
++#endif
+ 	func.statistics = vgi::VgiTableFunctionStatistics;
+ 	// COPY FROM always projects all target columns (identity), so no projection
+ 	// pushdown is needed; leave projection_pushdown at its default (false).
+diff --git a/src/vgi_exchange_cache_key.cpp b/src/vgi_exchange_cache_key.cpp
+index 1f27e7d..dd709ef 100644
+--- a/src/vgi_exchange_cache_key.cpp
++++ b/src/vgi_exchange_cache_key.cpp
+@@ -309,7 +309,7 @@ bool BuildExchangeCacheKeyStaticFields(ClientContext &context,
+ 	std::string identity_scope;
+ 	const std::string &cat = attach_params->catalog_name();
+ 	if (!cat.empty()) {
+-		auto catalog = Catalog::GetCatalogEntry(context, cat);
++		auto catalog = Catalog::GetCatalogEntry(context, Identifier(cat));
+ 		if (catalog && catalog->GetCatalogType() == "vgi") {
+ 			auto &vcat = catalog->Cast<VgiCatalog>();
+ 			catalog_version = vcat.GetKnownCatalogVersion();
+diff --git a/src/vgi_extension.cpp b/src/vgi_extension.cpp
+index 54c9214..8f5e156 100644
+--- a/src/vgi_extension.cpp
++++ b/src/vgi_extension.cpp
+@@ -19,6 +19,7 @@
+ #endif
+ 
+ #include "duckdb.hpp"
++#include "duckdb/logging/log_manager.hpp"
+ #include "duckdb/common/file_system.hpp"
+ #include "duckdb/main/attached_database.hpp"
+ #include "duckdb/main/config.hpp"
+@@ -85,9 +86,15 @@
+ #include "vgi_oauth.hpp"
+ #include "vgi_profiling.hpp"
+ #include "vgi_secret_storage.hpp"
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ #include "vgi_lateral_batch_operator.hpp"
++#endif
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ #include "vgi_streaming_window_operator.hpp"
++#endif
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ #include "vgi_table_buffering_impl.hpp"
++#endif
+ #include "duckdb/planner/operator/logical_get.hpp"
+ #ifndef __EMSCRIPTEN__
+ #include "vgi_subprocess.hpp"
+@@ -138,6 +145,7 @@ static unique_ptr<TransactionManager> CreateVgiTransactionManager(optional_ptr<S
+ // All-or-nothing in v1: if any expression is ineligible, the whole node
+ // stays a regular LogicalWindow. Mixed-eligibility splitting is a v2 task.
+ 
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ class VgiStreamingWindowOptimizer : public OptimizerExtension {
+ public:
+ 	VgiStreamingWindowOptimizer() {
+@@ -938,6 +946,8 @@ private:
+ 	}
+ };
+ 
++#endif // VGI_DUCKDB2_INVOCATION_PROFILE
++
+ // Storage extension for VGI — also holds per-secret-type redact keys
+ class VgiStorageExtension : public StorageExtension {
+ public:
+@@ -1148,7 +1158,7 @@ public:
+ 	// attach_fn performs the real DatabaseManager::AttachDatabase and throws on
+ 	// failure (registry stays unchanged in that case — it propagates out).
+ 	CompanionOutcome AcquireCompanion(const std::string &alias, const std::string &target,
+-	                                  const std::string &db_type, bool hidden, DatabaseManager &db_manager,
++	                                  const std::string &db_type, bool hidden, DatabaseManager &db_manager, ClientContext &context,
+ 	                                  const std::function<void()> &attach_fn, std::string &conflict_target_out) {
+ 		std::lock_guard<std::mutex> lock(companion_mutex_);
+ 		auto it = companion_catalogs_.find(alias);
+@@ -1158,7 +1168,7 @@ public:
+ 				// If a user detached it out-of-band, the registry is stale; drop
+ 				// the stale record and fall through to a fresh attach so branches
+ 				// can still resolve it.
+-				if (db_manager.GetDatabase(alias)) {
++				if (db_manager.GetDatabase(context, Identifier(alias))) {
+ 					it->second.refcount++;
+ 					return CompanionOutcome::SHARED;
+ 				}
+@@ -1168,7 +1178,7 @@ public:
+ 				return CompanionOutcome::CONFLICT;
+ 			}
+ 		}
+-		if (db_manager.GetDatabase(alias)) {
++		if (db_manager.GetDatabase(context, Identifier(alias))) {
+ 			conflict_target_out = "(existing non-companion catalog)";
+ 			return CompanionOutcome::CONFLICT;
+ 		}
+@@ -1279,8 +1289,8 @@ static void InjectCompanionSecret(ClientContext &context, const std::string &sec
+ 	}
+ 	// Don't overwrite an option the worker set explicitly.
+ 	for (const auto &e : kv->secret_map) {
+-		if (options.options.find(e.first) == options.options.end()) {
+-			options.options[e.first] = e.second;
++		if (options.options.find(e.first.GetIdentifierName()) == options.options.end()) {
++			options.options[e.first.GetIdentifierName()] = e.second;
+ 		}
+ 	}
+ }
+@@ -1293,6 +1303,7 @@ static void InjectCompanionSecret(ClientContext &context, const std::string &sec
+ // namespace. DuckDB keeps scalar / aggregate / table functions and macros in
+ // ONE per-schema CatalogSet, so a lookup under any of those types surfaces the
+ // others — possibly as a type-mismatch error, which is equally "taken".
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ static bool SystemFunctionNameTaken(ClientContext &context, Catalog &system_catalog, const std::string &name) {
+ 	static const CatalogType kFunctionTypes[] = {CatalogType::SCALAR_FUNCTION_ENTRY,
+ 	                                             CatalogType::AGGREGATE_FUNCTION_ENTRY,
+@@ -1478,6 +1489,7 @@ static void RegisterVgiGlobalFunctions(ClientContext &context, const std::string
+ 	}
+ }
+ 
++#endif
+ void ReleaseCompanionCatalogs(ClientContext &context, const std::vector<std::string> &aliases) {
+ 	if (aliases.empty()) {
+ 		return;
+@@ -1493,7 +1505,7 @@ void ReleaseCompanionCatalogs(ClientContext &context, const std::vector<std::str
+ 		// (`USE companion; DETACH vgi_catalog`) — a rare edge case that must not
+ 		// abort the parent detach or leak the exception out of OnDetach.
+ 		try {
+-			db_manager.DetachDatabase(context, alias, OnEntryNotFound::RETURN_NULL);
++			db_manager.DetachDatabase(context, Identifier(alias), OnEntryNotFound::RETURN_NULL);
+ 			VGI_LOG(context, "vgi.companion_detach", {{"alias", alias}});
+ 		} catch (const std::exception &e) {
+ 			VGI_LOG(context, "vgi.companion_detach.failed", {{"alias", alias}, {"error", e.what()}});
+@@ -1514,12 +1526,12 @@ static unique_ptr<BaseSecret> VgiCreateSecret(ClientContext &context, CreateSecr
+ 	auto vgi_ext = StorageExtension::Find(config, "vgi");
+ 	if (vgi_ext) {
+ 		auto &vgi_storage = static_cast<VgiStorageExtension &>(*vgi_ext);
+-		secret->redact_keys = vgi_storage.GetRedactKeys(input.type);
++		for (const auto &key : vgi_storage.GetRedactKeys(input.type.GetIdentifierName())) { secret->redact_keys.insert(Identifier(key)); }
+ 	}
+ 
+ 	// Copy all user-provided options into the secret map
+ 	for (const auto &entry : input.options) {
+-		secret->secret_map[entry.first] = entry.second;
++		secret->secret_map[Identifier(entry.first)] = entry.second;
+ 	}
+ 
+ 	return secret;
+@@ -1531,7 +1543,7 @@ static unique_ptr<BaseSecret> IrohCreateSecret(ClientContext &, CreateSecretInpu
+ 	auto secret = make_uniq<KeyValueSecret>(input.scope, input.type, input.provider, input.name);
+ 	secret->redact_keys.insert("secret_key");
+ 	for (const auto &entry : input.options) {
+-		secret->secret_map[entry.first] = entry.second;
++		secret->secret_map[Identifier(entry.first)] = entry.second;
+ 	}
+ 	return secret;
+ }
+@@ -1587,7 +1599,7 @@ static ParsedContainerOptions ParseContainerLocationStruct(const Value &loc) {
+ 	auto &child_types = StructType::GetChildTypes(loc.type());
+ 	auto &children = StructValue::GetChildren(loc);
+ 	for (idx_t i = 0; i < children.size(); i++) {
+-		auto key = StringUtil::Lower(child_types[i].first);
++		auto key = StringUtil::Lower(child_types[i].first.GetIdentifierName());
+ 		const Value &cv = children[i];
+ 		if (key == "image" || key == "location" || key == "path") {
+ 			out.image = cv.IsNull() ? "" : cv.ToString();
+@@ -1632,6 +1644,9 @@ static ParsedContainerOptions ParseContainerLocationStruct(const Value &loc) {
+ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> storage_info, ClientContext &context,
+                                             AttachedDatabase &db, const string &name, AttachInfo &info,
+                                             AttachOptions &options) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	options.access_mode = AccessMode::READ_ONLY;
++#endif
+ 	string worker_path;
+ 	string catalog_name = info.path; // The first argument to ATTACH is the catalog name
+ 	bool worker_debug = false;
+@@ -1908,6 +1923,11 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 	// detection / image inspection, database:// resolution, Iroh configuration,
+ 	// the discovery RPC). Checks the raw user LOCATION, before the rewrites below.
+ 	vgi::CheckLocationPolicy(context, worker_path, vgi::LocationEntryPoint::ATTACH);
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	if (vgi::IsHttpTransport(worker_path) || vgi::IsHttpiTransport(worker_path) || vgi::IsIrohTransport(worker_path)) {
++		throw NotImplementedException("VGI DuckDB 2 invocation profile supports synchronous subprocess/unix/tcp workers only");
++	}
++#endif
+ 
+ 	if (!tcp_proxy.empty() && !vgi::IsTcpTransport(worker_path)) {
+ 		throw BinderException("tcp_proxy is only valid for tcp:// LOCATIONs");
+@@ -2150,6 +2170,12 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 		cookie_jar = std::make_shared<vgi::SessionCookieJar>();
+ 	}
+ 
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	if (vgi::IsHttpTransport(worker_path) || vgi::IsHttpiTransport(worker_path) || vgi::IsIrohTransport(worker_path)) {
++		throw NotImplementedException("VGI DuckDB 2 invocation profile rejects resolved HTTP/Iroh worker transports");
++	}
++#endif
++
+ 	// Lifted from the InvokeCatalogAttach call below — these optionals must
+ 	// also flow into InvokeCatalogs so the discovery RPC primes the launcher
+ 	// cache with the user's overrides, not [defaults]. See InvokeCatalogs's
+@@ -2207,7 +2233,7 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 			// from the path basename) is left untouched.
+ 			auto &fs = FileSystem::GetFileSystem(context);
+ 			if (name == AttachedDatabase::ExtractDatabaseName(info.path, fs)) {
+-				db.SetName(catalog_name);
++				db.SetName(Identifier(catalog_name));
+ 			}
+ 		}
+ 
+@@ -2272,7 +2298,8 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 
+ 				Value casted;
+ 				std::string cast_error;
+-				if (!opt.second.DefaultTryCastAs(matching_spec->type, casted, &cast_error)) {
++				auto cast_result = opt.second.DefaultTryCastAs(matching_spec->type, &cast_error);
++				if (!cast_result) {
+ 					if (matching_spec->secret) {
+ 						// The cast error quotes the value; a credential's must not surface.
+ 						throw BinderException("Cannot cast ATTACH option '%s' to declared type %s",
+@@ -2281,6 +2308,7 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 					throw BinderException("Cannot cast ATTACH option '%s' to declared type %s: %s",
+ 					                      matching_spec->name, matching_spec->type.ToString(), cast_error);
+ 				}
++				casted = std::move(*cast_result);
+ 				if (matching_spec->secret) {
+ 					secret_option_names.insert(opt.first);
+ 					key_options[opt.first] = hashed_key(opt.first, casted);
+@@ -2327,10 +2355,10 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 	auto &config = DBConfig::GetConfig(db.GetDatabase());
+ 
+ 	for (const auto &setting : attach_result.settings) {
+-		if (config.HasExtensionOption(setting.name)) {
++		if (config.HasExtensionOption(Identifier(setting.name))) {
+ 			// Setting already exists - verify types match
+ 			ExtensionOption existing_option;
+-			if (!config.TryGetExtensionOption(setting.name, existing_option)) {
++			if (!config.TryGetExtensionOption(Identifier(setting.name), existing_option)) {
+ 				throw BinderException("Failed to retrieve existing VGI setting '%s'", setting.name);
+ 			}
+ 			if (existing_option.type != setting.type) {
+@@ -2341,7 +2369,7 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 			// Types match - setting is already registered, no need to add again
+ 		} else {
+ 			// New setting - register it
+-			config.AddExtensionOption(setting.name, setting.description, setting.type, setting.default_value);
++			config.AddExtensionOption(Identifier(setting.name), setting.description, setting.type, setting.default_value);
+ 		}
+ 	}
+ 
+@@ -2366,7 +2394,7 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 
+ 		// Register the secret type with DuckDB
+ 		SecretType secret_type;
+-		secret_type.name = st.name;
++		secret_type.name = Identifier(st.name);
+ 		secret_type.deserializer = KeyValueSecret::Deserialize<KeyValueSecret>;
+ 		secret_type.default_provider = "config";
+ 		secret_type.extension = "vgi";
+@@ -2391,7 +2419,7 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 		create_func.provider = "config";
+ 		create_func.function = VgiCreateSecret;
+ 		for (const auto &param : st.parameters) {
+-			create_func.named_parameters[param.name] = param.type;
++			create_func.named_parameters[Identifier(param.name)] = param.type;
+ 		}
+ 		secret_manager.RegisterSecretFunction(create_func, OnCreateConflict::IGNORE_ON_CONFLICT);
+ 	}
+@@ -2578,6 +2606,11 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 			// Old worker: advertises no COPY formats. Continue the ATTACH.
+ 		}
+ 
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++		if (!formats.empty()) {
++			throw NotImplementedException("VGI DuckDB 2 invocation profile does not support COPY formats");
++		}
++#else
+ 		if (!formats.empty()) {
+ 			auto *vgi_ext = VgiStorageExtension::Find(*context.db);
+ 			auto &system_catalog = Catalog::GetSystemCatalog(*context.db);
+@@ -2660,6 +2693,7 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 				vgi_ext->InsertCopyFormatLocked(registered_name, std::move(entry));
+ 			}
+ 		}
++#endif
+ 	}
+ 
+ 	// Publish the functions this catalog asked us to put into DuckDB's global
+@@ -2675,7 +2709,11 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 	//     re-resolves the live catalog (ResolveVgiGlobalBinding).
+ 	//   * `global_functions false` opts the catalog out entirely.
+ 	if (global_functions_enabled && attach_result_ptr && !attach_result_ptr->global_functions.empty()) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++		throw NotImplementedException("VGI DuckDB 2 invocation profile does not publish global functions; attach with global_functions false");
++#else
+ 		RegisterVgiGlobalFunctions(context, name, attach_params, *attach_result_ptr);
++#endif
+ 	}
+ 
+ 	// Capture the companion manifest before attach_result_ptr is moved into the
+@@ -2719,6 +2757,11 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 	// catalog the VGI layer did not itself create). The secret provider was
+ 	// registered above, so a companion's credential lookups resolve through the
+ 	// Orchard catch-all automatically (see docs/companion_catalogs.md).
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	if (attach_companions_enabled && !companion_manifest.empty()) {
++		throw NotImplementedException("VGI DuckDB 2 invocation profile does not attach companion catalogs; attach with attach_companions false");
++	}
++#else
+ 	if (attach_companions_enabled && !companion_manifest.empty()) {
+ 		auto *vgi_ext = VgiStorageExtension::Find(*context.db);
+ 		if (vgi_ext) {
+@@ -2765,7 +2808,7 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 				VgiStorageExtension::CompanionOutcome outcome;
+ 				try {
+ 					outcome = vgi_ext->AcquireCompanion(
+-					    c.alias, c.target, scheme, c.hidden, db_manager,
++					    c.alias, c.target, scheme, c.hidden, db_manager, context,
+ 					    [&]() {
+ 						    AttachInfo cinfo;
+ 						    cinfo.name = c.alias;
+@@ -2820,6 +2863,8 @@ static unique_ptr<Catalog> VgiCatalogAttach(optional_ptr<StorageExtensionInfo> s
+ 		}
+ 	}
+ 
++#endif
++
+ 	// Success path only — fire the attach telemetry event (async, fire-and-forget,
+ 	// honors QUERY_FARM_TELEMETRY_OPT_OUT; never throws).
+ 	tele.extension_version = VGI_EXTENSION_VERSION;
+@@ -2848,6 +2893,7 @@ static unique_ptr<TransactionManager> CreateVgiTransactionManager(optional_ptr<S
+ // vgi_oauth_logout() table function
+ //===--------------------------------------------------------------------===//
+ 
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ struct OAuthLogoutBindData : public TableFunctionData {
+ 	std::string target_catalog; // empty = all catalogs
+ 	bool logout_all = false;
+@@ -3462,6 +3508,7 @@ static void VgiGlobalFunctionsScan(ClientContext &context, TableFunctionInput &d
+ 	output.SetCardinality(count);
+ }
+ 
++#endif
+ static void LoadInternal(ExtensionLoader &loader) {
+ #if defined(__EMSCRIPTEN__) && VGI_ASYNC_INIT_ENABLED
+ 	// Pre-spawn a bounded pool of background workers at extension load. Required
+@@ -3535,6 +3582,7 @@ static void LoadInternal(ExtensionLoader &loader) {
+ 	iroh_secret_function.named_parameters["secret_key"] = LogicalType::VARCHAR;
+ 	loader.RegisterFunction(std::move(iroh_secret_function));
+ 
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ 	// -------------------------------------------------------------------------
+ 	// Register native GeoArrow Arrow extension types
+ 	// -------------------------------------------------------------------------
+@@ -3601,14 +3649,19 @@ static void LoadInternal(ExtensionLoader &loader) {
+ 		}
+ 	}
+ 
++#endif
+ 	// Built-in settings and their validation/defaults/docs share src/vgi_settings.json.
+ 	vgi::RegisterVgiSettings(config);
++
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ 	vgi::RegisterVgiMultiScanRewriter(config);
+ 	OptimizerExtension::Register(config, VgiStreamingWindowOptimizer());
+ 	OptimizerExtension::Register(config, VgiTableBufferingRewriter());
+ 	vgi::RegisterVgiLateralBatchRewriter(config);
+ 	OptimizerExtension::Register(config, VgiRequiredFiltersOptimizer());
++#endif
+ 
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ 	// Register VGI table functions
+ 	RegisterVgiCatalogsFunction(loader);
+ 
+@@ -3789,6 +3842,8 @@ static void LoadInternal(ExtensionLoader &loader) {
+ 		    {}, {}, {"SELECT * FROM vgi_oauth_identity();"}));
+ 		loader.RegisterFunction(std::move(identity_info));
+ 	}
++#endif
++
+ }
+ 
+ void VgiExtension::Load(ExtensionLoader &loader) {
+diff --git a/src/vgi_function_connection.cpp b/src/vgi_function_connection.cpp
+index 6fb7720..a45df11 100644
+--- a/src/vgi_function_connection.cpp
++++ b/src/vgi_function_connection.cpp
+@@ -267,7 +267,7 @@ bool NegotiateWorkerShmCapability(int in_fd, int out_fd, const std::string &work
+ 		auto empty_params =
+ 		    arrow::RecordBatch::Make(arrow::schema({}), 1, std::vector<std::shared_ptr<arrow::Array>> {});
+ 		auto client_caps = arrow::KeyValueMetadata::Make({TRANSPORT_CAP_SHM_KEY}, {"true"});
+-		WriteRpcRequest(in_fd, TRANSPORT_OPTIONS_METHOD, empty_params, client_caps);
++		WriteRpcRequest(in_fd, TRANSPORT_OPTIONS_METHOD, empty_params, client_caps, VGI_MAIN_PROTOCOL, &context);
+ 		auto resp = ReadUnaryResponse(out_fd, &context, worker_path, pid);
+ 		if (resp.metadata) {
+ 			auto v = resp.metadata->Get(TRANSPORT_CAP_SHM_KEY);
+@@ -544,7 +544,7 @@ std::shared_ptr<arrow::io::OutputStream> FunctionConnection::TransportOutput() {
+ 	if (!proc_) {
+ 		throw InternalException("VGI byte transport is not connected");
+ 	}
+-	return std::make_shared<FdOutputStream>(proc_->GetStdinFd());
++	return std::make_shared<FdOutputStream>(proc_->GetStdinFd(), &context_);
+ }
+ 
+ void FunctionConnection::WriteTransportRpc(
+@@ -1279,7 +1279,7 @@ std::shared_ptr<arrow::RecordBatch> FunctionConnection::ReadDataBatch() {
+ 			const std::string location_url = result.custom_metadata->value(loc_idx);
+ 			auto resolved = ResolveExternalLocation(context_, location_url, worker_path_, GetExecutionIdHex(),
+ 			                                        GetAttachOpaqueDataHex(), result.custom_metadata,
+-			                                        &context_.interrupted);
++			                                        &context_);
+ 			result.batch = resolved.batch;
+ 			result.custom_metadata = resolved.metadata;
+ 		}
+@@ -1741,6 +1741,10 @@ std::vector<uint8_t>
+ FunctionConnection::RpcTableBufferingProcess(const std::string &function_name, const std::vector<uint8_t> &execution_id,
+                                                 const std::shared_ptr<arrow::RecordBatch> &input_batch,
+                                                 std::optional<int64_t> batch_index) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not support buffered functions");
++#else
++
+ 	auto batch_bytes = vgi::SerializeToIpcBytes(input_batch);
+ 	auto rpc_params = vgi::BuildTableBufferingProcessInner(function_name, schema_name_, execution_id, batch_bytes,
+ 	                                                       attach_opaque_data_, batch_index);
+@@ -1774,11 +1778,17 @@ FunctionConnection::RpcTableBufferingProcess(const std::string &function_name, c
+ 	auto bin_array = std::static_pointer_cast<arrow::BinaryArray>(col);
+ 	auto view = bin_array->GetView(0);
+ 	return std::vector<uint8_t>(view.data(), view.data() + view.size());
++
++#endif
+ }
+ 
+ std::vector<std::vector<uint8_t>>
+ FunctionConnection::RpcTableBufferingCombine(const std::string &function_name, const std::vector<uint8_t> &execution_id,
+                                                 const std::vector<std::vector<uint8_t>> &state_ids) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not support buffered functions");
++#else
++
+ 	auto rpc_params =
+ 	    vgi::BuildTableBufferingCombineInner(function_name, schema_name_, execution_id, state_ids, attach_opaque_data_);
+ 	vgi::ValidateRequestSchema(rpc_params, "table_buffering_combine", worker_path_);
+@@ -1804,10 +1814,16 @@ FunctionConnection::RpcTableBufferingCombine(const std::string &function_name, c
+ 		result.emplace_back(v.data(), v.data() + v.size());
+ 	}
+ 	return result;
++
++#endif
+ }
+ 
+ void FunctionConnection::RpcTableBufferingDestructor(const std::string &function_name,
+                                                        const std::vector<uint8_t> &execution_id) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not support buffered functions");
++#else
++
+ 	auto rpc_params =
+ 	    vgi::BuildTableBufferingDestructorInner(function_name, schema_name_, execution_id, attach_opaque_data_);
+ 	vgi::ValidateRequestSchema(rpc_params, "table_buffering_destructor", worker_path_);
+@@ -1818,6 +1834,8 @@ void FunctionConnection::RpcTableBufferingDestructor(const std::string &function
+ #endif
+ 	auto inner = DecodeOuterResponse(response, "table_buffering_destructor", worker_path_);
+ 	vgi::ValidateResponseSchema(inner, "table_buffering_destructor", worker_path_);
++
++#endif
+ }
+ 
+ int FunctionConnection::Wait() {
+diff --git a/src/vgi_global_functions.cpp b/src/vgi_global_functions.cpp
+index 1a3eb7a..0397006 100644
+--- a/src/vgi_global_functions.cpp
++++ b/src/vgi_global_functions.cpp
+@@ -28,7 +28,7 @@ VgiGlobalBinding ResolveVgiGlobalBinding(ClientContext &context, const std::stri
+ 	// API to unregister a function, so the entry survives DETACH — resolving
+ 	// live here is what makes a re-ATTACH refresh the connection and a DETACH
+ 	// produce a clear error instead of a stale-worker call.
+-	auto db = DatabaseManager::Get(context).GetDatabase(context, catalog_name);
++	auto db = DatabaseManager::Get(context).GetDatabase(context, Identifier(catalog_name));
+ 	if (!db) {
+ 		throw InvalidInputException(
+ 		    "VGI function '%s' was published globally by catalog '%s', which is no longer attached. "
+diff --git a/src/vgi_http_client.cpp b/src/vgi_http_client.cpp
+index 1f55843..4eefb75 100644
+--- a/src/vgi_http_client.cpp
++++ b/src/vgi_http_client.cpp
+@@ -275,11 +275,11 @@ static std::vector<std::string> CollectSetCookieHeaders(const RpcHttpResponse &r
+ // and a failure with the flag set is still the interrupt, not a transport fault.
+ // A response that completed normally is kept: the scan loop reports the
+ // interrupt at its next check, and the stream token stays in step meanwhile.
+-static bool IsInterruptedRequest(const std::atomic<bool> *cancellation, const HTTPResponse *response) {
+-	if (!cancellation || !cancellation->load()) {
++static bool IsInterruptedRequest(ClientContext *cancellation, const HTTPResponse *response) {
++	if (!cancellation || !cancellation->IsInterrupted()) {
+ 		return false;
+ 	}
+-	return !response || response->IsCancelled() || response->HasRequestError();
++	return !response || response->HasRequestError();
+ }
+ 
+ // Forward declarations — defined below with the capability-header parsing.
+@@ -308,7 +308,7 @@ static std::string HttpPostArrowIpcInternal(
+     bool allow_codec_retry = true, duckdb::unique_ptr<HTTPClient> *client_holder = nullptr,
+                                              ServerCapabilities *harvested_caps = nullptr,
+                                              const std::shared_ptr<IrohClientConfig> &iroh_config = nullptr,
+-                                             const std::atomic<bool> *cancellation = nullptr) {
++                                             ClientContext *cancellation = nullptr) {
+ 	const bool is_httpi = IsHttpiTransport(url);
+ 	const uint64_t timeout_seconds = GetHttpTimeoutSeconds(context);
+ 	const int64_t accepted_max_response_bytes = GetAcceptedMaxResponseBytes(context);
+@@ -412,7 +412,7 @@ static std::string HttpPostArrowIpcInternal(
+ 	post.try_request = true;
+ 		// Per request, never on the cached params: those are shared by every
+ 		// query against this ATTACH.
+-		post.cancellation = cancellation;
++		if (cancellation) { throw NotImplementedException("VGI DuckDB 2 invocation profile does not support cancellable HTTP or external-location transfers"); }
+ 	if (client_holder) {
+ 			out_response->native = http_util.Request(post, *client_holder);
+ 	} else {
+@@ -738,7 +738,7 @@ std::string HttpPostArrowIpc(ClientContext &context, const std::string &url, con
+                               const std::shared_ptr<HTTPParams> &cached_http_params,
+                              duckdb::unique_ptr<HTTPClient> *client_holder, ServerCapabilities *harvested_caps,
+                              const std::shared_ptr<IrohClientConfig> &iroh_config,
+-                             const std::atomic<bool> *cancellation) {
++                             ClientContext *cancellation) {
+ 	// Get cached token from per-catalog auth (if any)
+ 	std::string token;
+ 	if (auth) {
+@@ -905,7 +905,7 @@ UnaryResponseResult HttpInvokeUnary(ClientContext &context, const std::string &w
+ // External Location Support
+ // ============================================================================
+ 
+-std::string HttpGetBytes(ClientContext &context, const std::string &url, const std::atomic<bool> *cancellation) {
++std::string HttpGetBytes(ClientContext &context, const std::string &url, ClientContext *cancellation) {
+ 	auto &db = *context.db;
+ 	auto &http_util = HTTPUtil::Get(db);
+ 	auto params = http_util.InitializeParameters(context, url);
+@@ -927,7 +927,7 @@ std::string HttpGetBytes(ClientContext &context, const std::string &url, const s
+ 	};
+ 
+ 	GetRequestInfo get(url, headers, *params, response_handler, content_handler);
+-	get.cancellation = cancellation;
++	if (cancellation) { throw NotImplementedException("VGI DuckDB 2 invocation profile does not support cancellable HTTP or external-location transfers"); }
+ 	auto response = http_util.Request(get);
+ 	if (IsInterruptedRequest(cancellation, response.get())) {
+ 		throw InterruptException();
+@@ -954,7 +954,7 @@ UnaryResponseResult ResolveExternalLocation(ClientContext &context, const std::s
+                                             const std::string &worker_path, const std::string &invocation_id_hex,
+                                              const std::string &attach_opaque_data_hex,
+                                              const std::shared_ptr<arrow::KeyValueMetadata> &pointer_metadata,
+-                                             const std::atomic<bool> *cancellation) {
++                                             ClientContext *cancellation) {
+ 	if (IsHttpiTransport(location_url)) {
+ 		throw IOException("VGI external locations over httpi:// are unsupported; the worker must return an "
+ 		                  "https:// pre-signed URL [url: %s]",
+diff --git a/src/vgi_http_function_connection.cpp b/src/vgi_http_function_connection.cpp
+index 77e56c2..be2a04e 100644
+--- a/src/vgi_http_function_connection.cpp
++++ b/src/vgi_http_function_connection.cpp
+@@ -274,7 +274,7 @@ void HttpFunctionConnection::BufferDataBatches(std::shared_ptr<arrow::Buffer> ow
+ 	while (true) {
+ 		// A bundled response can hold many batches, each possibly an external
+ 		// location costing its own GET.
+-		if (context_.interrupted) {
++		if (context_.IsInterrupted()) {
+ 			throw InterruptException();
+ 		}
+ 		auto read_result = reader->ReadNext();
+@@ -303,7 +303,7 @@ void HttpFunctionConnection::BufferDataBatches(std::shared_ptr<arrow::Buffer> ow
+ 			auto location_url = bwm.custom_metadata->value(bwm.custom_metadata->FindKey(RPC_LOCATION_KEY));
+ 			auto resolved = ResolveExternalLocation(context_, location_url,
+ 			                                         base_url_, GetExecutionIdHex(), GetAttachOpaqueDataHex(),
+-			                                         bwm.custom_metadata, &context_.interrupted);
++			                                         bwm.custom_metadata, &context_);
+ 			buffered_batches_.push_back(resolved.batch);
+ 			buffered_batch_indexes_.push_back(ParseVgiBatchIndex(resolved.metadata, base_url_));
+ 			buffered_partition_values_bytes_.push_back(
+@@ -540,7 +540,7 @@ InitResult HttpFunctionConnection::PerformInit(const BindResult &bind_result,
+ 	auto response_body = HttpPostArrowIpc(context_, init_url, body, auth,
+ 	                                        /*cookie_jar=*/nullptr, cached_params_init, &http_client_,
+ 	                                        &harvested, attach_params_ ? attach_params_->iroh() : nullptr,
+-	                                        &context_.interrupted);
++	                                        &context_);
+ 	PublishHarvestedCapabilities(harvested);
+ #ifdef __EMSCRIPTEN__
+ #endif
+@@ -561,7 +561,7 @@ InitResult HttpFunctionConnection::PerformInit(const BindResult &bind_result,
+ 		if (loc_idx >= 0) {
+ 			auto location_url = header_result.header.metadata->value(loc_idx);
+ 			auto resolved = ResolveExternalLocation(context_, location_url, base_url_,
+-			                                         "", "", header_result.header.metadata, &context_.interrupted);
++			                                         "", "", header_result.header.metadata, &context_);
+ 			header_result.header.header_batch = resolved.batch;
+ 			header_result.header.metadata = resolved.metadata;
+ 		}
+@@ -758,6 +758,10 @@ HttpFunctionConnection::RpcTableBufferingProcess(const std::string &function_nam
+                                                     const std::vector<uint8_t> &execution_id,
+                                                     const std::shared_ptr<arrow::RecordBatch> &input_batch,
+                                                     std::optional<int64_t> batch_index) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not support buffered functions");
++#else
++
+ 	auto batch_bytes = vgi::SerializeToIpcBytes(input_batch);
+ 	auto rpc_params = vgi::BuildTableBufferingProcessInner(function_name, schema_name_, execution_id,
+ 	                                                          batch_bytes, attach_opaque_data_, batch_index);
+@@ -779,12 +783,18 @@ HttpFunctionConnection::RpcTableBufferingProcess(const std::string &function_nam
+ 	auto bin_array = std::static_pointer_cast<arrow::BinaryArray>(col);
+ 	auto view = bin_array->GetView(0);
+ 	return std::vector<uint8_t>(view.data(), view.data() + view.size());
++
++#endif
+ }
+ 
+ std::vector<std::vector<uint8_t>>
+ HttpFunctionConnection::RpcTableBufferingCombine(const std::string &function_name,
+                                                     const std::vector<uint8_t> &execution_id,
+                                                     const std::vector<std::vector<uint8_t>> &state_ids) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not support buffered functions");
++#else
++
+ 	auto rpc_params = vgi::BuildTableBufferingCombineInner(function_name, schema_name_, execution_id, state_ids,
+ 	                                                          attach_opaque_data_);
+ 	auto auth = attach_params_ ? attach_params_->auth() : nullptr;
+@@ -813,10 +823,16 @@ HttpFunctionConnection::RpcTableBufferingCombine(const std::string &function_nam
+ 		result.emplace_back(v.data(), v.data() + v.size());
+ 	}
+ 	return result;
++
++#endif
+ }
+ 
+ void HttpFunctionConnection::RpcTableBufferingDestructor(const std::string &function_name,
+                                                            const std::vector<uint8_t> &execution_id) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not support buffered functions");
++#else
++
+ 	auto rpc_params = vgi::BuildTableBufferingDestructorInner(function_name, schema_name_, execution_id,
+ 	                                                             attach_opaque_data_);
+ 	auto auth = attach_params_ ? attach_params_->auth() : nullptr;
+@@ -831,6 +847,8 @@ void HttpFunctionConnection::RpcTableBufferingDestructor(const std::string &func
+ 	PublishHarvestedCapabilities(tb_caps);
+ 	auto inner = DecodeHttpOuterResponse(resp, "table_buffering_destructor", base_url_);
+ 	(void)inner;
++
++#endif
+ }
+ 
+ std::shared_ptr<arrow::RecordBatch> HttpFunctionConnection::ReadDataBatch() {
+@@ -863,7 +881,7 @@ std::shared_ptr<arrow::RecordBatch> HttpFunctionConnection::ReadDataBatch() {
+ 		// Continuation: POST exchange with state token to get more data. The
+ 		// request itself is cancellable, but a fast worker answers each one before
+ 		// an interrupt lands mid-transfer, so check between them too.
+-		if (context_.interrupted) {
++		if (context_.IsInterrupted()) {
+ 			throw InterruptException();
+ 		}
+ 		auto tick_schema = arrow::schema({});
+@@ -887,7 +905,7 @@ std::shared_ptr<arrow::RecordBatch> HttpFunctionConnection::ReadDataBatch() {
+ 		auto response_body = HttpPostArrowIpc(context_, exchange_url, body, p_auth,
+ 		                                        /*cookie_jar=*/nullptr, p_cached_params, &http_client_,
+ 		                                        &p_harvested, attach_params_ ? attach_params_->iroh() : nullptr,
+-		                                        &context_.interrupted);
++		                                        &context_);
+ 		PublishHarvestedCapabilities(p_harvested);
+ 
+ 		// Parse response — buffer new data batches (adopt the body, no copy)
+@@ -965,7 +983,7 @@ std::shared_ptr<arrow::RecordBatch> HttpFunctionConnection::ReadDataBatch() {
+ 	auto response_body = HttpPostArrowIpc(context_, exchange_url, body, x_auth,
+ 	                                        /*cookie_jar=*/nullptr, x_cached_params, &http_client_,
+ 	                                        &x_harvested, attach_params_ ? attach_params_->iroh() : nullptr,
+-	                                        &context_.interrupted);
++	                                        &context_);
+ 	PublishHarvestedCapabilities(x_harvested);
+ 
+ 	// Parse response — copy into owning buffer since Arrow IPC reads zero-copy reference it
+@@ -1016,7 +1034,7 @@ std::shared_ptr<arrow::RecordBatch> HttpFunctionConnection::ReadDataBatch() {
+ 			auto location_url = bwm.custom_metadata->value(bwm.custom_metadata->FindKey(RPC_LOCATION_KEY));
+ 			auto resolved = ResolveExternalLocation(context_, location_url,
+ 			                                         base_url_, GetExecutionIdHex(), GetAttachOpaqueDataHex(),
+-			                                         bwm.custom_metadata, &context_.interrupted);
++			                                         bwm.custom_metadata, &context_);
+ 			if (!output_batch) {
+ 				output_batch = resolved.batch;
+ 			}
+diff --git a/src/vgi_iroh_config.cpp b/src/vgi_iroh_config.cpp
+index 21e6e16..b3ff788 100644
+--- a/src/vgi_iroh_config.cpp
++++ b/src/vgi_iroh_config.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include "vgi_settings_defaults.hpp"
+ #include "vgi_iroh_config.hpp"
++#include "duckdb/common/exception/binder_exception.hpp"
+ 
+ #include "duckdb/common/exception.hpp"
+ #include "duckdb/common/string_util.hpp"
+@@ -74,7 +75,7 @@ std::unique_ptr<SecretEntry> LookupIrohSecret(ClientContext &context, const std:
+ 	int64_t best_score = -1;
+ 	bool best_temporary = false;
+ 	for (const auto &entry : all) {
+-		if (!entry.secret || !StringUtil::CIEquals(entry.secret->GetType(), "iroh")) {
++		if (!entry.secret || !StringUtil::CIEquals(entry.secret->GetType().GetIdentifierName(), "iroh")) {
+ 			continue;
+ 		}
+ 		const bool temporary = entry.storage_mode == SecretManager::TEMPORARY_STORAGE_NAME;
+diff --git a/src/vgi_iroh_native.cpp b/src/vgi_iroh_native.cpp
+index 786c589..fa24962 100644
+--- a/src/vgi_iroh_native.cpp
++++ b/src/vgi_iroh_native.cpp
+@@ -78,7 +78,7 @@ std::string FormatIrohError(const char *operation, const vgi_iroh_error &error)
+ 
+ uint8_t CheckDuckDBInterrupted(void *userdata) {
+ 	auto context = static_cast<ClientContext *>(userdata);
+-	return context && context->interrupted.load() ? 1 : 0;
++	return context && context->IsInterrupted() ? 1 : 0;
+ }
+ 
+ [[noreturn]] void ThrowIroh(const char *operation, const vgi_iroh_error &error) {
+@@ -232,7 +232,7 @@ public:
+ 		int64_t total = 0;
+ 		auto last_progress = std::chrono::steady_clock::now();
+ 		while (total < nbytes) {
+-			if (context_ && context_->interrupted) {
++			if (context_ && context_->IsInterrupted()) {
+ 				vgi_iroh_stream_cancel(stream_->value);
+ 				return arrow::Status::Cancelled("VGI Iroh request cancelled");
+ 			}
+@@ -523,7 +523,7 @@ IrohNativeHttpResponse PerformIrohHttpRequest(
+ 	uint8_t chunk[64 * 1024];
+ 	auto last_progress = std::chrono::steady_clock::now();
+ 	while (true) {
+-		if (context && context->interrupted) {
++		if (context && context->IsInterrupted()) {
+ 			vgi_iroh_http_response_cancel(raw);
+ 			throw InterruptException();
+ 		}
+diff --git a/src/vgi_rpc_client.cpp b/src/vgi_rpc_client.cpp
+index ea423b9..972ad89 100644
+--- a/src/vgi_rpc_client.cpp
++++ b/src/vgi_rpc_client.cpp
+@@ -333,18 +333,18 @@ void WriteRpcRequest(const std::shared_ptr<arrow::io::OutputStream> &sink,
+ void WriteRpcRequest(int fd, const std::string &method_name,
+                      const std::shared_ptr<arrow::RecordBatch> &params_batch,
+                      const std::shared_ptr<arrow::KeyValueMetadata> &extra_metadata,
+-                     const VgiProtocolId &protocol) {
+-	WriteRpcRequest(std::make_shared<FdOutputStream>(fd), method_name, params_batch, extra_metadata, protocol);
++                     const VgiProtocolId &protocol, ClientContext *context) {
++	WriteRpcRequest(std::make_shared<FdOutputStream>(fd, context), method_name, params_batch, extra_metadata, protocol);
+ }
+ 
+-void WriteEmptyRpcRequest(int fd, const std::string &method_name, const VgiProtocolId &protocol) {
++void WriteEmptyRpcRequest(int fd, const std::string &method_name, const VgiProtocolId &protocol, ClientContext *context) {
+ 	// Create an empty schema with zero fields
+ 	auto schema = arrow::schema({});
+ 
+ 	// Create a 1-row batch with zero columns
+ 	auto batch = arrow::RecordBatch::Make(schema, 1, std::vector<std::shared_ptr<arrow::Array>> {});
+ 
+-	WriteRpcRequest(fd, method_name, batch, /*extra_metadata=*/nullptr, protocol);
++	WriteRpcRequest(fd, method_name, batch, /*extra_metadata=*/nullptr, protocol, context);
+ }
+ 
+ // ============================================================================
+diff --git a/src/vgi_sab_stream.cpp b/src/vgi_sab_stream.cpp
+index 9c43207..a4ff8ec 100644
+--- a/src/vgi_sab_stream.cpp
++++ b/src/vgi_sab_stream.cpp
+@@ -53,11 +53,11 @@ arrow::Result<int64_t> SabInputStream::Read(int64_t nbytes, void *out) {
+ 		if (n == sab::kSabWouldBlock) {
+ 			// The ring was empty for a bounded wait. Poll query cancellation and retry —
+ 			// this is what keeps a read running as a DuckDB async prefetch task
+-			// interruptible: on an error/cancel DuckDB sets context.interrupted (see
++			// interruptible: on an error/cancel DuckDB sets context.IsInterrupted() (see
+ 			// Executor::PushError) and busy-waits for all executor tasks to return; an
+ 			// uninterruptible read here would never return and would freeze the whole
+ 			// engine. Mirrors the subprocess WaitForReadableUntilCancel poll.
+-			if (context_ && context_->interrupted) {
++			if (context_ && context_->IsInterrupted()) {
+ 				return arrow::Status::IOError("SabInputStream: read interrupted (query cancelled)");
+ 			}
+ 			if (deadline_ && std::chrono::steady_clock::now() >= *deadline_) {
+diff --git a/src/vgi_secret_storage.cpp b/src/vgi_secret_storage.cpp
+index 35cdfd3..dcc59c8 100644
+--- a/src/vgi_secret_storage.cpp
++++ b/src/vgi_secret_storage.cpp
+@@ -126,7 +126,7 @@ SecretMatch VgiRemoteSecretStorage::LookupSecret(const string &path, const strin
+ 				continue;
+ 			}
+ 			const auto previous_score = best.score;
+-			const std::string previous_name = best.HasMatch() ? best.GetSecret().GetName() : std::string();
++			const std::string previous_name = best.HasMatch() ? best.GetSecret().GetName().GetIdentifierName() : std::string();
+ 			SecretEntry entry = MakeEntry(kv.second.secret->Clone(), GetName());
+ 			best = SelectBestMatch(entry, path, tie_break_offset, best);
+ 			if (best.HasMatch() &&
+@@ -354,7 +354,7 @@ VgiRemoteSecretStorage::Synthesize(ClientContext &context, const string &type, c
+ 	std::string secret_name = name.empty() ? ("vgi_orchard_" + type) : name;
+ 	std::string secret_provider = provider.empty() ? std::string("orchard") : provider;
+ 
+-	auto secret = make_uniq<KeyValueSecret>(prefix_paths, type, secret_provider, secret_name);
++	auto secret = make_uniq<KeyValueSecret>(prefix_paths, Identifier(type), Identifier(secret_provider), Identifier(secret_name));
+ 
+ 	// Convert the one-row values RecordBatch → DuckDB DataChunk via the Arrow→DuckDB
+ 	// bridge, then read each column's row-0 cell as a fully-typed Value (string,
+@@ -388,12 +388,12 @@ VgiRemoteSecretStorage::Synthesize(ClientContext &context, const string &type, c
+ 		values_chunk.Verify();
+ 
+ 		for (idx_t col_idx = 0; col_idx < col_names.size(); col_idx++) {
+-			secret->secret_map[col_names[col_idx]] = values_chunk.GetValue(col_idx, 0);
++			secret->secret_map[Identifier(col_names[col_idx])] = values_chunk.GetValue(col_idx, 0);
+ 		}
+ 	}
+ 
+ 	for (const auto &rk : redact_keys) {
+-		secret->redact_keys.insert(rk);
++		secret->redact_keys.insert(Identifier(rk));
+ 	}
+ 	return std::move(secret);
+ }
+@@ -433,7 +433,7 @@ unique_ptr<SecretEntry> VgiRemoteSecretStorage::StoreSecret(unique_ptr<const Bas
+ 	    GetName());
+ }
+ 
+-void VgiRemoteSecretStorage::DropSecretByName(const string &name, OnEntryNotFound on_entry_not_found,
++void VgiRemoteSecretStorage::DropSecretByName(const Identifier &name, OnEntryNotFound on_entry_not_found,
+                                               optional_ptr<CatalogTransaction> transaction) {
+ 	// No-op: nothing user-droppable lives here. Must not throw — DROP SECRET and
+ 	// ambiguity scans call this on every storage.
+diff --git a/src/vgi_settings.cpp b/src/vgi_settings.cpp
+index cc0f772..418780e 100644
+--- a/src/vgi_settings.cpp
++++ b/src/vgi_settings.cpp
+@@ -54,6 +54,11 @@ LogicalType Type(Kind kind) {
+ }
+ 
+ void Validate(const Definition &d, Value &value) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	if (std::string(d.name) == "vgi_async_prefetch" && !value.IsNull() && value.GetValue<bool>()) {
++		throw NotImplementedException("VGI DuckDB 2 invocation profile does not support async prefetch");
++	}
++#endif
+ 	if (value.IsNull()) {
+ 		throw InvalidInputException("%s must not be NULL", d.name);
+ 	}
+diff --git a/src/vgi_subprocess.cpp b/src/vgi_subprocess.cpp
+index 8dbb238..cec4a37 100644
+--- a/src/vgi_subprocess.cpp
++++ b/src/vgi_subprocess.cpp
+@@ -710,9 +710,15 @@ void WaitForReadableUntilCancel(int fd, ClientContext *context) {
+ 	// until the worker speaks. Cancellation comes via the context's
+ 	// `interrupted` flag (Ctrl-C, query cancel) — we poll it every 250ms.
+ 	constexpr int kPollIntervalMs = 250;
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
++#endif
+ 
+ 	while (true) {
+-		if (context && context->interrupted) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++		if (std::chrono::steady_clock::now() >= deadline) throw IOException("VGI invocation profile idle I/O timeout after 30 seconds");
++#endif
++		if (context && context->IsInterrupted()) {
+ 			throw IOException("VGI operation interrupted (query cancelled)");
+ 		}
+ 
+@@ -1104,7 +1110,7 @@ void WaitForReadableUntilCancel(int fd, ClientContext *context) {
+ 			// spin forever (recv() then observes the EOF). interrupted re-checked
+ 			// each iteration → prompt cancel.
+ 			for (unsigned attempt = 0;; attempt++) {
+-				if (context && context->interrupted) {
++				if (context && context->IsInterrupted()) {
+ 					throw IOException("VGI operation interrupted (query cancelled)");
+ 				}
+ 				u_long avail = 0;
+diff --git a/src/vgi_table_buffering_impl.cpp b/src/vgi_table_buffering_impl.cpp
+index d628c08..cc78be3 100644
+--- a/src/vgi_table_buffering_impl.cpp
++++ b/src/vgi_table_buffering_impl.cpp
+@@ -711,7 +711,7 @@ SinkResultType PhysicalVgiTableBufferingFunction::Sink(ExecutionContext &context
+ 				// the init runner is blocked (slow worker spawn, OAuth
+ 				// refresh, etc.) doesn't leave peers hung indefinitely.
+ 				while (!gstate.init_done.load(std::memory_order_acquire) && !gstate.init_failed) {
+-					if (context.client.interrupted) {
++					if (context.client.IsInterrupted()) {
+ 						throw IOException("table_buffering init wait interrupted (query cancelled)");
+ 					}
+ 					gstate.init_cv.wait_for(lk, std::chrono::milliseconds(250));
+diff --git a/src/vgi_table_function_impl.cpp b/src/vgi_table_function_impl.cpp
+index 49dc5af..6f2bcfd 100644
+--- a/src/vgi_table_function_impl.cpp
++++ b/src/vgi_table_function_impl.cpp
+@@ -1,6 +1,8 @@
+ // © Copyright 2025, 2026 Query Farm LLC - https://query.farm
+ #include "vgi_settings_defaults.hpp"
+ #include "vgi_table_function_impl.hpp"
++#include "duckdb/execution/partition_info.hpp"
++#include "duckdb/function/partition_stats.hpp"
+ #include "vgi_platform.hpp" // VGI_ASYNC_INIT_ENABLED
+ #ifdef __EMSCRIPTEN__
+ #include <pthread.h>
+@@ -382,6 +384,19 @@ void PerformVgiTableFunctionBind(ClientContext &context, VgiTableFunctionBindDat
+ // Expression Filter Pushdown Support
+ // ============================================================================
+ 
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++bool VgiPushdownExpression(ClientContext &, const LogicalGet &, Expression &) { return false; }
++bool VgiContainsDynamicFilter(const TableFilter &) { return true; }
++SerializedFilters VgiSerializeFilters(ClientContext &context, const vector<column_t> &column_ids,
++                                      optional_ptr<TableFilterSet> filters, const vector<string> &column_names,
++                                      const string &worker_path, const string &rowid_column_name,
++                                      int64_t rowid_worker_col_index, const std::set<idx_t> *exclude_filter_keys,
++                                      VgiFilterColumnIndexDomain index_domain,
++                                      const std::vector<VgiFilterFunctionCapability> &additional_functions) {
++ if (filters && filters->HasFilters()) { throw NotImplementedException("VGI DuckDB 2 invocation profile does not accept pushed filters"); }
++ return {nullptr, {}};
++}
++#else
+ namespace {
+ 
+ bool HasFilterFunctionCapability(const std::vector<VgiFilterFunctionCapability> &capabilities,
+@@ -1334,6 +1349,8 @@ SerializedFilters VgiSerializeFilters(ClientContext &context, const vector<colum
+ 	return {std::move(filter_bytes), std::move(join_keys_buffers)};
+ }
+ 
++
++#endif
+ // ============================================================================
+ // VgiTableFunctionGlobalState::EnsureInitApplied
+ // ============================================================================
+@@ -1448,6 +1465,10 @@ static bool ResolvePartitionColumns(const VgiTableFunctionBindData &bind_data,
+ //! `out`. Returns false for any range / NULL / AND / other shape (not enumerable). A
+ //! TableFilterSet entry is per-column, so an OR here is `col=a OR col=b` on one column.
+ static bool ExtractPartitionEqualityValues(const TableFilter &filter, std::vector<Value> &out) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++return false;
++#else
++
+ 	switch (filter.filter_type) {
+ 	case TableFilterType::CONSTANT_COMPARISON: {
+ 		auto &cf = filter.Cast<ConstantFilter>();
+@@ -1490,6 +1511,8 @@ static bool ExtractPartitionEqualityValues(const TableFilter &filter, std::vecto
+ 	default:
+ 		return false; // range / IS NULL / AND → not enumerable
+ 	}
++
++#endif
+ }
+ 
+ //! Classify the pushed filter for per-partition caching, filling the partition_* fields
+@@ -1500,6 +1523,10 @@ static bool ExtractPartitionEqualityValues(const TableFilter &filter, std::vecto
+ //! ANY partition column disables the whole per-partition layer (leaves it false).
+ static void ClassifyPartitionFilters(ClientContext &context, const VgiTableFunctionBindData &bind_data,
+                                      TableFunctionInitInput &input, CacheEligibility &e) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++return;
++#else
++
+ 	if (bind_data.partition_kind != VgiPartitionKind::SingleValuePartitions) {
+ 		return;
+ 	}
+@@ -1635,6 +1662,8 @@ static void ClassifyPartitionFilters(ClientContext &context, const VgiTableFunct
+ 	}
+ 	e.partition_enumerated_tuples = std::move(tuples);
+ 	e.partition_enumerable = true;
++
++#endif
+ }
+ 
+ //! The "p:"-prefixed input_hash discriminator for one partition-value tuple. Both the
+@@ -1682,6 +1711,10 @@ CacheEligibility EvaluateCacheEligibility(ClientContext &context,
+                                           const VgiTableFunctionBindData &bind_data,
+                                           TableFunctionInitInput &input,
+                                           const std::vector<int32_t> &projection_ids) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++CacheEligibility e; e.ineligible_reason = "duckdb2_invocation_profile"; return e;
++#else
++
+ 	CacheEligibility e;
+ 	// Global master switch.
+ 	Value master;
+@@ -1836,6 +1869,8 @@ CacheEligibility EvaluateCacheEligibility(ClientContext &context,
+ 	ClassifyPartitionFilters(context, bind_data, input, e);
+ 	e.eligible = true;
+ 	return e;
++
++#endif
+ }
+ 
+ //! Log a result_cache.* event.
+@@ -2336,6 +2371,7 @@ unique_ptr<GlobalTableFunctionState> VgiTableFunctionInitGlobal(ClientContext &c
+ 	// Also traverse into ConjunctionAndFilter children, since DuckDB may combine
+ 	// a regular filter with an OptionalFilter(DynamicFilter) on the same column.
+ 	vector<VgiDynamicFilterInfo> dynamic_filters;
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ 	if (input.filters) {
+ 		// Helper: try to capture a DynamicFilter from an OptionalFilter entry
+ 		auto try_capture_from_optional = [&](idx_t original_col_idx, const string &col_name,
+@@ -2419,6 +2455,8 @@ unique_ptr<GlobalTableFunctionState> VgiTableFunctionInitGlobal(ClientContext &c
+ 			}
+ 		}
+ 	}
++#endif
++
+ 
+ 	if (!dynamic_filters.empty()) {
+ 		for (idx_t i = 0; i < dynamic_filters.size(); i++) {
+@@ -2695,6 +2733,9 @@ unique_ptr<GlobalTableFunctionState> VgiTableFunctionInitGlobal(ClientContext &c
+ 	// pthread-after-dlopen bug (#19425/#19199/#13303); flipping
+ 	// -DVGI_ASYNC_INIT_ENABLED=1 restores the async path.
+ 	auto applied = perform_init_with_retry(std::move(connection), acquired.from_pool);
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	if (applied.first.max_workers != 1) throw NotImplementedException("VGI DuckDB 2 invocation profile requires exactly one producer worker");
++#endif
+ 	global_state->global_execution_id = std::move(applied.first.execution_id);
+ 	global_state->max_processes = static_cast<idx_t>(applied.first.max_workers);
+ 	global_state->init_opaque_data = std::move(applied.first.opaque_data);
+@@ -2934,6 +2975,10 @@ unique_ptr<LocalTableFunctionState> VgiTableFunctionInitLocal(ExecutionContext &
+ 
+ std::shared_ptr<arrow::Buffer> VgiSerializeDynamicFilterDelta(ClientContext &context, const string &worker_path,
+                                                               const vector<VgiDynamicFilterDeltaUpdate> &updates) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++throw NotImplementedException("VGI DuckDB 2 invocation profile does not support dynamic filters");
++#else
++
+ 	FilterSerializer serializer(worker_path, 0, /*allow_external_sets=*/false);
+ 	auto document = yyjson_mut_obj(serializer.GetDoc());
+ 	yyjson_mut_obj_add_str(serializer.GetDoc(), document, "encoding", "vgi.filters.v2");
+@@ -3026,6 +3071,8 @@ std::shared_ptr<arrow::Buffer> VgiSerializeDynamicFilterDelta(ClientContext &con
+ 		throw IOException("Failed to finish dynamic filter delta: %s", finished.status().ToString());
+ 	}
+ 	return finished.ValueUnsafe();
++
++#endif
+ }
+ 
+ //! Update the TickFilterState with current DynamicFilter values.
+@@ -3045,6 +3092,10 @@ std::shared_ptr<arrow::Buffer> VgiSerializeDynamicFilterDelta(ClientContext &con
+ //! connection has already sent is tracked per connection by `generation`.
+ static void UpdateDynamicFilterState(VgiTableFunctionGlobalState &global_state, ClientContext &context,
+                                      const VgiTableFunctionBindData &bind_data) {
++#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++if (!global_state.dynamic_filters.empty()) throw NotImplementedException("VGI DuckDB 2 invocation profile does not support dynamic filters");
++#else
++
+ 	if (global_state.dynamic_filters.empty() || !global_state.tick_filter_state) {
+ 		return;
+ 	}
+@@ -3122,6 +3173,8 @@ static void UpdateDynamicFilterState(VgiTableFunctionGlobalState &global_state,
+ 		tick_state.encoded_filters.clear();
+ 		tick_state.has_filters = false;
+ 	}
++
++#endif
+ }
+ 
+ //! Per-DuckDB-pipeline cap on the batch_index space. Lives at
+@@ -3873,7 +3926,7 @@ static bool GetNextBatch(ClientContext &context, const VgiTableFunctionBindData
+ 	while (true) {
+ 		// Empty batches and split claims loop here without returning to DuckDB,
+ 		// whose own interrupt check runs only between chunks.
+-		if (context.interrupted) {
++		if (context.IsInterrupted()) {
+ 			throw InterruptException();
+ 		}
+ 		// Update dynamic filter state before each tick is sent
+@@ -3956,7 +4009,7 @@ void VgiPrefetchTask::Execute() {
+ 			// ERROR slot, and a torn-down consumer never reads it. Either way
+ 			// this task returns now instead of after the next RPC — DuckDB
+ 			// waits for every executor task before an interrupted query ends.
+-			if (context_.interrupted) {
++			if (context_.IsInterrupted()) {
+ 				throw InterruptException();
+ 			}
+ 			batch = slot_->connection->ReadDataBatch();
+@@ -4061,7 +4114,11 @@ void VgiTableFunctionScan(ClientContext &context, TableFunctionInput &input, Dat
+ 	auto &local_state = input.local_state->Cast<VgiTableFunctionLocalState>();
+ 
+ 	// Determine whether async prefetch is enabled for this scan
++	#ifdef VGI_DUCKDB2_INVOCATION_PROFILE
++	bool is_async = false;
++#else
+ 	bool is_async = (input.results_execution_mode == AsyncResultsExecutionMode::TASK_EXECUTOR);
++#endif
+ 	if (is_async) {
+ 		Value async_val;
+ 		if (context.TryGetCurrentSetting("vgi_async_prefetch", async_val)) {
+@@ -4270,6 +4327,7 @@ InsertionOrderPreservingMap<string> VgiTableFunctionToString(TableFunctionToStri
+ // the user keys reflect whatever the user persisted up to that thread's
+ // FinishSource (the *last* finisher will have the most complete view).
+ 
++#ifndef VGI_DUCKDB2_INVOCATION_PROFILE
+ InsertionOrderPreservingMap<string> VgiTableFunctionDynamicToString(TableFunctionDynamicToStringInput &input) {
+ 	InsertionOrderPreservingMap<string> result;
+ 	if (!input.bind_data || !input.global_state) {
+@@ -4353,6 +4411,7 @@ InsertionOrderPreservingMap<string> VgiTableFunctionDynamicToString(TableFunctio
+ 	}
+ 	return result;
+ }
++#endif
+ 
+ // ============================================================================
+ // Virtual Column Callbacks for Row ID Support
+diff --git a/src/vgi_table_in_out_impl.cpp b/src/vgi_table_in_out_impl.cpp
+index e2e7559..0464fc8 100644
+--- a/src/vgi_table_in_out_impl.cpp
++++ b/src/vgi_table_in_out_impl.cpp
+@@ -265,7 +265,9 @@ unique_ptr<FunctionData> VgiTableInOutBind(ClientContext &context, TableFunction
+ 		}
+ 		bind_data->single_row_scan = all_names_empty;
+ 	} else {
+-		bind_data->input_schema = BuildArrowSchemaFromDuckDB(context, input.input_table_types, input.input_table_names);
++		vector<string> input_names;
++		for (const auto &name : input.input_table_names) input_names.push_back(name.GetIdentifierName());
++		bind_data->input_schema = BuildArrowSchemaFromDuckDB(context, input.input_table_types, input_names);
+ 	}
+ 
+ 	VGI_LOG(context, "table_in_out.bind",
+diff --git a/src/vgi_unary_rpc.cpp b/src/vgi_unary_rpc.cpp
+index c7d884f..674e8a3 100644
+--- a/src/vgi_unary_rpc.cpp
++++ b/src/vgi_unary_rpc.cpp
+@@ -85,9 +85,9 @@ UnaryResponseResult AttemptUnaryRpc(const UnaryRpcOptions &opts, const std::stri
+ 	UnaryResponseResult response;
+ 	try {
+ 		if (params) {
+-			WriteRpcRequest(proc->GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol);
++			WriteRpcRequest(proc->GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol, &opts.context);
+ 		} else {
+-			WriteEmptyRpcRequest(proc->GetStdinFd(), method_name, opts.protocol);
++			WriteEmptyRpcRequest(proc->GetStdinFd(), method_name, opts.protocol, &opts.context);
+ 		}
+ 		// Disable in-band log message forwarding when enable_logging is false —
+ 		// HandleBatchLogMessage would otherwise call VGI_LOG from this thread.
+@@ -251,9 +251,9 @@ UnaryResponseResult InvokePooledUnaryRpc(const UnaryRpcOptions &opts, const std:
+ 				// tcp (and, later, unix): native vgi-rpc over the connected fd.
+ 				auto worker = ConnectSharedContainer(ep);
+ 				if (params) {
+-					WriteRpcRequest(worker->GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol);
++					WriteRpcRequest(worker->GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol, &opts.context);
+ 				} else {
+-					WriteEmptyRpcRequest(worker->GetStdinFd(), method_name, opts.protocol);
++					WriteEmptyRpcRequest(worker->GetStdinFd(), method_name, opts.protocol, &opts.context);
+ 				}
+ 				auto *log_ctx = opts.enable_logging ? &opts.context : nullptr;
+ 				return ReadUnaryResponse(worker->GetStdoutFd(), log_ctx, opts.worker_path, /*pid=*/-1);
+@@ -286,9 +286,9 @@ UnaryResponseResult InvokePooledUnaryRpc(const UnaryRpcOptions &opts, const std:
+ 		}
+ 		UnixSocketWorker worker(fd);
+ 		if (params) {
+-			WriteRpcRequest(worker.GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol);
++			WriteRpcRequest(worker.GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol, &opts.context);
+ 		} else {
+-			WriteEmptyRpcRequest(worker.GetStdinFd(), method_name, opts.protocol);
++			WriteEmptyRpcRequest(worker.GetStdinFd(), method_name, opts.protocol, &opts.context);
+ 		}
+ 		auto *log_ctx = opts.enable_logging ? &opts.context : nullptr;
+ 		return ReadUnaryResponse(worker.GetStdoutFd(), log_ctx, opts.worker_path, /*pid=*/-1);
+@@ -305,9 +305,9 @@ UnaryResponseResult InvokePooledUnaryRpc(const UnaryRpcOptions &opts, const std:
+ 		}
+ 		NamedPipeWorker worker(fd);
+ 		if (params) {
+-			WriteRpcRequest(worker.GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol);
++			WriteRpcRequest(worker.GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol, &opts.context);
+ 		} else {
+-			WriteEmptyRpcRequest(worker.GetStdinFd(), method_name, opts.protocol);
++			WriteEmptyRpcRequest(worker.GetStdinFd(), method_name, opts.protocol, &opts.context);
+ 		}
+ 		auto *log_ctx = opts.enable_logging ? &opts.context : nullptr;
+ 		return ReadUnaryResponse(worker.GetStdoutFd(), log_ctx, opts.worker_path, /*pid=*/-1);
+@@ -339,9 +339,9 @@ UnaryResponseResult InvokePooledUnaryRpc(const UnaryRpcOptions &opts, const std:
+ 		auto sock = ResolveAndConnect(opts.worker_path, std::chrono::seconds(10), overrides);
+ 		UnixSocketWorker worker(sock.Release());
+ 		if (params) {
+-			WriteRpcRequest(worker.GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol);
++			WriteRpcRequest(worker.GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol, &opts.context);
+ 		} else {
+-			WriteEmptyRpcRequest(worker.GetStdinFd(), method_name, opts.protocol);
++			WriteEmptyRpcRequest(worker.GetStdinFd(), method_name, opts.protocol, &opts.context);
+ 		}
+ 		auto *log_ctx = opts.enable_logging ? &opts.context : nullptr;
+ 		return ReadUnaryResponse(worker.GetStdoutFd(), log_ctx, opts.worker_path, /*pid=*/-1);
+@@ -364,9 +364,9 @@ UnaryResponseResult InvokePooledUnaryRpc(const UnaryRpcOptions &opts, const std:
+ 		}
+ 		NamedPipeWorker worker(NamedPipeConnect(pipe_name, std::chrono::seconds(10)));
+ 		if (params) {
+-			WriteRpcRequest(worker.GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol);
++			WriteRpcRequest(worker.GetStdinFd(), method_name, params, /*extra_metadata=*/nullptr, opts.protocol, &opts.context);
+ 		} else {
+-			WriteEmptyRpcRequest(worker.GetStdinFd(), method_name, opts.protocol);
++			WriteEmptyRpcRequest(worker.GetStdinFd(), method_name, opts.protocol, &opts.context);
+ 		}
+ 		auto *log_ctx = opts.enable_logging ? &opts.context : nullptr;
+ 		return ReadUnaryResponse(worker.GetStdoutFd(), log_ctx, opts.worker_path, /*pid=*/-1);
+diff --git a/test/duckdb2/build_io.py b/test/duckdb2/build_io.py
+new file mode 100644
+index 0000000..c192b63
+--- /dev/null
++++ b/test/duckdb2/build_io.py
+@@ -0,0 +1,34 @@
++"""Link the isolated I/O probe against an already built VGI archive and DuckDB host.
++
++Avoids building another engine solely for a fixture executable. No downloads or
++modifications to the supplied engine library or dependency prefix.
++"""
++import argparse
++import json
++from pathlib import Path
++import re
++import shlex
++import subprocess
++
++parser = argparse.ArgumentParser()
++parser.add_argument('--build', type=Path, required=True)
++parser.add_argument('--engine-library', type=Path, required=True)
++args = parser.parse_args()
++build = args.build.resolve()
++engine = args.engine_library.resolve()
++rows = json.loads((build / 'compile_commands.json').read_text())
++row = next(row for row in rows if row['file'].endswith('/src/vgi_arrow_ipc.cpp'))
++flags = shlex.split(row['command'])
++flags = flags[:flags.index('-o')]
++source = Path(row['file']).parent.parent / 'test/duckdb2/invocation_io.cpp'
++archive = build / 'extension/vgi/libvgi_extension.a'
++assert archive.is_file() and engine.is_file()
++ninja = (build / 'build.ninja').read_text()
++block = re.search(r'^build extension/vgi/vgi\.duckdb_extension:.*?(?=\n\n)', ninja, re.M | re.S).group()
++line = re.search(r'^  LINK_LIBRARIES = (.*)$', block, re.M).group(1)
++libraries = [item for item in shlex.split(line) if item != 'extension/vgi/libvgi_extension.a']
++output = build / 'extension/vgi/vgi_invocation_io_test'
++command = flags + [str(source), str(archive), str(engine)] + libraries + [
++    '-pthread', '-Wl,--gc-sections', '-Wl,-rpath,' + str(engine.parent), '-o', str(output)]
++subprocess.run(command, cwd=build, check=True)
++print(output)
+diff --git a/test/duckdb2/invocation_io.cpp b/test/duckdb2/invocation_io.cpp
+new file mode 100644
+index 0000000..79f44da
+--- /dev/null
++++ b/test/duckdb2/invocation_io.cpp
+@@ -0,0 +1,107 @@
++// Isolated DuckDB 2 invocation interoperability profile regression.
++#include "duckdb.hpp"
++#include "duckdb/main/client_context.hpp"
++#include "vgi_arrow_ipc.hpp"
++#include <chrono>
++#include <fcntl.h>
++#include <iostream>
++#include <stdexcept>
++#include <thread>
++#include <unistd.h>
++
++using namespace duckdb;
++using namespace duckdb::vgi;
++
++struct Pipe {
++	int fds[2];
++	Pipe() { if (pipe(fds) != 0) throw std::runtime_error("pipe failed"); }
++	~Pipe() { close(fds[0]); close(fds[1]); }
++};
++
++static void Require(bool condition, const char *message) {
++	if (!condition) throw std::runtime_error(message);
++}
++
++static void Fill(Pipe &pipe) {
++	auto flags = fcntl(pipe.fds[1], F_GETFL);
++	Require(flags >= 0 && fcntl(pipe.fds[1], F_SETFL, flags | O_NONBLOCK) == 0, "fill setup");
++	char bytes[4096] = {};
++	while (write(pipe.fds[1], bytes, sizeof(bytes)) > 0) {}
++	Require(errno == EAGAIN || errno == EWOULDBLOCK, "fill must stop at full pipe");
++	Require(fcntl(pipe.fds[1], F_SETFL, flags) == 0, "fill restore");
++}
++
++int main(int argc, char **) {
++	try {
++		DuckDB database(nullptr);
++		Connection connection(database);
++		auto &context = *connection.context;
++		int passed = 0;
++		for (int test = 0; test < 3; ++test) {
++			Pipe pipe;
++			if (test == 1) Require(write(pipe.fds[1], "x", 1) == 1, "partial frame seed");
++			if (test == 2) Fill(pipe);
++			const auto flags = fcntl(pipe.fds[test == 2 ? 1 : 0], F_GETFL);
++			context.ClearInterrupt();
++			std::thread cancel([&context]() {
++				std::this_thread::sleep_for(std::chrono::milliseconds(150));
++				context.Interrupt();
++			});
++			const auto start = std::chrono::steady_clock::now();
++			std::string error;
++			if (test == 2) {
++				FdOutputStream stream(pipe.fds[1], &context);
++				error = stream.Write("test", 4).ToString();
++			} else {
++				FdInputStream stream(pipe.fds[0], &context);
++				char bytes[2];
++				auto result = stream.Read(test == 1 ? 2 : 1, bytes);
++				error = result.ok() ? "unexpected successful read" : result.status().ToString();
++			}
++			cancel.join();
++			Require(error.find("interrupted") != std::string::npos, "cancellation diagnostic missing");
++			Require(std::chrono::steady_clock::now() - start < std::chrono::seconds(2), "cancellation was not prompt");
++			Require(fcntl(pipe.fds[test == 2 ? 1 : 0], F_GETFL) == flags, "descriptor flags not restored");
++			std::cout << "PASS cancellation " << ++passed << std::endl;
++		}
++		context.ClearInterrupt();
++		{
++			Pipe pipe;
++			FdOutputStream output(pipe.fds[1], &context);
++			Require(output.Write("abc", 3).ok(), "healthy write failed");
++			FdInputStream input(pipe.fds[0], &context);
++			char bytes[3];
++			auto result = input.Read(3, bytes);
++			Require(result.ok() && *result == 3 && std::string(bytes, 3) == "abc", "healthy payload changed");
++			std::cout << "PASS transfer " << ++passed << std::endl;
++		}
++		// Explicit opt-in because these two tests exercise the actual 30-second ceiling.
++		if (argc > 1) {
++			for (bool writing : {false, true}) {
++				Pipe pipe;
++				if (writing) Fill(pipe);
++				const auto start = std::chrono::steady_clock::now();
++				std::string error;
++				if (writing) {
++					FdOutputStream output(pipe.fds[1], &context);
++					error = output.Write("x", 1).ToString();
++				} else {
++					FdInputStream input(pipe.fds[0], &context);
++					char byte;
++					auto result = input.Read(1, &byte);
++					Require(!result.ok(), "idle read unexpectedly succeeded");
++					error = result.status().ToString();
++				}
++				auto elapsed = std::chrono::steady_clock::now() - start;
++				Require(error.find("idle I/O timeout") != std::string::npos, "idle timeout diagnostic missing");
++				Require(elapsed >= std::chrono::seconds(29) && elapsed < std::chrono::seconds(33), "idle timeout exceeded ceiling");
++				std::cout << "PASS idle timeout " << ++passed << std::endl;
++			}
++		}
++		std::cout << "PASS " << passed << " invocation transport cases" << std::endl;
++		return 0;
++	} catch (const std::exception &error) {
++		std::cerr << error.what() << std::endl;
++		return 1;
++	}
++}
+-- 
+2.56.0
+
