@@ -8,15 +8,124 @@ definitions and report populations. Generated JSON is checked in for consumers.
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+MODEL_NAME = "github"
 MODEL_ID = "queryfarm.github.reporting"
 NAMESPACE = uuid.UUID("5f2482ab-ab61-4a85-8e56-f10b37f0a8bb")
 ENGINE = "6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd"
+RAW_SOURCES = {"rest_responses", "graphql_responses", "api_endpoints"}
+PUBLIC_ARGUMENTS = {
+    "discussion_comments": {"number": "discussion_number"},
+    "discussion_replies": {"node_id": "comment_node_id"},
+    "projects": {"owner_type": "project_owner_type"},
+    "project_items": {"number": "project_number", "owner_type": "project_owner_type"},
+    "project_fields": {"number": "project_number", "owner_type": "project_owner_type"},
+    "rest_responses": {
+        "query": "rest_query",
+        "accept": "rest_accept",
+        "allow_not_found": "rest_allow_not_found",
+    },
+    "graphql_responses": {
+        "query": "graphql_document",
+        "variables": "graphql_variables",
+        "operation_name": "graphql_operation_name",
+    },
+}
+
+
+def validate_surface(inventory):
+    """Detect omitted worker entries and REST manifest drift without importing a worker."""
+    actual = {}
+    collections = {
+        "functions.py": "KEYED_FUNCTIONS",
+        "search.py": "SEARCH_FUNCTIONS",
+        "reference.py": "REFERENCE_FUNCTIONS",
+        "datasets.py": "DATASET_FUNCTIONS",
+    }
+    for filename, collection in collections.items():
+        tree = ast.parse((ROOT.parent / "vgi_github" / filename).read_text())
+        classes = {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
+        for node in tree.body:
+            target = node.target if isinstance(node, ast.AnnAssign) else None
+            if isinstance(node, ast.Assign):
+                target = node.targets[0]
+            if not isinstance(target, ast.Name) or target.id != collection:
+                continue
+            for reference in node.value.elts:
+                definition = classes[reference.id]
+                for member in definition.body:
+                    if isinstance(member, ast.ClassDef) and member.name == "Meta":
+                        for item in member.body:
+                            if isinstance(item, ast.Assign) and item.targets[0].id == "name":
+                                actual[ast.literal_eval(item.value)] = reference.id
+                    elif (
+                        isinstance(member, ast.Assign)
+                        and member.targets[0].id == "Meta"
+                        and isinstance(member.value, ast.Call)
+                    ):
+                        actual[ast.literal_eval(member.value.args[0])] = reference.id
+    worker = ast.parse((ROOT.parent / "vgi_github/worker.py").read_text())
+    registrations = next(
+        node.value
+        for node in worker.body
+        if isinstance(node, ast.Assign) and node.targets[0].id == "_FUNCTIONS"
+    )
+    if {node.value.id for node in registrations.elts} != set(collections.values()):
+        raise ValueError("Worker main registration changed; review every new function collection")
+    declared = {f["name"]: f["class"] for f in inventory["functions"] if f["schema"] == "main"}
+    if actual != declared or sorted(actual) != inventory["coverage"]["main_functions"]:
+        raise ValueError("Worker main-function inventory changed; review semantic coverage before generating")
+    manifest = json.loads((ROOT.parent / "vgi_github/rest_manifest.json").read_text())
+    operations = sorted(op["operation_id"] for op in manifest["operations"])
+    if any(op["method"] != "GET" for op in manifest["operations"]):
+        raise ValueError("Only GET operations can enter the approved REST response dispatcher")
+    if operations != inventory["coverage"]["rest_operation_ids"]:
+        raise ValueError("REST operation inventory changed; review and pin the new response coverage")
+    if manifest["api_version"] != inventory["coverage"]["rest_api_version"]:
+        raise ValueError("Pinned REST API version changed; review the semantic model")
+    api_functions = {f["physical_name"]: f["name"] for f in inventory["functions"] if f["schema"] == "api"}
+    if api_functions != inventory["coverage"]["api_functions"]:
+        raise ValueError("Raw API semantic-source inventory changed")
+    schemas = [
+        node
+        for node in ast.walk(worker)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "Schema"
+    ]
+    api = next(
+        node
+        for node in schemas
+        if any(
+            keyword.arg == "path" and ast.literal_eval(keyword.value) == ["api"] for keyword in node.keywords
+        )
+    )
+    registered_api = next(keyword.value for keyword in api.keywords if keyword.arg == "functions")
+    if {node.id for node in registered_api.elts} != {
+        f["class"] for f in inventory["functions"] if f["schema"] == "api"
+    }:
+        raise ValueError("Worker raw API registration changed; review semantic response coverage")
+    tables = {}
+    classes = {f["class"]: f["name"] for f in inventory["functions"]}
+    for schema in schemas:
+        path = ast.literal_eval(next(item.value for item in schema.keywords if item.arg == "path"))
+        for keyword in schema.keywords:
+            if keyword.arg != "tables":
+                continue
+            for table in keyword.value.elts:
+                name = ast.literal_eval(next(item.value for item in table.keywords if item.arg == "name"))
+                implementation = next(item.value.id for item in table.keywords if item.arg == "function")
+                tables[".".join([*path, name])] = classes[implementation]
+    if tables != inventory["coverage"]["catalog_tables"]:
+        raise ValueError("Worker table aliases changed; record their semantic source coverage")
+    rest = next(f for f in inventory["functions"] if f["name"] == "rest_responses")
+    operation_arg = next(arg for arg in rest["arguments"] if arg["name"] == "operation_id")
+    if operation_arg["allowed_values"] != operations:
+        raise ValueError("REST dispatcher argument domain differs from the pinned operation inventory")
 
 
 def text(value):
@@ -35,10 +144,11 @@ def quote(value):
 
 def build(instance, origin):
     inventory = json.loads((ROOT / "source_inventory.json").read_text())
+    validate_surface(inventory)
     functions = {f["name"]: f for f in inventory["functions"]}
     model = {
         "crossfield": 1,
-        "name": "github_reporting",
+        "name": MODEL_NAME,
         "id": MODEL_ID,
         "comment": "Approved live GitHub reporting. Complete keyed listings; search is capped discovery.",
         "invocations": {"version": 1, "input_contracts": {}, "sources": {}},
@@ -54,10 +164,6 @@ def build(instance, origin):
             "dataset_semantics": {},
             "invocation_sources": [],
             "driving_grain_reduction": [],
-            "invocation_limits": {
-                "defaults": {"max_retained_bytes": 268435456, "deadline_ms": 180000},
-                "ceilings": {"max_retained_bytes": 268435456, "deadline_ms": 180000},
-            },
         },
     }
     policy = model["policy"]
@@ -91,8 +197,6 @@ def build(instance, origin):
                     "fields": fields,
                 },
                 "columns": columns,
-                "max_rows": 100,
-                "max_bytes": 1048576,
             }
             if fresh:
                 for a in positional:
@@ -110,19 +214,32 @@ def build(instance, origin):
                 arg["position"] = a["position"]
             else:
                 arg["name"] = a["name"]
-                fixed = 0 if a["name"] in {"max_rows", "cache_ttl"} else a["default"]
-                arg["allowed_values"] = [literal(fixed)]
+                if a["name"] not in PUBLIC_ARGUMENTS.get(name, {}) and not (
+                    name == "project_items" and a["name"] == "fields"
+                ):
+                    fixed = 0 if a["name"] in {"max_rows", "max_pages", "cache_ttl"} else a["default"]
+                    arg["allowed_values"] = [literal(fixed)]
+            if "allowed_values" in a and "allowed_values" not in arg:
+                arg["allowed_values"] = [literal(value) for value in a["allowed_values"]]
             arguments.append(arg)
         fields = {}
         columns = []
         for c in function["result_columns"]:
-            dimension = c["type"] != "VARCHAR[]" and c["name"] not in {
-                "body",
-                "message",
-                "description",
-                "html_url",
-                "homepage",
-            }
+            dimension = (
+                name not in RAW_SOURCES
+                and c["type"] not in {"VARCHAR[]", "BLOB"}
+                and c["name"]
+                not in {
+                    "body",
+                    "message",
+                    "description",
+                    "html_url",
+                    "homepage",
+                    "fields_json",
+                    "options_json",
+                    "configuration_json",
+                }
+            )
             field = {"source_column": c["name"], "dimension": dimension}
             if c["type"] in {"TIMESTAMPTZ", "TIMESTAMP WITH TIME ZONE"}:
                 field["timezone"] = "UTC"
@@ -135,6 +252,9 @@ def build(instance, origin):
                     "nullable": c["name"] not in function["required_nonnull_columns"],
                 }
             )
+        for member, argument in function.get("argument_grain", {}).items():
+            fields[member] = {"source_argument": argument, "dimension": False}
+            approve(name, member, fields[member], f"Request identity from the approved {argument} argument.")
         sources[name] = {
             "id": MODEL_ID + "/sources/" + name,
             "dataset": {
@@ -146,7 +266,11 @@ def build(instance, origin):
             "binding_key": "github_source",
             "provider_id": "queryfarm.vgi.github",
             "instance_id": instance,
-            "function": {"schema": "main", "name": name, "arguments": arguments},
+            "function": {
+                "schema": function["schema"],
+                "name": function.get("physical_name", name),
+                "arguments": arguments,
+            },
             "profile": function["profile"],
             "result_columns": columns,
             "assertions": {
@@ -170,12 +294,6 @@ def build(instance, origin):
                 "finite_timeout_ms": 125000,
                 "cooperative_cancellation": True,
                 "authority": "queryfarm.vgi.posix-subprocess",
-            },
-            "limits": {
-                "max_driver_rows": 100,
-                "max_driver_bytes": 1048576,
-                "max_output_rows": 10000,
-                "max_retained_bytes": 67108864,
             },
         }
         policy["invocation_sources"].append(name)
@@ -203,6 +321,11 @@ def build(instance, origin):
         "releases": ["published_at"],
         "stargazers": ["starred_at"],
         "workflow_runs": ["created_at"],
+        "discussions": ["created_at", "answer_chosen_at"],
+        "discussion_comments": ["created_at"],
+        "discussion_replies": ["created_at"],
+        "projects": ["created_at", "closed_at"],
+        "project_items": ["created_at", "archived_at"],
     }.items():
         for name in names:
             label = name.removesuffix("_at").removesuffix("_date") + "_day"
@@ -227,6 +350,15 @@ def build(instance, origin):
         "DATEDIFF('millisecond', issues.created_at, issues.closed_at) / 3600000.0",
         "DOUBLE",
         "Elapsed creation to currently recorded closure; not time spent in open state across reopenings.",
+        False,
+        "h",
+    )
+    field(
+        "discussions",
+        "answer_hours",
+        "DATEDIFF('millisecond', discussions.created_at, discussions.answer_chosen_at) / 3600000.0",
+        "DOUBLE",
+        "Elapsed creation-to-currently-selected-answer hours; not first response or business hours.",
         False,
         "h",
     )
@@ -421,6 +553,90 @@ def build(instance, origin):
         "NULL for zero denominator.",
         additive=False,
     )
+    count("discussion_count", "discussions", "All visible discussions in the complete repository listing.")
+    answered = "discussions.is_answered = TRUE"
+    count("answered_discussions", "discussions", "Discussions with a currently selected answer.", answered)
+    count(
+        "unanswered_discussions",
+        "discussions",
+        "Discussions with no currently selected answer.",
+        "discussions.is_answered = FALSE",
+    )
+    metric(
+        "discussion_answer_rate",
+        "discussions",
+        "answered_discussions * 1.0 / NULLIF(discussion_count, 0)",
+        "Currently answered / all visible discussions, across all categories; "
+        "not an SLA or answerable-only rate.",
+        additive=False,
+    )
+    for name, expression, description in [
+        ("mean_discussion_answer_hours", "AVG(discussions.answer_hours)", "Mean"),
+        ("median_discussion_answer_hours", "MEDIAN(discussions.answer_hours)", "Exact continuous median"),
+    ]:
+        metric(
+            name,
+            "discussions",
+            expression,
+            description + " creation-to-currently-selected-answer hours; NULL for an empty answered cohort.",
+            answered,
+            False,
+            "h",
+        )
+    count(
+        "discussion_comment_count",
+        "discussion_comments",
+        "Top-level comments on the selected discussion; excludes replies.",
+    )
+    count(
+        "discussion_reply_count",
+        "discussion_replies",
+        "Replies to the selected discussion comment; not all comments in its discussion.",
+    )
+    count(
+        "project_count", "projects", "Current visible Projects v2 owned by the selected organization or user."
+    )
+    count(
+        "open_projects",
+        "projects",
+        "Projects currently open; not a historical backlog.",
+        "projects.state = 'open'",
+    )
+    count(
+        "closed_projects",
+        "projects",
+        "Projects currently closed; does not imply every item is complete.",
+        "projects.state = 'closed'",
+    )
+    count(
+        "project_item_count",
+        "project_items",
+        "Visible project item identities, including drafts and inaccessible content; "
+        "not distinct issues across projects.",
+    )
+    for name, kind in [
+        ("project_issue_items", "Issue"),
+        ("project_pull_request_items", "PullRequest"),
+        ("project_draft_items", "DraftIssue"),
+    ]:
+        count(
+            name,
+            "project_items",
+            f"Project items whose declared content type is {kind}; "
+            "inaccessible content remains in its declared category.",
+            f"project_items.content_type = '{kind}'",
+        )
+    count(
+        "archived_project_items",
+        "project_items",
+        "Project items with a recorded archive timestamp; not a completed-work measure.",
+        "project_items.archived_at IS NOT NULL",
+    )
+    count(
+        "project_field_count",
+        "project_fields",
+        "Current custom/system field definitions on the selected project; not populated item values.",
+    )
 
     parameter_names = {
         "repo": "repository",
@@ -430,25 +646,30 @@ def build(instance, origin):
         "query": "query",
     }
 
-    def relation(source, detail=False):
+    def relation(source, detail=False, *, selected_project_fields=False):
         function = functions[source]
         params = []
         arguments = {}
         values = []
         for a in function["arguments"]:
-            if a["binding"] == "positional":
-                name = parameter_names.get(a["name"], a["name"])
+            public_name = PUBLIC_ARGUMENTS.get(source, {}).get(a["name"])
+            if source == "project_items" and a["name"] == "fields" and selected_project_fields:
+                public_name = "project_fields"
+            if a["binding"] == "positional" or public_name:
+                name = public_name or parameter_names.get(a["name"], a["name"])
                 params.append(
                     {"name": name, "type": a["type"], "nullable": False, "comment": a["description"]}
                 )
-                if function["profile"] == "row_map_sync_v1":
+                if function["profile"] == "row_map_sync_v1" and a["binding"] == "positional":
                     arguments[a["name"]] = {"member": function["driver"] + "." + a["name"]}
                     values.append({"parameter": name})
                 else:
                     arguments[a["name"]] = {"parameter": name}
             else:
                 arguments[a["name"]] = {
-                    "literal": literal(0 if a["name"] in {"max_rows", "cache_ttl"} else a["default"])
+                    "literal": literal(
+                        0 if a["name"] in {"max_rows", "max_pages", "cache_ttl"} else a["default"]
+                    )
                 }
         request = {"version": 1, "source_bindings": {source: {"arguments": arguments}}}
         if function["profile"] == "row_map_sync_v1":
@@ -458,7 +679,12 @@ def build(instance, origin):
             )
         if detail:
             request["detail_dataset"] = source
-        sql = "crossfield_pipeline('github_reporting'," + quote(json.dumps(request, separators=(",", ":")))
+        sql = (
+            "crossfield_pipeline("
+            + quote(MODEL_NAME)
+            + ","
+            + quote(json.dumps(request, separators=(",", ":")))
+        )
         sql += "".join(",$" + p["name"] for p in params) + ")"
         return sql, params, request
 
@@ -489,8 +715,20 @@ def build(instance, origin):
         semantic_request["source_bindings"][source] = source_binding
     model["semantic_query"] = {"parameters": semantic_parameters, "request": semantic_request}
 
-    def report(name, source, select, comment, *, detail=False, date=None, group=None, where=None, order=None):
-        rel, params, _ = relation(source, detail)
+    def report(
+        name,
+        source,
+        select,
+        comment,
+        *,
+        detail=False,
+        date=None,
+        group=None,
+        where=None,
+        order=None,
+        selected_project_fields=False,
+    ):
+        rel, params, _ = relation(source, detail, selected_project_fields=selected_project_fields)
         sql = f"SELECT {select} FROM {rel}"
         conditions = [where] if where else []
         if date:
@@ -527,7 +765,9 @@ def build(instance, origin):
                 "tags": {
                     "source": source,
                     "consistency": "live",
-                    "population": "capped discovery"
+                    "population": "response documents; no entity metric"
+                    if source in RAW_SOURCES
+                    else "capped discovery"
                     if source.startswith("search_")
                     else "complete endpoint within declared limits",
                 },
@@ -543,6 +783,8 @@ def build(instance, origin):
             + (
                 ". Capped search matches, not a complete population or approved total."
                 if source.startswith("search_")
+                else ". Response-level detail only; no entity aggregation or automatic nested expansion."
+                if source in RAW_SOURCES
                 else ". Complete visible source response within execution bounds."
             ),
             detail=True,
@@ -671,11 +913,73 @@ def build(instance, origin):
         "repository_count",
         "Complete visible owned repository listing for an account.",
     )
+    report(
+        "discussion_overview",
+        "discussions",
+        "discussion_count, answered_discussions, unanswered_discussions, discussion_answer_rate",
+        "Current selected-answer coverage across all visible discussion categories; not an SLA.",
+    )
+    report(
+        "discussion_answer_summary",
+        "discussions",
+        "answered_discussions, mean_discussion_answer_hours, median_discussion_answer_hours",
+        "Currently answered discussions whose recorded answer selection falls in the UTC interval.",
+        date="answer_chosen_day",
+    )
+    report(
+        "discussion_comments_summary",
+        "discussion_comments",
+        "discussion_comment_count",
+        "Top-level comments created in the UTC interval on the selected discussion; excludes replies.",
+        date="created_day",
+    )
+    report(
+        "discussion_replies_summary",
+        "discussion_replies",
+        "discussion_reply_count",
+        "Replies created in the UTC interval under the selected parent comment.",
+        date="created_day",
+    )
+    report(
+        "projects_summary",
+        "projects",
+        "project_count, open_projects, closed_projects",
+        "Current visible Projects v2 by declared owner type; project closure is not item completion.",
+    )
+    report(
+        "project_items_summary",
+        "project_items",
+        "project_item_count, project_issue_items, project_pull_request_items, "
+        "project_draft_items, archived_project_items",
+        "Current project membership by content kind, including inaccessible content; "
+        "archive state is not completion.",
+    )
+    report(
+        "project_fields_summary",
+        "project_fields",
+        "project_field_count",
+        "Current project field definitions; values on items remain separate detail.",
+    )
+    report(
+        "project_item_values_detail",
+        "project_items",
+        ", ".join(
+            f'project_items."{c["name"]}" AS "{c["name"]}"'
+            for c in functions["project_items"]["result_columns"]
+        ),
+        "Complete project item detail with explicitly selected custom field IDs; "
+        "fields_json retains nested values.",
+        detail=True,
+        order="project_items.id",
+        selected_project_fields=True,
+    )
     _, params, request = relation("pulls")
     _, _, ci = relation("workflow_runs")
     request["source_bindings"].update(ci["source_bindings"])
     rel = (
-        "crossfield_pipeline('github_reporting',"
+        "crossfield_pipeline("
+        + quote(MODEL_NAME)
+        + ","
         + quote(json.dumps(request, separators=(",", ":")))
         + ",$repository)"
     )
@@ -706,14 +1010,16 @@ def main():
     parser.add_argument("--instance", default="github.com")
     parser.add_argument("--api-origin", default="https://api.github.com")
     parser.add_argument("--revision", type=int, default=1)
+    parser.add_argument(
+        "--check", action="store_true", help="Check coverage and exact generated artifacts without writing"
+    )
     args = parser.parse_args()
     if not 1 <= args.revision <= 2**63 - 1:
         parser.error("--revision must be between 1 and 9223372036854775807")
     model, reports = build(args.instance, args.api_origin.rstrip("/"))
-    args.output.mkdir(parents=True, exist_ok=True)
+    if not args.check:
+        args.output.mkdir(parents=True, exist_ok=True)
     raw = text(model)
-    (args.output / "github-reporting.crossfield.json").write_text(raw)
-    (args.output / "reports.json").write_text(text(reports))
     package_id = NAMESPACE if args.instance == "github.com" else uuid.uuid5(NAMESPACE, args.instance)
     package = {
         "format": "crossfield.package",
@@ -745,9 +1051,21 @@ def main():
         "tag_metadata": {},
         "checks": [],
     }
-    (args.output / "github-reporting.package.json").write_text(text(package))
+    artifacts = {
+        "github-reporting.crossfield.json": raw,
+        "reports.json": text(reports),
+        "github-reporting.package.json": text(package),
+    }
+    for name, content in artifacts.items():
+        path = args.output / name
+        if args.check:
+            if not path.is_file() or path.read_text() != content:
+                raise ValueError(f"Generated model artifact is stale: {path}")
+        else:
+            path.write_text(content)
     print(
-        f"Wrote {len(model['invocations']['sources'])} sources, {len(model['metrics'])} metrics "
+        f"{'Checked' if args.check else 'Wrote'} {len(model['invocations']['sources'])} sources, "
+        f"{len(model['metrics'])} metrics "
         f"and {len(reports)} reports to {args.output}"
     )
 

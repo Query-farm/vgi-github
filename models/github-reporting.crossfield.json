@@ -1,6 +1,6 @@
 {
   "crossfield": 1,
-  "name": "github_reporting",
+  "name": "github",
   "id": "queryfarm.github.reporting",
   "comment": "Approved live GitHub reporting. Complete keyed listings; search is capped discovery.",
   "invocations": {
@@ -27,9 +27,7 @@
             "type": "VARCHAR",
             "nullable": false
           }
-        ],
-        "max_rows": 100,
-        "max_bytes": 1048576
+        ]
       },
       "user_input": {
         "id": "queryfarm.github.reporting/inputs/user_input",
@@ -52,9 +50,7 @@
             "type": "VARCHAR",
             "nullable": false
           }
-        ],
-        "max_rows": 100,
-        "max_bytes": 1048576
+        ]
       },
       "repos_input": {
         "id": "queryfarm.github.reporting/inputs/repos_input",
@@ -77,9 +73,7 @@
             "type": "VARCHAR",
             "nullable": false
           }
-        ],
-        "max_rows": 100,
-        "max_bytes": 1048576
+        ]
       },
       "issue_comments_input": {
         "id": "queryfarm.github.reporting/inputs/issue_comments_input",
@@ -112,9 +106,218 @@
             "type": "BIGINT",
             "nullable": false
           }
-        ],
-        "max_rows": 100,
-        "max_bytes": 1048576
+        ]
+      },
+      "discussion_comments_input": {
+        "id": "queryfarm.github.reporting/inputs/discussion_comments_input",
+        "dataset": {
+          "name": "discussion_comments_input",
+          "id": "queryfarm.github.reporting/datasets/discussion_comments_input",
+          "grain": [
+            "repo",
+            "number"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": false
+          }
+        ]
+      },
+      "discussion_replies_input": {
+        "id": "queryfarm.github.reporting/inputs/discussion_replies_input",
+        "dataset": {
+          "name": "discussion_replies_input",
+          "id": "queryfarm.github.reporting/datasets/discussion_replies_input",
+          "grain": [
+            "node_id"
+          ],
+          "fields": {
+            "node_id": {
+              "source_column": "node_id",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "node_id",
+            "type": "VARCHAR",
+            "nullable": false
+          }
+        ]
+      },
+      "projects_input": {
+        "id": "queryfarm.github.reporting/inputs/projects_input",
+        "dataset": {
+          "name": "projects_input",
+          "id": "queryfarm.github.reporting/datasets/projects_input",
+          "grain": [
+            "owner"
+          ],
+          "fields": {
+            "owner": {
+              "source_column": "owner",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "owner",
+            "type": "VARCHAR",
+            "nullable": false
+          }
+        ]
+      },
+      "project_items_input": {
+        "id": "queryfarm.github.reporting/inputs/project_items_input",
+        "dataset": {
+          "name": "project_items_input",
+          "id": "queryfarm.github.reporting/datasets/project_items_input",
+          "grain": [
+            "owner",
+            "number"
+          ],
+          "fields": {
+            "owner": {
+              "source_column": "owner",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "owner",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": false
+          }
+        ]
+      },
+      "project_fields_input": {
+        "id": "queryfarm.github.reporting/inputs/project_fields_input",
+        "dataset": {
+          "name": "project_fields_input",
+          "id": "queryfarm.github.reporting/datasets/project_fields_input",
+          "grain": [
+            "owner",
+            "number"
+          ],
+          "fields": {
+            "owner": {
+              "source_column": "owner",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "owner",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": false
+          }
+        ]
+      },
+      "rest_responses_input": {
+        "id": "queryfarm.github.reporting/inputs/rest_responses_input",
+        "dataset": {
+          "name": "rest_responses_input",
+          "id": "queryfarm.github.reporting/datasets/rest_responses_input",
+          "grain": [
+            "operation_id",
+            "path_parameters"
+          ],
+          "fields": {
+            "operation_id": {
+              "source_column": "operation_id",
+              "dimension": true
+            },
+            "path_parameters": {
+              "source_column": "path_parameters",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "operation_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "path_parameters",
+            "type": "VARCHAR",
+            "nullable": false
+          }
+        ]
+      },
+      "graphql_responses_input": {
+        "id": "queryfarm.github.reporting/inputs/graphql_responses_input",
+        "dataset": {
+          "name": "graphql_responses_input",
+          "id": "queryfarm.github.reporting/datasets/graphql_responses_input",
+          "grain": [
+            "query",
+            "variables"
+          ],
+          "fields": {
+            "query": {
+              "source_column": "query",
+              "dimension": true
+            },
+            "variables": {
+              "source_column": "variables",
+              "dimension": true
+            }
+          }
+        },
+        "columns": [
+          {
+            "name": "query",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "variables",
+            "type": "VARCHAR",
+            "nullable": false
+          }
+        ]
       }
     },
     "sources": {
@@ -439,12 +642,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "user": {
@@ -668,12 +865,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "repos": {
@@ -1030,12 +1221,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "issues": {
@@ -1373,12 +1558,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "pulls": {
@@ -1713,12 +1892,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "issue_comments": {
@@ -1906,12 +2079,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "commits": {
@@ -2192,12 +2359,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "releases": {
@@ -2413,12 +2574,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "contributors": {
@@ -2553,12 +2708,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "languages": {
@@ -2655,12 +2804,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "stargazers": {
@@ -2795,12 +2938,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "workflow_runs": {
@@ -3068,12 +3205,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "search_repositories": {
@@ -3419,12 +3550,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "search_issues": {
@@ -3707,12 +3832,6 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
-        },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
         }
       },
       "all_rate_limit": {
@@ -3816,12 +3935,2677 @@
           "finite_timeout_ms": 125000,
           "cooperative_cancellation": true,
           "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "discussions": {
+        "id": "queryfarm.github.reporting/sources/discussions",
+        "dataset": {
+          "name": "discussions",
+          "id": "queryfarm.github.reporting/datasets/discussions",
+          "grain": [
+            "repo",
+            "node_id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            },
+            "node_id": {
+              "source_column": "node_id",
+              "dimension": true
+            },
+            "title": {
+              "source_column": "title",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "user_login": {
+              "source_column": "user_login",
+              "dimension": true
+            },
+            "category_id": {
+              "source_column": "category_id",
+              "dimension": true
+            },
+            "category_name": {
+              "source_column": "category_name",
+              "dimension": true
+            },
+            "is_answered": {
+              "source_column": "is_answered",
+              "dimension": true
+            },
+            "answer_comment_id": {
+              "source_column": "answer_comment_id",
+              "dimension": true
+            },
+            "comments": {
+              "source_column": "comments",
+              "dimension": true
+            },
+            "upvote_count": {
+              "source_column": "upvote_count",
+              "dimension": true
+            },
+            "locked": {
+              "source_column": "locked",
+              "dimension": true
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "answer_chosen_at": {
+              "source_column": "answer_chosen_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(discussions.created_at) || '-' || MONTH(discussions.created_at) || '-' || DAY(discussions.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            },
+            "answer_chosen_day": {
+              "expression": "TO_DATE(YEAR(discussions.answer_chosen_at) || '-' || MONTH(discussions.answer_chosen_at) || '-' || DAY(discussions.answer_chosen_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            },
+            "answer_hours": {
+              "expression": "DATEDIFF('millisecond', discussions.created_at, discussions.answer_chosen_at) / 3600000.0",
+              "type": "DOUBLE",
+              "dimension": false,
+              "unit": "h"
+            }
+          }
         },
-        "limits": {
-          "max_driver_rows": 100,
-          "max_driver_bytes": 1048576,
-          "max_output_rows": 10000,
-          "max_retained_bytes": 67108864
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "discussions",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "answered",
+              "physical_name": "answered",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "answered",
+              "allowed_values": [
+                null
+              ]
+            },
+            {
+              "id": "category_id",
+              "physical_name": "category_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "category_id",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "sort",
+              "physical_name": "sort",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "sort",
+              "allowed_values": [
+                "updated"
+              ]
+            },
+            {
+              "id": "direction",
+              "physical_name": "direction",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "direction",
+              "allowed_values": [
+                "desc"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "node_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "user_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "category_id",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "category_name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "is_answered",
+            "type": "BOOLEAN",
+            "nullable": false
+          },
+          {
+            "name": "answer_comment_id",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "comments",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "upvote_count",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "locked",
+            "type": "BOOLEAN",
+            "nullable": false
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "answer_chosen_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "discussion_comments": {
+        "id": "queryfarm.github.reporting/sources/discussion_comments",
+        "dataset": {
+          "name": "discussion_comments",
+          "id": "queryfarm.github.reporting/datasets/discussion_comments",
+          "grain": [
+            "repo",
+            "node_id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "discussion_number": {
+              "source_column": "discussion_number",
+              "dimension": true
+            },
+            "node_id": {
+              "source_column": "node_id",
+              "dimension": true
+            },
+            "reply_to_id": {
+              "source_column": "reply_to_id",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "user_login": {
+              "source_column": "user_login",
+              "dimension": true
+            },
+            "is_answer": {
+              "source_column": "is_answer",
+              "dimension": true
+            },
+            "replies": {
+              "source_column": "replies",
+              "dimension": true
+            },
+            "upvote_count": {
+              "source_column": "upvote_count",
+              "dimension": true
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(discussion_comments.created_at) || '-' || MONTH(discussion_comments.created_at) || '-' || DAY(discussion_comments.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "discussion_comments",
+          "arguments": [
+            {
+              "id": "repo",
+              "physical_name": "repo",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "number",
+              "physical_name": "number",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 1
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "discussion_number",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "node_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "reply_to_id",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "user_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "is_answer",
+            "type": "BOOLEAN",
+            "nullable": false
+          },
+          {
+            "name": "replies",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "upvote_count",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "discussion_replies": {
+        "id": "queryfarm.github.reporting/sources/discussion_replies",
+        "dataset": {
+          "name": "discussion_replies",
+          "id": "queryfarm.github.reporting/datasets/discussion_replies",
+          "grain": [
+            "repo",
+            "node_id"
+          ],
+          "fields": {
+            "repo": {
+              "source_column": "repo",
+              "dimension": true
+            },
+            "discussion_number": {
+              "source_column": "discussion_number",
+              "dimension": true
+            },
+            "node_id": {
+              "source_column": "node_id",
+              "dimension": true
+            },
+            "reply_to_id": {
+              "source_column": "reply_to_id",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "user_login": {
+              "source_column": "user_login",
+              "dimension": true
+            },
+            "is_answer": {
+              "source_column": "is_answer",
+              "dimension": true
+            },
+            "replies": {
+              "source_column": "replies",
+              "dimension": true
+            },
+            "upvote_count": {
+              "source_column": "upvote_count",
+              "dimension": true
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(discussion_replies.created_at) || '-' || MONTH(discussion_replies.created_at) || '-' || DAY(discussion_replies.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "discussion_replies",
+          "arguments": [
+            {
+              "id": "node_id",
+              "physical_name": "node_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "repo",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "discussion_number",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "node_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "reply_to_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "user_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "is_answer",
+            "type": "BOOLEAN",
+            "nullable": false
+          },
+          {
+            "name": "replies",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "upvote_count",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "projects": {
+        "id": "queryfarm.github.reporting/sources/projects",
+        "dataset": {
+          "name": "projects",
+          "id": "queryfarm.github.reporting/datasets/projects",
+          "grain": [
+            "owner_type",
+            "owner",
+            "id"
+          ],
+          "fields": {
+            "owner": {
+              "source_column": "owner",
+              "dimension": true
+            },
+            "owner_type": {
+              "source_column": "owner_type",
+              "dimension": true
+            },
+            "number": {
+              "source_column": "number",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "node_id": {
+              "source_column": "node_id",
+              "dimension": true
+            },
+            "title": {
+              "source_column": "title",
+              "dimension": true
+            },
+            "description": {
+              "source_column": "description",
+              "dimension": false
+            },
+            "short_description": {
+              "source_column": "short_description",
+              "dimension": true
+            },
+            "state": {
+              "source_column": "state",
+              "dimension": true
+            },
+            "is_public": {
+              "source_column": "is_public",
+              "dimension": true
+            },
+            "is_template": {
+              "source_column": "is_template",
+              "dimension": true
+            },
+            "creator_login": {
+              "source_column": "creator_login",
+              "dimension": true
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "closed_at": {
+              "source_column": "closed_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(projects.created_at) || '-' || MONTH(projects.created_at) || '-' || DAY(projects.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            },
+            "closed_day": {
+              "expression": "TO_DATE(YEAR(projects.closed_at) || '-' || MONTH(projects.closed_at) || '-' || DAY(projects.closed_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "projects",
+          "arguments": [
+            {
+              "id": "owner",
+              "physical_name": "owner",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "owner_type",
+              "physical_name": "owner_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "owner_type",
+              "allowed_values": [
+                "organization",
+                "user"
+              ]
+            },
+            {
+              "id": "query",
+              "physical_name": "query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "query",
+              "allowed_values": [
+                ""
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "owner",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "owner_type",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "number",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "node_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "description",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "short_description",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "state",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "is_public",
+            "type": "BOOLEAN",
+            "nullable": false
+          },
+          {
+            "name": "is_template",
+            "type": "BOOLEAN",
+            "nullable": false
+          },
+          {
+            "name": "creator_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "closed_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "project_items": {
+        "id": "queryfarm.github.reporting/sources/project_items",
+        "dataset": {
+          "name": "project_items",
+          "id": "queryfarm.github.reporting/datasets/project_items",
+          "grain": [
+            "owner_type",
+            "owner",
+            "project_number",
+            "id"
+          ],
+          "fields": {
+            "owner": {
+              "source_column": "owner",
+              "dimension": true
+            },
+            "owner_type": {
+              "source_column": "owner_type",
+              "dimension": true
+            },
+            "project_number": {
+              "source_column": "project_number",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "node_id": {
+              "source_column": "node_id",
+              "dimension": true
+            },
+            "content_type": {
+              "source_column": "content_type",
+              "dimension": true
+            },
+            "content_id": {
+              "source_column": "content_id",
+              "dimension": true
+            },
+            "content_number": {
+              "source_column": "content_number",
+              "dimension": true
+            },
+            "title": {
+              "source_column": "title",
+              "dimension": true
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "state": {
+              "source_column": "state",
+              "dimension": true
+            },
+            "user_login": {
+              "source_column": "user_login",
+              "dimension": true
+            },
+            "html_url": {
+              "source_column": "html_url",
+              "dimension": false
+            },
+            "creator_login": {
+              "source_column": "creator_login",
+              "dimension": true
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "archived_at": {
+              "source_column": "archived_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "fields_json": {
+              "source_column": "fields_json",
+              "dimension": false
+            },
+            "created_day": {
+              "expression": "TO_DATE(YEAR(project_items.created_at) || '-' || MONTH(project_items.created_at) || '-' || DAY(project_items.created_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            },
+            "archived_day": {
+              "expression": "TO_DATE(YEAR(project_items.archived_at) || '-' || MONTH(project_items.archived_at) || '-' || DAY(project_items.archived_at))",
+              "type": "DATE",
+              "dimension": true,
+              "is_time": true,
+              "calendar": "gregorian",
+              "granularity": "day"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "project_items",
+          "arguments": [
+            {
+              "id": "owner",
+              "physical_name": "owner",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "number",
+              "physical_name": "number",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 1
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "owner_type",
+              "physical_name": "owner_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "owner_type",
+              "allowed_values": [
+                "organization",
+                "user"
+              ]
+            },
+            {
+              "id": "query",
+              "physical_name": "query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "query",
+              "allowed_values": [
+                ""
+              ]
+            },
+            {
+              "id": "fields",
+              "physical_name": "fields",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "fields"
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "owner",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "owner_type",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "project_number",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "node_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "content_type",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "content_id",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "content_number",
+            "type": "BIGINT",
+            "nullable": true
+          },
+          {
+            "name": "title",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "state",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "user_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "html_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "creator_login",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "archived_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": true
+          },
+          {
+            "name": "fields_json",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "project_fields": {
+        "id": "queryfarm.github.reporting/sources/project_fields",
+        "dataset": {
+          "name": "project_fields",
+          "id": "queryfarm.github.reporting/datasets/project_fields",
+          "grain": [
+            "owner_type",
+            "owner",
+            "project_number",
+            "id"
+          ],
+          "fields": {
+            "owner": {
+              "source_column": "owner",
+              "dimension": true
+            },
+            "owner_type": {
+              "source_column": "owner_type",
+              "dimension": true
+            },
+            "project_number": {
+              "source_column": "project_number",
+              "dimension": true
+            },
+            "id": {
+              "source_column": "id",
+              "dimension": true
+            },
+            "node_id": {
+              "source_column": "node_id",
+              "dimension": true
+            },
+            "name": {
+              "source_column": "name",
+              "dimension": true
+            },
+            "data_type": {
+              "source_column": "data_type",
+              "dimension": true
+            },
+            "options_json": {
+              "source_column": "options_json",
+              "dimension": false
+            },
+            "configuration_json": {
+              "source_column": "configuration_json",
+              "dimension": false
+            },
+            "created_at": {
+              "source_column": "created_at",
+              "dimension": true,
+              "timezone": "UTC"
+            },
+            "updated_at": {
+              "source_column": "updated_at",
+              "dimension": true,
+              "timezone": "UTC"
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "main",
+          "name": "project_fields",
+          "arguments": [
+            {
+              "id": "owner",
+              "physical_name": "owner",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "number",
+              "physical_name": "number",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 1
+            },
+            {
+              "id": "max_rows",
+              "physical_name": "max_rows",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_rows",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "owner_type",
+              "physical_name": "owner_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "owner_type",
+              "allowed_values": [
+                "organization",
+                "user"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "owner",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "owner_type",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "project_number",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "id",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "node_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "data_type",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "options_json",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "configuration_json",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMPTZ",
+            "nullable": false
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "rest_responses": {
+        "id": "queryfarm.github.reporting/sources/rest_responses",
+        "dataset": {
+          "name": "rest_responses",
+          "id": "queryfarm.github.reporting/datasets/rest_responses",
+          "grain": [
+            "operation_id",
+            "page_number"
+          ],
+          "fields": {
+            "operation_id": {
+              "source_column": "operation_id",
+              "dimension": false
+            },
+            "page_number": {
+              "source_column": "page_number",
+              "dimension": false
+            },
+            "status_code": {
+              "source_column": "status_code",
+              "dimension": false
+            },
+            "content_type": {
+              "source_column": "content_type",
+              "dimension": false
+            },
+            "data": {
+              "source_column": "data",
+              "dimension": false
+            },
+            "body": {
+              "source_column": "body",
+              "dimension": false
+            },
+            "next_url": {
+              "source_column": "next_url",
+              "dimension": false
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "api",
+          "name": "rest",
+          "arguments": [
+            {
+              "id": "operation_id",
+              "physical_name": "operation_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0,
+              "allowed_values": [
+                "actions/download-artifact",
+                "actions/download-job-logs-for-workflow-run",
+                "actions/download-step-logs-for-workflow-run-job",
+                "actions/download-workflow-run-attempt-logs",
+                "actions/download-workflow-run-logs",
+                "actions/get-actions-cache-list",
+                "actions/get-actions-cache-retention-limit-for-enterprise",
+                "actions/get-actions-cache-retention-limit-for-organization",
+                "actions/get-actions-cache-retention-limit-for-repository",
+                "actions/get-actions-cache-storage-limit-for-enterprise",
+                "actions/get-actions-cache-storage-limit-for-organization",
+                "actions/get-actions-cache-storage-limit-for-repository",
+                "actions/get-actions-cache-usage",
+                "actions/get-actions-cache-usage-by-repo-for-org",
+                "actions/get-actions-cache-usage-for-enterprise",
+                "actions/get-actions-cache-usage-for-org",
+                "actions/get-allowed-actions-organization",
+                "actions/get-allowed-actions-repository",
+                "actions/get-artifact",
+                "actions/get-artifact-and-log-retention-settings-organization",
+                "actions/get-artifact-and-log-retention-settings-repository",
+                "actions/get-concurrency-group-for-repository",
+                "actions/get-custom-image-for-enterprise",
+                "actions/get-custom-image-for-org",
+                "actions/get-custom-image-version-for-enterprise",
+                "actions/get-custom-image-version-for-org",
+                "actions/get-custom-oidc-sub-claim-for-repo",
+                "actions/get-enterprise-actions-policies",
+                "actions/get-enterprise-actions-policy",
+                "actions/get-environment-public-key",
+                "actions/get-environment-secret",
+                "actions/get-environment-variable",
+                "actions/get-fork-pr-contributor-approval-permissions-organization",
+                "actions/get-fork-pr-contributor-approval-permissions-repository",
+                "actions/get-github-actions-default-workflow-permissions-enterprise",
+                "actions/get-github-actions-default-workflow-permissions-organization",
+                "actions/get-github-actions-default-workflow-permissions-repository",
+                "actions/get-github-actions-permissions-organization",
+                "actions/get-github-actions-permissions-repository",
+                "actions/get-hosted-runner-for-enterprise",
+                "actions/get-hosted-runner-for-org",
+                "actions/get-hosted-runners-github-owned-images-for-enterprise",
+                "actions/get-hosted-runners-github-owned-images-for-org",
+                "actions/get-hosted-runners-limits-for-enterprise",
+                "actions/get-hosted-runners-limits-for-org",
+                "actions/get-hosted-runners-machine-specs-for-enterprise",
+                "actions/get-hosted-runners-machine-specs-for-org",
+                "actions/get-hosted-runners-partner-images-for-enterprise",
+                "actions/get-hosted-runners-partner-images-for-org",
+                "actions/get-hosted-runners-platforms-for-enterprise",
+                "actions/get-hosted-runners-platforms-for-org",
+                "actions/get-job-for-workflow-run",
+                "actions/get-org-actions-policies",
+                "actions/get-org-actions-policy",
+                "actions/get-org-public-key",
+                "actions/get-org-secret",
+                "actions/get-org-variable",
+                "actions/get-pending-deployments-for-run",
+                "actions/get-private-repo-fork-pr-workflows-settings-organization",
+                "actions/get-private-repo-fork-pr-workflows-settings-repository",
+                "actions/get-repo-actions-policies",
+                "actions/get-repo-actions-policy",
+                "actions/get-repo-public-key",
+                "actions/get-repo-secret",
+                "actions/get-repo-variable",
+                "actions/get-reviews-for-run",
+                "actions/get-runner-version-deprecation-for-org",
+                "actions/get-runner-version-deprecation-for-repo",
+                "actions/get-self-hosted-runner-for-org",
+                "actions/get-self-hosted-runner-for-repo",
+                "actions/get-self-hosted-runner-group-for-org",
+                "actions/get-self-hosted-runners-permissions-organization",
+                "actions/get-workflow",
+                "actions/get-workflow-access-to-repository",
+                "actions/get-workflow-run",
+                "actions/get-workflow-run-attempt",
+                "actions/get-workflow-run-usage",
+                "actions/get-workflow-usage",
+                "actions/list-artifacts-for-repo",
+                "actions/list-concurrency-groups-for-repository",
+                "actions/list-concurrency-groups-for-workflow-run",
+                "actions/list-custom-image-versions-for-enterprise",
+                "actions/list-custom-image-versions-for-org",
+                "actions/list-custom-images-for-enterprise",
+                "actions/list-custom-images-for-org",
+                "actions/list-environment-secrets",
+                "actions/list-environment-variables",
+                "actions/list-github-hosted-runners-in-group-for-org",
+                "actions/list-hosted-runners-for-enterprise",
+                "actions/list-hosted-runners-for-org",
+                "actions/list-jobs-for-workflow-run",
+                "actions/list-jobs-for-workflow-run-attempt",
+                "actions/list-labels-for-self-hosted-runner-for-org",
+                "actions/list-labels-for-self-hosted-runner-for-repo",
+                "actions/list-org-secrets",
+                "actions/list-org-variables",
+                "actions/list-repo-access-to-self-hosted-runner-group-in-org",
+                "actions/list-repo-organization-secrets",
+                "actions/list-repo-organization-variables",
+                "actions/list-repo-secrets",
+                "actions/list-repo-variables",
+                "actions/list-repo-workflows",
+                "actions/list-runner-applications-for-org",
+                "actions/list-runner-applications-for-repo",
+                "actions/list-selected-repos-for-org-secret",
+                "actions/list-selected-repos-for-org-variable",
+                "actions/list-selected-repositories-enabled-github-actions-organization",
+                "actions/list-selected-repositories-self-hosted-runners-organization",
+                "actions/list-self-hosted-runner-groups-for-org",
+                "actions/list-self-hosted-runners-for-org",
+                "actions/list-self-hosted-runners-for-repo",
+                "actions/list-self-hosted-runners-in-group-for-org",
+                "actions/list-workflow-run-artifacts",
+                "actions/list-workflow-runs",
+                "actions/list-workflow-runs-for-repo",
+                "activity/check-repo-is-starred-by-authenticated-user",
+                "activity/get-feeds",
+                "activity/get-repo-subscription",
+                "activity/get-stargazer-count-for-repo",
+                "activity/get-stargazer-history-for-repo",
+                "activity/get-thread",
+                "activity/get-thread-subscription-for-authenticated-user",
+                "activity/list-events-for-authenticated-user",
+                "activity/list-notifications-for-authenticated-user",
+                "activity/list-org-events-for-authenticated-user",
+                "activity/list-public-events",
+                "activity/list-public-events-for-repo-network",
+                "activity/list-public-events-for-user",
+                "activity/list-public-org-events",
+                "activity/list-received-events-for-user",
+                "activity/list-received-public-events-for-user",
+                "activity/list-repo-events",
+                "activity/list-repo-notifications-for-authenticated-user",
+                "activity/list-repos-starred-by-authenticated-user",
+                "activity/list-repos-starred-by-user",
+                "activity/list-repos-watched-by-user",
+                "activity/list-stargazers-for-repo",
+                "activity/list-watched-repos-for-authenticated-user",
+                "activity/list-watchers-for-repo",
+                "agent-tasks/get-task-by-id",
+                "agent-tasks/get-task-by-repo-and-id",
+                "agent-tasks/list-tasks",
+                "agent-tasks/list-tasks-for-repo",
+                "agents/get-org-public-key",
+                "agents/get-org-secret",
+                "agents/get-org-variable",
+                "agents/get-repo-public-key",
+                "agents/get-repo-secret",
+                "agents/get-repo-variable",
+                "agents/list-org-secrets",
+                "agents/list-org-variables",
+                "agents/list-repo-organization-secrets",
+                "agents/list-repo-organization-variables",
+                "agents/list-repo-secrets",
+                "agents/list-repo-variables",
+                "agents/list-selected-repos-for-org-secret",
+                "agents/list-selected-repos-for-org-variable",
+                "announcement-banners/get-announcement-banner-for-enterprise",
+                "announcement-banners/get-announcement-banner-for-org",
+                "api-insights/get-route-stats-by-actor",
+                "api-insights/get-subject-stats",
+                "api-insights/get-summary-stats",
+                "api-insights/get-summary-stats-by-actor",
+                "api-insights/get-summary-stats-by-user",
+                "api-insights/get-time-stats",
+                "api-insights/get-time-stats-by-actor",
+                "api-insights/get-time-stats-by-user",
+                "api-insights/get-user-stats",
+                "apps/get-authenticated",
+                "apps/get-by-slug",
+                "apps/get-enterprise-installation",
+                "apps/get-installation",
+                "apps/get-org-installation",
+                "apps/get-repo-installation",
+                "apps/get-subscription-plan-for-account",
+                "apps/get-subscription-plan-for-account-stubbed",
+                "apps/get-user-installation",
+                "apps/get-webhook-config-for-app",
+                "apps/get-webhook-delivery",
+                "apps/list-accounts-for-plan",
+                "apps/list-accounts-for-plan-stubbed",
+                "apps/list-installation-repos-for-authenticated-user",
+                "apps/list-installation-requests-for-authenticated-app",
+                "apps/list-installations",
+                "apps/list-installations-for-authenticated-user",
+                "apps/list-plans",
+                "apps/list-plans-stubbed",
+                "apps/list-repos-accessible-to-installation",
+                "apps/list-subscriptions-for-authenticated-user",
+                "apps/list-subscriptions-for-authenticated-user-stubbed",
+                "apps/list-webhook-deliveries",
+                "billing/get-all-budgets",
+                "billing/get-all-budgets-org",
+                "billing/get-all-cost-centers",
+                "billing/get-budget",
+                "billing/get-budget-org",
+                "billing/get-budget-user-states",
+                "billing/get-cost-center",
+                "billing/get-github-advanced-security-billing-ghe",
+                "billing/get-github-advanced-security-billing-org",
+                "billing/get-github-billing-ai-credit-usage-report-ghe",
+                "billing/get-github-billing-ai-credit-usage-report-org",
+                "billing/get-github-billing-ai-credit-usage-report-user",
+                "billing/get-github-billing-premium-request-usage-report-ghe",
+                "billing/get-github-billing-premium-request-usage-report-org",
+                "billing/get-github-billing-premium-request-usage-report-user",
+                "billing/get-github-billing-usage-report-ghe",
+                "billing/get-github-billing-usage-report-org",
+                "billing/get-github-billing-usage-report-user",
+                "billing/get-github-billing-usage-summary-report-ghe",
+                "billing/get-github-billing-usage-summary-report-org",
+                "billing/get-github-billing-usage-summary-report-user",
+                "billing/get-usage-report-export",
+                "billing/list-usage-report-exports",
+                "campaigns/get-campaign-summary",
+                "campaigns/list-org-campaigns",
+                "checks/get",
+                "checks/get-suite",
+                "checks/list-annotations",
+                "checks/list-for-ref",
+                "checks/list-for-suite",
+                "checks/list-suites-for-ref",
+                "classroom/get-a-classroom",
+                "classroom/get-an-assignment",
+                "classroom/get-assignment-grades",
+                "classroom/list-accepted-assignments-for-an-assignment",
+                "classroom/list-assignments-for-a-classroom",
+                "classroom/list-classrooms",
+                "code-quality/get-finding",
+                "code-quality/get-setup",
+                "code-quality/list-findings-for-repo",
+                "code-scanning/get-ai-scan-enablement",
+                "code-scanning/get-ai-scan-enablement-for-org",
+                "code-scanning/get-alert",
+                "code-scanning/get-analysis",
+                "code-scanning/get-autofix",
+                "code-scanning/get-codeql-database",
+                "code-scanning/get-default-setup",
+                "code-scanning/get-dismissal-request-for-repo",
+                "code-scanning/get-sarif",
+                "code-scanning/get-variant-analysis",
+                "code-scanning/get-variant-analysis-repo-task",
+                "code-scanning/list-alert-instances",
+                "code-scanning/list-alerts-for-enterprise",
+                "code-scanning/list-alerts-for-org",
+                "code-scanning/list-alerts-for-repo",
+                "code-scanning/list-codeql-databases",
+                "code-scanning/list-dismissal-requests-for-repo",
+                "code-scanning/list-org-dismissal-requests",
+                "code-scanning/list-recent-analyses",
+                "code-security/get-configuration",
+                "code-security/get-configuration-for-repository",
+                "code-security/get-configurations-for-enterprise",
+                "code-security/get-configurations-for-org",
+                "code-security/get-default-configurations",
+                "code-security/get-default-configurations-for-enterprise",
+                "code-security/get-repositories-for-configuration",
+                "code-security/get-repositories-for-enterprise-configuration",
+                "code-security/get-single-configuration-for-enterprise",
+                "codes-of-conduct/get-all-codes-of-conduct",
+                "codes-of-conduct/get-conduct-code",
+                "codespaces/check-permissions-for-devcontainer",
+                "codespaces/codespace-machines-for-authenticated-user",
+                "codespaces/get-codespaces-for-user-in-org",
+                "codespaces/get-export-details-for-authenticated-user",
+                "codespaces/get-for-authenticated-user",
+                "codespaces/get-org-public-key",
+                "codespaces/get-org-secret",
+                "codespaces/get-public-key-for-authenticated-user",
+                "codespaces/get-repo-public-key",
+                "codespaces/get-repo-secret",
+                "codespaces/get-secret-for-authenticated-user",
+                "codespaces/list-devcontainers-in-repository-for-authenticated-user",
+                "codespaces/list-for-authenticated-user",
+                "codespaces/list-in-organization",
+                "codespaces/list-in-repository-for-authenticated-user",
+                "codespaces/list-org-secrets",
+                "codespaces/list-repo-secrets",
+                "codespaces/list-repositories-for-secret-for-authenticated-user",
+                "codespaces/list-secrets-for-authenticated-user",
+                "codespaces/list-selected-repos-for-org-secret",
+                "codespaces/pre-flight-with-repo-for-authenticated-user",
+                "codespaces/repo-machines-for-authenticated-user",
+                "copilot-spaces/get-for-org",
+                "copilot-spaces/get-for-user",
+                "copilot-spaces/get-resource-for-org",
+                "copilot-spaces/get-resource-for-user",
+                "copilot-spaces/list-collaborators-for-org",
+                "copilot-spaces/list-collaborators-for-user",
+                "copilot-spaces/list-for-org",
+                "copilot-spaces/list-for-user",
+                "copilot-spaces/list-resources-for-org",
+                "copilot-spaces/list-resources-for-user",
+                "copilot/copilot-content-exclusion-for-enterprise",
+                "copilot/copilot-content-exclusion-for-organization",
+                "copilot/copilot-enterprise-one-day-usage-metrics",
+                "copilot/copilot-enterprise-repos-one-day-report",
+                "copilot/copilot-enterprise-usage-metrics",
+                "copilot/copilot-enterprise-user-teams-one-day-report",
+                "copilot/copilot-organization-one-day-usage-metrics",
+                "copilot/copilot-organization-repos-one-day-report",
+                "copilot/copilot-organization-usage-metrics",
+                "copilot/copilot-organization-user-teams-one-day-report",
+                "copilot/copilot-organization-users-one-day-usage-metrics",
+                "copilot/copilot-organization-users-usage-metrics",
+                "copilot/copilot-users-one-day-usage-metrics",
+                "copilot/copilot-users-usage-metrics",
+                "copilot/get-copilot-cloud-agent-configuration",
+                "copilot/get-copilot-coding-agent-permissions-organization",
+                "copilot/get-copilot-custom-agents-for-enterprise",
+                "copilot/get-copilot-custom-agents-source-for-enterprise",
+                "copilot/get-copilot-organization-details",
+                "copilot/get-copilot-seat-details-for-enterprise-user",
+                "copilot/get-copilot-seat-details-for-user",
+                "copilot/get-usage-records",
+                "copilot/list-copilot-coding-agent-selected-repositories-for-organization",
+                "copilot/list-copilot-seats",
+                "copilot/list-copilot-seats-for-enterprise",
+                "dependabot/get-alert",
+                "dependabot/get-dismissal-request-for-repo",
+                "dependabot/get-org-public-key",
+                "dependabot/get-org-secret",
+                "dependabot/get-repo-public-key",
+                "dependabot/get-repo-secret",
+                "dependabot/list-alerts-for-enterprise",
+                "dependabot/list-alerts-for-org",
+                "dependabot/list-alerts-for-repo",
+                "dependabot/list-dismissal-requests-for-org",
+                "dependabot/list-dismissal-requests-for-repo",
+                "dependabot/list-org-secrets",
+                "dependabot/list-repo-secrets",
+                "dependabot/list-selected-repos-for-org-secret",
+                "dependabot/repository-access-for-enterprise",
+                "dependabot/repository-access-for-org",
+                "dependency-graph/diff-range",
+                "dependency-graph/export-sbom",
+                "dependency-graph/fetch-sbom-report",
+                "dependency-graph/generate-sbom-report",
+                "emojis/get",
+                "enterprise-admin/custom-properties-for-orgs-get-enterprise-definition",
+                "enterprise-admin/custom-properties-for-orgs-get-enterprise-definitions",
+                "enterprise-admin/custom-properties-for-orgs-get-enterprise-values",
+                "enterprise-admin/custom-properties-for-repos-get-enterprise-definition",
+                "enterprise-admin/custom-properties-for-repos-get-enterprise-definitions",
+                "enterprise-admin/get-allowed-actions-enterprise",
+                "enterprise-admin/get-artifact-and-log-retention-settings",
+                "enterprise-admin/get-audit-log",
+                "enterprise-admin/get-audit-log-stream-key",
+                "enterprise-admin/get-audit-log-streams",
+                "enterprise-admin/get-consumed-licenses",
+                "enterprise-admin/get-enterprise-innersource-vulnerability-sync-status",
+                "enterprise-admin/get-enterprise-role",
+                "enterprise-admin/get-enterprise-ruleset-history",
+                "enterprise-admin/get-enterprise-ruleset-version",
+                "enterprise-admin/get-enterprise-token-inventory-export",
+                "enterprise-admin/get-enterprise-token-inventory-item",
+                "enterprise-admin/get-fork-pr-contributor-approval-permissions",
+                "enterprise-admin/get-github-actions-permissions-enterprise",
+                "enterprise-admin/get-license-sync-status",
+                "enterprise-admin/get-one-audit-log-stream",
+                "enterprise-admin/get-private-repo-fork-pr-workflows-settings",
+                "enterprise-admin/get-provisioning-information-for-enterprise-group",
+                "enterprise-admin/get-provisioning-information-for-enterprise-user",
+                "enterprise-admin/get-runner-version-deprecation-for-enterprise",
+                "enterprise-admin/get-self-hosted-runner-for-enterprise",
+                "enterprise-admin/get-self-hosted-runner-group-for-enterprise",
+                "enterprise-admin/get-self-hosted-runners-permissions",
+                "enterprise-admin/get-server-statistics",
+                "enterprise-admin/list-enterprise-role-teams",
+                "enterprise-admin/list-enterprise-role-users",
+                "enterprise-admin/list-enterprise-roles",
+                "enterprise-admin/list-enterprise-token-inventory",
+                "enterprise-admin/list-labels-for-self-hosted-runner-for-enterprise",
+                "enterprise-admin/list-org-access-to-self-hosted-runner-group-in-enterprise",
+                "enterprise-admin/list-provisioned-groups-enterprise",
+                "enterprise-admin/list-provisioned-identities-enterprise",
+                "enterprise-admin/list-push-bypass-requests",
+                "enterprise-admin/list-runner-applications-for-enterprise",
+                "enterprise-admin/list-selected-organizations-enabled-github-actions-enterprise",
+                "enterprise-admin/list-self-hosted-runner-groups-for-enterprise",
+                "enterprise-admin/list-self-hosted-runners-for-enterprise",
+                "enterprise-admin/list-self-hosted-runners-in-group-for-enterprise",
+                "enterprise-admin/list-vss",
+                "enterprise-apps/installable-organization-accessible-repositories",
+                "enterprise-apps/installable-organizations",
+                "enterprise-apps/organization-installation-repositories",
+                "enterprise-apps/organization-installations",
+                "enterprise-team-memberships/get",
+                "enterprise-team-memberships/list",
+                "enterprise-team-memberships/list-teams-for-user",
+                "enterprise-team-organizations/get-assignment",
+                "enterprise-team-organizations/get-assignments",
+                "enterprise-teams/get",
+                "enterprise-teams/list",
+                "gists/check-is-starred",
+                "gists/get",
+                "gists/get-comment",
+                "gists/get-revision",
+                "gists/list",
+                "gists/list-comments",
+                "gists/list-commits",
+                "gists/list-for-user",
+                "gists/list-forks",
+                "gists/list-public",
+                "gists/list-starred",
+                "git/get-blob",
+                "git/get-commit",
+                "git/get-ref",
+                "git/get-tag",
+                "git/get-tree",
+                "git/list-matching-refs",
+                "gitignore/get-all-templates",
+                "gitignore/get-template",
+                "hosted-compute/get-network-configuration-for-enterprise",
+                "hosted-compute/get-network-configuration-for-org",
+                "hosted-compute/get-network-settings-for-enterprise",
+                "hosted-compute/get-network-settings-for-org",
+                "hosted-compute/list-network-configurations-for-enterprise",
+                "hosted-compute/list-network-configurations-for-org",
+                "interactions/get-pull-request-bypass-list-for-repo",
+                "interactions/get-pull-request-creation-cap-for-org",
+                "interactions/get-pull-request-creation-cap-for-repo",
+                "interactions/get-restrictions-for-authenticated-user",
+                "interactions/get-restrictions-for-org",
+                "interactions/get-restrictions-for-repo",
+                "issues/check-user-can-be-assigned",
+                "issues/check-user-can-be-assigned-to-issue",
+                "issues/get",
+                "issues/get-comment",
+                "issues/get-event",
+                "issues/get-label",
+                "issues/get-milestone",
+                "issues/get-parent",
+                "issues/list",
+                "issues/list-assignees",
+                "issues/list-comments",
+                "issues/list-comments-for-repo",
+                "issues/list-dependencies-blocked-by",
+                "issues/list-dependencies-blocking",
+                "issues/list-events",
+                "issues/list-events-for-repo",
+                "issues/list-events-for-timeline",
+                "issues/list-for-authenticated-user",
+                "issues/list-for-org",
+                "issues/list-for-repo",
+                "issues/list-issue-field-values-for-issue",
+                "issues/list-labels-for-milestone",
+                "issues/list-labels-for-repo",
+                "issues/list-labels-on-issue",
+                "issues/list-milestones",
+                "issues/list-relates-to",
+                "issues/list-sub-issues",
+                "issues/list-suggestions",
+                "licenses/get",
+                "licenses/get-all-commonly-used",
+                "licenses/get-for-repo",
+                "meta/get",
+                "meta/get-all-versions",
+                "meta/get-octocat",
+                "meta/get-zen",
+                "meta/root",
+                "migrations/download-archive-for-org",
+                "migrations/get-archive-for-authenticated-user",
+                "migrations/get-commit-authors",
+                "migrations/get-import-status",
+                "migrations/get-large-files",
+                "migrations/get-status-for-authenticated-user",
+                "migrations/get-status-for-org",
+                "migrations/list-for-authenticated-user",
+                "migrations/list-for-org",
+                "migrations/list-repos-for-authenticated-user",
+                "migrations/list-repos-for-org",
+                "oidc/get-oidc-custom-sub-template-for-org",
+                "oidc/list-oidc-custom-property-inclusions-for-enterprise",
+                "oidc/list-oidc-custom-property-inclusions-for-org",
+                "orgs/check-blocked-user",
+                "orgs/check-membership-for-user",
+                "orgs/check-public-membership-for-user",
+                "orgs/custom-properties-for-orgs-get-organization-values",
+                "orgs/custom-properties-for-repos-get-organization-definition",
+                "orgs/custom-properties-for-repos-get-organization-definitions",
+                "orgs/custom-properties-for-repos-get-organization-values",
+                "orgs/external-properties-for-repos-get-organization-app-installations",
+                "orgs/external-properties-for-repos-get-organization-definitions",
+                "orgs/get",
+                "orgs/get-audit-log",
+                "orgs/get-cluster-deployment-records-job",
+                "orgs/get-custom-repo-role",
+                "orgs/get-custom-role",
+                "orgs/get-immutable-releases-settings",
+                "orgs/get-immutable-releases-settings-repositories",
+                "orgs/get-membership-for-authenticated-user",
+                "orgs/get-membership-for-user",
+                "orgs/get-org-role",
+                "orgs/get-org-ruleset-history",
+                "orgs/get-org-ruleset-version",
+                "orgs/get-webhook",
+                "orgs/get-webhook-config-for-org",
+                "orgs/get-webhook-delivery",
+                "orgs/list",
+                "orgs/list-app-installations",
+                "orgs/list-artifact-deployment-records",
+                "orgs/list-artifact-storage-records",
+                "orgs/list-attestation-repositories",
+                "orgs/list-attestations",
+                "orgs/list-blocked-users",
+                "orgs/list-custom-repo-roles",
+                "orgs/list-custom-roles",
+                "orgs/list-failed-invitations",
+                "orgs/list-fine-grained-permissions",
+                "orgs/list-for-authenticated-user",
+                "orgs/list-for-user",
+                "orgs/list-invitation-teams",
+                "orgs/list-issue-fields",
+                "orgs/list-issue-types",
+                "orgs/list-members",
+                "orgs/list-memberships-for-authenticated-user",
+                "orgs/list-org-role-teams",
+                "orgs/list-org-role-users",
+                "orgs/list-org-roles",
+                "orgs/list-organization-fine-grained-permissions",
+                "orgs/list-outside-collaborators",
+                "orgs/list-pat-grant-repositories",
+                "orgs/list-pat-grant-request-repositories",
+                "orgs/list-pat-grant-requests",
+                "orgs/list-pat-grants",
+                "orgs/list-pending-invitations",
+                "orgs/list-public-members",
+                "orgs/list-push-bypass-requests",
+                "orgs/list-repo-fine-grained-permissions",
+                "orgs/list-saml-sso-authorizations",
+                "orgs/list-security-manager-teams",
+                "orgs/list-webhook-deliveries",
+                "orgs/list-webhooks",
+                "packages/get-all-package-versions-for-package-owned-by-authenticated-user",
+                "packages/get-all-package-versions-for-package-owned-by-org",
+                "packages/get-all-package-versions-for-package-owned-by-user",
+                "packages/get-package-for-authenticated-user",
+                "packages/get-package-for-organization",
+                "packages/get-package-for-user",
+                "packages/get-package-version-for-authenticated-user",
+                "packages/get-package-version-for-organization",
+                "packages/get-package-version-for-user",
+                "packages/list-docker-migration-conflicting-packages-for-authenticated-user",
+                "packages/list-docker-migration-conflicting-packages-for-organization",
+                "packages/list-docker-migration-conflicting-packages-for-user",
+                "packages/list-packages-for-authenticated-user",
+                "packages/list-packages-for-organization",
+                "packages/list-packages-for-user",
+                "private-registries/get-org-private-registry",
+                "private-registries/get-org-public-key",
+                "private-registries/list-org-private-registries",
+                "projects/get-field-for-org",
+                "projects/get-field-for-user",
+                "projects/get-for-org",
+                "projects/get-for-user",
+                "projects/get-org-item",
+                "projects/get-user-item",
+                "projects/list-fields-for-org",
+                "projects/list-fields-for-user",
+                "projects/list-for-org",
+                "projects/list-for-user",
+                "projects/list-items-for-org",
+                "projects/list-items-for-user",
+                "projects/list-view-items-for-org",
+                "projects/list-view-items-for-user",
+                "pull-request-stacks/get",
+                "pull-request-stacks/list",
+                "pulls/check-if-merged",
+                "pulls/get",
+                "pulls/get-merge-async-result",
+                "pulls/get-review",
+                "pulls/get-review-comment",
+                "pulls/list",
+                "pulls/list-comments-for-review",
+                "pulls/list-commits",
+                "pulls/list-files",
+                "pulls/list-requested-reviewers",
+                "pulls/list-review-comments",
+                "pulls/list-review-comments-for-repo",
+                "pulls/list-reviews",
+                "rate-limit/get",
+                "reactions/list-for-commit-comment",
+                "reactions/list-for-issue",
+                "reactions/list-for-issue-comment",
+                "reactions/list-for-pull-request-review-comment",
+                "reactions/list-for-release",
+                "repos/check-automated-security-fixes",
+                "repos/check-collaborator",
+                "repos/check-immutable-releases",
+                "repos/check-private-vulnerability-reporting",
+                "repos/check-vulnerability-alerts",
+                "repos/codeowners-errors",
+                "repos/compare-commits",
+                "repos/custom-properties-for-repos-get-repository-values",
+                "repos/download-tarball-archive",
+                "repos/download-zipball-archive",
+                "repos/get",
+                "repos/get-access-restrictions",
+                "repos/get-admin-branch-protection",
+                "repos/get-all-deployment-protection-rules",
+                "repos/get-all-environments",
+                "repos/get-all-status-check-contexts",
+                "repos/get-all-topics",
+                "repos/get-apps-with-access-to-protected-branch",
+                "repos/get-autolink",
+                "repos/get-branch",
+                "repos/get-branch-protection",
+                "repos/get-branch-rules",
+                "repos/get-clones",
+                "repos/get-code-frequency-stats",
+                "repos/get-collaborator-permission-level",
+                "repos/get-combined-status-for-ref",
+                "repos/get-commit",
+                "repos/get-commit-activity-stats",
+                "repos/get-commit-comment",
+                "repos/get-commit-signature-protection",
+                "repos/get-community-profile-metrics",
+                "repos/get-content",
+                "repos/get-contributors-stats",
+                "repos/get-custom-deployment-protection-rule",
+                "repos/get-deploy-key",
+                "repos/get-deployment",
+                "repos/get-deployment-branch-policy",
+                "repos/get-deployment-status",
+                "repos/get-enterprise-ruleset",
+                "repos/get-environment",
+                "repos/get-hash-algorithm",
+                "repos/get-latest-pages-build",
+                "repos/get-latest-release",
+                "repos/get-org-rule-suite",
+                "repos/get-org-rule-suites",
+                "repos/get-org-ruleset",
+                "repos/get-org-rulesets",
+                "repos/get-pages",
+                "repos/get-pages-build",
+                "repos/get-pages-deployment",
+                "repos/get-pages-health-check",
+                "repos/get-participation-stats",
+                "repos/get-pull-request-review-protection",
+                "repos/get-punch-card-stats",
+                "repos/get-readme",
+                "repos/get-readme-in-directory",
+                "repos/get-release",
+                "repos/get-release-asset",
+                "repos/get-release-by-tag",
+                "repos/get-repo-push-bypass-request",
+                "repos/get-repo-rule-suite",
+                "repos/get-repo-rule-suites",
+                "repos/get-repo-ruleset",
+                "repos/get-repo-ruleset-history",
+                "repos/get-repo-ruleset-version",
+                "repos/get-repo-rulesets",
+                "repos/get-status-checks-protection",
+                "repos/get-teams-with-access-to-protected-branch",
+                "repos/get-top-paths",
+                "repos/get-top-referrers",
+                "repos/get-users-with-access-to-protected-branch",
+                "repos/get-views",
+                "repos/get-webhook",
+                "repos/get-webhook-config-for-repo",
+                "repos/get-webhook-delivery",
+                "repos/list-activities",
+                "repos/list-attestations",
+                "repos/list-autolinks",
+                "repos/list-branches",
+                "repos/list-branches-for-head-commit",
+                "repos/list-collaborators",
+                "repos/list-comments-for-commit",
+                "repos/list-commit-comments-for-repo",
+                "repos/list-commit-statuses-for-ref",
+                "repos/list-commits",
+                "repos/list-contributors",
+                "repos/list-custom-deployment-rule-integrations",
+                "repos/list-deploy-keys",
+                "repos/list-deployment-branch-policies",
+                "repos/list-deployment-statuses",
+                "repos/list-deployments",
+                "repos/list-for-authenticated-user",
+                "repos/list-for-org",
+                "repos/list-for-user",
+                "repos/list-forks",
+                "repos/list-invitations",
+                "repos/list-invitations-for-authenticated-user",
+                "repos/list-issue-types",
+                "repos/list-languages",
+                "repos/list-pages-builds",
+                "repos/list-public",
+                "repos/list-pull-requests-associated-with-commit",
+                "repos/list-release-assets",
+                "repos/list-releases",
+                "repos/list-repo-push-bypass-requests",
+                "repos/list-tags",
+                "repos/list-teams",
+                "repos/list-webhook-deliveries",
+                "repos/list-webhooks",
+                "scim/get-provisioning-information-for-user",
+                "scim/list-provisioned-identities",
+                "search/code",
+                "search/commits",
+                "search/issues-and-pull-requests",
+                "search/labels",
+                "search/repos",
+                "search/topics",
+                "search/users",
+                "secret-scanning/get-alert",
+                "secret-scanning/get-bypass-request",
+                "secret-scanning/get-dismissal-request",
+                "secret-scanning/get-scan-history",
+                "secret-scanning/get-security-analysis-settings-for-enterprise",
+                "secret-scanning/list-alerts-for-enterprise",
+                "secret-scanning/list-alerts-for-org",
+                "secret-scanning/list-alerts-for-repo",
+                "secret-scanning/list-enterprise-bypass-requests",
+                "secret-scanning/list-enterprise-custom-patterns",
+                "secret-scanning/list-enterprise-dismissal-requests",
+                "secret-scanning/list-enterprise-pattern-configs",
+                "secret-scanning/list-locations-for-alert",
+                "secret-scanning/list-org-bypass-requests",
+                "secret-scanning/list-org-custom-patterns",
+                "secret-scanning/list-org-dismissal-requests",
+                "secret-scanning/list-org-pattern-configs",
+                "secret-scanning/list-repo-bypass-requests",
+                "secret-scanning/list-repo-custom-patterns",
+                "secret-scanning/list-repo-dismissal-requests",
+                "security-advisories/get-global-advisory",
+                "security-advisories/get-repository-advisory",
+                "security-advisories/list-global-advisories",
+                "security-advisories/list-org-repository-advisories",
+                "security-advisories/list-repository-advisories",
+                "teams/check-permissions-for-repo-in-org",
+                "teams/check-permissions-for-repo-legacy",
+                "teams/external-idp-group-info-for-org",
+                "teams/get-by-name",
+                "teams/get-legacy",
+                "teams/get-member-legacy",
+                "teams/get-membership-for-user-in-org",
+                "teams/get-membership-for-user-legacy",
+                "teams/list",
+                "teams/list-child-in-org",
+                "teams/list-child-legacy",
+                "teams/list-external-idp-groups-for-org",
+                "teams/list-for-authenticated-user",
+                "teams/list-idp-groups-for-legacy",
+                "teams/list-idp-groups-for-org",
+                "teams/list-idp-groups-in-org",
+                "teams/list-linked-external-idp-groups-to-team-for-org",
+                "teams/list-members-in-org",
+                "teams/list-members-legacy",
+                "teams/list-pending-invitations-in-org",
+                "teams/list-pending-invitations-legacy",
+                "teams/list-repos-in-org",
+                "teams/list-repos-legacy",
+                "users/check-blocked",
+                "users/check-following-for-user",
+                "users/check-person-is-followed-by-authenticated",
+                "users/get-authenticated",
+                "users/get-by-id",
+                "users/get-by-username",
+                "users/get-context-for-user",
+                "users/get-gpg-key-for-authenticated-user",
+                "users/get-public-ssh-key-for-authenticated-user",
+                "users/get-ssh-signing-key-for-authenticated-user",
+                "users/list",
+                "users/list-attestations",
+                "users/list-blocked-by-authenticated-user",
+                "users/list-emails-for-authenticated-user",
+                "users/list-followed-by-authenticated-user",
+                "users/list-followers-for-authenticated-user",
+                "users/list-followers-for-user",
+                "users/list-following-for-user",
+                "users/list-gpg-keys-for-authenticated-user",
+                "users/list-gpg-keys-for-user",
+                "users/list-public-emails-for-authenticated-user",
+                "users/list-public-keys-for-user",
+                "users/list-public-ssh-keys-for-authenticated-user",
+                "users/list-social-accounts-for-authenticated-user",
+                "users/list-social-accounts-for-user",
+                "users/list-ssh-signing-keys-for-authenticated-user",
+                "users/list-ssh-signing-keys-for-user"
+              ]
+            },
+            {
+              "id": "path_parameters",
+              "physical_name": "path_parameters",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 1
+            },
+            {
+              "id": "query",
+              "physical_name": "query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "query"
+            },
+            {
+              "id": "max_pages",
+              "physical_name": "max_pages",
+              "type": "BIGINT",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "max_pages",
+              "allowed_values": [
+                "0"
+              ]
+            },
+            {
+              "id": "accept",
+              "physical_name": "accept",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "accept"
+            },
+            {
+              "id": "api_version",
+              "physical_name": "api_version",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "api_version",
+              "allowed_values": [
+                "2026-03-10"
+              ]
+            },
+            {
+              "id": "allow_not_found",
+              "physical_name": "allow_not_found",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "allow_not_found"
+            },
+            {
+              "id": "cache_ttl",
+              "physical_name": "cache_ttl",
+              "type": "BIGINT",
+              "nullable": true,
+              "binding": "scalar",
+              "name": "cache_ttl",
+              "allowed_values": [
+                "0"
+              ]
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "operation_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "page_number",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "status_code",
+            "type": "BIGINT",
+            "nullable": false
+          },
+          {
+            "name": "content_type",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "data",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "body",
+            "type": "BLOB",
+            "nullable": true
+          },
+          {
+            "name": "next_url",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "graphql_responses": {
+        "id": "queryfarm.github.reporting/sources/graphql_responses",
+        "dataset": {
+          "name": "graphql_responses",
+          "id": "queryfarm.github.reporting/datasets/graphql_responses",
+          "grain": [
+            "request_document",
+            "request_variables",
+            "request_operation_name"
+          ],
+          "fields": {
+            "data": {
+              "source_column": "data",
+              "dimension": false
+            },
+            "request_document": {
+              "source_argument": "query",
+              "dimension": false
+            },
+            "request_variables": {
+              "source_argument": "variables",
+              "dimension": false
+            },
+            "request_operation_name": {
+              "source_argument": "operation_name",
+              "dimension": false
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "api",
+          "name": "graphql",
+          "arguments": [
+            {
+              "id": "query",
+              "physical_name": "query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 0
+            },
+            {
+              "id": "variables",
+              "physical_name": "variables",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar_or_driver",
+              "position": 1
+            },
+            {
+              "id": "operation_name",
+              "physical_name": "operation_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "binding": "scalar",
+              "name": "operation_name"
+            }
+          ]
+        },
+        "profile": "row_map_sync_v1",
+        "result_columns": [
+          {
+            "name": "data",
+            "type": "VARCHAR",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": true,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
+        }
+      },
+      "api_endpoints": {
+        "id": "queryfarm.github.reporting/sources/api_endpoints",
+        "dataset": {
+          "name": "api_endpoints",
+          "id": "queryfarm.github.reporting/datasets/api_endpoints",
+          "grain": [
+            "operation_id"
+          ],
+          "fields": {
+            "operation_id": {
+              "source_column": "operation_id",
+              "dimension": false
+            },
+            "function_name": {
+              "source_column": "function_name",
+              "dimension": false
+            },
+            "method": {
+              "source_column": "method",
+              "dimension": false
+            },
+            "path": {
+              "source_column": "path",
+              "dimension": false
+            },
+            "category": {
+              "source_column": "category",
+              "dimension": false
+            },
+            "summary": {
+              "source_column": "summary",
+              "dimension": false
+            },
+            "parameters": {
+              "source_column": "parameters",
+              "dimension": false
+            },
+            "products": {
+              "source_column": "products",
+              "dimension": false
+            },
+            "documentation_url": {
+              "source_column": "documentation_url",
+              "dimension": false
+            },
+            "deprecated": {
+              "source_column": "deprecated",
+              "dimension": false
+            }
+          }
+        },
+        "binding_key": "github_source",
+        "provider_id": "queryfarm.vgi.github",
+        "instance_id": "github.com",
+        "function": {
+          "schema": "api",
+          "name": "all_endpoints",
+          "arguments": []
+        },
+        "profile": "producer_sync_v1",
+        "result_columns": [
+          {
+            "name": "operation_id",
+            "type": "VARCHAR",
+            "nullable": false
+          },
+          {
+            "name": "function_name",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "method",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "path",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "category",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "summary",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "parameters",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "products",
+            "type": "VARCHAR[]",
+            "nullable": true
+          },
+          {
+            "name": "documentation_url",
+            "type": "VARCHAR",
+            "nullable": true
+          },
+          {
+            "name": "deprecated",
+            "type": "BOOLEAN",
+            "nullable": true
+          }
+        ],
+        "assertions": {
+          "authority": "queryfarm.github.reporting",
+          "read_only": true,
+          "execution_safe_bind": true,
+          "input_from_args": false,
+          "independent_rows": true,
+          "requires_optimizer": false,
+          "async": false
+        },
+        "consistency": {
+          "kind": "live_explicit",
+          "authority": "queryfarm.github.reporting"
+        },
+        "settings": [],
+        "required_secrets": [],
+        "attachment_tags": {
+          "vgi_github_reporting": "true",
+          "vgi_github_operation_timeout_seconds": "120",
+          "vgi_github_api_origin": "https://api.github.com"
+        },
+        "transport": {
+          "finite_timeout_ms": 125000,
+          "cooperative_cancellation": true,
+          "authority": "queryfarm.vgi.posix-subprocess"
         }
       }
     }
@@ -3928,6 +6712,57 @@
     },
     "ci_success_rate": {
       "expression": "successful_runs * 1.0 / NULLIF(eligible_runs, 0)"
+    },
+    "discussion_count": {
+      "expression": "COUNT(*)"
+    },
+    "answered_discussions": {
+      "expression": "COUNT(*)"
+    },
+    "unanswered_discussions": {
+      "expression": "COUNT(*)"
+    },
+    "discussion_answer_rate": {
+      "expression": "answered_discussions * 1.0 / NULLIF(discussion_count, 0)"
+    },
+    "mean_discussion_answer_hours": {
+      "expression": "AVG(discussions.answer_hours)"
+    },
+    "median_discussion_answer_hours": {
+      "expression": "MEDIAN(discussions.answer_hours)"
+    },
+    "discussion_comment_count": {
+      "expression": "COUNT(*)"
+    },
+    "discussion_reply_count": {
+      "expression": "COUNT(*)"
+    },
+    "project_count": {
+      "expression": "COUNT(*)"
+    },
+    "open_projects": {
+      "expression": "COUNT(*)"
+    },
+    "closed_projects": {
+      "expression": "COUNT(*)"
+    },
+    "project_item_count": {
+      "expression": "COUNT(*)"
+    },
+    "project_issue_items": {
+      "expression": "COUNT(*)"
+    },
+    "project_pull_request_items": {
+      "expression": "COUNT(*)"
+    },
+    "project_draft_items": {
+      "expression": "COUNT(*)"
+    },
+    "archived_project_items": {
+      "expression": "COUNT(*)"
+    },
+    "project_field_count": {
+      "expression": "COUNT(*)"
     }
   },
   "policy": {
@@ -3966,7 +6801,24 @@
       "timed_out_runs",
       "cancelled_runs",
       "eligible_runs",
-      "ci_success_rate"
+      "ci_success_rate",
+      "discussion_count",
+      "answered_discussions",
+      "unanswered_discussions",
+      "discussion_answer_rate",
+      "mean_discussion_answer_hours",
+      "median_discussion_answer_hours",
+      "discussion_comment_count",
+      "discussion_reply_count",
+      "project_count",
+      "open_projects",
+      "closed_projects",
+      "project_item_count",
+      "project_issue_items",
+      "project_pull_request_items",
+      "project_draft_items",
+      "archived_project_items",
+      "project_field_count"
     ],
     "dimensions": [
       "repository_input.repo",
@@ -4180,6 +7032,91 @@
       "all_rate_limit.remaining",
       "all_rate_limit.reset_at",
       "all_rate_limit.authenticated",
+      "discussions.repo",
+      "discussions.number",
+      "discussions.node_id",
+      "discussions.title",
+      "discussions.user_login",
+      "discussions.category_id",
+      "discussions.category_name",
+      "discussions.is_answered",
+      "discussions.answer_comment_id",
+      "discussions.comments",
+      "discussions.upvote_count",
+      "discussions.locked",
+      "discussions.created_at",
+      "discussions.updated_at",
+      "discussions.answer_chosen_at",
+      "discussion_comments_input.repo",
+      "discussion_comments_input.number",
+      "discussion_comments.repo",
+      "discussion_comments.discussion_number",
+      "discussion_comments.node_id",
+      "discussion_comments.reply_to_id",
+      "discussion_comments.user_login",
+      "discussion_comments.is_answer",
+      "discussion_comments.replies",
+      "discussion_comments.upvote_count",
+      "discussion_comments.created_at",
+      "discussion_comments.updated_at",
+      "discussion_replies_input.node_id",
+      "discussion_replies.repo",
+      "discussion_replies.discussion_number",
+      "discussion_replies.node_id",
+      "discussion_replies.reply_to_id",
+      "discussion_replies.user_login",
+      "discussion_replies.is_answer",
+      "discussion_replies.replies",
+      "discussion_replies.upvote_count",
+      "discussion_replies.created_at",
+      "discussion_replies.updated_at",
+      "projects_input.owner",
+      "projects.owner",
+      "projects.owner_type",
+      "projects.number",
+      "projects.id",
+      "projects.node_id",
+      "projects.title",
+      "projects.short_description",
+      "projects.state",
+      "projects.is_public",
+      "projects.is_template",
+      "projects.creator_login",
+      "projects.created_at",
+      "projects.updated_at",
+      "projects.closed_at",
+      "project_items_input.owner",
+      "project_items_input.number",
+      "project_items.owner",
+      "project_items.owner_type",
+      "project_items.project_number",
+      "project_items.id",
+      "project_items.node_id",
+      "project_items.content_type",
+      "project_items.content_id",
+      "project_items.content_number",
+      "project_items.title",
+      "project_items.state",
+      "project_items.user_login",
+      "project_items.creator_login",
+      "project_items.created_at",
+      "project_items.updated_at",
+      "project_items.archived_at",
+      "project_fields_input.owner",
+      "project_fields_input.number",
+      "project_fields.owner",
+      "project_fields.owner_type",
+      "project_fields.project_number",
+      "project_fields.id",
+      "project_fields.node_id",
+      "project_fields.name",
+      "project_fields.data_type",
+      "project_fields.created_at",
+      "project_fields.updated_at",
+      "rest_responses_input.operation_id",
+      "rest_responses_input.path_parameters",
+      "graphql_responses_input.query",
+      "graphql_responses_input.variables",
       "pulls.created_day",
       "pulls.merged_day",
       "issues.created_day",
@@ -4188,7 +7125,15 @@
       "commits.committer_day",
       "releases.published_day",
       "stargazers.starred_day",
-      "workflow_runs.created_day"
+      "workflow_runs.created_day",
+      "discussions.created_day",
+      "discussions.answer_chosen_day",
+      "discussion_comments.created_day",
+      "discussion_replies.created_day",
+      "projects.created_day",
+      "projects.closed_day",
+      "project_items.created_day",
+      "project_items.archived_day"
     ],
     "filter_dimensions": [
       "repository_input.repo",
@@ -4402,6 +7347,91 @@
       "all_rate_limit.remaining",
       "all_rate_limit.reset_at",
       "all_rate_limit.authenticated",
+      "discussions.repo",
+      "discussions.number",
+      "discussions.node_id",
+      "discussions.title",
+      "discussions.user_login",
+      "discussions.category_id",
+      "discussions.category_name",
+      "discussions.is_answered",
+      "discussions.answer_comment_id",
+      "discussions.comments",
+      "discussions.upvote_count",
+      "discussions.locked",
+      "discussions.created_at",
+      "discussions.updated_at",
+      "discussions.answer_chosen_at",
+      "discussion_comments_input.repo",
+      "discussion_comments_input.number",
+      "discussion_comments.repo",
+      "discussion_comments.discussion_number",
+      "discussion_comments.node_id",
+      "discussion_comments.reply_to_id",
+      "discussion_comments.user_login",
+      "discussion_comments.is_answer",
+      "discussion_comments.replies",
+      "discussion_comments.upvote_count",
+      "discussion_comments.created_at",
+      "discussion_comments.updated_at",
+      "discussion_replies_input.node_id",
+      "discussion_replies.repo",
+      "discussion_replies.discussion_number",
+      "discussion_replies.node_id",
+      "discussion_replies.reply_to_id",
+      "discussion_replies.user_login",
+      "discussion_replies.is_answer",
+      "discussion_replies.replies",
+      "discussion_replies.upvote_count",
+      "discussion_replies.created_at",
+      "discussion_replies.updated_at",
+      "projects_input.owner",
+      "projects.owner",
+      "projects.owner_type",
+      "projects.number",
+      "projects.id",
+      "projects.node_id",
+      "projects.title",
+      "projects.short_description",
+      "projects.state",
+      "projects.is_public",
+      "projects.is_template",
+      "projects.creator_login",
+      "projects.created_at",
+      "projects.updated_at",
+      "projects.closed_at",
+      "project_items_input.owner",
+      "project_items_input.number",
+      "project_items.owner",
+      "project_items.owner_type",
+      "project_items.project_number",
+      "project_items.id",
+      "project_items.node_id",
+      "project_items.content_type",
+      "project_items.content_id",
+      "project_items.content_number",
+      "project_items.title",
+      "project_items.state",
+      "project_items.user_login",
+      "project_items.creator_login",
+      "project_items.created_at",
+      "project_items.updated_at",
+      "project_items.archived_at",
+      "project_fields_input.owner",
+      "project_fields_input.number",
+      "project_fields.owner",
+      "project_fields.owner_type",
+      "project_fields.project_number",
+      "project_fields.id",
+      "project_fields.node_id",
+      "project_fields.name",
+      "project_fields.data_type",
+      "project_fields.created_at",
+      "project_fields.updated_at",
+      "rest_responses_input.operation_id",
+      "rest_responses_input.path_parameters",
+      "graphql_responses_input.query",
+      "graphql_responses_input.variables",
       "pulls.created_day",
       "pulls.merged_day",
       "issues.created_day",
@@ -4410,7 +7440,15 @@
       "commits.committer_day",
       "releases.published_day",
       "stargazers.starred_day",
-      "workflow_runs.created_day"
+      "workflow_runs.created_day",
+      "discussions.created_day",
+      "discussions.answer_chosen_day",
+      "discussion_comments.created_day",
+      "discussion_replies.created_day",
+      "projects.created_day",
+      "projects.closed_day",
+      "project_items.created_day",
+      "project_items.archived_day"
     ],
     "detail_fields": [
       "repository_input.repo",
@@ -4659,6 +7697,124 @@
       "all_rate_limit.remaining",
       "all_rate_limit.reset_at",
       "all_rate_limit.authenticated",
+      "discussions.repo",
+      "discussions.number",
+      "discussions.node_id",
+      "discussions.title",
+      "discussions.body",
+      "discussions.user_login",
+      "discussions.category_id",
+      "discussions.category_name",
+      "discussions.is_answered",
+      "discussions.answer_comment_id",
+      "discussions.comments",
+      "discussions.upvote_count",
+      "discussions.locked",
+      "discussions.created_at",
+      "discussions.updated_at",
+      "discussions.answer_chosen_at",
+      "discussions.html_url",
+      "discussion_comments_input.repo",
+      "discussion_comments_input.number",
+      "discussion_comments.repo",
+      "discussion_comments.discussion_number",
+      "discussion_comments.node_id",
+      "discussion_comments.reply_to_id",
+      "discussion_comments.body",
+      "discussion_comments.user_login",
+      "discussion_comments.is_answer",
+      "discussion_comments.replies",
+      "discussion_comments.upvote_count",
+      "discussion_comments.created_at",
+      "discussion_comments.updated_at",
+      "discussion_comments.html_url",
+      "discussion_replies_input.node_id",
+      "discussion_replies.repo",
+      "discussion_replies.discussion_number",
+      "discussion_replies.node_id",
+      "discussion_replies.reply_to_id",
+      "discussion_replies.body",
+      "discussion_replies.user_login",
+      "discussion_replies.is_answer",
+      "discussion_replies.replies",
+      "discussion_replies.upvote_count",
+      "discussion_replies.created_at",
+      "discussion_replies.updated_at",
+      "discussion_replies.html_url",
+      "projects_input.owner",
+      "projects.owner",
+      "projects.owner_type",
+      "projects.number",
+      "projects.id",
+      "projects.node_id",
+      "projects.title",
+      "projects.description",
+      "projects.short_description",
+      "projects.state",
+      "projects.is_public",
+      "projects.is_template",
+      "projects.creator_login",
+      "projects.created_at",
+      "projects.updated_at",
+      "projects.closed_at",
+      "project_items_input.owner",
+      "project_items_input.number",
+      "project_items.owner",
+      "project_items.owner_type",
+      "project_items.project_number",
+      "project_items.id",
+      "project_items.node_id",
+      "project_items.content_type",
+      "project_items.content_id",
+      "project_items.content_number",
+      "project_items.title",
+      "project_items.body",
+      "project_items.state",
+      "project_items.user_login",
+      "project_items.html_url",
+      "project_items.creator_login",
+      "project_items.created_at",
+      "project_items.updated_at",
+      "project_items.archived_at",
+      "project_items.fields_json",
+      "project_fields_input.owner",
+      "project_fields_input.number",
+      "project_fields.owner",
+      "project_fields.owner_type",
+      "project_fields.project_number",
+      "project_fields.id",
+      "project_fields.node_id",
+      "project_fields.name",
+      "project_fields.data_type",
+      "project_fields.options_json",
+      "project_fields.configuration_json",
+      "project_fields.created_at",
+      "project_fields.updated_at",
+      "rest_responses_input.operation_id",
+      "rest_responses_input.path_parameters",
+      "rest_responses.operation_id",
+      "rest_responses.page_number",
+      "rest_responses.status_code",
+      "rest_responses.content_type",
+      "rest_responses.data",
+      "rest_responses.body",
+      "rest_responses.next_url",
+      "graphql_responses_input.query",
+      "graphql_responses_input.variables",
+      "graphql_responses.data",
+      "graphql_responses.request_document",
+      "graphql_responses.request_variables",
+      "graphql_responses.request_operation_name",
+      "api_endpoints.operation_id",
+      "api_endpoints.function_name",
+      "api_endpoints.method",
+      "api_endpoints.path",
+      "api_endpoints.category",
+      "api_endpoints.summary",
+      "api_endpoints.parameters",
+      "api_endpoints.products",
+      "api_endpoints.documentation_url",
+      "api_endpoints.deprecated",
       "pulls.created_day",
       "pulls.merged_day",
       "issues.created_day",
@@ -4668,8 +7824,17 @@
       "releases.published_day",
       "stargazers.starred_day",
       "workflow_runs.created_day",
+      "discussions.created_day",
+      "discussions.answer_chosen_day",
+      "discussion_comments.created_day",
+      "discussion_replies.created_day",
+      "projects.created_day",
+      "projects.closed_day",
+      "project_items.created_day",
+      "project_items.archived_day",
       "pulls.merge_hours",
-      "issues.close_hours"
+      "issues.close_hours",
+      "discussions.answer_hours"
     ],
     "metric_semantics": {
       "repository_count": {
@@ -4886,6 +8051,113 @@
         "dataset": "workflow_runs",
         "additivity": "non_additive",
         "comment": "Success / (success + failure + timed_out), from latest reported run outcomes; NULL for zero denominator."
+      },
+      "discussion_count": {
+        "dataset": "discussions",
+        "additivity": "additive",
+        "comment": "All visible discussions in the complete repository listing."
+      },
+      "answered_discussions": {
+        "dataset": "discussions",
+        "additivity": "additive",
+        "comment": "Discussions with a currently selected answer.",
+        "population": "discussions.is_answered = TRUE",
+        "population_id": "discussions/16f810921729"
+      },
+      "unanswered_discussions": {
+        "dataset": "discussions",
+        "additivity": "additive",
+        "comment": "Discussions with no currently selected answer.",
+        "population": "discussions.is_answered = FALSE",
+        "population_id": "discussions/3f3059f1bb83"
+      },
+      "discussion_answer_rate": {
+        "dataset": "discussions",
+        "additivity": "non_additive",
+        "comment": "Currently answered / all visible discussions, across all categories; not an SLA or answerable-only rate."
+      },
+      "mean_discussion_answer_hours": {
+        "dataset": "discussions",
+        "additivity": "non_additive",
+        "comment": "Mean creation-to-currently-selected-answer hours; NULL for an empty answered cohort.",
+        "population": "discussions.is_answered = TRUE",
+        "population_id": "discussions/16f810921729",
+        "unit": "h"
+      },
+      "median_discussion_answer_hours": {
+        "dataset": "discussions",
+        "additivity": "non_additive",
+        "comment": "Exact continuous median creation-to-currently-selected-answer hours; NULL for an empty answered cohort.",
+        "population": "discussions.is_answered = TRUE",
+        "population_id": "discussions/16f810921729",
+        "unit": "h"
+      },
+      "discussion_comment_count": {
+        "dataset": "discussion_comments",
+        "additivity": "additive",
+        "comment": "Top-level comments on the selected discussion; excludes replies."
+      },
+      "discussion_reply_count": {
+        "dataset": "discussion_replies",
+        "additivity": "additive",
+        "comment": "Replies to the selected discussion comment; not all comments in its discussion."
+      },
+      "project_count": {
+        "dataset": "projects",
+        "additivity": "additive",
+        "comment": "Current visible Projects v2 owned by the selected organization or user."
+      },
+      "open_projects": {
+        "dataset": "projects",
+        "additivity": "additive",
+        "comment": "Projects currently open; not a historical backlog.",
+        "population": "projects.state = 'open'",
+        "population_id": "projects/41100e9b1306"
+      },
+      "closed_projects": {
+        "dataset": "projects",
+        "additivity": "additive",
+        "comment": "Projects currently closed; does not imply every item is complete.",
+        "population": "projects.state = 'closed'",
+        "population_id": "projects/dd1c789eecde"
+      },
+      "project_item_count": {
+        "dataset": "project_items",
+        "additivity": "additive",
+        "comment": "Visible project item identities, including drafts and inaccessible content; not distinct issues across projects."
+      },
+      "project_issue_items": {
+        "dataset": "project_items",
+        "additivity": "additive",
+        "comment": "Project items whose declared content type is Issue; inaccessible content remains in its declared category.",
+        "population": "project_items.content_type = 'Issue'",
+        "population_id": "project_items/66d19e97f8fc"
+      },
+      "project_pull_request_items": {
+        "dataset": "project_items",
+        "additivity": "additive",
+        "comment": "Project items whose declared content type is PullRequest; inaccessible content remains in its declared category.",
+        "population": "project_items.content_type = 'PullRequest'",
+        "population_id": "project_items/f3f005935911"
+      },
+      "project_draft_items": {
+        "dataset": "project_items",
+        "additivity": "additive",
+        "comment": "Project items whose declared content type is DraftIssue; inaccessible content remains in its declared category.",
+        "population": "project_items.content_type = 'DraftIssue'",
+        "population_id": "project_items/9c6a80c478dd"
+      },
+      "archived_project_items": {
+        "dataset": "project_items",
+        "additivity": "additive",
+        "comment": "Project items with a recorded archive timestamp; not a completed-work measure.",
+        "population": "project_items.archived_at IS NOT NULL",
+        "population_id": "project_items/fabdaf86e905"
+      },
+      "project_field_count": {
+        "dataset": "project_fields",
+        "additivity": "additive",
+        "comment": "Current custom/system field definitions on the selected project; not populated item values."
       }
     },
     "field_semantics": {
@@ -5873,6 +9145,478 @@
         "comment": "Whether these figures are for a token (true) or this IP's anonymous budget (false).",
         "sql_name": "all_rate_limit_authenticated"
       },
+      "discussions.repo": {
+        "comment": "Repository as owner/name; input to discussion_comments",
+        "sql_name": "discussions_repo"
+      },
+      "discussions.number": {
+        "comment": "Discussion number within the repository",
+        "sql_name": "discussions_number"
+      },
+      "discussions.node_id": {
+        "comment": "Global GraphQL discussion identifier",
+        "sql_name": "discussions_node_id"
+      },
+      "discussions.title": {
+        "comment": "Discussion title",
+        "sql_name": "discussions_title"
+      },
+      "discussions.body": {
+        "comment": "Discussion body in Markdown",
+        "sql_name": "discussions_body"
+      },
+      "discussions.user_login": {
+        "comment": "Author login; NULL for a deleted author",
+        "sql_name": "discussions_user_login"
+      },
+      "discussions.category_id": {
+        "comment": "GraphQL category identifier; accepted by the category_id filter",
+        "sql_name": "discussions_category_id"
+      },
+      "discussions.category_name": {
+        "comment": "Discussion category name",
+        "sql_name": "discussions_category_name"
+      },
+      "discussions.is_answered": {
+        "comment": "Whether an answer has been selected",
+        "sql_name": "discussions_is_answered"
+      },
+      "discussions.answer_comment_id": {
+        "comment": "Global node ID of the selected answer, if any",
+        "sql_name": "discussions_answer_comment_id"
+      },
+      "discussions.comments": {
+        "comment": "GitHub's discussion comment connection totalCount",
+        "sql_name": "discussions_comments"
+      },
+      "discussions.upvote_count": {
+        "comment": "Number of upvotes on the discussion",
+        "sql_name": "discussions_upvote_count"
+      },
+      "discussions.locked": {
+        "comment": "Whether the discussion is locked",
+        "sql_name": "discussions_locked"
+      },
+      "discussions.created_at": {
+        "comment": "Discussion creation time in UTC",
+        "sql_name": "discussions_created_at"
+      },
+      "discussions.updated_at": {
+        "comment": "Last discussion update time in UTC",
+        "sql_name": "discussions_updated_at"
+      },
+      "discussions.answer_chosen_at": {
+        "comment": "Time an answer was selected, or NULL",
+        "sql_name": "discussions_answer_chosen_at"
+      },
+      "discussions.html_url": {
+        "comment": "Browser URL of the discussion",
+        "sql_name": "discussions_html_url"
+      },
+      "discussion_comments_input.repo": {
+        "comment": "Repository as owner/name",
+        "sql_name": "discussion_comments_input_repo"
+      },
+      "discussion_comments_input.number": {
+        "comment": "Discussion number within the repository",
+        "sql_name": "discussion_comments_input_number"
+      },
+      "discussion_comments.repo": {
+        "comment": "Repository containing the discussion",
+        "sql_name": "discussion_comments_repo"
+      },
+      "discussion_comments.discussion_number": {
+        "comment": "Discussion number within the repository",
+        "sql_name": "discussion_comments_discussion_number"
+      },
+      "discussion_comments.node_id": {
+        "comment": "Global comment ID; input to discussion_replies",
+        "sql_name": "discussion_comments_node_id"
+      },
+      "discussion_comments.reply_to_id": {
+        "comment": "Global parent comment ID; NULL for top-level comments",
+        "sql_name": "discussion_comments_reply_to_id"
+      },
+      "discussion_comments.body": {
+        "comment": "Comment body in Markdown",
+        "sql_name": "discussion_comments_body"
+      },
+      "discussion_comments.user_login": {
+        "comment": "Author login; NULL for a deleted author",
+        "sql_name": "discussion_comments_user_login"
+      },
+      "discussion_comments.is_answer": {
+        "comment": "Whether this comment is the selected answer",
+        "sql_name": "discussion_comments_is_answer"
+      },
+      "discussion_comments.replies": {
+        "comment": "Number of replies; read them with discussion_replies",
+        "sql_name": "discussion_comments_replies"
+      },
+      "discussion_comments.upvote_count": {
+        "comment": "Number of upvotes on the comment",
+        "sql_name": "discussion_comments_upvote_count"
+      },
+      "discussion_comments.created_at": {
+        "comment": "Comment creation time in UTC",
+        "sql_name": "discussion_comments_created_at"
+      },
+      "discussion_comments.updated_at": {
+        "comment": "Last comment update time in UTC",
+        "sql_name": "discussion_comments_updated_at"
+      },
+      "discussion_comments.html_url": {
+        "comment": "Browser URL of the comment",
+        "sql_name": "discussion_comments_html_url"
+      },
+      "discussion_replies_input.node_id": {
+        "comment": "Global node_id of a discussion comment",
+        "sql_name": "discussion_replies_input_node_id"
+      },
+      "discussion_replies.repo": {
+        "comment": "Repository containing the discussion",
+        "sql_name": "discussion_replies_repo"
+      },
+      "discussion_replies.discussion_number": {
+        "comment": "Discussion number within the repository",
+        "sql_name": "discussion_replies_discussion_number"
+      },
+      "discussion_replies.node_id": {
+        "comment": "Global comment ID; input to discussion_replies",
+        "sql_name": "discussion_replies_node_id"
+      },
+      "discussion_replies.reply_to_id": {
+        "comment": "Global parent comment ID; NULL for top-level comments",
+        "sql_name": "discussion_replies_reply_to_id"
+      },
+      "discussion_replies.body": {
+        "comment": "Comment body in Markdown",
+        "sql_name": "discussion_replies_body"
+      },
+      "discussion_replies.user_login": {
+        "comment": "Author login; NULL for a deleted author",
+        "sql_name": "discussion_replies_user_login"
+      },
+      "discussion_replies.is_answer": {
+        "comment": "Whether this comment is the selected answer",
+        "sql_name": "discussion_replies_is_answer"
+      },
+      "discussion_replies.replies": {
+        "comment": "Number of replies; read them with discussion_replies",
+        "sql_name": "discussion_replies_replies"
+      },
+      "discussion_replies.upvote_count": {
+        "comment": "Number of upvotes on the comment",
+        "sql_name": "discussion_replies_upvote_count"
+      },
+      "discussion_replies.created_at": {
+        "comment": "Comment creation time in UTC",
+        "sql_name": "discussion_replies_created_at"
+      },
+      "discussion_replies.updated_at": {
+        "comment": "Last comment update time in UTC",
+        "sql_name": "discussion_replies_updated_at"
+      },
+      "discussion_replies.html_url": {
+        "comment": "Browser URL of the comment",
+        "sql_name": "discussion_replies_html_url"
+      },
+      "projects_input.owner": {
+        "comment": "Organization or user login that owns the project",
+        "sql_name": "projects_input_owner"
+      },
+      "projects.owner": {
+        "comment": "Project owner login",
+        "sql_name": "projects_owner"
+      },
+      "projects.owner_type": {
+        "comment": "organization or user; pass the same owner_type to project functions",
+        "sql_name": "projects_owner_type"
+      },
+      "projects.number": {
+        "comment": "Project number within its owner; input to project_items and project_fields",
+        "sql_name": "projects_number"
+      },
+      "projects.id": {
+        "comment": "Numeric project ID",
+        "sql_name": "projects_id"
+      },
+      "projects.node_id": {
+        "comment": "Global GraphQL project identifier",
+        "sql_name": "projects_node_id"
+      },
+      "projects.title": {
+        "comment": "Project title",
+        "sql_name": "projects_title"
+      },
+      "projects.description": {
+        "comment": "Project description",
+        "sql_name": "projects_description"
+      },
+      "projects.short_description": {
+        "comment": "Concise project description",
+        "sql_name": "projects_short_description"
+      },
+      "projects.state": {
+        "comment": "Project state: open or closed",
+        "sql_name": "projects_state"
+      },
+      "projects.is_public": {
+        "comment": "Whether the project is public",
+        "sql_name": "projects_is_public"
+      },
+      "projects.is_template": {
+        "comment": "Whether the project is a template",
+        "sql_name": "projects_is_template"
+      },
+      "projects.creator_login": {
+        "comment": "Login of the project creator",
+        "sql_name": "projects_creator_login"
+      },
+      "projects.created_at": {
+        "comment": "Project creation time in UTC",
+        "sql_name": "projects_created_at"
+      },
+      "projects.updated_at": {
+        "comment": "Last project update time in UTC",
+        "sql_name": "projects_updated_at"
+      },
+      "projects.closed_at": {
+        "comment": "Project closure time, or NULL",
+        "sql_name": "projects_closed_at"
+      },
+      "project_items_input.owner": {
+        "comment": "Organization or user login that owns the project",
+        "sql_name": "project_items_input_owner"
+      },
+      "project_items_input.number": {
+        "comment": "Project number within its owner, not the global project ID",
+        "sql_name": "project_items_input_number"
+      },
+      "project_items.owner": {
+        "comment": "Project owner login",
+        "sql_name": "project_items_owner"
+      },
+      "project_items.owner_type": {
+        "comment": "organization or user; pass the same owner_type to project functions",
+        "sql_name": "project_items_owner_type"
+      },
+      "project_items.project_number": {
+        "comment": "Project number within its owner",
+        "sql_name": "project_items_project_number"
+      },
+      "project_items.id": {
+        "comment": "Numeric project item ID; distinct from its content ID",
+        "sql_name": "project_items_id"
+      },
+      "project_items.node_id": {
+        "comment": "Global GraphQL project item identifier",
+        "sql_name": "project_items_node_id"
+      },
+      "project_items.content_type": {
+        "comment": "GitHub content type: Issue, PullRequest or DraftIssue",
+        "sql_name": "project_items_content_type"
+      },
+      "project_items.content_id": {
+        "comment": "Numeric ID of the issue, pull request or draft; NULL if inaccessible",
+        "sql_name": "project_items_content_id"
+      },
+      "project_items.content_number": {
+        "comment": "Repository issue or pull request number; NULL for drafts",
+        "sql_name": "project_items_content_number"
+      },
+      "project_items.title": {
+        "comment": "Content title; NULL if content is inaccessible",
+        "sql_name": "project_items_title"
+      },
+      "project_items.body": {
+        "comment": "Content body in Markdown",
+        "sql_name": "project_items_body"
+      },
+      "project_items.state": {
+        "comment": "Content state; NULL for drafts or inaccessible content",
+        "sql_name": "project_items_state"
+      },
+      "project_items.user_login": {
+        "comment": "Content author login",
+        "sql_name": "project_items_user_login"
+      },
+      "project_items.html_url": {
+        "comment": "Content browser URL; NULL for drafts or inaccessible content",
+        "sql_name": "project_items_html_url"
+      },
+      "project_items.creator_login": {
+        "comment": "Login of the user who added the project item",
+        "sql_name": "project_items_creator_login"
+      },
+      "project_items.created_at": {
+        "comment": "Time the item was added to the project, in UTC",
+        "sql_name": "project_items_created_at"
+      },
+      "project_items.updated_at": {
+        "comment": "Last project item update time in UTC",
+        "sql_name": "project_items_updated_at"
+      },
+      "project_items.archived_at": {
+        "comment": "Project item archive time, or NULL",
+        "sql_name": "project_items_archived_at"
+      },
+      "project_items.fields_json": {
+        "comment": "Custom field values as JSON; fields selects IDs, default is title only",
+        "sql_name": "project_items_fields_json"
+      },
+      "project_fields_input.owner": {
+        "comment": "Organization or user login that owns the project",
+        "sql_name": "project_fields_input_owner"
+      },
+      "project_fields_input.number": {
+        "comment": "Project number within its owner, not the global project ID",
+        "sql_name": "project_fields_input_number"
+      },
+      "project_fields.owner": {
+        "comment": "Project owner login",
+        "sql_name": "project_fields_owner"
+      },
+      "project_fields.owner_type": {
+        "comment": "organization or user; pass the same owner_type to project functions",
+        "sql_name": "project_fields_owner_type"
+      },
+      "project_fields.project_number": {
+        "comment": "Project number within its owner",
+        "sql_name": "project_fields_project_number"
+      },
+      "project_fields.id": {
+        "comment": "Numeric field ID; pass as a string in project_items fields",
+        "sql_name": "project_fields_id"
+      },
+      "project_fields.node_id": {
+        "comment": "Global GraphQL field identifier",
+        "sql_name": "project_fields_node_id"
+      },
+      "project_fields.name": {
+        "comment": "Project field name",
+        "sql_name": "project_fields_name"
+      },
+      "project_fields.data_type": {
+        "comment": "GitHub field type, such as text, number, date, single_select or iteration",
+        "sql_name": "project_fields_data_type"
+      },
+      "project_fields.options_json": {
+        "comment": "Single-select options as JSON, including IDs, names and colors",
+        "sql_name": "project_fields_options_json"
+      },
+      "project_fields.configuration_json": {
+        "comment": "Iteration configuration as JSON, or NULL",
+        "sql_name": "project_fields_configuration_json"
+      },
+      "project_fields.created_at": {
+        "comment": "Field creation time in UTC",
+        "sql_name": "project_fields_created_at"
+      },
+      "project_fields.updated_at": {
+        "comment": "Last field update time in UTC",
+        "sql_name": "project_fields_updated_at"
+      },
+      "rest_responses_input.operation_id": {
+        "comment": "Pinned GitHub GET operation ID",
+        "sql_name": "rest_responses_input_operation_id"
+      },
+      "rest_responses_input.path_parameters": {
+        "comment": "JSON object of required path parameters",
+        "sql_name": "rest_responses_input_path_parameters"
+      },
+      "rest_responses.operation_id": {
+        "comment": "GitHub's OpenAPI operation identifier.",
+        "sql_name": "rest_responses_operation_id"
+      },
+      "rest_responses.page_number": {
+        "comment": "Response page within this invocation, starting at 1.",
+        "sql_name": "rest_responses_page_number"
+      },
+      "rest_responses.status_code": {
+        "comment": "HTTP status, including 202 pending and 204 empty responses.",
+        "sql_name": "rest_responses_status_code"
+      },
+      "rest_responses.content_type": {
+        "comment": "Response media type as returned by GitHub.",
+        "sql_name": "rest_responses_content_type"
+      },
+      "rest_responses.data": {
+        "comment": "Complete JSON response as text; use DuckDB JSON functions to extract fields.",
+        "sql_name": "rest_responses_data"
+      },
+      "rest_responses.body": {
+        "comment": "Exact response bytes, including archives, logs, diffs and raw files.",
+        "sql_name": "rest_responses_body"
+      },
+      "rest_responses.next_url": {
+        "comment": "Next page URL, or NULL. Non-NULL on the last row means more pages exist.",
+        "sql_name": "rest_responses_next_url"
+      },
+      "graphql_responses_input.query": {
+        "comment": "Read-only GraphQL query document",
+        "sql_name": "graphql_responses_input_query"
+      },
+      "graphql_responses_input.variables": {
+        "comment": "GraphQL variables as a JSON object",
+        "sql_name": "graphql_responses_input_variables"
+      },
+      "graphql_responses.data": {
+        "comment": "Complete GraphQL response JSON, including data and extensions; errors fail the call.",
+        "sql_name": "graphql_responses_data"
+      },
+      "graphql_responses.request_document": {
+        "comment": "Request identity from the approved query argument.",
+        "sql_name": "graphql_responses_request_document"
+      },
+      "graphql_responses.request_variables": {
+        "comment": "Request identity from the approved variables argument.",
+        "sql_name": "graphql_responses_request_variables"
+      },
+      "graphql_responses.request_operation_name": {
+        "comment": "Request identity from the approved operation_name argument.",
+        "sql_name": "graphql_responses_request_operation_name"
+      },
+      "api_endpoints.operation_id": {
+        "comment": "GitHub OpenAPI operation identifier accepted by api.rest().",
+        "sql_name": "api_endpoints_operation_id"
+      },
+      "api_endpoints.function_name": {
+        "comment": "SQL function name in the rest schema.",
+        "sql_name": "api_endpoints_function_name"
+      },
+      "api_endpoints.method": {
+        "comment": "Always GET; no REST write operations are registered.",
+        "sql_name": "api_endpoints_method"
+      },
+      "api_endpoints.path": {
+        "comment": "REST path template; placeholders are positional SQL arguments in order.",
+        "sql_name": "api_endpoints_path"
+      },
+      "api_endpoints.category": {
+        "comment": "GitHub API category.",
+        "sql_name": "api_endpoints_category"
+      },
+      "api_endpoints.summary": {
+        "comment": "GitHub's short operation description.",
+        "sql_name": "api_endpoints_summary"
+      },
+      "api_endpoints.parameters": {
+        "comment": "JSON parameter definitions, including required flags and schemas.",
+        "sql_name": "api_endpoints_parameters"
+      },
+      "api_endpoints.products": {
+        "comment": "GitHub products whose pinned specification contains this operation.",
+        "sql_name": "api_endpoints_products"
+      },
+      "api_endpoints.documentation_url": {
+        "comment": "Official documentation for this endpoint.",
+        "sql_name": "api_endpoints_documentation_url"
+      },
+      "api_endpoints.deprecated": {
+        "comment": "Whether GitHub marks the operation deprecated.",
+        "sql_name": "api_endpoints_deprecated"
+      },
       "pulls.created_day": {
         "comment": "UTC calendar date of created_at.",
         "sql_name": "pulls_created_day"
@@ -5909,6 +9653,38 @@
         "comment": "UTC calendar date of created_at.",
         "sql_name": "workflow_runs_created_day"
       },
+      "discussions.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "discussions_created_day"
+      },
+      "discussions.answer_chosen_day": {
+        "comment": "UTC calendar date of answer_chosen_at.",
+        "sql_name": "discussions_answer_chosen_day"
+      },
+      "discussion_comments.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "discussion_comments_created_day"
+      },
+      "discussion_replies.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "discussion_replies_created_day"
+      },
+      "projects.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "projects_created_day"
+      },
+      "projects.closed_day": {
+        "comment": "UTC calendar date of closed_at.",
+        "sql_name": "projects_closed_day"
+      },
+      "project_items.created_day": {
+        "comment": "UTC calendar date of created_at.",
+        "sql_name": "project_items_created_day"
+      },
+      "project_items.archived_day": {
+        "comment": "UTC calendar date of archived_at.",
+        "sql_name": "project_items_archived_day"
+      },
       "pulls.merge_hours": {
         "comment": "Elapsed creation-to-merge hours, including draft and waiting time; not review or business hours.",
         "sql_name": "pulls_merge_hours"
@@ -5916,6 +9692,10 @@
       "issues.close_hours": {
         "comment": "Elapsed creation to currently recorded closure; not time spent in open state across reopenings.",
         "sql_name": "issues_close_hours"
+      },
+      "discussions.answer_hours": {
+        "comment": "Elapsed creation-to-currently-selected-answer hours; not first response or business hours.",
+        "sql_name": "discussions_answer_hours"
       }
     },
     "dataset_semantics": {
@@ -6023,6 +9803,69 @@
           "source_function": "all_rate_limit",
           "observation": "live"
         }
+      },
+      "discussions": {
+        "comment": "Repository discussions with typed columns",
+        "tags": {
+          "source_function": "discussions",
+          "observation": "live"
+        }
+      },
+      "discussion_comments": {
+        "comment": "Top-level comments on a discussion",
+        "tags": {
+          "source_function": "discussion_comments",
+          "observation": "live"
+        }
+      },
+      "discussion_replies": {
+        "comment": "Replies to a discussion comment",
+        "tags": {
+          "source_function": "discussion_replies",
+          "observation": "live"
+        }
+      },
+      "projects": {
+        "comment": "Projects owned by an organization or user",
+        "tags": {
+          "source_function": "projects",
+          "observation": "live"
+        }
+      },
+      "project_items": {
+        "comment": "Project items with typed content columns",
+        "tags": {
+          "source_function": "project_items",
+          "observation": "live"
+        }
+      },
+      "project_fields": {
+        "comment": "Field definitions for a project",
+        "tags": {
+          "source_function": "project_fields",
+          "observation": "live"
+        }
+      },
+      "rest_responses": {
+        "comment": "Complete bounded REST GET response pages, not normalized business entities",
+        "tags": {
+          "source_function": "rest_responses",
+          "observation": "live"
+        }
+      },
+      "graphql_responses": {
+        "comment": "One read-only GraphQL response per explicit document and variables; client-owned pagination",
+        "tags": {
+          "source_function": "graphql_responses",
+          "observation": "live"
+        }
+      },
+      "api_endpoints": {
+        "comment": "Offline pinned inventory of all supported REST GET operations",
+        "tags": {
+          "source_function": "api_endpoints",
+          "observation": "live"
+        }
       }
     },
     "invocation_sources": [
@@ -6040,7 +9883,16 @@
       "workflow_runs",
       "search_repositories",
       "search_issues",
-      "all_rate_limit"
+      "all_rate_limit",
+      "discussions",
+      "discussion_comments",
+      "discussion_replies",
+      "projects",
+      "project_items",
+      "project_fields",
+      "rest_responses",
+      "graphql_responses",
+      "api_endpoints"
     ],
     "driving_grain_reduction": [
       "repo",
@@ -6054,18 +9906,16 @@
       "contributors",
       "languages",
       "stargazers",
-      "workflow_runs"
-    ],
-    "invocation_limits": {
-      "defaults": {
-        "max_retained_bytes": 268435456,
-        "deadline_ms": 180000
-      },
-      "ceilings": {
-        "max_retained_bytes": 268435456,
-        "deadline_ms": 180000
-      }
-    }
+      "workflow_runs",
+      "discussions",
+      "discussion_comments",
+      "discussion_replies",
+      "projects",
+      "project_items",
+      "project_fields",
+      "rest_responses",
+      "graphql_responses"
+    ]
   },
   "semantic_query": {
     "parameters": {
@@ -6073,6 +9923,16 @@
         "type": "VARCHAR",
         "nullable": false,
         "comment": "Repository as 'owner/name'"
+      },
+      "discussion_number": {
+        "type": "BIGINT",
+        "nullable": false,
+        "comment": "Discussion number within the repository"
+      },
+      "comment_node_id": {
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Global node_id of a discussion comment"
       },
       "issue_number": {
         "type": "BIGINT",
@@ -6082,7 +9942,17 @@
       "owner": {
         "type": "VARCHAR",
         "nullable": false,
-        "comment": "User or organization login whose repositories to list"
+        "comment": "Organization or user login that owns the project"
+      },
+      "project_number": {
+        "type": "BIGINT",
+        "nullable": false,
+        "comment": "Project number within its owner, not the global project ID"
+      },
+      "project_owner_type": {
+        "type": "VARCHAR",
+        "nullable": false,
+        "comment": "Kind of project owner"
       }
     },
     "request": {
@@ -6098,6 +9968,29 @@
             ]
           ]
         },
+        "discussion_comments_input": {
+          "definition": "discussion_comments_input",
+          "rows": [
+            [
+              {
+                "parameter": "repository"
+              },
+              {
+                "parameter": "discussion_number"
+              }
+            ]
+          ]
+        },
+        "discussion_replies_input": {
+          "definition": "discussion_replies_input",
+          "rows": [
+            [
+              {
+                "parameter": "comment_node_id"
+              }
+            ]
+          ]
+        },
         "issue_comments_input": {
           "definition": "issue_comments_input",
           "rows": [
@@ -6107,6 +10000,42 @@
               },
               {
                 "parameter": "issue_number"
+              }
+            ]
+          ]
+        },
+        "project_fields_input": {
+          "definition": "project_fields_input",
+          "rows": [
+            [
+              {
+                "parameter": "owner"
+              },
+              {
+                "parameter": "project_number"
+              }
+            ]
+          ]
+        },
+        "project_items_input": {
+          "definition": "project_items_input",
+          "rows": [
+            [
+              {
+                "parameter": "owner"
+              },
+              {
+                "parameter": "project_number"
+              }
+            ]
+          ]
+        },
+        "projects_input": {
+          "definition": "projects_input",
+          "rows": [
+            [
+              {
+                "parameter": "owner"
               }
             ]
           ]
@@ -6165,6 +10094,72 @@
             },
             "cache_ttl": {
               "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "discussion_comments": {
+          "arguments": {
+            "repo": {
+              "member": "discussion_comments_input.repo"
+            },
+            "number": {
+              "member": "discussion_comments_input.number"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "discussion_comments_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "discussion_replies": {
+          "arguments": {
+            "node_id": {
+              "member": "discussion_replies_input.node_id"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            }
+          },
+          "driver": {
+            "input": "discussion_replies_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "discussions": {
+          "arguments": {
+            "repo": {
+              "member": "repository_input.repo"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            },
+            "answered": {
+              "literal": null
+            },
+            "category_id": {
+              "literal": ""
+            },
+            "sort": {
+              "literal": "updated"
+            },
+            "direction": {
+              "literal": "desc"
             }
           },
           "driver": {
@@ -6232,6 +10227,81 @@
           },
           "driver": {
             "input": "repository_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "project_fields": {
+          "arguments": {
+            "owner": {
+              "member": "project_fields_input.owner"
+            },
+            "number": {
+              "member": "project_fields_input.number"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            },
+            "owner_type": {
+              "parameter": "project_owner_type"
+            }
+          },
+          "driver": {
+            "input": "project_fields_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "project_items": {
+          "arguments": {
+            "owner": {
+              "member": "project_items_input.owner"
+            },
+            "number": {
+              "member": "project_items_input.number"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            },
+            "owner_type": {
+              "parameter": "project_owner_type"
+            },
+            "query": {
+              "literal": ""
+            },
+            "fields": {
+              "literal": ""
+            }
+          },
+          "driver": {
+            "input": "project_items_input"
+          },
+          "allow_driving_grain_reduction": true
+        },
+        "projects": {
+          "arguments": {
+            "owner": {
+              "member": "projects_input.owner"
+            },
+            "max_rows": {
+              "literal": "0"
+            },
+            "cache_ttl": {
+              "literal": "0"
+            },
+            "owner_type": {
+              "parameter": "project_owner_type"
+            },
+            "query": {
+              "literal": ""
+            }
+          },
+          "driver": {
+            "input": "projects_input"
           },
           "allow_driving_grain_reduction": true
         },

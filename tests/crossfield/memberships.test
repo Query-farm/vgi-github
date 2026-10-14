@@ -1,0 +1,89 @@
+# Current memberships in the independent REST payloads of connected_fixture.py.
+require crossfield
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Alpha has duckdb+analytics; beta has analytics; the empty repository has none.
+query TII
+SELECT repository_topic,repository_topic_membership_count,repositories_with_topic_count FROM engineering.semantic.github(owner=>'example') GROUP BY repository_topic ORDER BY repository_topic;
+----
+analytics	2	2
+duckdb	1	1
+
+# Pair counts differ from distinct parents. Empty arrays do not erase parent facts.
+query III
+SELECT repository_count,repository_topic_membership_count,repositories_with_topic_count FROM engineering.semantic.github(owner=>'example');
+----
+3	3	2
+
+# Labels 501 and 601 share the name bug but are distinct repository labels.
+query ITII
+SELECT pr_label_id,pr_label_name,pull_request_label_membership_count,labeled_pull_request_count FROM engineering.semantic.github(owner=>'example') GROUP BY pr_label_id,pr_label_name ORDER BY pr_label_id;
+----
+501	bug	2	2
+502	docs	1	1
+601	bug	1	1
+
+query TII
+SELECT pr_label_name,pull_request_label_membership_count,labeled_pull_request_count FROM engineering.semantic.github(owner=>'example') GROUP BY pr_label_name ORDER BY pr_label_name;
+----
+bug	3	3
+docs	1	1
+
+# Four assignments cover three PRs. Alice is an assignee of one PR, not all her authored PRs.
+query ITII
+SELECT pr_assignee_id,pr_assignee_login,pull_request_assignee_membership_count,assigned_pull_request_count FROM engineering.semantic.github(owner=>'example') GROUP BY pr_assignee_id,pr_assignee_login ORDER BY pr_assignee_id;
+----
+201	alice	1	1
+202	bob	2	2
+203	carol	1	1
+
+query IIIII
+SELECT pull_request_count,pull_request_label_membership_count,labeled_pull_request_count,pull_request_assignee_membership_count,assigned_pull_request_count FROM engineering.semantic.github(owner=>'example');
+----
+4	4	3	4	3
+
+# Single-PR lookup and list sources have the same membership contract.
+query IIII
+SELECT pull_request_label_membership_count,labeled_pull_request_count,pull_request_assignee_membership_count,assigned_pull_request_count FROM engineering.semantic.github(repository=>'example/alpha',pull_request_number=>1);
+----
+2	1	2	1
+
+query IIII
+SELECT pull_request_label_membership_count,labeled_pull_request_count,pull_request_assignee_membership_count,assigned_pull_request_count FROM engineering.semantic.github(repository=>'example/alpha',pull_request_number=>3);
+----
+0	0	0	0
+
+# A parent count has no automatic allocation over its child labels.
+statement error
+SELECT pr_label_name,pull_request_count FROM engineering.semantic.github(owner=>'example') GROUP BY pr_label_name;
+----
+INCOMPATIBLE_GRAIN
+
+statement ok
+PREPARE selected_topics AS SELECT repository_topic,repositories_with_topic_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY repository_topic ORDER BY repository_topic;
+
+query TI
+EXECUTE selected_topics;
+----
+analytics	1
+duckdb	1
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT pr_assignee_login,assigned_pull_request_count FROM engineering.semantic.github(owner=>'example') GROUP BY pr_assignee_login;

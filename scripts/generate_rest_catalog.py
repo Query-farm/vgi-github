@@ -13,15 +13,21 @@ import re
 import urllib.request
 from pathlib import Path
 
+from vgi_github.generation.schema import closure_hash
+
 PRODUCTS = ("api.github.com", "ghec")
 OUTPUT = Path(__file__).resolve().parents[1] / "vgi_github" / "rest_manifest.json"
 
 
 def resolve(spec: dict, value: dict) -> dict:
+    seen = set()
     while "$ref" in value:
         ref = value["$ref"]
         if not ref.startswith("#/"):
             raise ValueError(f"External reference: {ref}")
+        if ref in seen:
+            raise ValueError(f"Circular reference: {ref}")
+        seen.add(ref)
         value = spec
         for part in ref[2:].split("/"):
             value = value[part.replace("~1", "/").replace("~0", "~")]
@@ -44,6 +50,7 @@ def resolve_revision(revision: str) -> str:
 
 def build(source_dir: Path | None = None, *, revision: str, api_version: str) -> dict:
     operations: dict[str, dict] = {}
+    product_parameters: dict[str, dict[str, list]] = {}
     sources = []
     for product in PRODUCTS:
         url = (
@@ -77,6 +84,7 @@ def build(source_dir: Path | None = None, *, revision: str, api_version: str) ->
             existing = operations.get(identity)
             if existing and existing["path"] != path:
                 raise ValueError(f"Operation {identity} has conflicting paths")
+            product_parameters.setdefault(identity, {})[product] = list(parameters.values())
             operations[identity] = {
                 "operation_id": identity,
                 "function_name": re.sub(r"[^a-z0-9_]", "_", identity.lower()),
@@ -87,6 +95,10 @@ def build(source_dir: Path | None = None, *, revision: str, api_version: str) ->
                 "category": operation.get("tags", [identity.split("/")[0]])[0],
                 "documentation_url": operation.get("externalDocs", {}).get("url", ""),
                 "parameters": list(parameters.values()),
+                "response_schema_sha256": {
+                    **(existing["response_schema_sha256"] if existing else {}),
+                    product: closure_hash(spec, operation.get("responses", {})),
+                },
                 "products": [*(existing["products"] if existing else []), product],
                 "deprecated": operation.get("deprecated", False),
             }
@@ -98,6 +110,13 @@ def build(source_dir: Path | None = None, *, revision: str, api_version: str) ->
                 "get_operations": count,
             }
         )
+    # The existing parameters list remains the canonical runtime contract. Product
+    # entries override that list only where it differs, avoiding duplicate copies.
+    for identity, variants in product_parameters.items():
+        canonical = operations[identity]["parameters"]
+        overrides = {product: value for product, value in variants.items() if value != canonical}
+        if overrides:
+            operations[identity]["parameters_by_product"] = overrides
     names = [op["function_name"] for op in operations.values()]
     if len(names) != len(set(names)):
         raise ValueError("Generated function names collide")

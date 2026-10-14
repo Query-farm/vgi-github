@@ -1,0 +1,409 @@
+# Independently authored graph in connected_fixture.py; no generated expectations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT repository_name,pull_request_count,merged_prs,submitted_review_count FROM engineering.semantic.github(owner=>'example') GROUP BY repository_name;
+
+statement ok
+EXPLAIN (SQL) SELECT label_count FROM engineering.semantic.github(repository=>'example/alpha');
+
+statement ok
+DESCRIBE SELECT * FROM engineering.detail.pull_request_reviews(repository=>'example/alpha');
+
+query TTTT
+SELECT name,type,nullable::VARCHAR,default_value FROM crossfield_parameters() WHERE database_name='engineering' AND schema_name='semantic' AND name IN ('owner','pull_request_number','repository') ORDER BY name;
+----
+owner	VARCHAR	true	null
+pull_request_number	BIGINT	true	null
+repository	VARCHAR	true	null
+
+query TTTTT
+SELECT name,is_named::VARCHAR,is_positional::VARCHAR,is_const::VARCHAR,example FROM crossfield_parameters() WHERE invocation_name='engineering.semantic.github' AND name IN ('owner','repository','pull_request_number') ORDER BY name;
+----
+owner	true	false	true	"Query-farm"
+pull_request_number	true	false	true	1
+repository	true	false	true	"Query-farm/crossfield"
+
+query TTT
+SELECT name,json_extract_string(constraints,'$.non_empty'),json_extract_string(constraints,'$.minimum') FROM crossfield_parameters() WHERE database_name='engineering' AND schema_name='semantic' AND name IN ('owner','pull_request_number') ORDER BY name;
+----
+owner	true	NULL
+pull_request_number	false	1
+
+query TTT
+SELECT name,json_extract_string(requirements,'$.parameter_constraints[0].kind'),json_extract_string(requirements,'$.parameter_constraints[1].kind') FROM crossfield_catalog_capabilities() WHERE database_name='engineering' AND name IN ('repository_count','merged_prs') ORDER BY name;
+----
+merged_prs	exactly_one	requires
+repository_count	exactly_one	NULL
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT repository_count FROM engineering.semantic.github(owner=>'example');
+----
+3
+
+query I
+SELECT repository_count FROM engineering.semantic.github(owner=>'public-user');
+----
+1
+
+query IIIRIII
+SELECT repository_count,pull_request_count,merged_prs,median_merge_hours,submitted_review_count,approved_review_count,label_count FROM engineering.semantic.github(owner=>'example');
+----
+3	4	3	12.000	4	2	3
+
+# Independently aggregate each fact before combining; preserve the empty parent.
+query TIIIII
+SELECT repository_name,repository_count,pull_request_count,merged_prs,submitted_review_count,label_count FROM engineering.semantic.github(owner=>'example') GROUP BY repository_name ORDER BY repository_name;
+----
+example/alpha	1	3	2	3	2
+example/beta	1	1	1	1	1
+example/empty	1	0	0	0	0
+
+# The same author spans repositories; two reviews of alpha#1 do not multiply PRs.
+query TIIRI
+SELECT author_login,pull_request_count,merged_prs,median_merge_hours,submitted_review_count FROM engineering.semantic.github(owner=>'example') GROUP BY author_login ORDER BY author_login;
+----
+alice	3	2	27.000	3
+bob	1	1	12.000	1
+
+query TII
+SELECT reviewer_login,submitted_review_count,approved_review_count FROM engineering.semantic.github(owner=>'example') GROUP BY reviewer_login ORDER BY reviewer_login;
+----
+alice	1	0
+bob	2	2
+carol	1	0
+
+query IR
+SELECT merged_prs,median_merge_hours FROM engineering.semantic.github(repository=>'example/alpha');
+----
+2	30.000
+
+# WHERE and grouping remain researcher choices; the recipe is model-owned.
+query TI
+SELECT author_login,merged_prs FROM engineering.semantic.github(owner=>'example') WHERE author_login = 'alice' GROUP BY author_login ORDER BY author_login;
+----
+alice	2
+
+# Timestamp literals and implicit bounds retain approved ICU conversion semantics.
+query I
+SELECT merged_prs FROM engineering.semantic.github(owner=>'example') WHERE merged_at >= TIMESTAMPTZ '2026-09-03 00:00:00+00';
+----
+2
+
+query I
+SELECT merged_prs FROM engineering.semantic.github(owner=>'example') WHERE merged_at >= '2026-09-03 00:00:00+00' AND merged_at < '2026-09-04 00:00:00+00';
+----
+2
+
+# Model-owned UTC dates are ordinary selectable, filterable dimensions.
+query TII rowsort
+SELECT pull_request_merged_day,pull_request_count,merged_prs FROM engineering.semantic.github(owner=>'example') GROUP BY pull_request_merged_day;
+----
+2026-09-02	1	1
+2026-09-03	2	2
+NULL	1	0
+
+query TI rowsort
+SELECT pull_request_created_day,pull_request_count FROM engineering.semantic.github(owner=>'example') GROUP BY pull_request_created_day;
+----
+2026-09-01	1
+2026-09-02	1
+2026-09-03	1
+2026-09-04	1
+
+query TII
+SELECT review_submitted_day,submitted_review_count,approved_review_count FROM engineering.semantic.github(owner=>'example') GROUP BY review_submitted_day;
+----
+2026-09-03	4	2
+
+query IR
+SELECT merged_prs,median_merge_hours FROM engineering.semantic.github(owner=>'example') WHERE pull_request_merged_day >= DATE '2026-09-03' AND pull_request_merged_day < DATE '2026-09-04';
+----
+2	27.000
+
+query IIT
+SELECT pull_request_number,pull_request_id,pull_request_merged_day FROM engineering.detail.pull_requests(repository=>'example/alpha') ORDER BY pull_request_number;
+----
+1	1001	2026-09-03
+2	1002	2026-09-02
+3	1003	NULL
+
+query IT
+SELECT review_id,review_submitted_day FROM engineering.detail.pull_request_reviews(repository=>'example/beta');
+----
+21	2026-09-03
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT pull_request_merged_day,merged_prs FROM engineering.semantic.github(owner=>'example') GROUP BY pull_request_merged_day;
+
+query III
+SELECT pull_request_count,submitted_review_count,approved_review_count FROM engineering.semantic.github(repository=>'example/alpha',pull_request_number=>1);
+----
+1	2	1
+
+query IIIR
+SELECT pull_request_count,merged_prs,submitted_review_count,median_merge_hours FROM engineering.semantic.github(repository=>'example/empty');
+----
+0	0	0	NULL
+
+query I
+WITH cohort AS (SELECT merged_prs FROM engineering.semantic.github(owner=>'example')) SELECT merged_prs FROM cohort;
+----
+3
+
+statement ok
+PREPARE by_repository AS SELECT merged_prs FROM engineering.semantic.github(repository=>$1);
+
+query I
+EXECUTE by_repository('example/alpha');
+----
+2
+
+query I
+EXECUTE by_repository('example/empty');
+----
+0
+
+# Callable detail has no saved report and retains author/reviewer role separation.
+query IITTT
+SELECT review_id,pull_request_number,author_login,reviewer_login,state FROM engineering.detail.pull_request_reviews(repository=>'example/alpha',pull_request_number=>1) ORDER BY review_id;
+----
+11	1	alice	bob	APPROVED
+12	1	alice	alice	COMMENTED
+
+query IT
+SELECT review_id,reviewer_login FROM engineering.detail.pull_request_reviews(owner=>'example') ORDER BY review_id;
+----
+11	bob
+12	alice
+13	bob
+21	carol
+
+query IT
+SELECT r.review_id,r."user".login FROM engineering.detail.pull_request_reviews(repository=>'example/beta') r;
+----
+21	carol
+
+query T
+SELECT name FROM engineering.detail.repository_labels(owner=>'example') ORDER BY name;
+----
+bug
+feature
+help
+
+statement ok
+PREPARE one_pr AS SELECT review_id FROM engineering.detail.pull_request_reviews(repository=>$1,pull_request_number=>$2) ORDER BY review_id;
+
+query I
+EXECUTE one_pr('example/beta',1);
+----
+21
+
+# An unrelated reviewer dimension cannot redistribute a PR metric.
+statement error
+SELECT reviewer_login,merged_prs FROM engineering.semantic.github(owner=>'example') GROUP BY reviewer_login;
+----
+CROSSFIELD
+
+statement error
+SELECT COUNT(*) FROM engineering.detail.pull_request_reviews(owner=>'example');
+----
+CROSSFIELD
+
+statement error
+SELECT label_count FROM engineering.semantic.github(repository=>'example/alpha',pull_request_number=>1);
+----
+SEMANTIC_PARAMETER_UNUSED
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(repository=>'example/alpha',unexpected=>1);
+----
+SEMANTIC_PARAMETER_NAME
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT repository_count FROM engineering.semantic.github();
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(owner=>'example',repository=>'example/alpha');
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github(owner=>'example',pull_request_number=>1);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(owner=>'');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(repository=>'   ');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+SELECT merged_prs FROM engineering.semantic.github(repository=>'example/alpha',pull_request_number=>0);
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+SELECT review_id FROM engineering.detail.pull_request_reviews(owner=>'example',pull_request_number=>1);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+EXPLAIN (SEMANTIC) SELECT repository_count FROM engineering.semantic.github();
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+EXPLAIN (SQL) SELECT merged_prs FROM engineering.semantic.github(owner=>'example',pull_request_number=>1);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+DESCRIBE SELECT * FROM engineering.detail.repositories(owner=>'example',repository=>'example/alpha');
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement ok
+PREPARE choose_repository_scope AS SELECT repository_count FROM engineering.semantic.github(owner=>$1,repository=>$2,organization=>$3);
+
+statement error
+EXECUTE choose_repository_scope(NULL,NULL,NULL);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+EXECUTE choose_repository_scope('example','example/alpha',NULL);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+EXECUTE by_repository('   ');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+EXECUTE one_pr('example/alpha',0);
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement ok
+SET crossfield_mode='semantic';
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(owner=>'example',organization=>'example');
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement ok
+SET crossfield_mode='off';
+
+statement error
+SELECT repository_count FROM engineering.semantic.github();
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+# Deferred parameters also execute correctly when exactly one scope is selected.
+query I
+EXECUTE choose_repository_scope(NULL,NULL,'example');
+----
+3
+
+query I
+EXECUTE choose_repository_scope(NULL,'example/alpha',NULL);
+----
+1
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(repository=>'example/duplicate');
+----
+duplicate
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(repository=>'example/bad-type');
+----
+BIGINT
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(repository=>'example/late-error');
+----
+403
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(repository=>'example/missing');
+----
+404
+
+# An error after an earlier page must not poison a subsequent query.
+query II
+SELECT pull_request_count,submitted_review_count FROM engineering.semantic.github(repository=>'example/beta');
+----
+1	1
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

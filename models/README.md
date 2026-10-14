@@ -1,13 +1,25 @@
 # GitHub reporting with Crossfield
 
-This model covers the original 15 `main` functions: 34 approved metrics, 32 named
-reports, and the complete detail schemas, including array columns. Business
+For connected organization, user and repository analysis, start with the
+[generated model guide](generated-pilot/README.md). It offers 15 freely selected
+measures across 10 entities, including organization inventory, members, teams
+and user-authored PRs across repositories. Use `organization => ...` or
+`user => ...` without supplying a repository. The broad package described below
+retains its wider endpoint coverage; these remain separate packages/workers.
+
+This model covers the worker's 21 typed `main` functions, all 780 pinned REST GET
+operations, GraphQL queries and endpoint discovery: 24 sources, 51 approved
+business metrics and 49 named reports. REST uses the operation-ID dispatcher;
+one source covers the same operations as the generated `rest` functions. Business
 definitions live in [build_model.py](build_model.py); [source_inventory.json](source_inventory.json)
 records the worker signatures and field descriptions. The generated
 [package](github-reporting.package.json) contains the model, named parameters,
 comments and revision together.
+Typed datasets have reviewed business definitions. Raw REST and GraphQL reports
+preserve response payloads and request identity; they do not declare entity totals
+or approve arbitrary calculations inside those payloads.
 
-Start with `engineering.semantic.github_reporting(repository => 'owner/repo')`:
+Start with `engineering.semantic.github(repository => 'owner/repo')`:
 choose approved metrics, dimensions and filters in ordinary SQL. Named reports
 remain available for reusable presentations and complete detail rows.
 
@@ -59,7 +71,7 @@ SELECT
     merged_prs,
     median_merge_hours,
     p90_merge_hours
-FROM engineering.semantic.github_reporting(
+FROM engineering.semantic.github(
     repository => 'Query-farm/crossfield'
 )
 WHERE pulls_merged_day >= DATE '2026-09-01'
@@ -70,17 +82,17 @@ ORDER BY author;
 -- Remove the author dimension to calculate repository totals from the same
 -- approved measures. Percentiles are recomputed across the full cohort.
 SELECT merged_prs, mean_merge_hours, median_merge_hours, p90_merge_hours
-FROM engineering.semantic.github_reporting(repository => 'Query-farm/crossfield')
+FROM engineering.semantic.github(repository => 'Query-farm/crossfield')
 WHERE pulls_merged_day >= DATE '2026-09-01'
   AND pulls_merged_day < DATE '2026-10-01';
 
 EXPLAIN (SEMANTIC)
 SELECT merged_prs, median_merge_hours
-FROM engineering.semantic.github_reporting(repository => 'Query-farm/crossfield');
+FROM engineering.semantic.github(repository => 'Query-farm/crossfield');
 
 EXPLAIN (SQL)
 SELECT merged_prs, median_merge_hours
-FROM engineering.semantic.github_reporting(repository => 'Query-farm/crossfield');
+FROM engineering.semantic.github(repository => 'Query-farm/crossfield');
 ```
 
 The cohort is **merge time in `[start_day, end_day)` in UTC**. Bots remain
@@ -97,16 +109,20 @@ Only inputs needed by the selected source dependencies are required:
 
 | Input | SQL type | Used by |
 | --- | --- | --- |
-| `repository` | `VARCHAR` | Repository metrics, PRs, issues, comments, commits, releases, contributors, languages, stargazers and CI. |
-| `owner` | `VARCHAR` | `repository_count`, the visible owned-repository count for an account. |
+| `repository` | `VARCHAR` | Repository metrics, PRs, issues, comments, commits, releases, contributors, languages, stargazers, CI and Discussions. |
+| `owner` | `VARCHAR` | Public owned-repository count and Projects. |
 | `issue_number` | `BIGINT` | `issue_comment_count`, together with `repository`. |
+| `discussion_number` | `BIGINT` | Top-level discussion comments, together with `repository`. |
+| `comment_node_id` | `VARCHAR` | Replies to one discussion comment. |
+| `project_owner_type` | `VARCHAR` | Projects, items and fields: `organization` or `user`. |
+| `project_number` | `BIGINT` | The owner's GitHub Projects board number, returned by `projects_detail`; used with `owner` and `project_owner_type`. |
 
 ```sql
 SELECT repository_count
-FROM engineering.semantic.github_reporting(owner => 'Query-farm');
+FROM engineering.semantic.github(owner => 'Query-farm');
 
 SELECT issue_comment_count
-FROM engineering.semantic.github_reporting(
+FROM engineering.semantic.github(
     repository => 'Query-farm/crossfield', issue_number => 1
 );
 
@@ -114,9 +130,17 @@ FROM engineering.semantic.github_reporting(
 -- requested repository; raw PR rows never multiply raw workflow rows.
 SELECT repository_input_repo AS repository,
        merged_prs, workflow_run_count, ci_success_rate
-FROM engineering.semantic.github_reporting(repository => 'Query-farm/crossfield')
+FROM engineering.semantic.github(repository => 'Query-farm/crossfield')
 GROUP BY repository_input_repo;
 ```
+
+`repository_count(owner => ...)` currently uses GitHub's
+[`/users/{owner}/repos` endpoint](https://docs.github.com/en/rest/repos/repos#list-repositories-for-a-user),
+which lists public repositories even when authenticated. It does not discover
+private organization repositories or traverse the listed repositories for PR
+metrics. PR metrics require one `repository` input. The
+[proposed workflow improvements](../docs/CROSSFIELD_USABILITY.md) describe the
+planned owner-wide scope; that interface is not implemented yet.
 
 Calls accept named literals or native prepared parameters. Unknown, missing,
 unused, NULL and incorrectly typed inputs reject with repair guidance. For
@@ -129,18 +153,131 @@ CTEs and prepared queries use the same callable entry:
 ```sql
 PREPARE merges AS
 SELECT merged_prs, median_merge_hours, p90_merge_hours
-FROM engineering.semantic.github_reporting(repository => $1)
+FROM engineering.semantic.github(repository => $1)
 WHERE pulls_merged_day >= $2::DATE AND pulls_merged_day < $3::DATE;
 EXECUTE merges('Query-farm/crossfield', '2026-09-01', '2026-10-01');
 
 WITH merges AS (
     SELECT merged_prs
-    FROM engineering.semantic.github_reporting(repository => 'Query-farm/crossfield')
+    FROM engineering.semantic.github(repository => 'Query-farm/crossfield')
     WHERE pulls_merged_day >= DATE '2026-09-01'
       AND pulls_merged_day < DATE '2026-10-01'
 )
 SELECT merged_prs FROM merges;
 ```
+
+## Discussions and Projects
+
+```sql
+SELECT discussions_category_name, discussion_count, answered_discussions,
+       discussion_answer_rate, mean_discussion_answer_hours
+FROM engineering.semantic.github(repository => 'Query-farm/crossfield')
+GROUP BY discussions_category_name;
+```
+
+For Projects, first discover the boards owned by the organization:
+
+```sql
+SELECT number, title, state
+FROM engineering.reports.projects_detail(
+    owner => 'Query-farm', project_owner_type => 'organization'
+)
+ORDER BY number;
+```
+
+Use the selected board's `number` as `project_number`, retaining the same owner
+and owner type. GitHub exposes this number in the board URL, for example
+`https://github.com/orgs/OWNER/projects/NUMBER`; see
+[GitHub's project lookup documentation](https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects).
+A board belongs to an organization or user and may contain work from multiple
+repositories. Its number differs from its global `id` and GraphQL `node_id`.
+
+The following examples use **7 as an illustrative board number** from the test
+fixture; they do not establish that Query Farm owns board 7. Replace it with the
+number returned above. Likewise, replace custom-field IDs `123,456` with IDs
+returned by `project_fields_detail`.
+
+```sql
+SELECT project_item_count, project_issue_items, project_pull_request_items,
+       project_draft_items, archived_project_items
+FROM engineering.semantic.github(
+    owner => 'Query-farm', project_number => 7,
+    project_owner_type => 'organization'
+);
+
+SELECT id, name, data_type
+FROM engineering.reports.project_fields_detail(
+    owner => 'Query-farm', project_number => 7,
+    project_owner_type => 'organization'
+);
+
+SELECT id, content_type, title, fields_json
+FROM engineering.reports.project_item_values_detail(
+    owner => 'Query-farm', project_number => 7,
+    project_owner_type => 'organization', project_fields => '123,456'
+);
+```
+
+Answer rate means currently answered discussions divided by all visible
+discussions, including categories without a selected answer. Answer time measures
+creation to the currently recorded answer selection. It is not first-response
+time or an SLA. Fixture durations of 2 and 10 hours give mean/median 6 hours;
+with one unanswered discussion the answer rate is 2/3.
+
+Project item counts preserve item identities, including drafts and inaccessible
+content. One issue appearing on two projects is two project items. Archival is
+not completion. Custom fields remain JSON because each project defines its own
+types; choose field IDs explicitly for the detail report. Ordinary item metrics
+need no custom-field input and use the provider's title-only selection.
+The current callable model requires one selected project for item metrics;
+automatic discovery and aggregation across all of an owner's projects is not
+defined by this package.
+
+## Raw REST and GraphQL detail
+
+Discover every supported REST operation without a GitHub request:
+
+```sql
+SELECT operation_id, function_name, path, parameters
+FROM engineering.reports.api_endpoints_detail
+WHERE category = 'pulls';
+
+SELECT page_number, status_code, data, next_url
+FROM engineering.reports.rest_responses_detail(
+    operation_id => 'pulls/list-reviews',
+    path_parameters => '{"owner":"Query-farm","repo":"crossfield","pull_number":1}',
+    rest_query => '{}', rest_accept => 'application/vnd.github+json',
+    rest_allow_not_found => false
+);
+
+SELECT body
+FROM engineering.reports.rest_responses_detail(
+    operation_id => 'repos/download-zipball-archive',
+    path_parameters => '{"owner":"Query-farm","repo":"crossfield","ref":"main"}',
+    rest_query => '{}', rest_accept => 'application/octet-stream',
+    rest_allow_not_found => false
+);
+
+SELECT data
+FROM engineering.reports.graphql_responses_detail(
+    graphql_document => 'query Identity($login:String!){user(login:$login){login}}',
+    graphql_variables => '{"login":"octocat"}', graphql_operation_name => 'Identity'
+);
+```
+
+Every displayed argument is required; use `{}` for empty query/variable maps and
+an empty string for an unnamed GraphQL operation. REST operations are restricted
+to the pinned GET inventory. API version, complete Link pagination and cache
+policy remain model-owned. `rest_allow_not_found => true` explicitly retains a
+404 response for existence/membership checks. Binary responses keep exact BLOB
+bytes, and `data` keeps JSON text without flattening nested values.
+
+REST grain is one HTTP response page per request. GraphQL grain is one response
+per document/variables/operation; nested connections retain their own cursors and
+may still have more pages. GraphQL errors fail, including partial-data errors.
+Strict mode permits approved response detail, but rejects turning response rows
+into business totals. To calculate review, deployment or other entity metrics,
+add a typed reporting source and approved definitions for that population.
 
 ## Saved reports and detail
 
@@ -181,8 +318,11 @@ The detail report returns the same merged population, preserving each PR identit
 | `contributors_summary` | GitHub's current default-branch attribution, not interchangeable with commit-history counts. |
 | `languages_summary` | Current language bytes, not lines of code. |
 | `stars_summary` | Current visible stargazers; removed stars disappear. The worker requires administrator access. |
-| `repository_summary`, `account_repository_summary` | Current stars/forks for one repository, or a complete visible owned-repository count for one account. |
-| `<function>_detail` | All 15 functions expose their complete field schemas. Search reports are capped discovery and `all_rate_limit_detail` is diagnostic; neither has approved aggregate metrics. |
+| `repository_summary`, `account_repository_summary` | Current stars/forks for one repository, or a complete public owned-repository count for one account through `/users/{owner}/repos`. Authentication does not add private repositories to that listing. |
+| `discussion_overview`, `discussion_answer_summary`, `discussion_comments_summary`, `discussion_replies_summary` | Current selected-answer coverage/time, with separate top-level comment and reply populations. |
+| `projects_summary`, `project_items_summary`, `project_fields_summary` | Current boards, item identities and field definitions; project closure/archival do not imply completed work. |
+| `<source>_detail`, `project_item_values_detail` | Complete typed schemas, including arrays and selected custom-field JSON. Search is capped discovery and rate-limit data is diagnostic. |
+| `rest_responses_detail`, `graphql_responses_detail`, `api_endpoints_detail` | Full raw API surface at response grain, plus local endpoint discovery. No entity metrics on raw payloads. |
 
 ```sql
 SELECT * FROM engineering.reports.ci_summary(
@@ -230,9 +370,10 @@ identity within the configured instance. This is live execution, not historical
 
 Search can return at most 1,000 selected matches and GitHub may mark responses
 incomplete. Its reports provide discovery rows, not approved totals. First-review
-latency, historical reopened backlog, exact workflow completion duration,
-deployment frequency, code churn and lost-star history need additional facts.
-Calendar smoothing/window reports are not published for this invocation profile.
+latency, exact workflow completion duration, deployment frequency and code churn
+still need approved typed entity definitions over the raw endpoints. Historical
+reopened backlog and lost-star history remain unmodeled. Calendar smoothing/window
+reports are not published for this invocation profile.
 
 ## Rebuild and test
 
@@ -252,8 +393,14 @@ the revision before distributing changed definitions for an existing instance.
 The package has no publication receipt (`checks: []`); attachment validates its
 definitions, while deterministic tests supply implementation evidence.
 
-The [SQLLogicTest suite](../tests/crossfield/reporting.test) runs the real worker
-and native VGI/Crossfield against an independently authored mock HTTP API.
+`python models/build_model.py --check` verifies source/endpoint coverage and exact
+generated artifacts. A changed worker registration or REST operation inventory
+fails until its semantic coverage is reviewed and regenerated.
+
+The [existing reporting suite](../tests/crossfield/reporting.test),
+[whole-surface suite](../tests/crossfield/surface.test) and
+[raw API suite](../tests/crossfield/raw_api.test) run the real worker through
+native VGI/Crossfield against an independently authored mock HTTP API.
 [Fixture notes](../tests/crossfield/FIXTURES.md) specify expected answers and errors.
 Python implements the worker/HTTP fixture; all SQL executes in native DuckDB.
 The worker's [reporting tests](../tests/test_reporting.py) separately exercise

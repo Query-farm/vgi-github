@@ -1,0 +1,726 @@
+{
+  "entities": [
+    {
+      "name": "organization_lookup",
+      "description": "Schema-derived orgs/get source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "GitHub organization login.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/get",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "organization_members_source",
+      "description": "Schema-derived orgs/list-members source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "GitHub organization login.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "member_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "member_type",
+          "path": [
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-members",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "filter": {
+            "literal": "all"
+          },
+          "role": {
+            "literal": "all"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "teams_source",
+      "description": "Schema-derived teams/list source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "GitHub organization login.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_members_source",
+      "description": "Schema-derived teams/list-members-in-org source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "GitHub organization login.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Slug of one team in the organization."
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_member_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "member_role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "membership_inherited",
+          "path": [
+            "inherited"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-members-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          },
+          "team_slug": {
+            "argument": "team_slug"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "role": {
+            "literal": "all"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "organizations",
+      "description": "Canonical organization profiles for an explicit organization scope; not an inventory of every organization on GitHub.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_stage": "organizations",
+          "source_column": "organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_stage": "organizations",
+          "source_column": "organization_login"
+        },
+        {
+          "name": "name",
+          "source_stage": "organizations",
+          "source_column": "name"
+        },
+        {
+          "name": "description",
+          "source_stage": "organizations",
+          "source_column": "description"
+        },
+        {
+          "name": "created_at",
+          "source_stage": "organizations",
+          "source_column": "created_at"
+        }
+      ],
+      "grain": [
+        "organization_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "organizations",
+            "scope": "organizations"
+          }
+        ],
+        "output_stage": "organizations"
+      },
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "name",
+          "description",
+          "created_at"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "name"
+        ],
+        "metrics": [
+          {
+            "name": "organization_count",
+            "kind": "count",
+            "comment": "Selected organization identities, including organizations with no visible members, teams or repositories."
+          }
+        ],
+        "sql_names": {
+          "organization_login": "organization_login",
+          "name": "organization_name"
+        }
+      }
+    },
+    {
+      "name": "organization_memberships",
+      "description": "Current organization membership visible to the attached credentials, including concealed members only when authorized. Membership does not imply employment; outside repository contributors are not members.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_stage": "organizations",
+          "source_column": "organization_id"
+        },
+        {
+          "name": "user_id",
+          "source_stage": "members",
+          "source_column": "user_id"
+        },
+        {
+          "name": "member_login",
+          "source_stage": "members",
+          "source_column": "member_login"
+        },
+        {
+          "name": "member_type",
+          "source_stage": "members",
+          "source_column": "member_type"
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "user_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "organizations",
+            "scope": "organizations"
+          },
+          {
+            "name": "members",
+            "entity": "organization_members_source",
+            "arguments": {
+              "organization": {
+                "stage": "organizations",
+                "column": "organization_login"
+              }
+            }
+          }
+        ],
+        "output_stage": "members"
+      },
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "user_id",
+          "member_login",
+          "member_type"
+        ],
+        "dimensions": [
+          "member_login",
+          "member_type"
+        ],
+        "metrics": [
+          {
+            "name": "organization_member_count",
+            "kind": "count",
+            "comment": "Current visible organization-member relationships, one per organization and account. Credential visibility defines the population; not employees or distinct members across organizations."
+          }
+        ],
+        "sql_names": {
+          "member_login": "member_login",
+          "member_type": "member_type"
+        }
+      }
+    },
+    {
+      "name": "teams",
+      "description": "Teams in the selected organization visible to the attached credentials; includes teams with no returned members.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_stage": "organizations",
+          "source_column": "organization_id"
+        },
+        {
+          "name": "team_id",
+          "source_stage": "teams",
+          "source_column": "team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_stage": "teams",
+          "source_column": "team_slug"
+        },
+        {
+          "name": "team_name",
+          "source_stage": "teams",
+          "source_column": "team_name"
+        },
+        {
+          "name": "description",
+          "source_stage": "teams",
+          "source_column": "description"
+        },
+        {
+          "name": "privacy",
+          "source_stage": "teams",
+          "source_column": "privacy"
+        },
+        {
+          "name": "team_type",
+          "source_stage": "teams",
+          "source_column": "team_type"
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "organizations",
+            "scope": "organizations"
+          },
+          {
+            "name": "teams",
+            "entity": "teams_source",
+            "arguments": {
+              "organization": {
+                "stage": "organizations",
+                "column": "organization_login"
+              }
+            }
+          }
+        ],
+        "output_stage": "teams"
+      },
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "team_id",
+          "team_slug",
+          "team_name",
+          "description",
+          "privacy",
+          "team_type"
+        ],
+        "dimensions": [
+          "team_id",
+          "team_slug",
+          "team_name",
+          "privacy",
+          "team_type"
+        ],
+        "metrics": [
+          {
+            "name": "team_count",
+            "kind": "count",
+            "comment": "Current visible team identities in the selected organization, including empty teams."
+          }
+        ],
+        "sql_names": {
+          "team_slug": "team_slug",
+          "team_name": "team_name",
+          "privacy": "team_privacy",
+          "team_type": "team_type"
+        }
+      }
+    },
+    {
+      "name": "team_memberships",
+      "description": "Effective membership returned for each visible team. One person in two teams contributes two memberships. Child-team membership may be included by GitHub; optional role and inherited fields remain NULL when absent.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_stage": "organizations",
+          "source_column": "organization_id"
+        },
+        {
+          "name": "team_id",
+          "source_stage": "teams",
+          "source_column": "team_id"
+        },
+        {
+          "name": "user_id",
+          "source_stage": "members",
+          "source_column": "user_id"
+        },
+        {
+          "name": "team_member_login",
+          "source_stage": "members",
+          "source_column": "team_member_login"
+        },
+        {
+          "name": "member_role",
+          "source_stage": "members",
+          "source_column": "member_role"
+        },
+        {
+          "name": "membership_inherited",
+          "source_stage": "members",
+          "source_column": "membership_inherited"
+        }
+      ],
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "organizations",
+            "scope": "organizations"
+          },
+          {
+            "name": "teams",
+            "entity": "teams_source",
+            "arguments": {
+              "organization": {
+                "stage": "organizations",
+                "column": "organization_login"
+              }
+            }
+          },
+          {
+            "name": "members",
+            "entity": "team_members_source",
+            "arguments": {
+              "organization": {
+                "stage": "organizations",
+                "column": "organization_login"
+              },
+              "team_slug": {
+                "stage": "teams",
+                "column": "team_slug"
+              }
+            }
+          }
+        ],
+        "output_stage": "members"
+      },
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "team_id",
+          "user_id",
+          "team_member_login",
+          "member_role",
+          "membership_inherited"
+        ],
+        "dimensions": [
+          "team_member_login",
+          "member_role",
+          "membership_inherited"
+        ],
+        "metrics": [
+          {
+            "name": "team_membership_count",
+            "kind": "count",
+            "comment": "Current visible effective team-account pairs, including inherited membership when returned. Additive over teams as memberships, not distinct people or attributable PR activity."
+          }
+        ],
+        "sql_names": {
+          "team_member_login": "team_member_login",
+          "member_role": "team_member_role",
+          "membership_inherited": "team_membership_inherited"
+        }
+      }
+    }
+  ],
+  "scopes": {
+    "organizations": {
+      "exclusive_parameters": [
+        "organization"
+      ],
+      "comment": "Require an explicit organization scope for organization, membership and team entities.",
+      "select": {
+        "entity": "organization_lookup",
+        "arguments": {
+          "organization": {
+            "parameter": "organization"
+          }
+        }
+      }
+    }
+  },
+  "relationships": [
+    {
+      "name": "memberships_to_organizations",
+      "from": "organization_memberships",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ]
+    },
+    {
+      "name": "teams_to_organizations",
+      "from": "teams",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ]
+    },
+    {
+      "name": "team_memberships_to_teams",
+      "from": "team_memberships",
+      "to": "teams",
+      "from_columns": [
+        "team_id"
+      ],
+      "to_columns": [
+        "team_id"
+      ]
+    }
+  ],
+  "shared_dimensions": {
+    "github.organization.id.v1": [
+      "organizations.organization_id",
+      "organization_memberships.organization_id",
+      "teams.organization_id",
+      "team_memberships.organization_id"
+    ],
+    "github.team.id.v1": [
+      "teams.team_id",
+      "team_memberships.team_id"
+    ]
+  }
+}

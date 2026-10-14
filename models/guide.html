@@ -126,8 +126,16 @@ Crossfield</a>
 <ul>
 <li><a href="#attach-and-discover" id="toc-attach-and-discover">Attach
 and discover</a></li>
-<li><a href="#start-with-merges" id="toc-start-with-merges">Start with
-merges</a></li>
+<li><a href="#choose-metrics-and-dimensions"
+id="toc-choose-metrics-and-dimensions">Choose metrics and
+dimensions</a></li>
+<li><a href="#discussions-and-projects"
+id="toc-discussions-and-projects">Discussions and Projects</a></li>
+<li><a href="#raw-rest-and-graphql-detail"
+id="toc-raw-rest-and-graphql-detail">Raw REST and GraphQL
+detail</a></li>
+<li><a href="#saved-reports-and-detail"
+id="toc-saved-reports-and-detail">Saved reports and detail</a></li>
 <li><a href="#reporting-coverage" id="toc-reporting-coverage">Reporting
 coverage</a></li>
 <li><a href="#completeness-failures-and-limits"
@@ -140,14 +148,24 @@ test</a></li>
 <main>
 <h1 id="github-reporting-with-crossfield">GitHub reporting with
 Crossfield</h1>
-<p>This model covers all 15 vgi-github functions: 34 approved metrics,
-32 named reports, and the complete detail schemas, including array
-columns. Business definitions live in <a
-href="build_model.py">build_model.py</a>; <a
+<p>This model covers the worker's 21 typed <code>main</code> functions,
+all 780 pinned REST GET operations, GraphQL queries and endpoint
+discovery: 24 sources, 51 approved business metrics and 49 named
+reports. REST uses the operation-ID dispatcher; one source covers the
+same operations as the generated <code>rest</code> functions. Business
+definitions live in <a href="build_model.py">build_model.py</a>; <a
 href="source_inventory.json">source_inventory.json</a> records the
 worker signatures and field descriptions. The generated <a
 href="github-reporting.package.json">package</a> contains the model,
-named parameters, comments and revision together.</p>
+named parameters, comments and revision together. Typed datasets have
+reviewed business definitions. Raw REST and GraphQL reports preserve
+response payloads and request identity; they do not declare entity
+totals or approve arbitrary calculations inside those payloads.</p>
+<p>Start with
+<code>engineering.semantic.github(repository =&gt; 'owner/repo')</code>:
+choose approved metrics, dimensions and filters in ordinary SQL. Named
+reports remain available for reusable presentations and complete detail
+rows.</p>
 <p>Use the matching patched DuckDB 2.0 engine, Crossfield and native VGI
 extensions. The community VGI binary for another DuckDB release is not
 compatible. This profile uses a local subprocess; HTTP transport has not
@@ -173,51 +191,287 @@ class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#c
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>);</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> crossfield_mode <span class="op">=</span> <span class="st">&#39;strict&#39;</span>;</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> crossfield_queries()</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> name, sql_name, <span class="kw">comment</span> <span class="kw">FROM</span> crossfield_members()</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> database_name <span class="op">=</span> <span class="st">&#39;engineering&#39;</span>;</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> crossfield_query_parameters()</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> database_name <span class="op">=</span> <span class="st">&#39;engineering&#39;</span> <span class="kw">AND</span> query_name <span class="op">=</span> <span class="st">&#39;pr_merge_summary&#39;</span>;</span></code></pre></div>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> name, <span class="kw">type</span>, nullable, <span class="kw">comment</span>, source_datasets, metric_names</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> crossfield_parameters()</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> database_name <span class="op">=</span> <span class="st">&#39;engineering&#39;</span>;</span></code></pre></div>
 <p>The logical binding <code>github_source</code> is independent of the
 attachment alias. The model requires the attachment's reporting policy,
 120-second worker budget and API origin to match. The package scopes
 identities to <code>github.com</code>; generate a separately reviewed
 package for another instance. A token, credentials and private
 repository names are never stored in the model.</p>
-<p>Every report argument is required. SQL date arguments are ISO
-strings; native prepared parameters use the declared DATE type. NULL and
-invalid typed values reject. Empty or reversed intervals use ordinary
-SQL semantics: an empty cohort, zero ungrouped counts and NULL duration
-statistics.</p>
-<h2 id="start-with-merges">Start with merges</h2>
+<h2 id="choose-metrics-and-dimensions">Choose metrics and
+dimensions</h2>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.pr_merge_summary(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  start_day <span class="op">=&gt;</span> <span class="st">&#39;2026-09-01&#39;</span>, end_day <span class="op">=&gt;</span> <span class="st">&#39;2026-10-01&#39;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>);</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.merged_pr_detail(</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  start_day <span class="op">=&gt;</span> <span class="st">&#39;2026-09-01&#39;</span>, end_day <span class="op">=&gt;</span> <span class="st">&#39;2026-10-01&#39;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>);</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPLAIN</span> (SEMANTIC)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.pr_merge_summary(</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>,</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  start_day <span class="op">=&gt;</span> <span class="st">&#39;2026-09-01&#39;</span>, end_day <span class="op">=&gt;</span> <span class="st">&#39;2026-10-01&#39;</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    pulls_user_login <span class="kw">AS</span> author,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    merged_prs,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    median_merge_hours,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    p90_merge_hours</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> pulls_merged_day <span class="op">&gt;=</span> <span class="dt">DATE</span> <span class="st">&#39;2026-09-01&#39;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">AND</span> pulls_merged_day <span class="op">&lt;</span> <span class="dt">DATE</span> <span class="st">&#39;2026-10-01&#39;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> pulls_user_login</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> author;</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">-- Remove the author dimension to calculate repository totals from the same</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">-- approved measures. Percentiles are recomputed across the full cohort.</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> merged_prs, mean_merge_hours, median_merge_hours, p90_merge_hours</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> pulls_merged_day <span class="op">&gt;=</span> <span class="dt">DATE</span> <span class="st">&#39;2026-09-01&#39;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">AND</span> pulls_merged_day <span class="op">&lt;</span> <span class="dt">DATE</span> <span class="st">&#39;2026-10-01&#39;</span>;</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPLAIN</span> (SEMANTIC)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> merged_prs, median_merge_hours</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>);</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPLAIN</span> (SQL)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> merged_prs, median_merge_hours</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>);</span></code></pre></div>
 <p>The cohort is <strong>merge time in <code>[start_day, end_day)</code>
 in UTC</strong>. Bots remain included. Elapsed hours use millisecond
 differences divided by 3,600,000, so draft and waiting time count. This
 is not review time or business hours. Four merge durations of 2, 4, 10
 and 20 hours produce <strong>4 merged PRs, mean 9, median 7 and
 continuous p90 17</strong>. Empty cohorts return
-<code>0, NULL, NULL, NULL</code>. The detail report returns the same
-population, preserving each PR identity.</p>
-<p><code>pr_merges_daily</code> groups that cohort by UTC merge date;
-absent dates stay absent. <code>pr_merges_by_author</code> groups by the
-reported login. Do not average their means or percentiles to recover an
-overall figure; ask for <code>pr_merge_summary</code>.</p>
+<code>0, NULL, NULL, NULL</code>. By author, durations 2 and 10 produce
+median 6 and p90 9.2; durations 4 and 20 produce median 12 and p90 18.4.
+Do not average grouped means or percentiles to recover a total: remove
+the dimension and let Crossfield recompute it.</p>
+<p>Parameters select provider inputs; SQL <code>WHERE</code> defines the
+analytical cohort. Only inputs needed by the selected source
+dependencies are required:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>SQL type</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>repository</code></td>
+<td><code>VARCHAR</code></td>
+<td>Repository metrics, PRs, issues, comments, commits, releases,
+contributors, languages, stargazers, CI and Discussions.</td>
+</tr>
+<tr>
+<td><code>owner</code></td>
+<td><code>VARCHAR</code></td>
+<td>Public owned-repository count and Projects.</td>
+</tr>
+<tr>
+<td><code>issue_number</code></td>
+<td><code>BIGINT</code></td>
+<td><code>issue_comment_count</code>, together with
+<code>repository</code>.</td>
+</tr>
+<tr>
+<td><code>discussion_number</code></td>
+<td><code>BIGINT</code></td>
+<td>Top-level discussion comments, together with
+<code>repository</code>.</td>
+</tr>
+<tr>
+<td><code>comment_node_id</code></td>
+<td><code>VARCHAR</code></td>
+<td>Replies to one discussion comment.</td>
+</tr>
+<tr>
+<td><code>project_owner_type</code></td>
+<td><code>VARCHAR</code></td>
+<td>Projects, items and fields: <code>organization</code> or
+<code>user</code>.</td>
+</tr>
+<tr>
+<td><code>project_number</code></td>
+<td><code>BIGINT</code></td>
+<td>The owner's GitHub Projects board number, returned by
+<code>projects_detail</code>; used with <code>owner</code> and
+<code>project_owner_type</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> repository_count</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(owner <span class="op">=&gt;</span> <span class="st">&#39;Query-farm&#39;</span>);</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> issue_comment_count</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>, issue_number <span class="op">=&gt;</span> <span class="dv">1</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">-- Independent PR and workflow facts aggregate before combination at the</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">-- requested repository; raw PR rows never multiply raw workflow rows.</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> repository_input_repo <span class="kw">AS</span> repository,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>       merged_prs, workflow_run_count, ci_success_rate</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> repository_input_repo;</span></code></pre></div>
+<p><code>repository_count(owner =&gt; ...)</code> currently uses
+GitHub's <a
+href="https://docs.github.com/en/rest/repos/repos#list-repositories-for-a-user"><code>/users/{owner}/repos</code>
+endpoint</a>, which lists public repositories even when authenticated.
+It does not discover private organization repositories or traverse the
+listed repositories for PR metrics. PR metrics require one
+<code>repository</code> input. The <a
+href="../docs/CROSSFIELD_USABILITY.md">proposed workflow
+improvements</a> describe the planned owner-wide scope; that interface
+is not implemented yet.</p>
+<p>Calls accept named literals or native prepared parameters. Unknown,
+missing, unused, NULL and incorrectly typed inputs reject with repair
+guidance. For example, supplying <code>owner</code> to a PR-only query
+rejects; it cannot silently look like an extra filter. Callers cannot
+override complete pagination or cache policy. Crossfield invokes only
+required sources, so PR metrics do not fetch CI, comments or account
+data. Discovery, preparation and <code>EXPLAIN</code> do not fetch rows.
+CTEs and prepared queries use the same callable entry:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">PREPARE</span> merges <span class="kw">AS</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> merged_prs, median_merge_hours, p90_merge_hours</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(repository <span class="op">=&gt;</span> $1)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> pulls_merged_day <span class="op">&gt;=</span> $2:<span class="ch">:DATE</span> <span class="kw">AND</span> pulls_merged_day <span class="op">&lt;</span> $3:<span class="ch">:DATE</span>;</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">EXECUTE</span> merges(<span class="st">&#39;Query-farm/crossfield&#39;</span>, <span class="st">&#39;2026-09-01&#39;</span>, <span class="st">&#39;2026-10-01&#39;</span>);</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">WITH</span> merges <span class="kw">AS</span> (</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">SELECT</span> merged_prs</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">FROM</span> engineering.semantic.github(repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> pulls_merged_day <span class="op">&gt;=</span> <span class="dt">DATE</span> <span class="st">&#39;2026-09-01&#39;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>      <span class="kw">AND</span> pulls_merged_day <span class="op">&lt;</span> <span class="dt">DATE</span> <span class="st">&#39;2026-10-01&#39;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> merged_prs <span class="kw">FROM</span> merges;</span></code></pre></div>
+<h2 id="discussions-and-projects">Discussions and Projects</h2>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> discussions_category_name, discussion_count, answered_discussions,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>       discussion_answer_rate, mean_discussion_answer_hours</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> discussions_category_name;</span></code></pre></div>
+<p>For Projects, first discover the boards owned by the
+organization:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="dt">number</span>, title, state</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.reports.projects_detail(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    owner <span class="op">=&gt;</span> <span class="st">&#39;Query-farm&#39;</span>, project_owner_type <span class="op">=&gt;</span> <span class="st">&#39;organization&#39;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> <span class="dt">number</span>;</span></code></pre></div>
+<p>Use the selected board's <code>number</code> as
+<code>project_number</code>, retaining the same owner and owner type.
+GitHub exposes this number in the board URL, for example
+<code>https://github.com/orgs/OWNER/projects/NUMBER</code>; see <a
+href="https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-api-to-manage-projects">GitHub's
+project lookup documentation</a>. A board belongs to an organization or
+user and may contain work from multiple repositories. Its number differs
+from its global <code>id</code> and GraphQL <code>node_id</code>.</p>
+<p>The following examples use <strong>7 as an illustrative board
+number</strong> from the test fixture; they do not establish that Query
+Farm owns board 7. Replace it with the number returned above. Likewise,
+replace custom-field IDs <code>123,456</code> with IDs returned by
+<code>project_fields_detail</code>.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> project_item_count, project_issue_items, project_pull_request_items,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>       project_draft_items, archived_project_items</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    owner <span class="op">=&gt;</span> <span class="st">&#39;Query-farm&#39;</span>, project_number <span class="op">=&gt;</span> <span class="dv">7</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    project_owner_type <span class="op">=&gt;</span> <span class="st">&#39;organization&#39;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, name, data_type</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.reports.project_fields_detail(</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    owner <span class="op">=&gt;</span> <span class="st">&#39;Query-farm&#39;</span>, project_number <span class="op">=&gt;</span> <span class="dv">7</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    project_owner_type <span class="op">=&gt;</span> <span class="st">&#39;organization&#39;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, content_type, title, fields_json</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.reports.project_item_values_detail(</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    owner <span class="op">=&gt;</span> <span class="st">&#39;Query-farm&#39;</span>, project_number <span class="op">=&gt;</span> <span class="dv">7</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    project_owner_type <span class="op">=&gt;</span> <span class="st">&#39;organization&#39;</span>, project_fields <span class="op">=&gt;</span> <span class="st">&#39;123,456&#39;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p>Answer rate means currently answered discussions divided by all
+visible discussions, including categories without a selected answer.
+Answer time measures creation to the currently recorded answer
+selection. It is not first-response time or an SLA. Fixture durations of
+2 and 10 hours give mean/median 6 hours; with one unanswered discussion
+the answer rate is 2/3.</p>
+<p>Project item counts preserve item identities, including drafts and
+inaccessible content. One issue appearing on two projects is two project
+items. Archival is not completion. Custom fields remain JSON because
+each project defines its own types; choose field IDs explicitly for the
+detail report. Ordinary item metrics need no custom-field input and use
+the provider's title-only selection. The current callable model requires
+one selected project for item metrics; automatic discovery and
+aggregation across all of an owner's projects is not defined by this
+package.</p>
+<h2 id="raw-rest-and-graphql-detail">Raw REST and GraphQL detail</h2>
+<p>Discover every supported REST operation without a GitHub request:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> operation_id, function_name, path, <span class="kw">parameters</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.reports.api_endpoints_detail</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> <span class="kw">category</span> <span class="op">=</span> <span class="st">&#39;pulls&#39;</span>;</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> page_number, status_code, <span class="kw">data</span>, next_url</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.reports.rest_responses_detail(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    operation_id <span class="op">=&gt;</span> <span class="st">&#39;pulls/list-reviews&#39;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    path_parameters <span class="op">=&gt;</span> <span class="st">&#39;{&quot;owner&quot;:&quot;Query-farm&quot;,&quot;repo&quot;:&quot;crossfield&quot;,&quot;pull_number&quot;:1}&#39;</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    rest_query <span class="op">=&gt;</span> <span class="st">&#39;{}&#39;</span>, rest_accept <span class="op">=&gt;</span> <span class="st">&#39;application/vnd.github+json&#39;</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    rest_allow_not_found <span class="op">=&gt;</span> <span class="kw">false</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">body</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.reports.rest_responses_detail(</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    operation_id <span class="op">=&gt;</span> <span class="st">&#39;repos/download-zipball-archive&#39;</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    path_parameters <span class="op">=&gt;</span> <span class="st">&#39;{&quot;owner&quot;:&quot;Query-farm&quot;,&quot;repo&quot;:&quot;crossfield&quot;,&quot;ref&quot;:&quot;main&quot;}&#39;</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    rest_query <span class="op">=&gt;</span> <span class="st">&#39;{}&#39;</span>, rest_accept <span class="op">=&gt;</span> <span class="st">&#39;application/octet-stream&#39;</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    rest_allow_not_found <span class="op">=&gt;</span> <span class="kw">false</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">data</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.reports.graphql_responses_detail(</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    graphql_document <span class="op">=&gt;</span> <span class="st">&#39;query Identity($login:String!){user(login:$login){login}}&#39;</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    graphql_variables <span class="op">=&gt;</span> <span class="st">&#39;{&quot;login&quot;:&quot;octocat&quot;}&#39;</span>, graphql_operation_name <span class="op">=&gt;</span> <span class="st">&#39;Identity&#39;</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p>Every displayed argument is required; use <code>{}</code> for empty
+query/variable maps and an empty string for an unnamed GraphQL
+operation. REST operations are restricted to the pinned GET inventory.
+API version, complete Link pagination and cache policy remain
+model-owned. <code>rest_allow_not_found =&gt; true</code> explicitly
+retains a 404 response for existence/membership checks. Binary responses
+keep exact BLOB bytes, and <code>data</code> keeps JSON text without
+flattening nested values.</p>
+<p>REST grain is one HTTP response page per request. GraphQL grain is
+one response per document/variables/operation; nested connections retain
+their own cursors and may still have more pages. GraphQL errors fail,
+including partial-data errors. Strict mode permits approved response
+detail, but rejects turning response rows into business totals. To
+calculate review, deployment or other entity metrics, add a typed
+reporting source and approved definitions for that population.</p>
+<h2 id="saved-reports-and-detail">Saved reports and detail</h2>
+<p>Saved reports package a model-owned selection and presentation. Their
+parameter contract is fixed; every declared argument is required. SQL
+date literals may be ISO strings, and prepared arguments use the
+declared DATE type. Empty or reversed intervals retain ordinary SQL
+empty-cohort semantics.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> crossfield_queries() <span class="kw">WHERE</span> database_name <span class="op">=</span> <span class="st">&#39;engineering&#39;</span>;</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> crossfield_query_parameters()</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> database_name <span class="op">=</span> <span class="st">&#39;engineering&#39;</span> <span class="kw">AND</span> query_name <span class="op">=</span> <span class="st">&#39;pr_merge_summary&#39;</span>;</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.pr_merge_summary(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  start_day <span class="op">=&gt;</span> <span class="st">&#39;2026-09-01&#39;</span>, end_day <span class="op">=&gt;</span> <span class="st">&#39;2026-10-01&#39;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.merged_pr_detail(</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  start_day <span class="op">=&gt;</span> <span class="st">&#39;2026-09-01&#39;</span>, end_day <span class="op">=&gt;</span> <span class="st">&#39;2026-10-01&#39;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p>The detail report returns the same merged population, preserving each
+PR identity. <code>pr_merges_daily</code> groups by UTC merge date;
+absent dates stay absent.</p>
 <h2 id="reporting-coverage">Reporting coverage</h2>
 <table>
 <thead>
@@ -281,33 +535,56 @@ requires administrator access.</td>
 <tr>
 <td><code>repository_summary</code>,
 <code>account_repository_summary</code></td>
-<td>Current stars/forks for one repository, or a complete visible
-owned-repository count for one account.</td>
+<td>Current stars/forks for one repository, or a complete public
+owned-repository count for one account through
+<code>/users/{owner}/repos</code>. Authentication does not add private
+repositories to that listing.</td>
 </tr>
 <tr>
-<td><code>&lt;function&gt;_detail</code></td>
-<td>All 15 functions expose their complete field schemas. Search reports
-are capped discovery and <code>all_rate_limit_detail</code> is
-diagnostic; neither has approved aggregate metrics.</td>
+<td><code>discussion_overview</code>,
+<code>discussion_answer_summary</code>,
+<code>discussion_comments_summary</code>,
+<code>discussion_replies_summary</code></td>
+<td>Current selected-answer coverage/time, with separate top-level
+comment and reply populations.</td>
+</tr>
+<tr>
+<td><code>projects_summary</code>, <code>project_items_summary</code>,
+<code>project_fields_summary</code></td>
+<td>Current boards, item identities and field definitions; project
+closure/archival do not imply completed work.</td>
+</tr>
+<tr>
+<td><code>&lt;source&gt;_detail</code>,
+<code>project_item_values_detail</code></td>
+<td>Complete typed schemas, including arrays and selected custom-field
+JSON. Search is capped discovery and rate-limit data is diagnostic.</td>
+</tr>
+<tr>
+<td><code>rest_responses_detail</code>,
+<code>graphql_responses_detail</code>,
+<code>api_endpoints_detail</code></td>
+<td>Full raw API surface at response grain, plus local endpoint
+discovery. No entity metrics on raw payloads.</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.ci_summary(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  start_day <span class="op">=&gt;</span> <span class="st">&#39;2026-09-01&#39;</span>, end_day <span class="op">=&gt;</span> <span class="st">&#39;2026-10-01&#39;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>);</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.repository_activity(</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>);</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.pulls_detail(repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>);</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.issue_comments_detail(</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>, issue_number <span class="op">=&gt;</span> <span class="dv">1</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>);</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.search_repositories_detail(<span class="kw">query</span> <span class="op">=&gt;</span> <span class="st">&#39;topic:duckdb&#39;</span>);</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.all_rate_limit_detail;</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.ci_summary(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  start_day <span class="op">=&gt;</span> <span class="st">&#39;2026-09-01&#39;</span>, end_day <span class="op">=&gt;</span> <span class="st">&#39;2026-10-01&#39;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.repository_activity(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.pulls_detail(repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>);</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.issue_comments_detail(</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>, issue_number <span class="op">=&gt;</span> <span class="dv">1</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.search_repositories_detail(<span class="kw">query</span> <span class="op">=&gt;</span> <span class="st">&#39;topic:duckdb&#39;</span>);</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> engineering.reports.all_rate_limit_detail;</span></code></pre></div>
 <p>Report and column comments expose population choices through
 Crossfield discovery. Array-valued labels, reviewers, assignees, topics
 and commit parents remain detail values; their elements do not multiply
@@ -336,25 +613,36 @@ instance. This is live execution, not historical <code>AT</code> or
 materialized reporting.</p>
 <p>Search can return at most 1,000 selected matches and GitHub may mark
 responses incomplete. Its reports provide discovery rows, not approved
-totals. First-review latency, historical reopened backlog, exact
-workflow completion duration, deployment frequency, code churn and
-lost-star history need additional facts. Calendar smoothing/window
-reports are not published for this invocation profile.</p>
+totals. First-review latency, exact workflow completion duration,
+deployment frequency and code churn still need approved typed entity
+definitions over the raw endpoints. Historical reopened backlog and
+lost-star history remain unmodeled. Calendar smoothing/window reports
+are not published for this invocation profile.</p>
 <h2 id="rebuild-and-test">Rebuild and test</h2>
 <p>Generate on the build host using only the Python standard
 library:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> models/build_model.py</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> models/build_model.py</span></code></pre></div>
 <p>This writes the standalone invocation model,
-<code>reports.json</code> and portable package. Changing an API instance
-uses <code>--instance</code> and <code>--api-origin</code> and receives
-a separate package identity. Review its policies and use
-<code>--revision</code> to advance the revision before distributing
-changed definitions for an existing instance. The package has no
-publication receipt (<code>checks: []</code>); attachment validates its
-definitions, while deterministic tests supply implementation
-evidence.</p>
-<p>The <a href="../tests/crossfield/reporting.test">SQLLogicTest
-suite</a> runs the real worker and native VGI/Crossfield against an
+<code>reports.json</code> and portable package. The model's
+<code>semantic_query</code> section declares typed public inputs and
+their provider mappings. Its shared repository driver and fixed provider
+options are the same reviewed definitions used by the named reports.
+Changing an API instance uses <code>--instance</code> and
+<code>--api-origin</code> and receives a separate package identity.
+Review its policies and use <code>--revision</code> to advance the
+revision before distributing changed definitions for an existing
+instance. The package has no publication receipt
+(<code>checks: []</code>); attachment validates its definitions, while
+deterministic tests supply implementation evidence.</p>
+<p><code>python models/build_model.py --check</code> verifies
+source/endpoint coverage and exact generated artifacts. A changed worker
+registration or REST operation inventory fails until its semantic
+coverage is reviewed and regenerated.</p>
+<p>The <a href="../tests/crossfield/reporting.test">existing reporting
+suite</a>, <a href="../tests/crossfield/surface.test">whole-surface
+suite</a> and <a href="../tests/crossfield/raw_api.test">raw API
+suite</a> run the real worker through native VGI/Crossfield against an
 independently authored mock HTTP API. <a
 href="../tests/crossfield/FIXTURES.md">Fixture notes</a> specify
 expected answers and errors. Python implements the worker/HTTP fixture;

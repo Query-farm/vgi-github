@@ -1,0 +1,127 @@
+# Uses research_fixture.py: researcher has 6 PRs/6 issues; idle-researcher has none.
+# Repository data is delegated to connected_fixture.py by the same worker.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+query TTTT
+SELECT name,type,nullable::VARCHAR,default_value FROM crossfield_parameters() WHERE invocation_name='engineering.semantic.github' AND name IN ('repositories','users') ORDER BY name;
+----
+repositories	STRUCT(repository VARCHAR)[]	true	null
+users	STRUCT(login VARCHAR)[]	true	null
+
+statement ok
+SET crossfield_mode='strict';
+
+# Conflicting scopes fail before provider transport, including a cohort with a PR number.
+statement error
+SELECT authored_pr_count FROM engineering.semantic.github(user=>'researcher',users=>[{'login':'idle-researcher'}]);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(owner=>'example',repositories=>[{'repository':'example/alpha'}]);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(repositories=>[{'repository':'example/alpha'}],pull_request_number=>1);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT user_login,authored_pr_count FROM engineering.semantic.github(users=>[{'login':'researcher'},{'login':'idle-researcher'}]) GROUP BY user_login;
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+# Six independent contribution families retain their counts; two users is a separate population.
+query IIIIIII
+SELECT user_count,authored_pr_count,authored_issue_count,authored_discussion_count,authored_issue_comment_count,authored_discussion_comment_count,authored_commit_comment_count FROM engineering.semantic.github(users=>[{'login':'researcher'},{'login':'idle-researcher'}]);
+----
+2	6	6	3	4	3	3
+
+query TIII
+SELECT user_login,user_count,authored_pr_count,authored_issue_count FROM engineering.semantic.github(users=>[{'login':'researcher'},{'login':'idle-researcher'}]) GROUP BY user_login ORDER BY user_login;
+----
+idle-researcher	1	0	0
+researcher	1	6	6
+
+# Repository cohort is explicit, includes all PRs and does not multiply review records.
+query IIII
+SELECT repository_count,pull_request_count,merged_prs,submitted_review_count FROM engineering.semantic.github(repositories=>[{'repository':'example/alpha'},{'repository':'example/beta'}]);
+----
+2	4	3	4
+
+query TIII
+SELECT repository_name,repository_count,pull_request_count,submitted_review_count FROM engineering.semantic.github(repositories=>[{'repository':'example/alpha'},{'repository':'example/beta'}]) GROUP BY repository_name ORDER BY repository_name;
+----
+example/alpha	1	3	3
+example/beta	1	1	1
+
+# NULL selects the singular fallback; an empty collection selects an empty population.
+query II
+SELECT user_count,authored_pr_count FROM engineering.semantic.github(user=>'researcher',users=>NULL);
+----
+1	6
+
+query II
+SELECT user_count,authored_pr_count FROM engineering.semantic.github(users=>[]);
+----
+0	0
+
+query II
+SELECT repository_count,pull_request_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0
+
+statement ok
+PREPARE user_cohort AS SELECT user_login,user_count,authored_pr_count FROM engineering.semantic.github(users=>$1) GROUP BY user_login ORDER BY user_login;
+
+query TII
+EXECUTE user_cohort([{'login':'researcher'},{'login':'idle-researcher'}]);
+----
+idle-researcher	1	0
+researcher	1	6
+
+query TII
+EXECUTE user_cohort([{'login':'idle-researcher'}]);
+----
+idle-researcher	1	0
+
+statement ok
+PREPARE repository_cohort AS SELECT repository_name,repository_count,pull_request_count FROM engineering.semantic.github(repositories=>$1) GROUP BY repository_name ORDER BY repository_name;
+
+query TII
+EXECUTE repository_cohort([{'repository':'example/beta'},{'repository':'example/empty'}]);
+----
+example/beta	1	1
+example/empty	1	0

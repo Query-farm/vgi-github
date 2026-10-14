@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
+from dataclasses import replace
 from types import SimpleNamespace
 
 import httpx
@@ -366,12 +368,509 @@ def test_projected_output_and_opt_in_graphql_cache(monkeypatch):
     assert out.cache[0].ttl == 60 and out.cache[0].per_value
 
 
-@pytest.mark.parametrize("func", ds.DATASET_FUNCTIONS)
-def test_reporting_mode_rejects_unapproved_datasets(func):
-    with pytest.raises(api.GitHubReportingError, match="not approved"):
-        func.on_bind(SimpleNamespace(attach_opaque_data=auth.encode_attach("off", "", reporting=True)))
-
-
 def test_dataset_catalog_contracts():
     for func in ds.DATASET_FUNCTIONS:
         assert func.get_metadata().input_from_args and not func.has_finalize_override()
+
+
+REPORTING = auth.encode_attach("off", "", reporting=True, operation_timeout_seconds=120)
+
+
+def project(number=7):
+    return {
+        "id": 100 + number,
+        "number": number,
+        "node_id": f"P_{number}",
+        "owner": {"login": "o"},
+        "title": "Roadmap",
+        "state": "open",
+        "public": False,
+        "is_template": False,
+        "created_at": "2026-10-01T09:00:00Z",
+        "updated_at": "2026-10-02T10:00:00Z",
+        "closed_at": None,
+    }
+
+
+def project_item(identity=1):
+    return {
+        "id": identity,
+        "node_id": f"PI_{identity}",
+        "content_type": "Issue",
+        "content": {"id": 999, "number": 13, "state": "open", "title": "Implement reporting"},
+        "created_at": "2026-10-01T09:00:00Z",
+        "updated_at": "2026-10-02T10:00:00Z",
+        "archived_at": None,
+        "fields": [],
+    }
+
+
+def project_field(identity=1):
+    return {
+        "id": identity,
+        "node_id": f"PF_{identity}",
+        "name": "Effort",
+        "data_type": "number",
+        "created_at": "2026-10-01T09:00:00Z",
+        "updated_at": "2026-10-02T10:00:00Z",
+        "options": [],
+        "configuration": None,
+    }
+
+
+# These responses and independent expected identities cover every typed dataset.
+# Repeated project content is deliberate: the item, not its content, is the grain.
+REPORTING_CASES = [
+    pytest.param(
+        ds.DiscussionsFunction,
+        ds.DiscussionsArgs(repo="", max_rows=0),
+        {"repo": ["o/r"]},
+        ("repository", "discussions"),
+        [discussion(1), discussion(2)],
+        "node_id",
+        ["D_1", "D_2"],
+        id="discussions",
+    ),
+    pytest.param(
+        ds.DiscussionCommentsFunction,
+        ds.DiscussionCommentsArgs(repo="", number=0, max_rows=0),
+        {"repo": ["o/r"], "number": [1]},
+        ("repository", "discussion", "comments"),
+        [comment("C_1"), comment("C_2")],
+        "node_id",
+        ["C_1", "C_2"],
+        id="comments",
+    ),
+    pytest.param(
+        ds.DiscussionRepliesFunction,
+        ds.DiscussionRepliesArgs(node_id="", max_rows=0),
+        {"node_id": ["C_1"]},
+        ("node", "replies"),
+        [comment("R_1", "C_1"), comment("R_2", "C_1")],
+        "node_id",
+        ["R_1", "R_2"],
+        id="replies",
+    ),
+    pytest.param(
+        ds.ProjectsFunction,
+        ds.ProjectsArgs(owner="", max_rows=0),
+        {"owner": ["o"]},
+        "/orgs/o/projectsV2",
+        [project(7), project(8)],
+        "id",
+        [107, 108],
+        id="projects",
+    ),
+    pytest.param(
+        ds.ProjectItemsFunction,
+        ds.ProjectItemsArgs(owner="", number=0, max_rows=0),
+        {"owner": ["o"], "number": [7]},
+        "/orgs/o/projectsV2/7/items",
+        [project_item(1), project_item(2)],
+        "id",
+        [1, 2],
+        id="items",
+    ),
+    pytest.param(
+        ds.ProjectFieldsFunction,
+        ds.ProjectFieldsArgs(owner="", number=0, max_rows=0),
+        {"owner": ["o"], "number": [7]},
+        "/orgs/o/projectsV2/7/fields",
+        [project_field(1), project_field(2)],
+        "id",
+        [1, 2],
+        id="fields",
+    ),
+]
+CASE_COLUMNS = "func,args,inputs,path,rows,key,expected"
+
+
+def reporting_response(path, rows, cursor=None):
+    if isinstance(path, tuple):
+        data = connection(rows, cursor)
+        for segment in reversed(path):
+            data = {segment: data}
+        return httpx.Response(200, json={"data": data})
+    headers = {"Link": f'<{api.base_url()}{path}?after={cursor}>; rel="next"'} if cursor else {}
+    return httpx.Response(200, json=rows, headers=headers)
+
+
+def run_reporting(func, args, inputs, *, output=None, out=None):
+    out = out if out is not None else _Out()
+    schema = func.on_bind(SimpleNamespace(attach_opaque_data=REPORTING)).output_schema
+    func.process(
+        _Params(
+            args=args, output_schema=output if output is not None else schema, attach_opaque_data=REPORTING
+        ),
+        None,
+        _input(**inputs),
+        out,
+    )
+    return out
+
+
+@pytest.mark.parametrize(CASE_COLUMNS, REPORTING_CASES)
+def test_reporting_walks_all_pages_validates_grain_and_disables_cache(
+    monkeypatch, func, args, inputs, path, rows, key, expected
+):
+    responses = iter(
+        [
+            reporting_response(path, rows[:1], "next"),
+            reporting_response(path, [], "last"),
+            reporting_response(path, rows[1:]),
+        ]
+    )
+    seen = install(monkeypatch, lambda request: next(responses))
+    # Two identical LATERAL keys retain both parents but fetch only once per batch.
+    out = run_reporting(
+        func, replace(args, cache_ttl=60), {name: values * 2 for name, values in inputs.items()}
+    )
+    result = out.batches[0].to_pylist()
+    assert [row[key] for row in result] == expected * 2
+    assert out.parents == [[0, 0, 1, 1]] and len(seen) == 3
+    assert out.cache[0].no_store and out.cache[0].stale_if_error is None
+    assert all(row["created_at"].tzinfo is not None for row in result)
+
+
+@pytest.mark.parametrize(CASE_COLUMNS, REPORTING_CASES)
+def test_reporting_accepts_verified_empty_listing(monkeypatch, func, args, inputs, path, rows, key, expected):
+    seen = install(monkeypatch, lambda request: reporting_response(path, []))
+    out = run_reporting(func, args, inputs)
+    assert out.batches[0].num_rows == 0 and len(seen) == 1
+
+
+@pytest.mark.parametrize(CASE_COLUMNS, REPORTING_CASES)
+def test_reporting_rejects_caps_and_null_keys_before_network(
+    monkeypatch, func, args, inputs, path, rows, key, expected
+):
+    seen = install(monkeypatch, lambda request: pytest.fail("must reject before HTTP"))
+    with pytest.raises(api.GitHubReportingError, match="max_rows"):
+        run_reporting(func, replace(args, max_rows=100), inputs)
+    for column in inputs:
+        with pytest.raises(api.GitHubReportingError, match="NULL"):
+            run_reporting(func, args, {**inputs, column: [None]})
+    assert not seen
+
+
+@pytest.mark.parametrize(CASE_COLUMNS, REPORTING_CASES)
+def test_reporting_rejects_duplicate_identity_across_pages_before_emitting(
+    monkeypatch, func, args, inputs, path, rows, key, expected
+):
+    responses = iter([reporting_response(path, rows[:1], "next"), reporting_response(path, rows[:1])])
+    install(monkeypatch, lambda request: next(responses))
+    out = _Out()
+    # Projecting away identity cannot hide malformed source rows.
+    output = pa.schema([func.FIXED_SCHEMA.field("created_at")])
+    with pytest.raises(api.GitHubReportingError, match="duplicate"):
+        run_reporting(func, args, inputs, output=output, out=out)
+    assert out.batches == []
+
+
+@pytest.mark.parametrize(CASE_COLUMNS, REPORTING_CASES)
+def test_reporting_requires_valid_identity_and_dates_even_when_projected_away(
+    monkeypatch, func, args, inputs, path, rows, key, expected
+):
+    created = "createdAt" if isinstance(path, tuple) else "created_at"
+    updated = "updatedAt" if isinstance(path, tuple) else "updated_at"
+    raw_key = "id"  # GraphQL's id maps to node_id; REST id is numeric.
+    for change in (
+        {raw_key: None},
+        {raw_key: True},
+        {created: None},
+        {updated: None},
+        {created: "2026-10-01T09:00:00"},
+        {updated: "2026-09-30T00:00:00Z"},
+    ):
+        install(monkeypatch, lambda request, change=change: reporting_response(path, [{**rows[0], **change}]))
+        with pytest.raises(api.GitHubReportingError):
+            run_reporting(func, args, inputs, output=pa.schema([func.FIXED_SCHEMA.field(0)]))
+
+
+@pytest.mark.parametrize(
+    "func,required,optional",
+    [
+        (
+            ds.DiscussionsFunction,
+            "repo number node_id is_answered comments upvote_count locked created_at updated_at",
+            "user_login answer_comment_id answer_chosen_at",
+        ),
+        (
+            ds.DiscussionCommentsFunction,
+            "repo discussion_number node_id is_answer replies upvote_count created_at updated_at",
+            "user_login reply_to_id",
+        ),
+        (
+            ds.DiscussionRepliesFunction,
+            "repo discussion_number node_id reply_to_id is_answer replies upvote_count created_at updated_at",
+            "user_login",
+        ),
+        (
+            ds.ProjectsFunction,
+            "owner owner_type number id node_id state is_public is_template created_at updated_at",
+            "closed_at creator_login",
+        ),
+        (
+            ds.ProjectItemsFunction,
+            "owner owner_type project_number id node_id content_type created_at updated_at",
+            "content_id content_number title state archived_at",
+        ),
+        (
+            ds.ProjectFieldsFunction,
+            "owner owner_type project_number id node_id name data_type created_at updated_at",
+            "options_json configuration_json",
+        ),
+    ],
+)
+def test_reporting_bind_publishes_validated_contract_without_fetch(monkeypatch, func, required, optional):
+    seen = install(monkeypatch, lambda request: pytest.fail("binding must not fetch"))
+    schema = func.on_bind(SimpleNamespace(attach_opaque_data=REPORTING)).output_schema
+    assert all(not schema.field(name).nullable for name in required.split())
+    assert all(schema.field(name).nullable for name in optional.split())
+    exploratory = func.on_bind(SimpleNamespace(attach_opaque_data=None)).output_schema
+    assert all(exploratory.field(name).nullable for name in required.split())
+    assert seen == []
+
+
+@pytest.mark.parametrize(
+    "change,error",
+    [
+        ({"isAnswered": None}, "boolean"),
+        ({"locked": 1}, "boolean"),
+        ({"comments": {"totalCount": -1}}, "nonnegative"),
+        ({"comments": {}}, "nonnegative"),
+        ({"upvoteCount": True}, "nonnegative"),
+        ({"isAnswered": True}, "answer ID/time"),
+        ({"answer": {"id": "C_1"}}, "answer ID/time"),
+        ({"answerChosenAt": "2026-10-02T00:00:00Z"}, "answer ID/time"),
+        ({"answer": {}}, "answer id"),
+        ({"answer": []}, "object or NULL"),
+        ({"isAnswered": True, "answer": {"id": "C_1"}, "answerChosenAt": "2026-09-30T00:00:00Z"}, "duration"),
+        ({"repository": {"nameWithOwner": "elsewhere/repo"}}, "mismatched repo"),
+    ],
+)
+def test_reporting_discussion_rejects_invalid_answer_counter_or_population(monkeypatch, change, error):
+    install(
+        monkeypatch,
+        lambda request: reporting_response(("repository", "discussions"), [{**discussion(), **change}]),
+    )
+    with pytest.raises(api.GitHubReportingError, match=error):
+        run_reporting(ds.DiscussionsFunction, ds.DiscussionsArgs(repo="", max_rows=0), {"repo": ["o/r"]})
+
+
+def test_reporting_answered_discussion_retains_nullable_author_and_answer_duration(monkeypatch):
+    row = {
+        **discussion(),
+        "isAnswered": True,
+        "answer": {"id": "C_1"},
+        "answerChosenAt": "2026-10-01T11:00:00Z",
+    }
+    install(monkeypatch, lambda request: reporting_response(("repository", "discussions"), [row]))
+    result = (
+        run_reporting(ds.DiscussionsFunction, ds.DiscussionsArgs(repo="", max_rows=0), {"repo": ["o/r"]})
+        .batches[0]
+        .to_pylist()[0]
+    )
+    assert result["is_answered"] and result["user_login"] is None
+    assert (result["answer_chosen_at"] - result["created_at"]).total_seconds() == 7200
+
+
+@pytest.mark.parametrize(
+    "path,data",
+    [
+        (("repository", "discussions"), {"repository": None}),
+        (("repository", "discussion", "comments"), {"repository": {"discussion": None}}),
+        (("node", "replies"), {"node": None}),
+    ],
+)
+def test_reporting_missing_graphql_resource_is_not_an_empty_population(monkeypatch, path, data):
+    install(monkeypatch, lambda request: httpx.Response(200, json={"data": data}))
+    with api.reporting_operation(REPORTING), pytest.raises(api.GitHubReportingError, match="accessible"):
+        ds._connection_rows(ds.DISCUSSIONS_QUERY, {}, path, 0, None)
+
+
+@pytest.mark.parametrize("is_reply", [False, True])
+@pytest.mark.parametrize(
+    "change,error",
+    [
+        ({"isAnswer": None}, "boolean"),
+        ({"replies": {"totalCount": -1}}, "nonnegative"),
+        ({"upvoteCount": 2**63}, "nonnegative"),
+        ({"discussion": {"number": 0, "repository": {"nameWithOwner": "o/r"}}}, "discussion_number"),
+        ({"replyTo": {"id": "wrong-parent"}}, "reply_to_id"),
+    ],
+)
+def test_reporting_comments_require_valid_counters_and_parent(monkeypatch, is_reply, change, error):
+    path = ("node", "replies") if is_reply else ("repository", "discussion", "comments")
+    row = {**comment("R_1" if is_reply else "C_1", "C_1" if is_reply else None), **change}
+    install(monkeypatch, lambda request: reporting_response(path, [row]))
+    func = ds.DiscussionRepliesFunction if is_reply else ds.DiscussionCommentsFunction
+    args = (
+        ds.DiscussionRepliesArgs(node_id="", max_rows=0)
+        if is_reply
+        else ds.DiscussionCommentsArgs(repo="", number=0, max_rows=0)
+    )
+    inputs = {"node_id": ["C_1"]} if is_reply else {"repo": ["o/r"], "number": [1]}
+    with pytest.raises(api.GitHubReportingError, match=error):
+        run_reporting(func, args, inputs)
+
+
+@pytest.mark.parametrize(
+    "change,error",
+    [
+        ({"state": None}, "invalid state"),
+        ({"public": 1}, "boolean"),
+        ({"is_template": None}, "boolean"),
+        ({"state": "closed"}, "closed_at"),
+        ({"closed_at": "2026-10-02T00:00:00Z"}, "open project"),
+        ({"state": "closed", "closed_at": "2026-09-30T00:00:00Z"}, "duration"),
+        ({"owner": {"login": "other"}}, "mismatched owner"),
+    ],
+)
+def test_reporting_projects_require_valid_state_and_dates(monkeypatch, change, error):
+    install(monkeypatch, lambda request: reporting_response("/orgs/o/projectsV2", [{**project(), **change}]))
+    with pytest.raises(api.GitHubReportingError, match=error):
+        run_reporting(ds.ProjectsFunction, ds.ProjectsArgs(owner="", max_rows=0), {"owner": ["o"]})
+
+
+def test_reporting_project_items_allow_declared_inaccessible_content_and_drafts(monkeypatch):
+    rows = [
+        {**project_item(1), "content": None},
+        {
+            **project_item(2),
+            "content_type": "DraftIssue",
+            "content": {"id": 200, "title": "Draft"},
+            "archived_at": "2026-10-02T00:00:00Z",
+        },
+    ]
+    install(monkeypatch, lambda request: reporting_response("/orgs/o/projectsV2/7/items", rows))
+    result = (
+        run_reporting(
+            ds.ProjectItemsFunction,
+            ds.ProjectItemsArgs(owner="", number=0, max_rows=0),
+            {"owner": ["o"], "number": [7]},
+        )
+        .batches[0]
+        .to_pylist()
+    )
+    assert [row["id"] for row in result] == [1, 2]
+    assert result[0]["content_id"] is None and result[0]["title"] is None
+    assert result[1]["content_id"] == 200 and result[1]["content_number"] is None
+    assert result[1]["state"] is None and result[1]["archived_at"] is not None
+
+
+@pytest.mark.parametrize(
+    "change,error",
+    [
+        ({"content_type": None}, "content_type"),
+        ({"content_type": "Unknown"}, "content_type"),
+        ({"content": []}, "object or NULL"),
+        ({"content": {}}, "content id"),
+        ({"content": {"id": True}}, "content id"),
+        ({"content": {"id": 11, "number": None}}, "content number"),
+        ({"content": {"id": 11, "number": 12, "state": "unknown"}}, "content state"),
+        ({"archived_at": "2026-09-30T00:00:00Z"}, "duration"),
+    ],
+)
+def test_reporting_project_items_do_not_repair_bad_content(monkeypatch, change, error):
+    install(
+        monkeypatch,
+        lambda request: reporting_response("/orgs/o/projectsV2/7/items", [{**project_item(), **change}]),
+    )
+    with pytest.raises(api.GitHubReportingError, match=error):
+        run_reporting(
+            ds.ProjectItemsFunction,
+            ds.ProjectItemsArgs(owner="", number=0, max_rows=0),
+            {"owner": ["o"], "number": [7]},
+        )
+
+
+@pytest.mark.parametrize("column", ["name", "data_type"])
+@pytest.mark.parametrize("value", [None, "", "  ", 1])
+def test_reporting_project_fields_require_real_names_and_types(monkeypatch, column, value):
+    install(
+        monkeypatch,
+        lambda request: reporting_response(
+            "/orgs/o/projectsV2/7/fields", [{**project_field(), column: value}]
+        ),
+    )
+    with pytest.raises(api.GitHubReportingError, match=column):
+        run_reporting(
+            ds.ProjectFieldsFunction,
+            ds.ProjectFieldsArgs(owner="", number=0, max_rows=0),
+            {"owner": ["o"], "number": [7]},
+        )
+
+
+@pytest.mark.parametrize(
+    "case_index,column",
+    [
+        (0, "answer"),
+        (0, "answerChosenAt"),
+        (1, "replyTo"),
+        (2, "replyTo"),
+        (3, "closed_at"),
+        (4, "content"),
+        (4, "archived_at"),
+    ],
+)
+def test_reporting_requires_explicit_optional_state_evidence(monkeypatch, case_index, column):
+    func, args, inputs, path, rows, _, _ = REPORTING_CASES[case_index].values
+    row = deepcopy(rows[0])
+    del row[column]
+    install(monkeypatch, lambda request: reporting_response(path, [row]))
+    with pytest.raises(api.GitHubReportingError, match=f"missing {column}"):
+        run_reporting(func, args, inputs)
+
+
+@pytest.mark.parametrize(CASE_COLUMNS, REPORTING_CASES)
+def test_reporting_pagination_failure_never_emits_a_partial_population(
+    monkeypatch, func, args, inputs, path, rows, key, expected
+):
+    failure = (
+        httpx.Response(200, json={"data": {"node": None}, "errors": [{"message": "Denied midway"}]})
+        if isinstance(path, tuple)
+        else httpx.Response(403, json={"message": "Denied midway"})
+    )
+    responses = iter([reporting_response(path, rows[:1], "next"), failure])
+    seen = install(monkeypatch, lambda request: next(responses))
+    out = _Out()
+    with pytest.raises(api.GitHubError, match="Denied midway"):
+        run_reporting(func, args, inputs, out=out)
+    assert len(seen) == 2 and out.batches == []
+
+
+@pytest.mark.parametrize("case_index", [0, 3])
+def test_reporting_page_limit_raises_instead_of_returning_truncated_rows(monkeypatch, case_index):
+    func, args, inputs, path, rows, _, _ = REPORTING_CASES[case_index].values
+    monkeypatch.setattr(api, "MAX_PAGES", 2)
+    responses = iter(
+        [
+            reporting_response(path, rows[:1], "next"),
+            reporting_response(path, rows[1:], "last"),
+        ]
+    )
+    seen = install(monkeypatch, lambda request: next(responses))
+    out = _Out()
+    with pytest.raises(api.GitHubPageLimitError):
+        run_reporting(func, args, inputs, out=out)
+    assert len(seen) == 2 and out.batches == []
+
+
+@pytest.mark.parametrize("case_index", [0, 3])
+def test_reporting_graphql_and_rest_share_deadline_across_pages(monkeypatch, case_index):
+    func, args, inputs, path, rows, _, _ = REPORTING_CASES[case_index].values
+    clock = [0.0]
+    monkeypatch.setattr(api.time, "monotonic", lambda: clock[0])
+
+    def handler(request):
+        expected_timeout = 120.0 if clock[0] == 0 else 59.0
+        assert request.extensions["timeout"]["read"] <= expected_timeout
+        clock[0] += 61
+        return reporting_response(path, rows[:1], "next")
+
+    seen = install(monkeypatch, handler)
+    out = _Out()
+    with pytest.raises(api.GitHubDeadlineError):
+        run_reporting(func, args, inputs, out=out)
+    assert len(seen) == 2 and out.batches == []
+    assert not api.reporting_enabled()

@@ -5,7 +5,12 @@
 - Add typed `main.discussions`, `discussion_comments` and `discussion_replies` through
   GraphQL, and `projects`, `project_items` and `project_fields` through REST. All support
   bounded automatic pagination, named filters and correlated `LATERAL`; custom Project
-  field values remain JSON. These additions are outside the original Crossfield model.
+  field values remain JSON. Reporting mode validates complete listings, stable row keys,
+  dates, counters and state, while retaining declared nullable project content. Extend the
+  Crossfield model with approved Discussions and Projects metrics and detail reports.
+- Cover generated REST operations, `api.rest()` and `api.graphql()` in Crossfield detail
+  reports. Raw REST rows represent response pages and GraphQL rows represent envelopes;
+  approved entity metrics remain defined on validated typed sources.
 - Check upstream REST coverage weekly with read-only workflow permissions. Add
   `--check-upstream` for drift detection and `--revision latest` for reviewed local refreshes;
   preserve the pinned API version unless explicitly changed.

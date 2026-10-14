@@ -53,6 +53,88 @@ def test_diff_detects_additions_removals_and_parameter_changes():
     assert not any(gen.operation_diff(old, metadata_only).values())
 
 
+def test_response_closure_drift_is_product_specific_and_keeps_parameter_variants(tmp_path):
+    for index, product in enumerate(gen.PRODUCTS):
+        spec = {
+            "paths": {
+                "/examples": {
+                    "get": {
+                        "operationId": "example/list",
+                        "summary": "Examples",
+                        "parameters": [
+                            {
+                                "name": "limit",
+                                "in": "query",
+                                "schema": {"type": "integer", "maximum": index + 10},
+                            }
+                        ],
+                        "responses": {
+                            "200": {
+                                "content": {
+                                    "application/json": {"schema": {"$ref": "#/components/schemas/Result"}}
+                                }
+                            }
+                        },
+                    }
+                }
+            },
+            "components": {
+                "schemas": {
+                    "Result": {"type": "array", "items": {"$ref": "#/components/schemas/Item"}},
+                    "Item": {"type": "object", "properties": {"id": {"type": "integer"}}},
+                }
+            },
+        }
+        (tmp_path / f"{product}.json").write_text(json.dumps(spec))
+    before = gen.build(tmp_path, revision=SHA, api_version="2026-03-10")
+    path = tmp_path / "ghec.json"
+    changed = json.loads(path.read_text())
+    changed["components"]["schemas"]["Item"]["properties"]["id"]["type"] = "string"
+    path.write_text(json.dumps(changed))
+    after = gen.build(tmp_path, revision=SHA, api_version="2026-03-10")
+    assert gen.operation_diff(before, after)["changed"] == ["example/list"]
+    old, new = before["operations"][0], after["operations"][0]
+    assert old["response_schema_sha256"]["api.github.com"] == new["response_schema_sha256"]["api.github.com"]
+    assert old["response_schema_sha256"]["ghec"] != new["response_schema_sha256"]["ghec"]
+    assert new["parameters_by_product"]["api.github.com"][0]["schema"]["maximum"] == 10
+    assert "ghec" not in new["parameters_by_product"]
+    assert new["parameters"][0]["schema"]["maximum"] == 11
+
+
+def test_response_hash_handles_recursive_refs_and_rejects_unresolved_refs():
+    spec = {
+        "components": {
+            "schemas": {
+                "Node": {"type": "object", "properties": {"child": {"$ref": "#/components/schemas/Node"}}}
+            }
+        }
+    }
+    value = {"$ref": "#/components/schemas/Node"}
+    assert len(gen.closure_hash(spec, value)) == 64
+    with pytest.raises(ValueError, match="unresolved reference"):
+        gen.closure_hash(spec, {"$ref": "#/missing"})
+
+
+def test_response_hash_does_not_treat_example_payload_as_schema_reference():
+    spec = {
+        "components": {
+            "schemas": {
+                "Record": {
+                    "type": "object",
+                    "properties": {"example": {"$ref": "#/components/schemas/Field"}},
+                    "example": {"$ref": "external-file.yaml"},
+                    "default": {"$ref": "also-data.json"},
+                },
+                "Field": {"type": "string"},
+            }
+        }
+    }
+    node = {"$ref": "#/components/schemas/Record"}
+    before = gen.closure_hash(spec, node)
+    spec["components"]["schemas"]["Field"]["type"] = "integer"
+    assert gen.closure_hash(spec, node) != before
+
+
 def test_latest_resolves_to_immutable_commit_with_get(monkeypatch):
     def open_url(request, **kwargs):
         assert request.get_method() == "GET"

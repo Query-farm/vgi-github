@@ -1,0 +1,536 @@
+"""
+Represents an object which can take actions on GitHub. Typically a User or Bot.
+"""
+interface Actor {
+  """The username of the actor."""
+  login: String!
+}
+
+"""Represents a comment on a given Commit."""
+type CommitComment {
+  """The actor who authored the comment."""
+  author: Actor
+  """Identifies the comment body."""
+  body: String!
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """The Node ID of the CommitComment object"""
+  id: ID!
+  """The repository associated with this node."""
+  repository: Repository!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+  """The HTTP URL permalink for this commit comment."""
+  url: URI!
+}
+
+"""The connection type for CommitComment."""
+type CommitCommentConnection {
+  """A list of nodes."""
+  nodes: [CommitComment]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""An ISO-8601 encoded UTC date string."""
+scalar DateTime
+
+"""A discussion in a repository."""
+type Discussion {
+  """The actor who authored the comment."""
+  author: Actor
+  """The main text of the discussion post."""
+  body: String!
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """The Node ID of the Discussion object"""
+  id: ID!
+  """The number identifying this discussion within the repository."""
+  number: Int!
+  """The repository associated with this node."""
+  repository: Repository!
+  """The title of this discussion."""
+  title: String!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+  """The URL for this discussion."""
+  url: URI!
+}
+
+"""A comment on a discussion."""
+type DiscussionComment {
+  """The actor who authored the comment."""
+  author: Actor
+  """The body as Markdown."""
+  body: String!
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """The discussion this comment was created in"""
+  discussion: Discussion
+  """The Node ID of the DiscussionComment object"""
+  id: ID!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+  """The URL for this discussion comment."""
+  url: URI!
+}
+
+"""The connection type for DiscussionComment."""
+type DiscussionCommentConnection {
+  """A list of nodes."""
+  nodes: [DiscussionComment]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""The connection type for Discussion."""
+type DiscussionConnection {
+  """A list of nodes."""
+  nodes: [Discussion]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""Ways in which lists of discussions can be ordered upon return."""
+input DiscussionOrder {
+  """The direction in which to order discussions by the specified field."""
+  direction: OrderDirection!
+  """The field by which to order discussions."""
+  field: DiscussionOrderField!
+}
+
+"""Properties by which discussion connections can be ordered."""
+enum DiscussionOrderField {
+  """Order discussions by creation time."""
+  CREATED_AT
+  """Order discussions by most recent modification time."""
+  UPDATED_AT
+}
+
+"""The possible states of a discussion."""
+enum DiscussionState {
+  """A discussion that has been closed"""
+  CLOSED
+  """A discussion that is open"""
+  OPEN
+}
+
+"""
+An Issue is a place to discuss ideas, enhancements, tasks, and bugs for a project.
+"""
+type Issue {
+  """The actor who authored the comment."""
+  author: Actor
+  """Identifies the body of the issue."""
+  body: String!
+  """Identifies the date and time when the object was closed."""
+  closedAt: DateTime
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """The Node ID of the Issue object"""
+  id: ID!
+  """Identifies the issue number."""
+  number: Int!
+  """The repository associated with this node."""
+  repository: Repository!
+  """Identifies the state of the issue."""
+  state: IssueState!
+  """Identifies the issue title."""
+  title: String!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+  """The HTTP URL for this issue"""
+  url: URI!
+}
+
+"""Represents a comment on an Issue."""
+type IssueComment {
+  """The actor who authored the comment."""
+  author: Actor
+  """The body as Markdown."""
+  body: String!
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """The Node ID of the IssueComment object"""
+  id: ID!
+  """The repository associated with this node."""
+  repository: Repository!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+  """The HTTP URL for this issue comment"""
+  url: URI!
+}
+
+"""The connection type for IssueComment."""
+type IssueCommentConnection {
+  """A list of nodes."""
+  nodes: [IssueComment]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""Ways in which lists of issue comments can be ordered upon return."""
+input IssueCommentOrder {
+  """The direction in which to order issue comments by the specified field."""
+  direction: OrderDirection!
+  """The field in which to order issue comments by."""
+  field: IssueCommentOrderField!
+}
+
+"""Properties by which issue comment connections can be ordered."""
+enum IssueCommentOrderField {
+  """Order issue comments by update time"""
+  UPDATED_AT
+}
+
+"""The connection type for Issue."""
+type IssueConnection {
+  """A list of nodes."""
+  nodes: [Issue]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""Ways in which to filter lists of issues."""
+input IssueFilters {
+  """
+  List issues assigned to given name. Pass in `null` for issues with no assigned
+  user, and `*` for issues assigned to any user.
+  """
+  assignee: String
+  """List issues created by given name."""
+  createdBy: String
+  """List issues where the list of label names exist on the issue."""
+  labels: [String!]
+  """List issues where the given name is mentioned in the issue."""
+  mentioned: String
+  """
+  List issues by given milestone argument. If an string representation of an
+  integer is passed, it should refer to a milestone by its database ID. Pass in
+  `null` for issues with no milestone, and `*` for issues that are assigned to any milestone.
+  """
+  milestone: String
+  """
+  List issues by given milestone argument. If an string representation of an
+  integer is passed, it should refer to a milestone by its number field. Pass in
+  `null` for issues with no milestone, and `*` for issues that are assigned to any milestone.
+  """
+  milestoneNumber: String
+  """List issues that have been updated at or after the given date."""
+  since: DateTime
+  """List issues filtered by the list of states given."""
+  states: [IssueState!]
+  """List issues subscribed to by viewer."""
+  viewerSubscribed: Boolean = false
+}
+
+"""Ways in which lists of issues can be ordered upon return."""
+input IssueOrder {
+  """The direction in which to order issues by the specified field."""
+  direction: OrderDirection!
+  """The field in which to order issues by."""
+  field: IssueOrderField!
+}
+
+"""Properties by which issue connections can be ordered."""
+enum IssueOrderField {
+  """Order issues by comment count"""
+  COMMENTS
+  """Order issues by creation time"""
+  CREATED_AT
+  """Order issues by update time"""
+  UPDATED_AT
+}
+
+"""The possible states of an issue."""
+enum IssueState {
+  """An issue that has been closed"""
+  CLOSED
+  """An issue that is still open"""
+  OPEN
+}
+
+"""
+A label for categorizing Issues, Pull Requests, Milestones, or Discussions with a given Repository.
+"""
+type Label {
+  """Identifies the label color."""
+  color: String!
+  """Identifies the date and time when the label was created."""
+  createdAt: DateTime
+  """A brief description of this label."""
+  description: String
+  """The Node ID of the Label object"""
+  id: ID!
+  """Indicates whether or not this is a default label."""
+  isDefault: Boolean!
+  """Identifies the label name."""
+  name: String!
+  """Identifies the date and time when the label was last updated."""
+  updatedAt: DateTime
+  """The HTTP URL for this label."""
+  url: URI!
+}
+
+"""The connection type for Label."""
+type LabelConnection {
+  """A list of nodes."""
+  nodes: [Label]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""Ways in which lists of labels can be ordered upon return."""
+input LabelOrder {
+  """The direction in which to order labels by the specified field."""
+  direction: OrderDirection!
+  """The field in which to order labels by."""
+  field: LabelOrderField!
+}
+
+"""Properties by which label connections can be ordered."""
+enum LabelOrderField {
+  """Order labels by creation time"""
+  CREATED_AT
+  """Order labels by name """
+  NAME
+}
+
+"""Represents a given language found in repositories."""
+type Language {
+  """The name of the current language."""
+  name: String!
+}
+
+"""
+Possible directions in which to order a list of items when provided an `orderBy` argument.
+"""
+enum OrderDirection {
+  """Specifies an ascending order for a given `orderBy` argument."""
+  ASC
+  """Specifies a descending order for a given `orderBy` argument."""
+  DESC
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+}
+
+"""A repository pull request."""
+type PullRequest {
+  """The actor who authored the comment."""
+  author: Actor
+  """The body as Markdown."""
+  body: String!
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """The Node ID of the PullRequest object"""
+  id: ID!
+  """The date and time that the pull request was merged."""
+  mergedAt: DateTime
+  """Identifies the pull request number."""
+  number: Int!
+  """The repository associated with this node."""
+  repository: Repository!
+  """Identifies the state of the pull request."""
+  state: PullRequestState!
+  """Identifies the pull request title."""
+  title: String!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+  """The HTTP URL for this pull request."""
+  url: URI!
+}
+
+"""The connection type for PullRequest."""
+type PullRequestConnection {
+  """A list of nodes."""
+  nodes: [PullRequest]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""The possible states of a pull request."""
+enum PullRequestState {
+  """A pull request that has been closed without being merged."""
+  CLOSED
+  """A pull request that has been closed by being merged."""
+  MERGED
+  """A pull request that is still open."""
+  OPEN
+}
+
+"""The query root of GitHub's GraphQL interface."""
+type Query {
+  """Lookup a given repository by the owner and repository name."""
+  repository(
+    """
+    Follow repository renames. If disabled, a repository referenced by its old name will return an error.
+    """
+    followRenames: Boolean = true
+    """The name of the repository"""
+    name: String!
+    """The login field of a user or organization"""
+    owner: String!
+  ): Repository
+  """Lookup a user by login."""
+  user(
+    """The user's login."""
+    login: String!
+  ): User
+}
+
+"""A repository contains the content for a project."""
+type Repository {
+  """The Node ID of the Repository object"""
+  id: ID!
+  """A list of labels associated with the repository."""
+  labels(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for labels returned from the connection."""
+    orderBy: LabelOrder = {field: CREATED_AT, direction: ASC}
+    """If provided, searches labels by name and description."""
+    query: String
+  ): LabelConnection
+  """The repository's name with owner."""
+  nameWithOwner: String!
+  """The primary language of the repository's code."""
+  primaryLanguage: Language
+}
+
+"""An RFC 3986, RFC 3987, and RFC 6570 (level 4) compliant URI string."""
+scalar URI
+
+"""
+A user is an individual's account on GitHub that owns repositories and can make new content.
+"""
+type User {
+  """A list of commit comments made by this user."""
+  commitComments(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+  ): CommitCommentConnection!
+  """A list of issue comments made by this user."""
+  issueComments(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for issue comments returned from the connection."""
+    orderBy: IssueCommentOrder
+  ): IssueCommentConnection!
+  """A list of issues associated with this user."""
+  issues(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Filtering options for issues returned from the connection."""
+    filterBy: IssueFilters
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """A list of label names to filter the pull requests by."""
+    labels: [String!]
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for issues returned from the connection."""
+    orderBy: IssueOrder
+    """A list of states to filter the issues by."""
+    states: [IssueState!]
+  ): IssueConnection!
+  """A list of pull requests associated with this user."""
+  pullRequests(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """The base ref name to filter the pull requests by."""
+    baseRefName: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """The head ref name to filter the pull requests by."""
+    headRefName: String
+    """A list of label names to filter the pull requests by."""
+    labels: [String!]
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for pull requests returned from the connection."""
+    orderBy: IssueOrder
+    """A list of states to filter the pull requests by."""
+    states: [PullRequestState!]
+  ): PullRequestConnection!
+  """Discussion comments this user has authored."""
+  repositoryDiscussionComments(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """
+    Filter discussion comments to only those that were marked as the answer
+    """
+    onlyAnswers: Boolean = false
+    """Filter discussion comments to only those in a specific repository."""
+    repositoryId: ID
+  ): DiscussionCommentConnection!
+  """Discussions this user has started."""
+  repositoryDiscussions(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Filter discussions to only those that have been answered or not. Defaults to
+    including both answered and unanswered discussions.
+    """
+    answered: Boolean = null
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for discussions returned from the connection."""
+    orderBy: DiscussionOrder = {field: CREATED_AT, direction: DESC}
+    """Filter discussions to only those in a specific repository."""
+    repositoryId: ID
+    """A list of states to filter the discussions by."""
+    states: [DiscussionState!] = []
+  ): DiscussionConnection!
+}

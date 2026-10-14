@@ -1,0 +1,19 @@
+{
+  "cohorts": {
+    "users": {
+      "parameter": "users",
+      "argument": "user",
+      "field": "login",
+      "comment": "Personal-user cohort. Supply users or user; an empty cohort returns zero counts. Each login must be nonempty and unique ignoring case.",
+      "example": [{"login": "octocat"}, {"login": "hubot"}]
+    },
+    "repositories": {
+      "parameter": "repositories",
+      "argument": "repository",
+      "field": "repository",
+      "resource": "repository",
+      "comment": "Explicit repository cohort as owner/name values. Supply repositories or one of repository, owner and organization; an empty cohort returns zero counts. Names must be unique ignoring case.",
+      "example": [{"repository": "Query-farm/crossfield"}, {"repository": "Query-farm/vgi"}]
+    }
+  }
+}

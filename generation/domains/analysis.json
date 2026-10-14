@@ -1,0 +1,719 @@
+{
+  "crossfield": {
+    "invocations": {
+      "sources": {
+        "pull_request_reviews": {
+          "dataset": {
+            "fields": {
+              "review_latency_hours": {
+                "expression": "DATEDIFF('millisecond', pull_request_reviews.pull_request_created_at, pull_request_reviews.submitted_at) / 3600000.0",
+                "type": "DOUBLE",
+                "unit": "h"
+              },
+              "review_submitted_eastern_day": {
+                "expression": "CAST(pull_request_reviews.review_submitted_eastern AS DATE)",
+                "type": "DATE",
+                "dimension": true,
+                "is_time": true,
+                "calendar": "gregorian",
+                "granularity": "day"
+              }
+            }
+          }
+        },
+        "authored_pull_requests": {
+          "dataset": {
+            "fields": {
+              "authored_pr_created_eastern_day": {
+                "expression": "CAST(authored_pull_requests.authored_pr_created_eastern AS DATE)",
+                "type": "DATE",
+                "dimension": true,
+                "is_time": true,
+                "calendar": "gregorian",
+                "granularity": "day"
+              }
+            }
+          }
+        }
+      },
+      "derived_datasets": {
+        "first_review_prs": {
+          "id": "github/derived/first_review_prs",
+          "from": "pull_request_reviews",
+          "dataset": {
+            "name": "first_review_prs",
+            "id": "github/analysis/first_review_prs",
+            "grain": [
+              "repository_id",
+              "pull_request_number"
+            ],
+            "fields": {
+              "repository_id": {
+                "source_column": "repository_id",
+                "dimension": true
+              },
+              "pull_request_number": {
+                "source_column": "pull_request_number",
+                "dimension": true
+              },
+              "first_review_hours": {
+                "source_column": "first_review_hours"
+              },
+              "first_review_at": {
+                "source_column": "first_review_at",
+                "timezone": "UTC"
+              }
+            }
+          },
+          "columns": [
+            {
+              "name": "repository_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "first_review_hours",
+              "type": "DOUBLE",
+              "nullable": true
+            },
+            {
+              "name": "first_review_at",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true
+            }
+          ],
+          "semantic_query": {
+            "group_by": {
+              "repository_id": "pull_request_reviews.repository_id",
+              "pull_request_number": "pull_request_reviews.pull_request_number"
+            },
+            "metrics": {
+              "first_review_hours": "pr_first_review_hours",
+              "first_review_at": "pr_first_review_at"
+            },
+            "rows": "observed"
+          }
+        },
+        "submitted_reviews": {
+          "id": "github/derived/submitted_reviews",
+          "from": "pull_request_reviews",
+          "dataset": {
+            "name": "submitted_reviews",
+            "id": "github/analysis/submitted_reviews",
+            "grain": [
+              "repository_id",
+              "pull_request_number",
+              "reviewer_id",
+              "review_id",
+              "submitted_at"
+            ],
+            "fields": {
+              "repository_id": {
+                "source_column": "repository_id",
+                "dimension": true
+              },
+              "pull_request_number": {
+                "source_column": "pull_request_number",
+                "dimension": true
+              },
+              "reviewer_id": {
+                "source_column": "reviewer_id",
+                "dimension": true
+              },
+              "review_id": {
+                "source_column": "review_id",
+                "dimension": true
+              },
+              "submitted_at": {
+                "source_column": "submitted_at",
+                "dimension": true,
+                "timezone": "UTC"
+              },
+              "record_count": {
+                "source_column": "record_count"
+              },
+              "state": {
+                "source_column": "state"
+              },
+              "reviewer_login": {
+                "source_column": "reviewer_login"
+              }
+            }
+          },
+          "columns": [
+            {
+              "name": "repository_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "reviewer_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "review_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "submitted_at",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": false
+            },
+            {
+              "name": "record_count",
+              "type": "BIGINT",
+              "nullable": true
+            },
+            {
+              "name": "state",
+              "type": "VARCHAR",
+              "nullable": true
+            },
+            {
+              "name": "reviewer_login",
+              "type": "VARCHAR",
+              "nullable": true
+            }
+          ],
+          "semantic_query": {
+            "group_by": {
+              "repository_id": "pull_request_reviews.repository_id",
+              "pull_request_number": "pull_request_reviews.pull_request_number",
+              "reviewer_id": "pull_request_reviews.reviewer_id",
+              "review_id": "pull_request_reviews.review_id",
+              "submitted_at": "pull_request_reviews.submitted_at"
+            },
+            "metrics": {
+              "record_count": "review_record_count",
+              "state": "review_record_state",
+              "reviewer_login": "review_record_login"
+            },
+            "rows": "observed",
+            "filter": "submitted_review_count > 0 AND pull_request_reviews.submitted_at IS NOT NULL AND pull_request_reviews.reviewer_id IS NOT NULL"
+          }
+        },
+        "latest_reviewer_reviews": {
+          "id": "github/derived/latest_reviewer_reviews",
+          "from": "submitted_reviews",
+          "dataset": {
+            "name": "latest_reviewer_reviews",
+            "id": "github/analysis/latest_reviewer_reviews",
+            "grain": [
+              "repository_id",
+              "pull_request_number",
+              "reviewer_id",
+              "review_id",
+              "submitted_at"
+            ],
+            "fields": {
+              "repository_id": {
+                "source_column": "repository_id",
+                "dimension": true
+              },
+              "pull_request_number": {
+                "source_column": "pull_request_number",
+                "dimension": true
+              },
+              "reviewer_id": {
+                "source_column": "reviewer_id",
+                "dimension": true
+              },
+              "review_id": {
+                "source_column": "review_id",
+                "dimension": true
+              },
+              "submitted_at": {
+                "source_column": "submitted_at",
+                "dimension": true,
+                "timezone": "UTC"
+              },
+              "state": {
+                "source_column": "state"
+              },
+              "reviewer_login": {
+                "source_column": "reviewer_login"
+              }
+            }
+          },
+          "columns": [
+            {
+              "name": "repository_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "reviewer_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "review_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "submitted_at",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": false
+            },
+            {
+              "name": "state",
+              "type": "VARCHAR",
+              "nullable": true
+            },
+            {
+              "name": "reviewer_login",
+              "type": "VARCHAR",
+              "nullable": true
+            }
+          ],
+          "semantic_query": {
+            "group_by": {
+              "repository_id": "submitted_reviews.repository_id",
+              "pull_request_number": "submitted_reviews.pull_request_number",
+              "reviewer_id": "submitted_reviews.reviewer_id",
+              "review_id": "submitted_reviews.review_id",
+              "submitted_at": "submitted_reviews.submitted_at"
+            },
+            "metrics": {
+              "state": "submitted_review_state",
+              "reviewer_login": "submitted_reviewer_login"
+            },
+            "rows": "observed",
+            "filter": "review_latest_rank = 1"
+          }
+        }
+      }
+    },
+    "metrics": {
+      "pr_first_review_hours": {
+        "expression": "MIN(pull_request_reviews.review_latency_hours)"
+      },
+      "pr_first_review_at": {
+        "expression": "MIN(pull_request_reviews.submitted_at)"
+      },
+      "reviewed_pr_count": {
+        "expression": "COUNT(*)"
+      },
+      "mean_first_review_hours": {
+        "expression": "AVG(first_review_prs.first_review_hours)"
+      },
+      "median_first_review_hours": {
+        "expression": "MEDIAN(first_review_prs.first_review_hours)"
+      },
+      "p90_first_review_hours": {
+        "expression": "PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY first_review_prs.first_review_hours)"
+      },
+      "review_record_count": {
+        "expression": "COUNT(*)"
+      },
+      "review_record_state": {
+        "expression": "MAX(pull_request_reviews.state)"
+      },
+      "review_record_login": {
+        "expression": "MAX(pull_request_reviews.reviewer_login)"
+      },
+      "review_latest_rank": {
+        "expression": "ROW_NUMBER() OVER (PARTITION BY submitted_reviews.repository_id, submitted_reviews.pull_request_number, submitted_reviews.reviewer_id ORDER BY submitted_reviews.submitted_at DESC, submitted_reviews.review_id DESC)"
+      },
+      "submitted_review_state": {
+        "expression": "MAX(submitted_reviews.state)"
+      },
+      "submitted_reviewer_login": {
+        "expression": "MAX(submitted_reviews.reviewer_login)"
+      },
+      "latest_reviewer_review_count": {
+        "expression": "COUNT(*)"
+      },
+      "latest_approved_reviewer_count": {
+        "expression": "COUNT(*) FILTER (WHERE latest_reviewer_reviews.state = 'APPROVED')"
+      },
+      "monthly_authored_pr_total": {
+        "expression": "SUM(authored_pr_count) OVER (PARTITION BY authored_pull_requests.user_id, authored_pull_requests.user_login, authored_pull_requests.authored_pr_created_month)"
+      },
+      "monthly_repository_pr_share": {
+        "expression": "authored_pr_count / NULLIF(monthly_authored_pr_total, 0)"
+      },
+      "monthly_user_pr_rank": {
+        "expression": "DENSE_RANK() OVER (PARTITION BY authored_pull_requests.authored_pr_created_month ORDER BY authored_pr_count DESC)"
+      }
+    },
+    "policy": {
+      "metrics": [
+        "pr_first_review_hours",
+        "pr_first_review_at",
+        "reviewed_pr_count",
+        "mean_first_review_hours",
+        "median_first_review_hours",
+        "p90_first_review_hours",
+        "review_record_count",
+        "review_record_state",
+        "review_record_login",
+        "review_latest_rank",
+        "submitted_review_state",
+        "submitted_reviewer_login",
+        "latest_reviewer_review_count",
+        "latest_approved_reviewer_count",
+        "monthly_authored_pr_total",
+        "monthly_repository_pr_share",
+        "monthly_user_pr_rank"
+      ],
+      "dimensions": [
+        "pull_request_reviews.repository_id",
+        "pull_request_reviews.pull_request_number",
+        "pull_request_reviews.review_id",
+        "pull_request_reviews.submitted_at",
+        "pull_request_reviews.reviewer_id",
+        "pull_request_reviews.reviewer_login",
+        "pull_request_reviews.state",
+        "first_review_prs.repository_id",
+        "first_review_prs.pull_request_number",
+        "submitted_reviews.repository_id",
+        "submitted_reviews.pull_request_number",
+        "submitted_reviews.reviewer_id",
+        "submitted_reviews.review_id",
+        "submitted_reviews.submitted_at",
+        "latest_reviewer_reviews.repository_id",
+        "latest_reviewer_reviews.pull_request_number",
+        "latest_reviewer_reviews.reviewer_id",
+        "latest_reviewer_reviews.review_id",
+        "latest_reviewer_reviews.submitted_at",
+        "authored_pull_requests.user_id",
+        "authored_pull_requests.user_login",
+        "authored_pull_requests.repository_node_id",
+        "authored_pull_requests.repository_name",
+        "authored_pull_requests.authored_pr_created_month",
+        "authored_pull_requests.authored_pr_created_eastern",
+        "authored_pull_requests.authored_pr_created_eastern_day",
+        "pull_request_reviews.review_submitted_eastern",
+        "pull_request_reviews.review_submitted_eastern_day"
+      ],
+      "filter_dimensions": [
+        "pull_request_reviews.repository_id",
+        "pull_request_reviews.pull_request_number",
+        "pull_request_reviews.review_id",
+        "pull_request_reviews.submitted_at",
+        "pull_request_reviews.reviewer_id",
+        "pull_request_reviews.reviewer_login",
+        "pull_request_reviews.state",
+        "first_review_prs.repository_id",
+        "first_review_prs.pull_request_number",
+        "submitted_reviews.repository_id",
+        "submitted_reviews.pull_request_number",
+        "submitted_reviews.reviewer_id",
+        "submitted_reviews.review_id",
+        "submitted_reviews.submitted_at",
+        "latest_reviewer_reviews.repository_id",
+        "latest_reviewer_reviews.pull_request_number",
+        "latest_reviewer_reviews.reviewer_id",
+        "latest_reviewer_reviews.review_id",
+        "latest_reviewer_reviews.submitted_at",
+        "authored_pull_requests.user_id",
+        "authored_pull_requests.user_login",
+        "authored_pull_requests.repository_node_id",
+        "authored_pull_requests.repository_name",
+        "authored_pull_requests.authored_pr_created_month",
+        "authored_pull_requests.authored_pr_created_eastern",
+        "authored_pull_requests.authored_pr_created_eastern_day",
+        "pull_request_reviews.review_submitted_eastern",
+        "pull_request_reviews.review_submitted_eastern_day"
+      ],
+      "detail_fields": [
+        "pull_request_reviews.repository_id",
+        "pull_request_reviews.pull_request_number",
+        "pull_request_reviews.review_id",
+        "pull_request_reviews.submitted_at",
+        "pull_request_reviews.reviewer_id",
+        "pull_request_reviews.reviewer_login",
+        "pull_request_reviews.state",
+        "pull_request_reviews.review_latency_hours",
+        "first_review_prs.repository_id",
+        "first_review_prs.pull_request_number",
+        "first_review_prs.first_review_hours",
+        "first_review_prs.first_review_at",
+        "submitted_reviews.repository_id",
+        "submitted_reviews.pull_request_number",
+        "submitted_reviews.reviewer_id",
+        "submitted_reviews.review_id",
+        "submitted_reviews.submitted_at",
+        "submitted_reviews.record_count",
+        "submitted_reviews.state",
+        "submitted_reviews.reviewer_login",
+        "latest_reviewer_reviews.repository_id",
+        "latest_reviewer_reviews.pull_request_number",
+        "latest_reviewer_reviews.reviewer_id",
+        "latest_reviewer_reviews.review_id",
+        "latest_reviewer_reviews.submitted_at",
+        "latest_reviewer_reviews.state",
+        "latest_reviewer_reviews.reviewer_login",
+        "authored_pull_requests.user_id",
+        "authored_pull_requests.user_login",
+        "authored_pull_requests.repository_node_id",
+        "authored_pull_requests.repository_name",
+        "authored_pull_requests.authored_pr_created_month",
+        "authored_pull_requests.authored_pr_created_eastern",
+        "authored_pull_requests.authored_pr_created_eastern_day",
+        "pull_request_reviews.review_submitted_eastern",
+        "pull_request_reviews.review_submitted_eastern_day"
+      ],
+      "metric_semantics": {
+        "pr_first_review_hours": {
+          "comment": "Earliest submitted review latency per selected PR group; use first_review_prs for a distribution with one observation per PR.",
+          "additivity": "non_additive",
+          "dataset": "pull_request_reviews",
+          "population": "pull_request_reviews.submitted_at IS NOT NULL AND pull_request_reviews.state IN ('APPROVED', 'CHANGES_REQUESTED', 'COMMENTED', 'DISMISSED')",
+          "population_id": "github/submitted-review-with-time/v1",
+          "unit": "h"
+        },
+        "pr_first_review_at": {
+          "comment": "Earliest eligible review submission instant. Missing timestamps and pending states are excluded.",
+          "additivity": "non_additive",
+          "dataset": "pull_request_reviews",
+          "population": "pull_request_reviews.submitted_at IS NOT NULL AND pull_request_reviews.state IN ('APPROVED', 'CHANGES_REQUESTED', 'COMMENTED', 'DISMISSED')",
+          "population_id": "github/submitted-review-with-time/v1",
+          "timezone": "UTC"
+        },
+        "reviewed_pr_count": {
+          "comment": "PRs with at least one submitted, timestamped review. Each PR contributes once regardless of review count.",
+          "additivity": "additive",
+          "dataset": "first_review_prs"
+        },
+        "mean_first_review_hours": {
+          "comment": "Equal weight per reviewed PR; averages the first review latency, not all review records. Unreviewed PRs are excluded.",
+          "additivity": "non_additive",
+          "dataset": "first_review_prs",
+          "unit": "h"
+        },
+        "median_first_review_hours": {
+          "comment": "Median first-review latency across reviewed PRs; one observation per PR.",
+          "additivity": "non_additive",
+          "dataset": "first_review_prs",
+          "unit": "h"
+        },
+        "p90_first_review_hours": {
+          "comment": "Continuous 90th percentile of first-review latency across reviewed PRs; one observation per PR.",
+          "additivity": "non_additive",
+          "dataset": "first_review_prs",
+          "unit": "h"
+        },
+        "review_record_count": {
+          "comment": "All returned review records, including pending records; used before the explicit submitted-review stage filter.",
+          "additivity": "additive",
+          "dataset": "pull_request_reviews"
+        },
+        "review_record_state": {
+          "comment": "Review state at the unique review-record grain; used only to carry its value into the submitted-review stage.",
+          "additivity": "non_additive",
+          "dataset": "pull_request_reviews"
+        },
+        "review_record_login": {
+          "comment": "Reviewer login at unique review-record grain; the stable numeric reviewer ID controls identity.",
+          "additivity": "non_additive",
+          "dataset": "pull_request_reviews"
+        },
+        "review_latest_rank": {
+          "comment": "Latest submitted review per PR and reviewer, ordered by instant and then greatest review ID for deterministic timestamp ties.",
+          "additivity": "non_additive",
+          "dataset": "submitted_reviews",
+          "window_grain": [
+            "submitted_reviews.repository_id",
+            "submitted_reviews.pull_request_number",
+            "submitted_reviews.reviewer_id",
+            "submitted_reviews.review_id",
+            "submitted_reviews.submitted_at"
+          ]
+        },
+        "submitted_review_state": {
+          "comment": "Submitted state at a unique review ID, retained for latest-review selection.",
+          "additivity": "non_additive",
+          "dataset": "submitted_reviews"
+        },
+        "submitted_reviewer_login": {
+          "comment": "Reviewer login at a unique submitted review ID; not the PR author.",
+          "additivity": "non_additive",
+          "dataset": "submitted_reviews"
+        },
+        "latest_reviewer_review_count": {
+          "comment": "PR/reviewer pairs with an observed submitted review; the latest record is selected before this count.",
+          "additivity": "additive",
+          "dataset": "latest_reviewer_reviews"
+        },
+        "latest_approved_reviewer_count": {
+          "comment": "PR/reviewer pairs whose latest submitted record is APPROVED; not distinct people across PRs and not GitHub merge eligibility.",
+          "additivity": "additive",
+          "dataset": "latest_reviewer_reviews"
+        },
+        "monthly_authored_pr_total": {
+          "comment": "Visible authored PR total for this user and UTC creation month across all repository groups in the selected population.",
+          "additivity": "non_additive",
+          "window_grain": [
+            "authored_pull_requests.user_id",
+            "authored_pull_requests.user_login",
+            "authored_pull_requests.authored_pr_created_month",
+            "authored_pull_requests.repository_node_id",
+            "authored_pull_requests.repository_name"
+          ]
+        },
+        "monthly_repository_pr_share": {
+          "comment": "Repository share of a user's visible authored PRs in a UTC creation month. Denominator is formed before QUALIFY or output LIMIT; no claim about invisible repositories or contribution quality.",
+          "additivity": "non_additive",
+          "window_grain": [
+            "authored_pull_requests.user_id",
+            "authored_pull_requests.user_login",
+            "authored_pull_requests.authored_pr_created_month",
+            "authored_pull_requests.repository_node_id",
+            "authored_pull_requests.repository_name"
+          ]
+        },
+        "monthly_user_pr_rank": {
+          "comment": "Dense rank of selected users by observed authored-PR count in each UTC creation month. Ties share rank; users with no observed PRs are absent. This is activity volume, not performance or impact.",
+          "additivity": "non_additive",
+          "window_grain": [
+            "authored_pull_requests.user_id",
+            "authored_pull_requests.user_login",
+            "authored_pull_requests.authored_pr_created_month"
+          ]
+        }
+      },
+      "field_semantics": {
+        "pull_request_reviews.repository_id": {
+          "sql_name": "review_repository_id"
+        },
+        "pull_request_reviews.pull_request_number": {
+          "sql_name": "review_pr_number"
+        },
+        "pull_request_reviews.review_id": {
+          "sql_name": "review_record_id"
+        },
+        "pull_request_reviews.submitted_at": {
+          "sql_name": "review_submitted_at"
+        },
+        "pull_request_reviews.review_latency_hours": {
+          "sql_name": "review_latency_hours",
+          "comment": "Elapsed hours from PR creation to this review submission, using UTC instants; pending timestamps remain NULL."
+        },
+        "first_review_prs.repository_id": {
+          "sql_name": "first_review_prs_repository_id",
+          "comment": "One observed row per PR with at least one eligible timestamped review. Unreviewed PRs are absent, not zero-latency observations."
+        },
+        "first_review_prs.pull_request_number": {
+          "sql_name": "first_review_prs_pull_request_number"
+        },
+        "first_review_prs.first_review_hours": {
+          "sql_name": "first_review_prs_first_review_hours"
+        },
+        "first_review_prs.first_review_at": {
+          "sql_name": "first_review_prs_first_review_at"
+        },
+        "submitted_reviews.repository_id": {
+          "sql_name": "submitted_reviews_repository_id",
+          "comment": "Timestamped submitted reviews with stable reviewer identity; pending and anonymous records are excluded before ranking."
+        },
+        "submitted_reviews.pull_request_number": {
+          "sql_name": "submitted_reviews_pull_request_number"
+        },
+        "submitted_reviews.reviewer_id": {
+          "sql_name": "submitted_reviews_reviewer_id"
+        },
+        "submitted_reviews.review_id": {
+          "sql_name": "submitted_reviews_review_id"
+        },
+        "submitted_reviews.submitted_at": {
+          "sql_name": "submitted_reviews_submitted_at"
+        },
+        "submitted_reviews.record_count": {
+          "sql_name": "submitted_reviews_record_count"
+        },
+        "submitted_reviews.state": {
+          "sql_name": "submitted_reviews_state"
+        },
+        "submitted_reviews.reviewer_login": {
+          "sql_name": "submitted_reviews_reviewer_login"
+        },
+        "latest_reviewer_reviews.repository_id": {
+          "sql_name": "latest_reviewer_reviews_repository_id",
+          "comment": "Latest observed submitted review per PR/reviewer. Multiple PRs by one reviewer remain separate; this is not merge eligibility."
+        },
+        "latest_reviewer_reviews.pull_request_number": {
+          "sql_name": "latest_reviewer_reviews_pull_request_number"
+        },
+        "latest_reviewer_reviews.reviewer_id": {
+          "sql_name": "latest_reviewer_reviews_reviewer_id"
+        },
+        "latest_reviewer_reviews.review_id": {
+          "sql_name": "latest_reviewer_reviews_review_id"
+        },
+        "latest_reviewer_reviews.submitted_at": {
+          "sql_name": "latest_reviewer_reviews_submitted_at"
+        },
+        "latest_reviewer_reviews.state": {
+          "sql_name": "latest_reviewer_reviews_state"
+        },
+        "latest_reviewer_reviews.reviewer_login": {
+          "sql_name": "latest_reviewer_reviews_reviewer_login"
+        },
+        "authored_pull_requests.user_id": {
+          "sql_name": "activity_user_id"
+        },
+        "authored_pull_requests.user_login": {
+          "sql_name": "activity_user"
+        },
+        "authored_pull_requests.authored_pr_created_eastern": {
+          "sql_name": "authored_pr_created_eastern",
+          "comment": "Fixed US Eastern reporting wall clock (America/New_York with DST). Explicit reporting choice; never inferred from a GitHub profile location."
+        },
+        "authored_pull_requests.authored_pr_created_eastern_day": {
+          "sql_name": "authored_pr_created_eastern_day",
+          "comment": "US Eastern reporting date using America/New_York daylight-saving rules. UTC dates remain available separately."
+        },
+        "pull_request_reviews.review_submitted_eastern": {
+          "sql_name": "review_submitted_eastern",
+          "comment": "Fixed US Eastern reporting wall clock (America/New_York with DST). Explicit reporting choice; never inferred from a GitHub profile location."
+        },
+        "pull_request_reviews.review_submitted_eastern_day": {
+          "sql_name": "review_submitted_eastern_day",
+          "comment": "US Eastern reporting date using America/New_York daylight-saving rules. UTC dates remain available separately."
+        },
+        "authored_pull_requests.repository_node_id": {
+          "sql_name": "activity_repository_id"
+        }
+      },
+      "window_metrics": [
+        "review_latest_rank",
+        "monthly_authored_pr_total",
+        "monthly_repository_pr_share",
+        "monthly_user_pr_rank"
+      ],
+      "local_time_fields": {
+        "authored_pull_requests.authored_pr_created_eastern": {
+          "instant": "authored_pull_requests.created_at",
+          "zone": "America/New_York",
+          "dimension": true
+        },
+        "pull_request_reviews.review_submitted_eastern": {
+          "instant": "pull_request_reviews.submitted_at",
+          "zone": "America/New_York",
+          "dimension": true
+        }
+      },
+      "timezone": "UTC"
+    }
+  }
+}

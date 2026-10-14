@@ -1,0 +1,187 @@
+{
+  "entities": [
+    {
+      "name": "user_profile_lookup",
+      "description": "Schema-derived users/get-by-username source.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-by-username",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "users",
+      "description": "One canonical personal GitHub user profile. User scope does not mean owned repositories; organization logins reject.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_stage": "users",
+          "source_column": "user_id"
+        },
+        {
+          "name": "user_login",
+          "source_stage": "users",
+          "source_column": "user_login"
+        },
+        {
+          "name": "account_type",
+          "source_stage": "users",
+          "source_column": "account_type"
+        },
+        {
+          "name": "name",
+          "source_stage": "users",
+          "source_column": "name"
+        },
+        {
+          "name": "created_at",
+          "source_stage": "users",
+          "source_column": "created_at"
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "users",
+            "scope": "users"
+          }
+        ],
+        "output_stage": "users"
+      },
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "account_type",
+          "name",
+          "created_at"
+        ],
+        "dimensions": [
+          "user_id",
+          "user_login",
+          "name"
+        ],
+        "metrics": [
+          {
+            "name": "user_count",
+            "kind": "count",
+            "comment": "Selected personal user accounts, including users with no visible authored PRs."
+          }
+        ],
+        "sql_names": {
+          "user_login": "user_login",
+          "name": "user_name"
+        }
+      }
+    }
+  ],
+  "scopes": {
+    "users": {
+      "comment": "Require a personal user account; an organization login is not a user activity scope.",
+      "select": {
+        "resolve": {
+          "entity": "account_lookup",
+          "arguments": {
+            "owner": {
+              "parameter": "user"
+            }
+          }
+        },
+        "field": "account_type",
+        "cases": {
+          "User": {
+            "entity": "user_profile_lookup",
+            "arguments": {
+              "user": {
+                "parameter": "user"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "shared_dimensions": {
+    "github.user.id.v1": [
+      "users.user_id",
+      "authored_pull_requests.user_id",
+      "authored_issues.user_id",
+      "authored_discussions.user_id",
+      "authored_issue_comments.user_id",
+      "authored_discussion_comments.user_id",
+      "authored_commit_comments.user_id"
+    ]
+  }
+}

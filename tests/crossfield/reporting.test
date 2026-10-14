@@ -55,16 +55,20 @@ statement ok
 SET crossfield_mode='strict';
 
 query TTT
-SELECT name,type,nullable::VARCHAR FROM crossfield_parameters() WHERE database_name='engineering' AND invocation_name='engineering.semantic.github_reporting' ORDER BY name;
+SELECT name,type,nullable::VARCHAR FROM crossfield_parameters() WHERE database_name='engineering' AND invocation_name='engineering.semantic.github' ORDER BY name;
 ----
+comment_node_id	VARCHAR	false
+discussion_number	BIGINT	false
 issue_number	BIGINT	false
 owner	VARCHAR	false
+project_number	BIGINT	false
+project_owner_type	VARCHAR	false
 repository	VARCHAR	false
 
 query I
 SELECT count(*) FROM crossfield_queries() WHERE database_name='engineering';
 ----
-32
+49
 
 query TTTT
 SELECT name,type,nullable::VARCHAR,comment FROM crossfield_query_parameters() WHERE database_name='engineering' AND query_name='pr_merge_summary' ORDER BY ordinal;
@@ -89,71 +93,71 @@ statement ok
 PREPARE search_issues AS SELECT number,state FROM engineering.reports.search_issues_detail(query=>$1) ORDER BY number;
 
 statement ok
-PREPARE semantic_merges AS SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>$1) WHERE pulls_merged_day >= $2::DATE AND pulls_merged_day < $3::DATE;
+PREPARE semantic_merges AS SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github(repository=>$1) WHERE pulls_merged_day >= $2::DATE AND pulls_merged_day < $3::DATE;
 
 statement ok
-EXPLAIN (SEMANTIC) SELECT pulls_user_login AS author,merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01' GROUP BY pulls_user_login;
+EXPLAIN (SEMANTIC) SELECT pulls_user_login AS author,merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01' GROUP BY pulls_user_login;
 
 statement ok
-EXPLAIN (SQL) SELECT repository_input_repo,merged_prs,workflow_run_count,ci_success_rate FROM engineering.semantic.github_reporting(repository=>'example/project') GROUP BY repository_input_repo;
+EXPLAIN (SQL) SELECT repository_input_repo,merged_prs,workflow_run_count,ci_success_rate FROM engineering.semantic.github(repository=>'example/project') GROUP BY repository_input_repo;
 
 statement ok
-DESCRIBE SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project');
+DESCRIBE SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github(repository=>'example/project');
 
 # Public inputs are model-owned. Required arguments depend on the selected
 # metrics; unknown/unused arguments cannot silently look like effective filters.
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting();
+SELECT merged_prs FROM engineering.semantic.github();
 ----
 SEMANTIC_PARAMETER_MISSING
 
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>NULL);
+SELECT merged_prs FROM engineering.semantic.github(repository=>NULL);
 ----
 SEMANTIC_PARAMETER_NULL
 
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>42);
+SELECT merged_prs FROM engineering.semantic.github(repository=>42);
 ----
 SEMANTIC_PARAMETER_TYPE
 
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>'example/project',max_rows=>1);
+SELECT merged_prs FROM engineering.semantic.github(repository=>'example/project',max_rows=>1);
 ----
 SEMANTIC_PARAMETER_NAME
 
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>'example/project',owner=>'example');
+SELECT merged_prs FROM engineering.semantic.github(repository=>'example/project',owner=>'example');
 ----
 SEMANTIC_PARAMETER_UNUSED
 
 statement error
-SELECT issue_comment_count FROM engineering.semantic.github_reporting(repository=>'example/project');
+SELECT issue_comment_count FROM engineering.semantic.github(repository=>'example/project');
 ----
 SEMANTIC_PARAMETER_MISSING
 
 statement error
-SELECT issue_comment_count FROM engineering.semantic.github_reporting(repository=>'example/project',issue_number=>'one');
+SELECT issue_comment_count FROM engineering.semantic.github(repository=>'example/project',issue_number=>'one');
 ----
 SEMANTIC_PARAMETER_TYPE
 
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting('example/project');
+SELECT merged_prs FROM engineering.semantic.github('example/project');
 ----
 SEMANTIC_ARGUMENTS
 
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting('example/project',repository=>'example/project');
+SELECT merged_prs FROM engineering.semantic.github('example/project',repository=>'example/project');
 ----
 <REGEX>:(?s).*(SEMANTIC_ARGUMENTS|named|positional).*
 
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>'example/project',repository=>'example/other');
+SELECT merged_prs FROM engineering.semantic.github(repository=>'example/project',repository=>'example/other');
 ----
 <REGEX>:(?s).*(SEMANTIC_ARGUMENTS|Duplicate|duplicate).*
 
 statement error
-SELECT merged_prs FROM engineering.semantic.github_reporting(repository=>upper('example/project'));
+SELECT merged_prs FROM engineering.semantic.github(repository=>upper('example/project'));
 ----
 SEMANTIC_PARAMETER_EXPRESSION
 
@@ -205,23 +209,13 @@ CROSSFIELD_REAGGREGATION
 statement ok
 SET crossfield_mode='off';
 
-query I
-SELECT count(*) FROM duckdb_functions() WHERE database_name='engineering' AND schema_name='semantic' AND function_name='github_reporting';
-----
-1
-
-query I
-SELECT count(*) FROM duckdb_tables() WHERE database_name='engineering' AND schema_name='semantic' AND table_name='github_reporting';
-----
-1
-
 query T
 SELECT name FROM crossfield_parameters() WHERE database_name='engineering' AND list_contains(source_datasets,'pulls') AND list_contains(metric_names,'merged_prs');
 ----
 repository
 
 query TTT
-SELECT name,json_extract(requirements,'$.required_parameters')::VARCHAR,json_extract(requirements,'$.requires_pipeline')::VARCHAR FROM crossfield_catalog_capabilities() WHERE database_name='engineering' AND name IN ('merged_prs','repository_count') ORDER BY name;
+SELECT name,json_extract_string(requirements,'$.required_parameters'),json_extract_string(requirements,'$.requires_pipeline') FROM crossfield_catalog_capabilities() WHERE database_name='engineering' AND name IN ('merged_prs','repository_count') ORDER BY name;
 ----
 merged_prs	["repository"]	false
 repository_count	["owner"]	false
@@ -232,7 +226,7 @@ SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<
 0
 
 query III
-SELECT contains(metadata,'mean_merge_hours')::INTEGER,contains(metadata,'github_reporting')::INTEGER,contains(metadata,'live_explicit')::INTEGER FROM crossfield_compile('SELECT * FROM engineering.reports.pr_merge_summary(repository=>''example/project'',start_day=>''2026-09-01'',end_day=>''2026-10-01'')');
+SELECT contains(metadata,'mean_merge_hours')::INTEGER,(json_extract_string(metadata,'$.model.name')='github')::INTEGER,contains(metadata,'live_explicit')::INTEGER FROM crossfield_compile('SELECT * FROM engineering.reports.pr_merge_summary(repository=>''example/project'',start_day=>''2026-09-01'',end_day=>''2026-10-01'')');
 ----
 1	1	1
 
@@ -247,7 +241,7 @@ SET crossfield_mode='strict';
 # Free metric composition keeps the caller's dimensions and population. These
 # two authors have durations (2,10) and (4,20), respectively.
 query TIRR
-SELECT pulls_user_login AS author,merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01' GROUP BY pulls_user_login ORDER BY author;
+SELECT pulls_user_login AS author,merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01' GROUP BY pulls_user_login ORDER BY author;
 ----
 alice	2	6.000	9.200
 bob	2	12.000	18.400
@@ -264,7 +258,7 @@ true	0
 
 # The callable entry also works without strict-session enforcement.
 query IRR
-SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01';
+SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01';
 ----
 4	7.000	17.000
 
@@ -287,26 +281,64 @@ EXECUTE semantic_merges(NULL,'2026-09-01','2026-10-01');
 <REGEX>:(?s).*(SEMANTIC_PARAMETER_NULL|NULL|null).*
 
 query IRR
-WITH merges AS (SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github_reporting(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01') SELECT merged_prs,median_merge_hours,p90_merge_hours FROM merges;
+WITH merges AS (SELECT merged_prs,median_merge_hours,p90_merge_hours FROM engineering.semantic.github(repository=>'example/project') WHERE pulls_merged_day >= DATE '2026-09-01' AND pulls_merged_day < DATE '2026-10-01') SELECT merged_prs,median_merge_hours,p90_merge_hours FROM merges;
 ----
 4	7.000	17.000
 
 query TIIR
-SELECT repository_input_repo AS repository,merged_prs,workflow_run_count,ci_success_rate FROM engineering.semantic.github_reporting(repository=>'example/project') GROUP BY repository_input_repo;
+SELECT repository_input_repo AS repository,merged_prs,workflow_run_count,ci_success_rate FROM engineering.semantic.github(repository=>'example/project') GROUP BY repository_input_repo;
 ----
 example/project	6	3	0.500
 
 # Source pruning changes the required inputs: repository is not required by
 # account repository counts; issue comments require both repository and number.
 query I
-SELECT repository_count FROM engineering.semantic.github_reporting(owner=>'example');
+SELECT repository_count FROM engineering.semantic.github(owner=>'example');
 ----
 2
 
 query I
-SELECT issue_comment_count FROM engineering.semantic.github_reporting(repository=>'example/project',issue_number=>1);
+SELECT issue_comment_count FROM engineering.semantic.github(repository=>'example/project',issue_number=>1);
 ----
 1
+
+# Every model-owned source template has an independent numerical oracle. These
+# exercise direct metrics without borrowing a saved report's provider request.
+query II
+SELECT repository_stars,repository_forks FROM engineering.semantic.github(repository=>'example/project');
+----
+12	3
+
+query III
+SELECT issue_count,open_issues,closed_issues FROM engineering.semantic.github(repository=>'example/project');
+----
+2	1	1
+
+query II
+SELECT commit_count,verified_commit_count FROM engineering.semantic.github(repository=>'example/project');
+----
+2	1
+
+query II
+SELECT published_releases,release_asset_downloads FROM engineering.semantic.github(repository=>'example/project');
+----
+1	35
+
+query II
+SELECT contributor_count,attributed_commits FROM engineering.semantic.github(repository=>'example/project');
+----
+2	10
+
+query TI
+SELECT languages_language,language_bytes FROM engineering.semantic.github(repository=>'example/project') GROUP BY languages_language ORDER BY languages_language;
+----
+C++	250
+Python	750
+
+query I
+SELECT current_stargazers FROM engineering.semantic.github(repository=>'example/project');
+----
+2
 
 # Main numerical oracle: four September merges have 2, 4, 10, and 20 elapsed
 # hours. Include the exact lower bound and exclude the exact upper bound.

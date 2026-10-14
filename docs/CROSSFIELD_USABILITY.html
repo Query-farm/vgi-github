@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Complete GitHub semantic access — Crossfield plan</title>
+<style>
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+:root { color-scheme: light; --ink:#20352c; --muted:#617368; --green:#25694b; --line:#dce5dc; --paper:#fffefa; --background:#f3f5ee; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; scroll-padding-top:2rem; }
+body { margin:0; background:var(--background); color:var(--ink); font:17px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+a { color:var(--green); text-decoration-thickness:1px; text-underline-offset:3px; }
+a:hover { color:#133e2a; }
+a:focus-visible { outline:3px solid #b49537; outline-offset:4px; }
+.masthead { border-bottom:1px solid var(--line); padding:20px 5vw; background:var(--paper); display:flex; gap:24px; align-items:center; justify-content:space-between; }
+.brand { font-size:13px; font-weight:750; letter-spacing:.15em; color:var(--green); }
+.masthead a { font-size:13px; }
+.layout { max-width:1370px; margin:auto; display:grid; grid-template-columns:230px minmax(0,1fr); gap:42px; padding:44px 4vw 80px; }
+aside { position:sticky; top:32px; align-self:start; font-size:14px; line-height:1.5; }
+.nav-label { font-size:11px; letter-spacing:.13em; text-transform:uppercase; font-weight:750; color:var(--muted); margin-bottom:16px; }
+nav ul { list-style:none; margin:0; padding:0; }
+nav > ul > li > a { display:none; }
+nav li li { margin:0 0 14px; }
+nav a { text-decoration:none; }
+.nav-footer { border-top:1px solid var(--line); margin-top:25px; padding-top:18px; color:var(--muted); font-size:12px; }
+main { min-width:0; background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:42px 46px; box-shadow:0 6px 30px #20352c04; }
+h1,h2 { color:#173e2c; font-weight:730; letter-spacing:-.035em; line-height:1.2; }
+h1 { font-size:clamp(32px,3.4vw,46px); margin:0 0 24px; max-width:760px; }
+h1 + p { font-size:20px; line-height:1.65; color:#3c5948; }
+h2 { font-size:28px; margin:48px 0 20px; padding-top:28px; border-top:1px solid var(--line); }
+p { margin:0 0 21px; }
+strong { font-weight:720; }
+code { font: .86em/1.6 "SFMono-Regular",Consolas,"Liberation Mono",monospace; background:#edf2e9; color:#24553b; padding:2px 5px; border-radius:4px; }
+div.sourceCode { margin:24px 0; border:1px solid #d6dfd5; border-radius:9px; background:#f5f7f1; overflow:auto; }
+pre { margin:0; padding:21px 23px; overflow:auto; tab-size:2; }
+pre code { background:transparent; padding:0; border-radius:0; font-size:13px; line-height:1.75; color:#263f31; white-space:pre; }
+code span.kw { color:#215e43; font-weight:700; }
+code span.st { color:#92501e; }
+code span.co { color:#6b7c70; }
+code span.op { color:#426153; }
+table { width:100%; border-collapse:collapse; font-size:14px; line-height:1.6; margin:24px 0 32px; }
+th { background:#eaf0e4; color:#244830; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.07em; }
+th,td { padding:15px; vertical-align:top; border-bottom:1px solid var(--line); }
+td:first-child { width:34%; }
+td:first-child code { overflow-wrap:anywhere; white-space:normal; }
+tr:nth-child(even) td { background:#f8faf5; }
+main ul { padding-left:23px; }
+main li { margin-bottom:12px; }
+footer { margin-top:42px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
+@media(max-width:960px) { .layout { grid-template-columns:180px minmax(0,1fr); gap:24px; padding:30px 3vw 60px; } main { padding:30px; } }
+@media(max-width:720px) { .layout { display:block; padding:20px 12px 40px; } aside { position:static; padding:8px 14px 24px; } nav ul ul { display:flex; flex-wrap:wrap; gap:8px 20px; } nav li li { margin:0; } .nav-footer { display:none; } main { padding:25px 20px; } h1 { font-size:33px; } h1 + p { font-size:18px; } table { font-size:13px; } th,td { padding:10px 8px; } }
+@media print { body { background:white; font-size:11pt; } .masthead,aside { display:none; } .layout { display:block; padding:0; } main { border:0; padding:0; box-shadow:none; } h1 { font-size:28pt; } h2 { break-after:avoid; } pre code { white-space:pre-wrap; overflow-wrap:anywhere; font-size:8pt; } tr { break-inside:avoid; } a { color:inherit; } }
+</style>
+</head>
+<body>
+<header class="masthead"><span class="brand">QUERY FARM / CROSSFIELD</span><a href="CROSSFIELD_USABILITY.md">Markdown source</a></header>
+<div class="layout">
+<aside><div class="nav-label">In this plan</div><nav aria-label="Table of contents"><ul>
+<li><a href="#complete-github-semantic-access-through-crossfield"
+id="toc-complete-github-semantic-access-through-crossfield">Complete
+GitHub semantic access through Crossfield</a>
+<ul>
+<li><a href="#what-completeness-means"
+id="toc-what-completeness-means">What completeness means</a></li>
+<li><a href="#what-the-current-query-actually-does"
+id="toc-what-the-current-query-actually-does">What the current query
+actually does</a></li>
+<li><a href="#the-intended-sql-experience"
+id="toc-the-intended-sql-experience">The intended SQL
+experience</a></li>
+<li><a href="#scope-and-population-rules"
+id="toc-scope-and-population-rules">Scope and population rules</a></li>
+<li><a href="#implementation-sequence"
+id="toc-implementation-sequence">Implementation sequence</a>
+<ul>
+<li><a href="#crossfield-changes-versus-worker-changes"
+id="toc-crossfield-changes-versus-worker-changes">Crossfield changes
+versus worker changes</a></li>
+<li><a href="#measures-that-need-more-than-a-typed-endpoint"
+id="toc-measures-that-need-more-than-a-typed-endpoint">Measures that
+need more than a typed endpoint</a></li>
+</ul></li>
+<li><a href="#discovery-and-a-researchers-session"
+id="toc-discovery-and-a-researchers-session">Discovery and a
+researcher's session</a></li>
+<li><a href="#validation-and-completion"
+id="toc-validation-and-completion">Validation and completion</a></li>
+</ul></li>
+</ul></nav><div class="nav-footer">DuckDB 2.0 · Native VGI<br>Proposal for review</div></aside>
+<main>
+<h1 id="complete-github-semantic-access-through-crossfield">Complete
+GitHub semantic access through Crossfield</h1>
+<p><strong>Proposal for review.</strong> The public model rename to
+<code>github</code> is implemented. The broader interfaces below are
+proposed, not implemented or validated SQL. This document owns the
+proposed user workflow and implementation sequence; <a
+href="CROSSFIELD_SPEC.md">integration notes</a> record current runtime
+evidence.</p>
+<p><strong>Goal: the whole worker read surface is usable through typed
+SQL entities, modeled relationships and approved measures, without
+requiring REST or GraphQL knowledge.</strong> Implementation phases
+determine order; completion requires every phase and every inventory
+item. Reviews are an early integration case, not the boundary of the
+project.</p>
+<p>Researchers must be able to discover fields, select single resources
+or cohorts, inspect populations, combine related data and export typed
+rows. API request details belong in the worker and model.</p>
+<h2 id="what-completeness-means">What completeness means</h2>
+<p>The REST denominator is the checked-in manifest: <strong>780 GET
+operations across 48 categories</strong>, with separate
+<code>api.github.com</code> and Enterprise Cloud availability. The
+target includes all 21 typed functions and the general GraphQL
+interface. Pin the corresponding public GraphQL schema and inventory its
+query-accessible domain fields, types, connections and arguments;
+accepting a GraphQL string is not coverage of that schema. Upstream
+changes extend this ledger on revision.</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Required semantic access</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Entity collections and individual resources</td>
+<td>Named SQL tables/functions, typed fields, keys, supported scopes and
+automatic pagination. Multiple endpoints may share one entity
+definition.</td>
+</tr>
+<tr>
+<td>Relationships and child collections</td>
+<td>Model-owned traversal, qualified identities and approved joins;
+users do not enumerate every parent or construct child requests.</td>
+</tr>
+<tr>
+<td>Analytical facts</td>
+<td>Approved counts, state measures, durations, rates and distributions
+wherever the source supports a defined population. Every published
+measure has an explicit recipe and numerical tests.</td>
+</tr>
+<tr>
+<td>Configuration, permissions, membership and reference data</td>
+<td>Typed singleton/detail relations and meaningful state/count
+measures. These families are required even when they are not traditional
+reporting facts.</td>
+</tr>
+<tr>
+<td>Logs, text, archives and binary downloads</td>
+<td>Named resource access with typed metadata and native text/BLOB
+payloads. Unstructured content remains content; users need no REST
+operation ID or media-type selection.</td>
+</tr>
+<tr>
+<td>GraphQL-only fields and connections</td>
+<td>The same entity/dimension vocabulary, generated typed projections
+and complete connection traversal. Interfaces/unions retain their
+concrete type and approved fields.</td>
+</tr>
+</tbody>
+</table>
+<p>Keep a machine-readable ledger alongside
+<code>source_inventory.json</code>: source operation or GraphQL field,
+product/version, public SQL entry, supported arguments/fields, scope and
+traversal, grain, metric definitions, permissions and test references.
+An item is complete only when its declared public contract is
+implemented and tested. Raw JSON passthrough, a deferred label or a
+schema-generation success alone does not close it. Product-specific or
+inaccessible data has a typed contract and explicit capability/error
+behavior; it is not silently omitted from the ledger.</p>
+<p>Completion is finite against these pinned contracts. It does not
+promise every future GitHub field or every conceivable business
+calculation. New measures can use the complete typed foundation without
+introducing another API wrapper.</p>
+<h2 id="what-the-current-query-actually-does">What the current query
+actually does</h2>
+<p><code>SELECT repository_count FROM engineering.semantic.github(owner =&gt; 'Query-farm')</code>
+counts rows from the worker's owned-repository listing. It uses complete
+pagination within declared bounds. It does not fetch PRs, reviews or CI
+for those repositories; today, those metrics require their own
+<code>repository</code> input.</p>
+<p>There is also a coverage defect to correct:
+<code>ReposFunction</code> currently calls
+<code>/users/{owner}/repos</code>, which GitHub documents as a
+public-repository listing. The model's word “visible” and some worker
+descriptions are broader than the endpoint guarantees. Organization and
+authenticated-user listings have separate contracts. Private
+organization coverage cannot be inferred from having a token, and capped
+search is not a substitute for complete inventory. <a
+href="https://docs.github.com/en/rest/repos/repos#list-repositories-for-a-user">GitHub
+repository API contracts</a>.</p>
+<p>The previous milestone exposed all pinned APIs at response grain. Its
+780 REST operation IDs establish access coverage; they do not establish
+780 usable semantic entities, approved measures or live-tested
+endpoints. The 21 typed functions are the foundation for the researcher
+interface.</p>
+<h2 id="the-intended-sql-experience">The intended SQL experience</h2>
+<p>Keep <code>engineering.semantic.github(...)</code> for approved
+measures. Extend the existing <code>detail</code> schema with callable
+entity tables; keep <code>reports</code> for reusable analyses. Names
+describe GitHub concepts, regardless of the underlying transport.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Proposed: the same measures across the owner&#39;s repositories.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> repository_name, merged_prs, median_merge_hours</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(owner <span class="op">=&gt;</span> <span class="st">&#39;Query-farm&#39;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> pulls_merged_day <span class="op">&gt;=</span> <span class="dt">DATE</span> <span class="st">&#39;2026-09-01&#39;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">AND</span> pulls_merged_day <span class="op">&lt;</span> <span class="dt">DATE</span> <span class="st">&#39;2026-10-01&#39;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> repository_name;</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">-- Proposed: review records, with no endpoint or JSON knowledge required.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> repository_name, pull_request_number,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>       reviewer_login, review_state, submitted_at</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.detail.pull_request_reviews(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> submitted_at <span class="op">&gt;=</span> <span class="dt">TIMESTAMP</span> <span class="st">&#39;2026-09-01 00:00:00&#39;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">AND</span> submitted_at <span class="op">&lt;</span> <span class="dt">TIMESTAMP</span> <span class="st">&#39;2026-10-01 00:00:00&#39;</span>;</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">-- Proposed: select a particular PR through a business identifier.</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> reviewer_login, review_state, submitted_at</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.detail.pull_request_reviews(</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    repository <span class="op">=&gt;</span> <span class="st">&#39;Query-farm/crossfield&#39;</span>, pull_request_number <span class="op">=&gt;</span> <span class="dv">1</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">-- Proposed: approved review measures over an organization.</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> repository_name, submitted_review_count, reviewed_pr_count</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(owner <span class="op">=&gt;</span> <span class="st">&#39;Query-farm&#39;</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> review_submitted_day <span class="op">&gt;=</span> <span class="dt">DATE</span> <span class="st">&#39;2026-09-01&#39;</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">AND</span> review_submitted_day <span class="op">&lt;</span> <span class="dt">DATE</span> <span class="st">&#39;2026-10-01&#39;</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> repository_name;</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co">-- Proposed: project discovery and traversal are part of the model.</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> project_title, project_item_count, archived_project_items</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> engineering.semantic.github(owner <span class="op">=&gt;</span> <span class="st">&#39;Query-farm&#39;</span>)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> project_title;</span></code></pre></div>
+<p><code>repository_name</code> is a proposed shared dimension backed by
+repository identity. It is not a spelling change to unrelated source
+columns. Existing explicit dataset names remain useful where dimensions
+describe different concepts.</p>
+<p>The first detail call enumerates the selected repository's PRs, then
+their reviews. The third call selects one PR. An owner-scoped equivalent
+discovers repositories first. Users can still supply stable project
+numbers; project titles are readable dimensions and filters, not
+silently unique keys. A title used as a lookup must match exactly one
+project or return an actionable ambiguity error.</p>
+<h2 id="scope-and-population-rules">Scope and population rules</h2>
+<table>
+<thead>
+<tr>
+<th>Selection</th>
+<th>Intended population</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>repository =&gt; 'owner/name'</code></td>
+<td>One explicitly selected repository.</td>
+</tr>
+<tr>
+<td><code>owner =&gt; 'login'</code></td>
+<td>Owned repositories or projects available under the selected
+credential scope, according to the requested entity/metric. It does not
+add repositories merely collaborated on.</td>
+</tr>
+<tr>
+<td><code>pull_request_number =&gt; n</code></td>
+<td>One PR within an explicitly selected repository. Omitting it
+enumerates PRs.</td>
+</tr>
+<tr>
+<td><code>project_number =&gt; n</code></td>
+<td>One project within an owner. Omitting it for project-item queries
+enumerates projects.</td>
+</tr>
+<tr>
+<td><code>visibility =&gt; 'public'</code></td>
+<td>Proposed optional repository scope for public-data studies. Default
+repository scope is accessible repositories, with credential limitations
+disclosed.</td>
+</tr>
+</tbody>
+</table>
+<p>Offer one coherent scope per call, including single or multiple
+repositories and owners, explicit research cohorts, and
+resource-specific scopes such as enterprise, installation, user, project
+or workflow run. Add typed collection/cohort inputs where needed instead
+of requiring repeated manual calls. Overlapping selections must resolve
+to one declared entity population, with duplicate handling exposed.
+Conflicting or irrelevant inputs reject. Resolve account kind once in
+the worker at execution; routine callers need not know
+<code>organization</code> versus <code>user</code>. Infer no repository
+from a project title. Project metrics use an owner/project scope;
+repository visibility options do not silently filter project
+populations.</p>
+<p>Correct owner enumeration chooses reviewed organization,
+authenticated-user or installation routes as appropriate for the token.
+Other-user public enumeration must remain explicit in metadata. An
+unsupported credential/scope combination fails with guidance rather than
+claiming complete private coverage. “Accessible” does not prove the
+existence or absence of resources hidden from the credential. Archived
+repositories and forks remain included unless the model or caller
+explicitly filters approved dimensions; definitions disclose that
+population.</p>
+<p>Counts refer to entities at declared keys, not response pages.
+Repository totals must not multiply when reviews or CI facts are added.
+PR numbers are qualified by repository identity; project membership is
+qualified by project identity. Keep repositories/projects with no
+children in grouped counts as zero, and undefined durations as NULL.
+Filtered cohorts and denominators remain visible.</p>
+<h2 id="implementation-sequence">Implementation sequence</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Change and deliverable</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Inventory and correct scope</td>
+<td>Build the full REST/GraphQL coverage ledger. Correct owner
+resolution, public/private repository selection and source
+descriptions.</td>
+<td>Every pinned operation/read field has an assigned SQL contract and
+status. Organization/user/token cases have independently expected
+inventories.</td>
+</tr>
+<tr>
+<td>2. Generate the typed foundation</td>
+<td>Use pinned OpenAPI response schemas and GraphQL types to generate
+adapters, typed arguments/results, documentation and structural tests.
+Apply reviewed overrides for entity names, keys, pagination,
+polymorphism and dynamic fields.</td>
+<td>No operation is dropped because it is outside the initial reporting
+families. Schema drift is explicit; generated fields are not
+automatically approved measures.</td>
+</tr>
+<tr>
+<td>3. Complete generic query composition</td>
+<td>Add alternative scopes, typed cohort inputs, callable detail
+entries, parent/child traversal and shared dimensions. Use reviews,
+Projects and an organization-wide PR/CI query as integration cases.</td>
+<td>Single-resource and cohort queries agree. Empty parents survive,
+facts do not multiply, and callers need no endpoint IDs, JSON maps or
+cursor management.</td>
+</tr>
+<tr>
+<td>4. Complete every entity family</td>
+<td>Implement all ledger contracts across development, delivery,
+collaboration, identity, administration, security, billing, usage and
+reference/content APIs. Reuse adapters for equivalent REST/GraphQL
+access.</td>
+<td>All 48 REST categories and pinned GraphQL domain fields have typed
+SQL access and product/permission behavior. Raw-only or deferred entries
+remain gaps.</td>
+</tr>
+<tr>
+<td>5. Complete the measures and research workflows</td>
+<td>Define applicable metrics for every family, including review
+latency, workflow attempts/duration, deployments, code changes, security
+state, usage and billing. Deliver discovery, repair, explain and export
+workflows.</td>
+<td>Each declared measure has approved population/grain/units and
+independent answers. Required intermediate aggregation and relationship
+capabilities are implemented.</td>
+</tr>
+<tr>
+<td>6. Close the ledger</td>
+<td>Reconcile generated contracts, public catalog entries, examples and
+tests; finish every uncovered entry.</td>
+<td>No unexplained, raw-only or deferred item is counted as complete.
+Every mapping and measure has passing evidence; unavailable live
+credentials are recorded separately from deterministic passes.</td>
+</tr>
+</tbody>
+</table>
+<p>All six steps are required for completion. Each can deliver usable
+improvements while subsequent steps continue; an early reviews example
+does not close the goal.</p>
+<p>The family inventory includes repositories/Git
+data/issues/pulls/reactions,
+Actions/checks/deployments/releases/packages, Discussions/Projects,
+users/orgs/teams/enterprise/SCIM/apps, code/dependency/secret security,
+billing/Copilot/agents/hosted compute/Codespaces, and
+classroom/gists/migrations/ reference/search APIs. The checked-in
+manifest is authoritative, so this readable grouping cannot hide a
+missed category. Search retains its documented discovery population and
+cannot substitute for complete inventory.</p>
+<p>GitHub publishes both an <a
+href="https://docs.github.com/en/rest/about-the-rest-api/about-the-openapi-description-for-the-rest-api">OpenAPI
+description</a> and a <a
+href="https://docs.github.com/en/graphql/overview/public-schema">public
+GraphQL schema</a>. Use those machine-readable contracts for breadth,
+preserving their licenses and notices, and reviewed semantic definitions
+for meaning. Preserve nested STRUCT/LIST values and intentional
+text/BLOB content. Dynamic project fields need typed value relations and
+reviewed named projections, not guessed types or a JSON-only escape
+hatch.</p>
+<h3 id="crossfield-changes-versus-worker-changes">Crossfield changes
+versus worker changes</h3>
+<p>The worker owns API routes, generated or fixed approved GraphQL
+documents, response decoding, typed columns and cursor/Link traversal.
+GitHub review listing is per PR; pagination and any nested GraphQL
+connections must be completed by these adapters. <a
+href="https://docs.github.com/en/rest/pulls/reviews#list-reviews-for-a-pull-request">Review
+API</a>, <a
+href="https://docs.github.com/en/graphql/guides/using-pagination-in-the-graphql-api">GraphQL
+pagination</a>.</p>
+<p>The model owns scope alternatives, approved source bindings,
+invocation edges, keys, shared dimensions, metric recipes and population
+rules. Native DuckDB executes the resulting joins and table functions.
+Reuse Crossfield's existing source pruning and row-map stages. Do not
+add a Crossfield call scheduler, unconditional result buffering or an
+API-specific SQL parser.</p>
+<p>Today <code>semantic_query</code> is one input template; it cannot
+choose repository versus owner traversal from alternative argument sets.
+It also excludes <code>detail_dataset</code>. The generic composition
+step therefore requires extension work: validated scope alternatives,
+callable detail descriptors, original-intent checks and metadata for
+those calls. Extend native argument handling for required
+structured/cohort inputs; support new reviewed relationship or
+intermediate-aggregation patterns when a ledger contract requires them.
+Existing implementation limits are work to resolve, not reasons to
+silently remove families from the target. Named saved reports can reuse
+the resulting definitions; they should not be the only way to choose
+fields. Keep stable entity/metric IDs independent of the chosen scope.
+Prepared/view identity must retain the selected template and inputs. No
+core patch is planned; require a concrete missing generic hook before
+adding one.</p>
+<p>Only push filters ahead of remote calls when they preserve the
+requested population. A September review can belong to an August PR;
+review submission filters must not become PR creation filters. Query
+LIMIT is a presentation operation and must not masquerade as a complete
+source listing. A broad scope that exceeds existing execution bounds
+fails with a suggestion for a smaller scope; exact request counts cannot
+be known by metadata-only EXPLAIN.</p>
+<h3 id="measures-that-need-more-than-a-typed-endpoint">Measures that
+need more than a typed endpoint</h3>
+<p>Submitted-review counts exclude pending reviews with no submission
+timestamp; state-dependent counts describe the returned current state.
+“Approved review” does not mean a PR satisfies branch protection. GitHub
+documents pending reviews as unsubmitted records without
+<code>submitted_at</code>. <a
+href="https://docs.github.com/en/rest/pulls/reviews">Review state
+contract</a>.</p>
+<p>First-review latency needs one approved first-review observation per
+PR before aggregation across PRs. Define reviewer exclusions, bots,
+draft time, cohort date, unreviewed PRs and elapsed-hour units before
+exposing a median. Prove the necessary intermediate PR grain through the
+provider compiler; if unsupported, add a small generic approved
+aggregation stage. Do not average repository medians or hide a business
+recipe in transport decoding. This can follow review counts during
+implementation but remains required before the review-analysis scope is
+complete.</p>
+<p>Deployment frequency similarly needs explicit environment and success
+rules; workflow duration needs attempt/completion evidence. Keep these
+proposed measures distinct from existing, validated metrics until their
+independent tests pass.</p>
+<h2 id="discovery-and-a-researchers-session">Discovery and a
+researcher's session</h2>
+<ol type="1">
+<li>Inspect <code>crossfield_members()</code>,
+<code>crossfield_queries()</code> and parameter discovery for entity
+descriptions, row grain, approved metrics, scopes and required inputs.
+Extend the existing global functions to describe callable detail and
+scope alternatives; do not create metadata tables in each
+attachment.</li>
+<li>Use <code>DESCRIBE</code> and <code>EXPLAIN (SEMANTIC)</code> on the
+intended query without fetching GitHub data. Show the owner/repository
+traversal, fields, cohort, completeness limits and approved definitions.
+<code>EXPLAIN (SQL)</code> still shows generated SQL.</li>
+<li>Select typed entity rows or approved metrics. Return semantic repair
+guidance for unsupported combinations, including the appropriate entity
+entry and scope. Do not suggest REST JSON or a GraphQL document as the
+normal repair.</li>
+<li>Export detail through existing COPY/CTAS support and retain model
+revision, scope and observation time with the analysis. Live GitHub has
+no transactionally consistent historical snapshot; output is not
+historical state reconstruction.</li>
+</ol>
+<p>Keep raw response helpers as a documented advanced interface. The
+main guide should lead with research questions, typed rows and measures.
+Custom project fields can expose a typed long-form entity
+(<code>project</code>, <code>item</code>, <code>field</code>, typed
+value) before model authors approve named field projections; never infer
+a cross-project dimension solely because two fields share the name
+“Status.”</p>
+<h2 id="validation-and-completion">Validation and completion</h2>
+<p>Use the actual worker with independently authored HTTP fixtures and
+standard native DuckDB SQLLogicTests on EC2, in both optimizer modes.
+Extend the existing suites; no new custom runner, Python DuckDB build or
+capacity qualification.</p>
+<p>Every operation/GraphQL mapping needs request, response/type and
+field-preservation coverage. Each entity needs grain, scope,
+relationship, pagination and error cases; each measure needs independent
+numerical expectations. Shared generated tests can cover common
+contracts, while reviewed fixtures verify real semantic meaning.
+Generation is not its own correctness oracle. Require catalog/discovery
+and prepared/CTE/export coverage for each execution shape. Separately
+record which product and credential profiles have live evidence; unrun
+tests are never passes.</p>
+<p>Concrete acceptance examples include:</p>
+<ul>
+<li>An owner has three repositories, including one accessible private
+repository and one with no PRs. They contain PR counts 2/1/0. Owner
+inventory count is 3; grouped PR counts retain 2/1/0. A separate public
+scope excludes the private row.</li>
+<li>Reviews per PR are 2/0/1, all submitted. The owner total is three
+review records and two reviewed PRs, independent of unrelated workflow
+rows. A pending review adds one detail row but changes neither submitted
+count nor reviewed-PR count.</li>
+<li>PR number 1 in two repositories remains two PRs; IDs, NULL payloads,
+parent mismatches and duplicated review identities have explicit
+acceptance/rejection.</li>
+<li>A review submitted inside the time range for a PR created before it
+survives. Date filtering and empty cohorts reconcile detail with
+approved counts.</li>
+<li>Every page is consumed; exhausted bounds, inaccessible children and
+partial GraphQL errors fail, and a subsequent healthy query succeeds.
+Credentials do not leak into metadata or explain output.</li>
+<li>Scope selection, prepared values, attachment replacement, CTEs and
+native consumers retain approval. Discovery/explanation performs no
+GitHub data fetch; unrelated source families are not executed.</li>
+</ul>
+<p>Required first-review fixtures use PR latencies 2 and 10 hours with
+one unreviewed PR: the approved median is 6 hours over two observations.
+Repeated reviews must not weight the PR twice. A passing entity-access
+test is not acceptance of this latency recipe.</p>
+<p>Equivalent fixtures cover each remaining family's measures and
+relationships, including overlapping cohorts, project membership,
+workflow retries, deployment state changes, security states and
+period/unit boundaries. The implementation is complete only when the
+coverage ledger closes, not when the first example or the current
+regression suite passes.</p>
+<footer>Formatted from CROSSFIELD_USABILITY.md. Proposed interfaces are not yet implemented.</footer>
+</main>
+</div>
+</body>
+</html>

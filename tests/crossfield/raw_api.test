@@ -1,0 +1,154 @@
+# Whole-worker coverage uses reviewed typed entities and explicit raw response
+# grain. Expected numbers come from surface_fixture.py, not recorded SQL output.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT discussion_count FROM engineering.semantic.github(repository=>'example/project');
+
+statement ok
+EXPLAIN (SQL) SELECT * FROM engineering.reports.rest_responses_detail(operation_id=>'pulls/list-reviews',path_parameters=>'{"owner":"example","repo":"project","pull_number":1}',rest_query=>'{}',rest_accept=>'application/vnd.github+json',rest_allow_not_found=>false);
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT * FROM engineering.reports.graphql_responses_detail(graphql_document=>'query Identity($login:String!){user(login:$login){login}}',graphql_variables=>'{"login":"alice"}',graphql_operation_name=>'Identity');
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+# These are response pages, not two reviews counted as an approved metric.
+query IIT
+SELECT page_number,status_code,data FROM engineering.reports.rest_responses_detail(operation_id=>'pulls/list-reviews',path_parameters=>'{"owner":"example","repo":"project","pull_number":1}',rest_query=>'{}',rest_accept=>'application/vnd.github+json',rest_allow_not_found=>false) ORDER BY page_number;
+----
+1	200	[{"id":1,"state":"APPROVED","extra":[1,null]}]
+2	200	[{"id":2,"state":"COMMENTED","extra":[1,null]}]
+
+statement error
+SELECT COUNT(*) FROM engineering.reports.rest_responses_detail(operation_id=>'pulls/list-reviews',path_parameters=>'{"owner":"example","repo":"project","pull_number":1}',rest_query=>'{}',rest_accept=>'application/vnd.github+json',rest_allow_not_found=>false);
+----
+CROSSFIELD
+
+statement error
+SELECT * FROM engineering.reports.rest_responses_detail(operation_id=>'issues/create',path_parameters=>'{}',rest_query=>'{}',rest_accept=>'application/vnd.github+json',rest_allow_not_found=>false);
+----
+INVOCATION
+
+statement error
+SELECT * FROM engineering.reports.rest_responses_detail(operation_id=>'pulls/list-reviews',path_parameters=>'{"owner":"example","repo":"project","pull_number":1}',rest_query=>'{"bogus":true}',rest_accept=>'application/vnd.github+json',rest_allow_not_found=>false);
+----
+Unknown query parameters
+
+query I
+SELECT status_code FROM engineering.reports.rest_responses_detail(operation_id=>'orgs/check-membership-for-user',path_parameters=>'{"org":"example","username":"outsider"}',rest_query=>'{}',rest_accept=>'application/vnd.github+json',rest_allow_not_found=>true);
+----
+404
+
+statement error
+SELECT status_code FROM engineering.reports.rest_responses_detail(operation_id=>'orgs/check-membership-for-user',path_parameters=>'{"org":"example","username":"outsider"}',rest_query=>'{}',rest_accept=>'application/vnd.github+json',rest_allow_not_found=>false);
+----
+404
+
+statement ok
+CREATE TABLE saved_binary AS SELECT body FROM engineering.reports.rest_responses_detail(operation_id=>'repos/download-zipball-archive',path_parameters=>'{"owner":"example","repo":"project","ref":"main"}',rest_query=>'{}',rest_accept=>'application/octet-stream',rest_allow_not_found=>false);
+
+statement ok
+CREATE VIEW binary_report AS SELECT body FROM engineering.reports.rest_responses_detail(operation_id=>'repos/download-zipball-archive',path_parameters=>'{"owner":"example","repo":"project","ref":"main"}',rest_query=>'{}',rest_accept=>'application/octet-stream',rest_allow_not_found=>false);
+
+statement ok
+PREPARE raw_identity AS SELECT data FROM engineering.reports.graphql_responses_detail(graphql_document=>'query Identity($login:String!){user(login:$login){login}}',graphql_variables=>$1,graphql_operation_name=>'Identity');
+
+query T
+EXECUTE raw_identity('{"login":"alice"}');
+----
+{"data": {"user": {"login": "alice"}, "pageInfo": {"hasNextPage": true, "endCursor": "next-cursor"}}, "extensions": {"fixture": "retained"}}
+
+query T
+EXECUTE raw_identity('{"login":"bob"}');
+----
+{"data": {"user": {"login": "bob"}, "pageInfo": {"hasNextPage": true, "endCursor": "next-cursor"}}, "extensions": {"fixture": "retained"}}
+
+statement error
+EXECUTE raw_identity('{"login":"error"}');
+----
+Fixture partial GraphQL error
+
+statement error
+EXECUTE raw_identity(NULL);
+----
+NULL
+
+statement error
+SELECT * FROM engineering.reports.graphql_responses_detail(graphql_document=>'mutation { addStar(input:{starrableId:"x"}) { clientMutationId } }',graphql_variables=>'{}',graphql_operation_name=>'');
+----
+Read-only GraphQL
+
+statement error
+SELECT COUNT(*) FROM engineering.reports.graphql_responses_detail(graphql_document=>'{viewer{login}}',graphql_variables=>'{}',graphql_operation_name=>'');
+----
+CROSSFIELD
+
+query TT
+SELECT operation_id,function_name FROM engineering.reports.api_endpoints_detail WHERE operation_id='pulls/list-reviews';
+----
+pulls/list-reviews	pulls_list_reviews
+
+statement ok
+SET crossfield_mode='off';
+
+query T
+SELECT hex(body) FROM saved_binary;
+----
+00FF806172636869766500
+
+query T
+SELECT hex(body) FROM binary_report;
+----
+00FF806172636869766500
+
+query I
+SELECT count(*) FROM engineering.reports.api_endpoints_detail;
+----
+780
+
+statement ok
+DROP VIEW binary_report;
+
+statement ok
+DEALLOCATE raw_identity;
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

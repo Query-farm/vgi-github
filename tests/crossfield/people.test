@@ -1,0 +1,336 @@
+# Independent organizations, memberships, teams and authored-work graph.
+# HTTP fixture accounts and memberships are deliberately different populations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+DESCRIBE SELECT * FROM engineering.detail.organizations(organization=>'example');
+
+statement ok
+DESCRIBE SELECT * FROM engineering.detail.users(user=>'alice');
+
+statement ok
+DESCRIBE SELECT * FROM engineering.detail.organization_memberships(organization=>'example');
+
+statement ok
+DESCRIBE SELECT * FROM engineering.detail.teams(organization=>'example');
+
+statement ok
+DESCRIBE SELECT * FROM engineering.detail.team_memberships(organization=>'example');
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT user_login,authored_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY user_login;
+
+statement ok
+EXPLAIN (SQL) SELECT organization_login,organization_member_count,team_count FROM engineering.semantic.github(organization=>'example') GROUP BY organization_login;
+
+query TTTT
+SELECT name,type,nullable::VARCHAR,default_value FROM crossfield_parameters() WHERE database_name='engineering' AND schema_name='semantic' AND name IN ('organization','user') ORDER BY name;
+----
+organization	VARCHAR	true	null
+user	VARCHAR	true	null
+
+query TTT
+SELECT name,example,json_extract_string(constraints,'$.non_empty') FROM crossfield_parameters() WHERE database_name='engineering' AND schema_name='semantic' AND name IN ('organization','user') ORDER BY name;
+----
+organization	"Query-farm"	true
+user	"octocat"	true
+
+query TT
+SELECT json_extract_string(requirements,'$.parameter_constraints[0].kind'),json_extract_string(requirements,'$.parameter_constraints[0].parameters') FROM crossfield_catalog_capabilities() WHERE database_name='engineering' AND name='user_count';
+----
+exactly_one	["user","users"]
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+query TIIII
+SELECT organization_login,organization_count,organization_member_count,team_count,team_membership_count FROM engineering.semantic.github(organization=>'example') GROUP BY organization_login;
+----
+example	1	2	3	3
+
+# Explicit organization scope joins repository activity to its organization.
+query TIII
+SELECT organization_login,organization_count,repository_count,pull_request_count FROM engineering.semantic.github(organization=>'example') GROUP BY organization_login;
+----
+example	1	3	4
+
+# The guide's organization inventory combines three independent populations.
+query TIII
+SELECT organization_login,organization_member_count,team_count,repository_count FROM engineering.semantic.github(organization=>'example') GROUP BY organization_login;
+----
+example	2	3	3
+
+# A member can belong to two teams: three membership records are two people.
+query TII rowsort
+SELECT team_slug,team_count,team_membership_count FROM engineering.semantic.github(organization=>'example') GROUP BY team_slug;
+----
+core	1	2
+docs	1	1
+empty	1	0
+
+query TI rowsort
+SELECT team_member_login,team_membership_count FROM engineering.semantic.github(organization=>'example') GROUP BY team_member_login;
+----
+alice	2
+carol	1
+
+query I
+SELECT team_membership_count FROM engineering.semantic.github(organization=>'example') WHERE team_slug='core';
+----
+2
+
+query TII rowsort
+SELECT team_slug,team_count,team_membership_count FROM engineering.semantic.github(organization=>'example') WHERE team_slug='empty' GROUP BY team_slug;
+----
+empty	1	0
+
+query IT rowsort
+SELECT user_id,member_login FROM engineering.detail.organization_memberships(organization=>'example');
+----
+201	alice
+203	carol
+
+query IIT rowsort
+SELECT team_id,user_id,team_member_login FROM engineering.detail.team_memberships(organization=>'example');
+----
+501	201	alice
+501	203	carol
+502	201	alice
+
+# GitHub makes role/inheritance optional. Their absence remains unknown.
+query ITTT rowsort
+SELECT team_id,team_member_login,member_role,membership_inherited FROM engineering.detail.team_memberships(organization=>'example');
+----
+501	alice	NULL	NULL
+501	carol	NULL	NULL
+502	alice	NULL	NULL
+
+# Organization scope discovers the same repository population as the existing owner scope.
+query IIIR
+SELECT repository_count,pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github(organization=>'example');
+----
+3	4	3	12.000
+
+# Bob's PR is real activity even though bob is absent from the membership table.
+query TI rowsort
+SELECT author_login,pull_request_count FROM engineering.semantic.github(organization=>'example') GROUP BY author_login;
+----
+alice	3
+bob	1
+
+query TIIII
+SELECT organization_login,organization_count,organization_member_count,team_count,team_membership_count FROM engineering.semantic.github(organization=>'empty-org') GROUP BY organization_login;
+----
+empty-org	1	0	0	0
+
+query II
+SELECT repository_count,pull_request_count FROM engineering.semantic.github(organization=>'empty-org');
+----
+0	0
+
+# User-authored work includes another owner's repository, irrespective of ownership.
+# Alice's merged durations are 48, 6 and 18 hours, whose median is 18.
+query TIIIR
+SELECT user_login,user_count,authored_pr_count,authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY user_login;
+----
+alice	1	4	3	18.000
+
+query TIIR rowsort
+SELECT authored_repository_name,authored_pr_count,authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY authored_repository_name;
+----
+example/alpha	2	1	48.000
+example/beta	1	1	6.000
+other/project	1	1	18.000
+
+query TII rowsort
+SELECT authored_pr_merged_day,authored_pr_count,authored_merged_pr_count FROM engineering.semantic.github(user=>'alice') GROUP BY authored_pr_merged_day;
+----
+2026-09-03	2	2
+2026-09-07	1	1
+NULL	1	0
+
+query IR
+SELECT authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') WHERE authored_pr_merged_day >= DATE '2026-09-07' AND authored_pr_merged_day < DATE '2026-09-08';
+----
+1	18.000
+
+query IR
+SELECT authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') WHERE authored_pr_merged_at >= TIMESTAMPTZ '2026-09-07 00:00:00+00' AND authored_pr_merged_at < TIMESTAMPTZ '2026-09-08 00:00:00+00';
+----
+1	18.000
+
+query TIIIR
+SELECT user_login,user_count,authored_pr_count,authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'empty-user') GROUP BY user_login;
+----
+empty-user	1	0	0	NULL
+
+query TIIR
+WITH authored AS (SELECT user_login,authored_pr_count,authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'bob') GROUP BY user_login)
+SELECT * FROM authored;
+----
+bob	1	1	12.000
+
+statement ok
+PREPARE by_user AS SELECT authored_pr_count,authored_merged_pr_count FROM engineering.semantic.github(user=>$1);
+
+query II
+EXECUTE by_user('alice');
+----
+4	3
+
+query II
+EXECUTE by_user('carol');
+----
+0	0
+
+query TIT rowsort
+SELECT repository_name,pull_request_number,authored_pr_merged_day FROM engineering.detail.authored_pull_requests(user=>'alice');
+----
+example/alpha	1	2026-09-03
+example/alpha	3	NULL
+example/beta	1	2026-09-03
+other/project	1	2026-09-07
+
+# User.pullRequests is an associated-work surface. The model verifies authorship
+# on every page, including a foreign or deleted author after a valid first page.
+statement error
+SELECT authored_pr_count FROM engineering.semantic.github(user=>'wrong-author');
+----
+row assertion failed
+
+statement error
+SELECT authored_pr_count FROM engineering.semantic.github(user=>'null-author');
+----
+row assertion failed
+
+statement error
+SELECT user_count FROM engineering.semantic.github(user=>'example');
+----
+Unsupported scope account type
+
+query II
+EXECUTE by_user('bob');
+----
+1	1
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+# No approved attribution connects current team membership to historical PR activity.
+statement error
+SELECT user_count FROM engineering.semantic.github();
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT organization_member_count FROM engineering.semantic.github();
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT team_slug,authored_pr_count FROM engineering.semantic.github(user=>'alice',organization=>'example') GROUP BY team_slug;
+----
+CROSSFIELD
+
+statement error
+SELECT team_slug,merged_prs FROM engineering.semantic.github(organization=>'example') GROUP BY team_slug;
+----
+CROSSFIELD
+
+statement error
+SELECT member_login,merged_prs FROM engineering.semantic.github(organization=>'example') GROUP BY member_login;
+----
+CROSSFIELD
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(organization=>'example',owner=>'example');
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT organization_count FROM engineering.semantic.github(organization=>'   ');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+SELECT user_count FROM engineering.semantic.github(user=>'');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+EXECUTE by_user('   ');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+DESCRIBE SELECT * FROM engineering.detail.users(user=>'   ');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+SELECT organization_member_count FROM engineering.semantic.github(organization=>'example',user=>'alice');
+----
+SEMANTIC_PARAMETER_UNUSED
+
+statement error
+SELECT authored_pr_count FROM engineering.semantic.github(user=>'alice',repository=>'example/alpha');
+----
+SEMANTIC_PARAMETER_UNUSED
+
+statement error
+SELECT user_count FROM engineering.semantic.github(user=>42);
+----
+SEMANTIC_PARAMETER_TYPE
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

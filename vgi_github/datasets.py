@@ -12,7 +12,7 @@ from vgi.invocation import BindResponse
 from vgi.metadata import FunctionExample
 from vgi.table_in_out_function import RowTransformFunction
 
-from vgi_github import auth
+from vgi_github import auth, reporting
 from vgi_github import github_api as api
 from vgi_github.functions import _fan_out
 from vgi_github.meta import docs, examples, field
@@ -211,7 +211,8 @@ def _metadata(name, schema, category, description, detail, sql):
                 md=detail + "\n\nPagination is automatic. Default `max_rows=100`; `max_rows=0` walks all "
                 "pages, bounded at 100, and fails if more remain. "
                 "Filter with named arguments before the cap. "
-                "GitHub errors fail the query. These datasets are not approved Crossfield reporting sources. "
+                "GitHub errors fail the query. Reporting mode requires `max_rows=0`, validates complete "
+                "rows before projection, and disables result caching. "
                 "Cache TTLs follow ATTACH unless overridden; GraphQL has no automatic response caching.",
                 example_queries=examples((description, sql)),
             ),
@@ -221,19 +222,12 @@ def _metadata(name, schema, category, description, detail, sql):
 
 
 def _bind(cls, params):
-    _check_mode(params)
-    return BindResponse(output_schema=cls.FIXED_SCHEMA)
-
-
-def _check_mode(params):
-    if auth.reporting_of(params.attach_opaque_data):
-        raise api.GitHubReportingError(
-            "Projects and Discussions are not approved Crossfield reporting sources"
-        )
+    return BindResponse(
+        output_schema=reporting.output_schema(cls.Meta.name, cls.FIXED_SCHEMA, params.attach_opaque_data)
+    )
 
 
 def _emit(cls, params, batch, out, columns, fetch):
-    _check_mode(params)
     if params.args.max_rows < 0:
         raise api.GitHubInputError("max_rows must be non-negative")
     _fan_out(
@@ -323,11 +317,15 @@ def _connection_rows(query, variables, path, max_rows, credentials):
         current = payload.get("data")
         if not isinstance(current, dict):
             raise api.GitHubError(200, "GraphQL", "Missing query data")
-        # A nullable repository/discussion/node can legitimately be absent on
-        # the first page. Disappearance mid-walk must never look like completion.
+        # Exploratory mode permits absent resources. Reporting must distinguish
+        # inaccessible/missing resources from a successfully empty connection.
         for key in path:
             if current is None:
                 if cursor is None:
+                    if api.reporting_enabled():
+                        raise api.GitHubReportingError(
+                            "GitHub reporting requires an accessible GraphQL resource"
+                        )
                     return []
                 raise api.GitHubError(200, "GraphQL", "Resource disappeared during pagination")
             if not isinstance(current, dict) or key not in current:
@@ -394,6 +392,21 @@ def _comment(row):
     }
 
 
+def _validate_parents(rows, **expected):
+    if api.reporting_enabled():
+        for row in rows:
+            for column, value in expected.items():
+                actual = row.get(column)
+                # GitHub owner/repository names are case-insensitive; node IDs are not.
+                if column in ("repo", "owner") and isinstance(actual, str):
+                    actual, value = actual.casefold(), value.casefold()
+                if actual != value:
+                    raise api.GitHubReportingError(
+                        f"GitHub reporting returned a row with mismatched {column}"
+                    )
+    return rows
+
+
 class DiscussionsFunction(RowTransformFunction[DiscussionsArgs]):
     FIXED_SCHEMA = DISCUSSION_SCHEMA
     Meta = _metadata(
@@ -433,7 +446,8 @@ class DiscussionsFunction(RowTransformFunction[DiscussionsArgs]):
                 args.max_rows,
                 credentials,
             )
-            return [_discussion(row, repo) for row in rows]
+            reporting.validate_dataset_payloads(cls.Meta.name, rows)
+            return _validate_parents([_discussion(row, repo) for row in rows], repo=repo)
 
         _emit(cls, params, batch, out, ["repo"], fetch)
 
@@ -447,7 +461,7 @@ class DiscussionCommentsFunction(RowTransformFunction[DiscussionCommentsArgs]):
         "Top-level comments on a discussion",
         "Read top-level comments through GraphQL with GitHub credentials, in GitHub connection order. "
         "Replies are a separate connection: use discussion_replies(node_id) to read them. "
-        "A missing discussion without GraphQL errors yields no rows.",
+        "A missing discussion yields no rows in exploratory mode and fails in reporting mode.",
         "SELECT c.user_login, c.body FROM github.main.discussions('duckdb/duckdb', max_rows => 1) d, "
         "LATERAL github.main.discussion_comments(d.repo, d.number, max_rows => 10) c",
     )
@@ -468,7 +482,8 @@ class DiscussionCommentsFunction(RowTransformFunction[DiscussionCommentsArgs]):
                 params.args.max_rows,
                 credentials,
             )
-            return [_comment(row) for row in rows]
+            reporting.validate_dataset_payloads(cls.Meta.name, rows)
+            return _validate_parents([_comment(row) for row in rows], repo=repo, discussion_number=number)
 
         _emit(cls, params, batch, out, ["repo", "number"], fetch)
 
@@ -497,12 +512,11 @@ class DiscussionRepliesFunction(RowTransformFunction[DiscussionRepliesArgs]):
         def fetch(node_id, hint, credentials):
             if not node_id.strip():
                 raise api.GitHubInputError("node_id must be a non-empty GraphQL node ID")
-            return [
-                _comment(row)
-                for row in _connection_rows(
-                    REPLIES_QUERY, {"id": node_id}, ("node", "replies"), params.args.max_rows, credentials
-                )
-            ]
+            rows = _connection_rows(
+                REPLIES_QUERY, {"id": node_id}, ("node", "replies"), params.args.max_rows, credentials
+            )
+            reporting.validate_dataset_payloads(cls.Meta.name, rows)
+            return _validate_parents([_comment(row) for row in rows], reply_to_id=node_id)
 
         _emit(cls, params, batch, out, ["node_id"], fetch)
 
@@ -547,16 +561,20 @@ class ProjectsFunction(RowTransformFunction[ProjectsArgs]):
                 hint=hint,
                 credentials=credentials,
             )
-            return [
-                {
-                    **row,
-                    "owner": _get(row, "owner", "login") or owner,
-                    "owner_type": params.args.owner_type,
-                    "is_public": row.get("public"),
-                    "creator_login": _get(row, "creator", "login"),
-                }
-                for row in rows
-            ]
+            reporting.validate_dataset_payloads(cls.Meta.name, rows)
+            return _validate_parents(
+                [
+                    {
+                        **row,
+                        "owner": _get(row, "owner", "login") or owner,
+                        "owner_type": params.args.owner_type,
+                        "is_public": row.get("public"),
+                        "creator_login": _get(row, "creator", "login"),
+                    }
+                    for row in rows
+                ],
+                owner=owner,
+            )
 
         _emit(cls, params, batch, out, ["owner"], fetch)
 
@@ -592,6 +610,7 @@ class ProjectItemsFunction(RowTransformFunction[ProjectItemsArgs]):
                 hint=hint,
                 credentials=credentials,
             )
+            reporting.validate_dataset_payloads(cls.Meta.name, rows)
             return [
                 {
                     **row,
@@ -643,6 +662,7 @@ class ProjectFieldsFunction(RowTransformFunction[ProjectFieldsArgs]):
                 hint=hint,
                 credentials=credentials,
             )
+            reporting.validate_dataset_payloads(cls.Meta.name, rows)
             return [
                 {
                     **row,

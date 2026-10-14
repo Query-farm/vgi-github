@@ -1,0 +1,2166 @@
+{
+  "entities": [
+    {
+      "name": "authored_pull_requests_source",
+      "description": "User.pullRequests connection across visible repositories, with author identity checked against the canonical selected user.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "pull_request_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "pull_request_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "title",
+          "path": [
+            "title"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "createdAt"
+          ]
+        },
+        {
+          "name": "merged_at",
+          "path": [
+            "mergedAt"
+          ]
+        },
+        {
+          "name": "repository_node_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ],
+          "description": "Source evidence from GitHub."
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ],
+          "description": "Source evidence from GitHub."
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updatedAt"
+          ],
+          "description": "Source evidence from GitHub."
+        },
+        {
+          "name": "repository_language",
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "description": "Current repository primary language, not the language of this change or historical metadata."
+        }
+      ],
+      "grain": [
+        "pull_request_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "user",
+          "pullRequests"
+        ],
+        "field_arguments": {
+          "user": {
+            "login": {
+              "argument": "user"
+            }
+          },
+          "pullRequests": {
+            "first": {
+              "literal": 100
+            },
+            "after": {
+              "cursor": true
+            }
+          }
+        },
+        "result_path": [
+          "nodes"
+        ],
+        "pagination": {
+          "kind": "cursor",
+          "page_info_path": [
+            "pageInfo"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "author_login",
+            "argument": "user",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authored_issues_source",
+      "description": "Issues authored by the selected user across visible repositories. Creation activity; current status is not status at a historical period end.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "issue_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "createdAt"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updatedAt"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "repository_node_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        },
+        {
+          "name": "repository_language",
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "description": "Current repository primary language, not the language of the contribution or its historical value."
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        },
+        {
+          "name": "number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "title",
+          "path": [
+            "title"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "closed_at",
+          "path": [
+            "closedAt"
+          ]
+        }
+      ],
+      "grain": [
+        "issue_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "user",
+          "issues"
+        ],
+        "field_arguments": {
+          "user": {
+            "login": {
+              "argument": "user"
+            }
+          },
+          "issues": {
+            "first": {
+              "literal": 100
+            },
+            "after": {
+              "cursor": true
+            },
+            "filterBy": {
+              "object": {
+                "createdBy": {
+                  "argument": "user"
+                }
+              }
+            }
+          }
+        },
+        "result_path": [
+          "nodes"
+        ],
+        "pagination": {
+          "kind": "cursor",
+          "page_info_path": [
+            "pageInfo"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "author_login",
+            "argument": "user",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authored_discussions_source",
+      "description": "Repository discussions started by the selected user across visible repositories.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "discussion_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "createdAt"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updatedAt"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "repository_node_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        },
+        {
+          "name": "repository_language",
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "description": "Current repository primary language, not the language of the contribution or its historical value."
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        },
+        {
+          "name": "number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "title",
+          "path": [
+            "title"
+          ]
+        }
+      ],
+      "grain": [
+        "discussion_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "user",
+          "repositoryDiscussions"
+        ],
+        "field_arguments": {
+          "user": {
+            "login": {
+              "argument": "user"
+            }
+          },
+          "repositoryDiscussions": {
+            "first": {
+              "literal": 100
+            },
+            "after": {
+              "cursor": true
+            }
+          }
+        },
+        "result_path": [
+          "nodes"
+        ],
+        "pagination": {
+          "kind": "cursor",
+          "page_info_path": [
+            "pageInfo"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "author_login",
+            "argument": "user",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authored_issue_comments_source",
+      "description": "Issue and PR timeline comments authored by the selected user; these are comment records, not review submissions or distinct issues.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "comment_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "createdAt"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updatedAt"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "repository_node_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        },
+        {
+          "name": "repository_language",
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "description": "Current repository primary language, not the language of the contribution or its historical value."
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "user",
+          "issueComments"
+        ],
+        "field_arguments": {
+          "user": {
+            "login": {
+              "argument": "user"
+            }
+          },
+          "issueComments": {
+            "first": {
+              "literal": 100
+            },
+            "after": {
+              "cursor": true
+            }
+          }
+        },
+        "result_path": [
+          "nodes"
+        ],
+        "pagination": {
+          "kind": "cursor",
+          "page_info_path": [
+            "pageInfo"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "author_login",
+            "argument": "user",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authored_discussion_comments_source",
+      "description": "Discussion comments and replies authored by the selected user. Missing discussion/repository context remains NULL and does not discard an attributable comment.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "comment_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "createdAt"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updatedAt"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "repository_node_id",
+          "path": [
+            "discussion",
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "discussion",
+            "repository",
+            "nameWithOwner"
+          ]
+        },
+        {
+          "name": "repository_language",
+          "path": [
+            "discussion",
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "description": "Current repository primary language, not the language of the contribution or its historical value."
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        },
+        {
+          "name": "subject_title",
+          "path": [
+            "discussion",
+            "title"
+          ]
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "user",
+          "repositoryDiscussionComments"
+        ],
+        "field_arguments": {
+          "user": {
+            "login": {
+              "argument": "user"
+            }
+          },
+          "repositoryDiscussionComments": {
+            "first": {
+              "literal": 100
+            },
+            "after": {
+              "cursor": true
+            }
+          }
+        },
+        "result_path": [
+          "nodes"
+        ],
+        "pagination": {
+          "kind": "cursor",
+          "page_info_path": [
+            "pageInfo"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "author_login",
+            "argument": "user",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authored_commit_comments_source",
+      "description": "Commit comments authored by the selected user, not commits or code-change counts.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "comment_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "createdAt"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updatedAt"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "repository_node_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        },
+        {
+          "name": "repository_language",
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "description": "Current repository primary language, not the language of the contribution or its historical value."
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "user",
+          "commitComments"
+        ],
+        "field_arguments": {
+          "user": {
+            "login": {
+              "argument": "user"
+            }
+          },
+          "commitComments": {
+            "first": {
+              "literal": 100
+            },
+            "after": {
+              "cursor": true
+            }
+          }
+        },
+        "result_path": [
+          "nodes"
+        ],
+        "pagination": {
+          "kind": "cursor",
+          "page_info_path": [
+            "pageInfo"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "author_login",
+            "argument": "user",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "authored_pull_requests",
+      "description": "PRs authored by the selected personal user across visible repositories, including repositories the user does not own. Each row's author must match the canonical user or the query fails. This is independent of owned-repository inventory.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_stage": "users",
+          "source_column": "user_id"
+        },
+        {
+          "name": "user_login",
+          "source_stage": "users",
+          "source_column": "user_login"
+        },
+        {
+          "name": "pull_request_node_id",
+          "source_stage": "pull_requests",
+          "source_column": "pull_request_node_id"
+        },
+        {
+          "name": "pull_request_number",
+          "source_stage": "pull_requests",
+          "source_column": "pull_request_number"
+        },
+        {
+          "name": "state",
+          "source_stage": "pull_requests",
+          "source_column": "state"
+        },
+        {
+          "name": "title",
+          "source_stage": "pull_requests",
+          "source_column": "title"
+        },
+        {
+          "name": "created_at",
+          "source_stage": "pull_requests",
+          "source_column": "created_at"
+        },
+        {
+          "name": "merged_at",
+          "source_stage": "pull_requests",
+          "source_column": "merged_at"
+        },
+        {
+          "name": "repository_node_id",
+          "source_stage": "pull_requests",
+          "source_column": "repository_node_id"
+        },
+        {
+          "name": "repository_name",
+          "source_stage": "pull_requests",
+          "source_column": "repository_name"
+        },
+        {
+          "name": "author_login",
+          "source_stage": "pull_requests",
+          "source_column": "author_login"
+        },
+        {
+          "name": "url",
+          "source_stage": "pull_requests",
+          "source_column": "url"
+        },
+        {
+          "name": "body",
+          "source_stage": "pull_requests",
+          "source_column": "body"
+        },
+        {
+          "name": "updated_at",
+          "source_stage": "pull_requests",
+          "source_column": "updated_at"
+        },
+        {
+          "name": "repository_language",
+          "source_stage": "pull_requests",
+          "source_column": "repository_language"
+        }
+      ],
+      "grain": [
+        "pull_request_node_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "users",
+            "scope": "users"
+          },
+          {
+            "name": "pull_requests",
+            "entity": "authored_pull_requests_source",
+            "arguments": {
+              "user": {
+                "stage": "users",
+                "column": "user_login"
+              }
+            }
+          }
+        ],
+        "output_stage": "pull_requests"
+      },
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "pull_request_node_id",
+          "pull_request_number",
+          "state",
+          "title",
+          "created_at",
+          "merged_at",
+          "repository_node_id",
+          "repository_name",
+          "author_login",
+          "merge_hours",
+          "authored_pr_created_day",
+          "authored_pr_merged_day",
+          "url",
+          "body",
+          "updated_at",
+          "repository_language",
+          "authored_pr_created_week",
+          "authored_pr_created_month",
+          "authored_pr_title_category"
+        ],
+        "dimensions": [
+          "pull_request_number",
+          "state",
+          "repository_node_id",
+          "repository_name",
+          "created_at",
+          "merged_at",
+          "authored_pr_created_day",
+          "authored_pr_merged_day",
+          "repository_language",
+          "authored_pr_created_week",
+          "authored_pr_created_month",
+          "authored_pr_title_category"
+        ],
+        "metrics": [
+          {
+            "name": "authored_pr_count",
+            "kind": "count",
+            "comment": "All visible open and closed PRs authored by the selected user, regardless of who owns each repository."
+          },
+          {
+            "name": "authored_merged_pr_count",
+            "kind": "count",
+            "comment": "Visible PRs authored by the selected user with a non-NULL merge timestamp.",
+            "where": {
+              "field": "merged_at",
+              "op": "is_not_null"
+            }
+          },
+          {
+            "name": "authored_median_merge_hours",
+            "kind": "median",
+            "field": "merge_hours",
+            "where": {
+              "field": "merged_at",
+              "op": "is_not_null"
+            },
+            "comment": "Exact continuous median elapsed UTC hours from creation to merge for visible authored PRs; NULL for an empty merged cohort."
+          },
+          {
+            "name": "authored_pr_active_days",
+            "kind": "count_distinct",
+            "field": "authored_pr_created_day",
+            "comment": "Distinct UTC creation dates represented by selected visible records. Non-additive across repositories and other overlapping groups; inactive dates contribute zero."
+          },
+          {
+            "name": "authored_pr_repository_count",
+            "kind": "count_distinct",
+            "field": "repository_node_id",
+            "comment": "Distinct known repository identities represented by selected visible records. Non-additive across dates/categories; unknown repository context is excluded."
+          }
+        ],
+        "sql_names": {
+          "repository_name": "authored_repository_name",
+          "state": "authored_pr_state",
+          "pull_request_number": "authored_pr_number",
+          "authored_pr_created_day": "authored_pr_created_day",
+          "authored_pr_merged_day": "authored_pr_merged_day",
+          "created_at": "authored_pr_created_at",
+          "merged_at": "authored_pr_merged_at",
+          "repository_language": "authored_pr_repository_language",
+          "authored_pr_created_week": "authored_pr_created_week",
+          "authored_pr_created_month": "authored_pr_created_month",
+          "authored_pr_title_category": "authored_pr_title_category"
+        },
+        "derived_fields": [
+          {
+            "name": "merge_hours",
+            "kind": "elapsed",
+            "start": "created_at",
+            "end": "merged_at",
+            "unit": "h",
+            "comment": "Elapsed UTC milliseconds between creation and merge divided by 3600000; NULL until merged."
+          },
+          {
+            "name": "authored_pr_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "Gregorian UTC date of creation for a PR authored by the selected user."
+          },
+          {
+            "name": "authored_pr_merged_day",
+            "kind": "date",
+            "source": "merged_at",
+            "timezone": "UTC",
+            "comment": "Gregorian UTC date of merge for an authored PR; NULL until merged."
+          },
+          {
+            "name": "authored_pr_created_week",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "week",
+            "comment": "UTC Gregorian week of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_pr_created_month",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "month",
+            "comment": "UTC Gregorian month of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_pr_title_category",
+            "kind": "text_category",
+            "source": "title",
+            "rules": [
+              {
+                "id": "documentation",
+                "match": "prefix",
+                "value": "docs:",
+                "category": "documentation"
+              },
+              {
+                "id": "bugfix",
+                "match": "prefix",
+                "value": "fix:",
+                "category": "bugfix"
+              },
+              {
+                "id": "feature",
+                "match": "prefix",
+                "value": "feat:",
+                "category": "feature"
+              },
+              {
+                "id": "refactoring",
+                "match": "prefix",
+                "value": "refactor:",
+                "category": "refactoring"
+              },
+              {
+                "id": "testing",
+                "match": "prefix",
+                "value": "test:",
+                "category": "testing"
+              }
+            ],
+            "otherwise": "unclassified",
+            "comment": "Transparent classification from case-insensitive conventional title prefixes docs:, fix:, feat:, refactor:, test:. First matching rule wins; other titles are unclassified. This describes title wording, not author intent; original title is available as evidence."
+          }
+        ]
+      }
+    },
+    {
+      "name": "authored_issues",
+      "description": "Issues authored by the selected user across visible repositories. Creation activity; current status is not status at a historical period end.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_stage": "users",
+          "source_column": "user_id"
+        },
+        {
+          "name": "user_login",
+          "source_stage": "users",
+          "source_column": "user_login"
+        },
+        {
+          "name": "issue_node_id",
+          "source_stage": "activity",
+          "source_column": "issue_node_id"
+        },
+        {
+          "name": "created_at",
+          "source_stage": "activity",
+          "source_column": "created_at"
+        },
+        {
+          "name": "updated_at",
+          "source_stage": "activity",
+          "source_column": "updated_at"
+        },
+        {
+          "name": "url",
+          "source_stage": "activity",
+          "source_column": "url"
+        },
+        {
+          "name": "body",
+          "source_stage": "activity",
+          "source_column": "body"
+        },
+        {
+          "name": "repository_node_id",
+          "source_stage": "activity",
+          "source_column": "repository_node_id"
+        },
+        {
+          "name": "repository_name",
+          "source_stage": "activity",
+          "source_column": "repository_name"
+        },
+        {
+          "name": "repository_language",
+          "source_stage": "activity",
+          "source_column": "repository_language"
+        },
+        {
+          "name": "author_login",
+          "source_stage": "activity",
+          "source_column": "author_login"
+        },
+        {
+          "name": "number",
+          "source_stage": "activity",
+          "source_column": "number"
+        },
+        {
+          "name": "title",
+          "source_stage": "activity",
+          "source_column": "title"
+        },
+        {
+          "name": "state",
+          "source_stage": "activity",
+          "source_column": "state"
+        },
+        {
+          "name": "closed_at",
+          "source_stage": "activity",
+          "source_column": "closed_at"
+        }
+      ],
+      "grain": [
+        "issue_node_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "users",
+            "scope": "users"
+          },
+          {
+            "name": "activity",
+            "entity": "authored_issues_source",
+            "arguments": {
+              "user": {
+                "stage": "users",
+                "column": "user_login"
+              }
+            }
+          }
+        ],
+        "output_stage": "activity"
+      },
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "issue_node_id",
+          "created_at",
+          "updated_at",
+          "url",
+          "body",
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "author_login",
+          "number",
+          "title",
+          "state",
+          "closed_at",
+          "authored_issue_created_day",
+          "authored_issue_created_week",
+          "authored_issue_created_month",
+          "authored_issue_title_category"
+        ],
+        "dimensions": [
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "created_at",
+          "number",
+          "state",
+          "authored_issue_created_day",
+          "authored_issue_created_week",
+          "authored_issue_created_month",
+          "authored_issue_title_category"
+        ],
+        "metrics": [
+          {
+            "name": "authored_issue_count",
+            "kind": "count",
+            "comment": "Issues authored by the selected user across visible repositories. Creation activity; current status is not status at a historical period end. Each visible source identity counts once; event time is its creation timestamp."
+          },
+          {
+            "name": "authored_issue_active_days",
+            "kind": "count_distinct",
+            "field": "authored_issue_created_day",
+            "comment": "Distinct UTC creation dates represented by selected visible records. Non-additive across repositories and other overlapping groups; inactive dates contribute zero."
+          },
+          {
+            "name": "authored_issue_repository_count",
+            "kind": "count_distinct",
+            "field": "repository_node_id",
+            "comment": "Distinct known repository identities represented by selected visible records. Non-additive across dates/categories; unknown repository context is excluded."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "authored_issue_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC Gregorian day of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_issue_created_week",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "week",
+            "comment": "UTC Gregorian week of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_issue_created_month",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "month",
+            "comment": "UTC Gregorian month of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_issue_title_category",
+            "kind": "text_category",
+            "source": "title",
+            "rules": [
+              {
+                "id": "documentation",
+                "match": "prefix",
+                "value": "docs:",
+                "category": "documentation"
+              },
+              {
+                "id": "bugfix",
+                "match": "prefix",
+                "value": "fix:",
+                "category": "bugfix"
+              },
+              {
+                "id": "feature",
+                "match": "prefix",
+                "value": "feat:",
+                "category": "feature"
+              },
+              {
+                "id": "refactoring",
+                "match": "prefix",
+                "value": "refactor:",
+                "category": "refactoring"
+              },
+              {
+                "id": "testing",
+                "match": "prefix",
+                "value": "test:",
+                "category": "testing"
+              }
+            ],
+            "otherwise": "unclassified",
+            "comment": "Transparent classification from case-insensitive conventional title prefixes docs:, fix:, feat:, refactor:, test:. First matching rule wins; other titles are unclassified. This describes title wording, not author intent; original title is available as evidence."
+          }
+        ],
+        "sql_names": {
+          "repository_node_id": "authored_issue_repository_node_id",
+          "repository_name": "authored_issue_repository_name",
+          "repository_language": "authored_issue_repository_language",
+          "created_at": "authored_issue_created_at",
+          "number": "authored_issue_number",
+          "state": "authored_issue_state",
+          "authored_issue_created_day": "authored_issue_created_day",
+          "authored_issue_created_week": "authored_issue_created_week",
+          "authored_issue_created_month": "authored_issue_created_month",
+          "authored_issue_title_category": "authored_issue_title_category"
+        }
+      }
+    },
+    {
+      "name": "authored_discussions",
+      "description": "Repository discussions started by the selected user across visible repositories.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_stage": "users",
+          "source_column": "user_id"
+        },
+        {
+          "name": "user_login",
+          "source_stage": "users",
+          "source_column": "user_login"
+        },
+        {
+          "name": "discussion_node_id",
+          "source_stage": "activity",
+          "source_column": "discussion_node_id"
+        },
+        {
+          "name": "created_at",
+          "source_stage": "activity",
+          "source_column": "created_at"
+        },
+        {
+          "name": "updated_at",
+          "source_stage": "activity",
+          "source_column": "updated_at"
+        },
+        {
+          "name": "url",
+          "source_stage": "activity",
+          "source_column": "url"
+        },
+        {
+          "name": "body",
+          "source_stage": "activity",
+          "source_column": "body"
+        },
+        {
+          "name": "repository_node_id",
+          "source_stage": "activity",
+          "source_column": "repository_node_id"
+        },
+        {
+          "name": "repository_name",
+          "source_stage": "activity",
+          "source_column": "repository_name"
+        },
+        {
+          "name": "repository_language",
+          "source_stage": "activity",
+          "source_column": "repository_language"
+        },
+        {
+          "name": "author_login",
+          "source_stage": "activity",
+          "source_column": "author_login"
+        },
+        {
+          "name": "number",
+          "source_stage": "activity",
+          "source_column": "number"
+        },
+        {
+          "name": "title",
+          "source_stage": "activity",
+          "source_column": "title"
+        }
+      ],
+      "grain": [
+        "discussion_node_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "users",
+            "scope": "users"
+          },
+          {
+            "name": "activity",
+            "entity": "authored_discussions_source",
+            "arguments": {
+              "user": {
+                "stage": "users",
+                "column": "user_login"
+              }
+            }
+          }
+        ],
+        "output_stage": "activity"
+      },
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "discussion_node_id",
+          "created_at",
+          "updated_at",
+          "url",
+          "body",
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "author_login",
+          "number",
+          "title",
+          "authored_discussion_created_day",
+          "authored_discussion_created_week",
+          "authored_discussion_created_month",
+          "authored_discussion_title_category"
+        ],
+        "dimensions": [
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "created_at",
+          "number",
+          "authored_discussion_created_day",
+          "authored_discussion_created_week",
+          "authored_discussion_created_month",
+          "authored_discussion_title_category"
+        ],
+        "metrics": [
+          {
+            "name": "authored_discussion_count",
+            "kind": "count",
+            "comment": "Repository discussions started by the selected user across visible repositories. Each visible source identity counts once; event time is its creation timestamp."
+          },
+          {
+            "name": "authored_discussion_active_days",
+            "kind": "count_distinct",
+            "field": "authored_discussion_created_day",
+            "comment": "Distinct UTC creation dates represented by selected visible records. Non-additive across repositories and other overlapping groups; inactive dates contribute zero."
+          },
+          {
+            "name": "authored_discussion_repository_count",
+            "kind": "count_distinct",
+            "field": "repository_node_id",
+            "comment": "Distinct known repository identities represented by selected visible records. Non-additive across dates/categories; unknown repository context is excluded."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "authored_discussion_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC Gregorian day of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_discussion_created_week",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "week",
+            "comment": "UTC Gregorian week of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_discussion_created_month",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "month",
+            "comment": "UTC Gregorian month of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_discussion_title_category",
+            "kind": "text_category",
+            "source": "title",
+            "rules": [
+              {
+                "id": "documentation",
+                "match": "prefix",
+                "value": "docs:",
+                "category": "documentation"
+              },
+              {
+                "id": "bugfix",
+                "match": "prefix",
+                "value": "fix:",
+                "category": "bugfix"
+              },
+              {
+                "id": "feature",
+                "match": "prefix",
+                "value": "feat:",
+                "category": "feature"
+              },
+              {
+                "id": "refactoring",
+                "match": "prefix",
+                "value": "refactor:",
+                "category": "refactoring"
+              },
+              {
+                "id": "testing",
+                "match": "prefix",
+                "value": "test:",
+                "category": "testing"
+              }
+            ],
+            "otherwise": "unclassified",
+            "comment": "Transparent classification from case-insensitive conventional title prefixes docs:, fix:, feat:, refactor:, test:. First matching rule wins; other titles are unclassified. This describes title wording, not author intent; original title is available as evidence."
+          }
+        ],
+        "sql_names": {
+          "repository_node_id": "authored_discussion_repository_node_id",
+          "repository_name": "authored_discussion_repository_name",
+          "repository_language": "authored_discussion_repository_language",
+          "created_at": "authored_discussion_created_at",
+          "number": "authored_discussion_number",
+          "authored_discussion_created_day": "authored_discussion_created_day",
+          "authored_discussion_created_week": "authored_discussion_created_week",
+          "authored_discussion_created_month": "authored_discussion_created_month",
+          "authored_discussion_title_category": "authored_discussion_title_category"
+        }
+      }
+    },
+    {
+      "name": "authored_issue_comments",
+      "description": "Issue and PR timeline comments authored by the selected user; these are comment records, not review submissions or distinct issues.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_stage": "users",
+          "source_column": "user_id"
+        },
+        {
+          "name": "user_login",
+          "source_stage": "users",
+          "source_column": "user_login"
+        },
+        {
+          "name": "comment_node_id",
+          "source_stage": "activity",
+          "source_column": "comment_node_id"
+        },
+        {
+          "name": "created_at",
+          "source_stage": "activity",
+          "source_column": "created_at"
+        },
+        {
+          "name": "updated_at",
+          "source_stage": "activity",
+          "source_column": "updated_at"
+        },
+        {
+          "name": "url",
+          "source_stage": "activity",
+          "source_column": "url"
+        },
+        {
+          "name": "body",
+          "source_stage": "activity",
+          "source_column": "body"
+        },
+        {
+          "name": "repository_node_id",
+          "source_stage": "activity",
+          "source_column": "repository_node_id"
+        },
+        {
+          "name": "repository_name",
+          "source_stage": "activity",
+          "source_column": "repository_name"
+        },
+        {
+          "name": "repository_language",
+          "source_stage": "activity",
+          "source_column": "repository_language"
+        },
+        {
+          "name": "author_login",
+          "source_stage": "activity",
+          "source_column": "author_login"
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "users",
+            "scope": "users"
+          },
+          {
+            "name": "activity",
+            "entity": "authored_issue_comments_source",
+            "arguments": {
+              "user": {
+                "stage": "users",
+                "column": "user_login"
+              }
+            }
+          }
+        ],
+        "output_stage": "activity"
+      },
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "comment_node_id",
+          "created_at",
+          "updated_at",
+          "url",
+          "body",
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "author_login",
+          "authored_issue_comment_created_day",
+          "authored_issue_comment_created_week",
+          "authored_issue_comment_created_month"
+        ],
+        "dimensions": [
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "created_at",
+          "authored_issue_comment_created_day",
+          "authored_issue_comment_created_week",
+          "authored_issue_comment_created_month"
+        ],
+        "metrics": [
+          {
+            "name": "authored_issue_comment_count",
+            "kind": "count",
+            "comment": "Issue and PR timeline comments authored by the selected user; these are comment records, not review submissions or distinct issues. Each visible source identity counts once; event time is its creation timestamp."
+          },
+          {
+            "name": "authored_issue_comment_active_days",
+            "kind": "count_distinct",
+            "field": "authored_issue_comment_created_day",
+            "comment": "Distinct UTC creation dates represented by selected visible records. Non-additive across repositories and other overlapping groups; inactive dates contribute zero."
+          },
+          {
+            "name": "authored_issue_comment_repository_count",
+            "kind": "count_distinct",
+            "field": "repository_node_id",
+            "comment": "Distinct known repository identities represented by selected visible records. Non-additive across dates/categories; unknown repository context is excluded."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "authored_issue_comment_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC Gregorian day of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_issue_comment_created_week",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "week",
+            "comment": "UTC Gregorian week of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_issue_comment_created_month",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "month",
+            "comment": "UTC Gregorian month of creation; weeks begin Monday."
+          }
+        ],
+        "sql_names": {
+          "repository_node_id": "authored_issue_comment_repository_node_id",
+          "repository_name": "authored_issue_comment_repository_name",
+          "repository_language": "authored_issue_comment_repository_language",
+          "created_at": "authored_issue_comment_created_at",
+          "authored_issue_comment_created_day": "authored_issue_comment_created_day",
+          "authored_issue_comment_created_week": "authored_issue_comment_created_week",
+          "authored_issue_comment_created_month": "authored_issue_comment_created_month"
+        }
+      }
+    },
+    {
+      "name": "authored_discussion_comments",
+      "description": "Discussion comments and replies authored by the selected user. Missing discussion/repository context remains NULL and does not discard an attributable comment.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_stage": "users",
+          "source_column": "user_id"
+        },
+        {
+          "name": "user_login",
+          "source_stage": "users",
+          "source_column": "user_login"
+        },
+        {
+          "name": "comment_node_id",
+          "source_stage": "activity",
+          "source_column": "comment_node_id"
+        },
+        {
+          "name": "created_at",
+          "source_stage": "activity",
+          "source_column": "created_at"
+        },
+        {
+          "name": "updated_at",
+          "source_stage": "activity",
+          "source_column": "updated_at"
+        },
+        {
+          "name": "url",
+          "source_stage": "activity",
+          "source_column": "url"
+        },
+        {
+          "name": "body",
+          "source_stage": "activity",
+          "source_column": "body"
+        },
+        {
+          "name": "repository_node_id",
+          "source_stage": "activity",
+          "source_column": "repository_node_id"
+        },
+        {
+          "name": "repository_name",
+          "source_stage": "activity",
+          "source_column": "repository_name"
+        },
+        {
+          "name": "repository_language",
+          "source_stage": "activity",
+          "source_column": "repository_language"
+        },
+        {
+          "name": "author_login",
+          "source_stage": "activity",
+          "source_column": "author_login"
+        },
+        {
+          "name": "subject_title",
+          "source_stage": "activity",
+          "source_column": "subject_title"
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "users",
+            "scope": "users"
+          },
+          {
+            "name": "activity",
+            "entity": "authored_discussion_comments_source",
+            "arguments": {
+              "user": {
+                "stage": "users",
+                "column": "user_login"
+              }
+            }
+          }
+        ],
+        "output_stage": "activity"
+      },
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "comment_node_id",
+          "created_at",
+          "updated_at",
+          "url",
+          "body",
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "author_login",
+          "subject_title",
+          "authored_discussion_comment_created_day",
+          "authored_discussion_comment_created_week",
+          "authored_discussion_comment_created_month"
+        ],
+        "dimensions": [
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "created_at",
+          "authored_discussion_comment_created_day",
+          "authored_discussion_comment_created_week",
+          "authored_discussion_comment_created_month"
+        ],
+        "metrics": [
+          {
+            "name": "authored_discussion_comment_count",
+            "kind": "count",
+            "comment": "Discussion comments and replies authored by the selected user. Missing discussion/repository context remains NULL and does not discard an attributable comment. Each visible source identity counts once; event time is its creation timestamp."
+          },
+          {
+            "name": "authored_discussion_comment_active_days",
+            "kind": "count_distinct",
+            "field": "authored_discussion_comment_created_day",
+            "comment": "Distinct UTC creation dates represented by selected visible records. Non-additive across repositories and other overlapping groups; inactive dates contribute zero."
+          },
+          {
+            "name": "authored_discussion_comment_repository_count",
+            "kind": "count_distinct",
+            "field": "repository_node_id",
+            "comment": "Distinct known repository identities represented by selected visible records. Non-additive across dates/categories; unknown repository context is excluded."
+          },
+          {
+            "name": "authored_discussion_comment_unknown_repository_count",
+            "kind": "count",
+            "where": {
+              "field": "repository_node_id",
+              "op": "is_null"
+            },
+            "comment": "Visible discussion comments with unavailable discussion/repository context. Included in comment count, excluded from distinct known repositories."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "authored_discussion_comment_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC Gregorian day of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_discussion_comment_created_week",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "week",
+            "comment": "UTC Gregorian week of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_discussion_comment_created_month",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "month",
+            "comment": "UTC Gregorian month of creation; weeks begin Monday."
+          }
+        ],
+        "sql_names": {
+          "repository_node_id": "authored_discussion_comment_repository_node_id",
+          "repository_name": "authored_discussion_comment_repository_name",
+          "repository_language": "authored_discussion_comment_repository_language",
+          "created_at": "authored_discussion_comment_created_at",
+          "authored_discussion_comment_created_day": "authored_discussion_comment_created_day",
+          "authored_discussion_comment_created_week": "authored_discussion_comment_created_week",
+          "authored_discussion_comment_created_month": "authored_discussion_comment_created_month"
+        }
+      }
+    },
+    {
+      "name": "authored_commit_comments",
+      "description": "Commit comments authored by the selected user, not commits or code-change counts.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_stage": "users",
+          "source_column": "user_id"
+        },
+        {
+          "name": "user_login",
+          "source_stage": "users",
+          "source_column": "user_login"
+        },
+        {
+          "name": "comment_node_id",
+          "source_stage": "activity",
+          "source_column": "comment_node_id"
+        },
+        {
+          "name": "created_at",
+          "source_stage": "activity",
+          "source_column": "created_at"
+        },
+        {
+          "name": "updated_at",
+          "source_stage": "activity",
+          "source_column": "updated_at"
+        },
+        {
+          "name": "url",
+          "source_stage": "activity",
+          "source_column": "url"
+        },
+        {
+          "name": "body",
+          "source_stage": "activity",
+          "source_column": "body"
+        },
+        {
+          "name": "repository_node_id",
+          "source_stage": "activity",
+          "source_column": "repository_node_id"
+        },
+        {
+          "name": "repository_name",
+          "source_stage": "activity",
+          "source_column": "repository_name"
+        },
+        {
+          "name": "repository_language",
+          "source_stage": "activity",
+          "source_column": "repository_language"
+        },
+        {
+          "name": "author_login",
+          "source_stage": "activity",
+          "source_column": "author_login"
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "users",
+            "scope": "users"
+          },
+          {
+            "name": "activity",
+            "entity": "authored_commit_comments_source",
+            "arguments": {
+              "user": {
+                "stage": "users",
+                "column": "user_login"
+              }
+            }
+          }
+        ],
+        "output_stage": "activity"
+      },
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "comment_node_id",
+          "created_at",
+          "updated_at",
+          "url",
+          "body",
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "author_login",
+          "authored_commit_comment_created_day",
+          "authored_commit_comment_created_week",
+          "authored_commit_comment_created_month"
+        ],
+        "dimensions": [
+          "repository_node_id",
+          "repository_name",
+          "repository_language",
+          "created_at",
+          "authored_commit_comment_created_day",
+          "authored_commit_comment_created_week",
+          "authored_commit_comment_created_month"
+        ],
+        "metrics": [
+          {
+            "name": "authored_commit_comment_count",
+            "kind": "count",
+            "comment": "Commit comments authored by the selected user, not commits or code-change counts. Each visible source identity counts once; event time is its creation timestamp."
+          },
+          {
+            "name": "authored_commit_comment_active_days",
+            "kind": "count_distinct",
+            "field": "authored_commit_comment_created_day",
+            "comment": "Distinct UTC creation dates represented by selected visible records. Non-additive across repositories and other overlapping groups; inactive dates contribute zero."
+          },
+          {
+            "name": "authored_commit_comment_repository_count",
+            "kind": "count_distinct",
+            "field": "repository_node_id",
+            "comment": "Distinct known repository identities represented by selected visible records. Non-additive across dates/categories; unknown repository context is excluded."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "authored_commit_comment_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC Gregorian day of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_commit_comment_created_week",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "week",
+            "comment": "UTC Gregorian week of creation; weeks begin Monday."
+          },
+          {
+            "name": "authored_commit_comment_created_month",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "granularity": "month",
+            "comment": "UTC Gregorian month of creation; weeks begin Monday."
+          }
+        ],
+        "sql_names": {
+          "repository_node_id": "authored_commit_comment_repository_node_id",
+          "repository_name": "authored_commit_comment_repository_name",
+          "repository_language": "authored_commit_comment_repository_language",
+          "created_at": "authored_commit_comment_created_at",
+          "authored_commit_comment_created_day": "authored_commit_comment_created_day",
+          "authored_commit_comment_created_week": "authored_commit_comment_created_week",
+          "authored_commit_comment_created_month": "authored_commit_comment_created_month"
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "authored_pull_requests_to_users",
+      "from": "authored_pull_requests",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "name": "authored_issues_to_users",
+      "from": "authored_issues",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "name": "authored_discussions_to_users",
+      "from": "authored_discussions",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "name": "authored_issue_comments_to_users",
+      "from": "authored_issue_comments",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "name": "authored_discussion_comments_to_users",
+      "from": "authored_discussion_comments",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "name": "authored_commit_comments_to_users",
+      "from": "authored_commit_comments",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ]
+    }
+  ],
+  "shared_dimensions": {
+    "github.activity.repository_node_id.v1": [
+      "authored_pull_requests.repository_node_id",
+      "authored_issues.repository_node_id",
+      "authored_discussions.repository_node_id",
+      "authored_issue_comments.repository_node_id",
+      "authored_discussion_comments.repository_node_id",
+      "authored_commit_comments.repository_node_id"
+    ]
+  }
+}

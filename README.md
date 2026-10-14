@@ -27,9 +27,11 @@ repository or a whole organization in a single query. It only ever reads; it nev
 anything on GitHub.
 
 For approved business definitions, typed named reports and strict SQL, use the
-[Crossfield semantic model](models/README.md). It covers the original 15 `main` functions,
-including PR merge durations, issue state, CI reliability and complete detail
-schemas. It requires the matching patched DuckDB 2.0 and native VGI build.
+[Crossfield semantic model](models/README.md). It covers the typed `main` functions,
+including PR merge durations, issue state, CI reliability, Discussions and Projects.
+Generated REST operations, `api.rest()` and `api.graphql()` are also available as raw
+response detail; business metrics use the validated typed sources. Crossfield requires
+the matching patched DuckDB 2.0 and native VGI build.
 
 ## Get started
 
@@ -231,7 +233,11 @@ Project items retain rows with inaccessible content, with NULL content columns. 
 vary by project, so their values remain in `fields_json`; without `fields`, GitHub returns only
 the title field. `project_fields` provides the IDs, types, select options and iteration settings.
 Errors, including permission failures and partial GraphQL errors, fail the query.
-The six new datasets are not approved Crossfield sources and reject `reporting true`.
+All six datasets support `reporting true` and the Crossfield model. Reporting requires
+`max_rows => 0`, validates row identities, timestamps, counters and state before projection,
+and disables result caching. Missing or inaccessible GraphQL resources raise errors;
+a successfully empty connection remains an empty result. Project items with explicitly
+inaccessible content remain valid items, with NULL content columns.
 
 REST is the default for new typed datasets when it supplies the data. GraphQL fills coverage
 gaps such as Discussions; the SQL interface remains typed either way. GitHub documents both
@@ -292,8 +298,10 @@ The default is one page. A non-NULL `next_url` on the final row means more pages
 GitHub's own search caps, tree truncation and endpoint-specific limits still apply; requesting
 all pages cannot recover data GitHub does not serve. Complete search/tree requests reject
 explicitly incomplete responses. Query parameters such as `page`, `before` and `after` can
-also be supplied when supported by the endpoint. These raw response pages are not approved
-Crossfield reporting sources; the semantic model continues to use its original 15 `main` sources.
+also be supplied when supported by the endpoint. The Crossfield model provides raw detail
+reports for the generated REST operations and dispatcher. Their grain is one response page,
+including binary or empty responses; counting these rows counts pages, not GitHub entities.
+Approved business metrics come from typed sources with defined populations and row identities.
 
 Missing or forbidden resources raise errors. For endpoints where 404 is a useful negative
 answer, such as membership checks, use `allow_not_found => true` and inspect `status_code`.
@@ -328,6 +336,8 @@ FROM github.api.graphql(
 
 Pagination is explicit: pass each connection's `endCursor` back through an `after` variable.
 GraphQL responses containing errors fail the query, including partial-data responses.
+The Crossfield raw GraphQL detail report preserves one response envelope per invocation.
+It does not certify the completeness of nested connections or define entity metrics from JSON.
 GraphQL uses GitHub's required HTTP POST transport, but a real GraphQL parser rejects
 **all mutations and subscriptions before network access**, even unselected operations in
 the same document. REST remains GET-only. No GitHub write operation is available.

@@ -1,0 +1,100 @@
+{
+  "format": "vgi-github-generation-sources",
+  "graphql_revision": "82ff2d4780080e6929ebb95608cefa22dfa05ac7",
+  "modifications": "REST: selected GET paths with complete local reference closure. GraphQL: selected output fields and scalar common interface fields, full input/scalar/enum closure; object interface implementations and vendor directives omitted. No generated metrics are inferred from upstream schemas.",
+  "products": [
+    "api.github.com"
+  ],
+  "rest_revision": "58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1",
+  "selection": {
+    "graphql_field_paths": [
+      [
+        "repository",
+        "labels"
+      ],
+      [
+        "user",
+        "pullRequests"
+      ],
+      [
+        "user",
+        "issues"
+      ],
+      [
+        "user",
+        "repositoryDiscussions"
+      ],
+      [
+        "user",
+        "issueComments"
+      ],
+      [
+        "user",
+        "repositoryDiscussionComments"
+      ],
+      [
+        "user",
+        "commitComments"
+      ]
+    ],
+    "rest_operation_ids": [
+      "orgs/get",
+      "orgs/list-members",
+      "pulls/get",
+      "pulls/list",
+      "pulls/list-reviews",
+      "repos/get",
+      "repos/list-for-org",
+      "repos/list-for-user",
+      "teams/list",
+      "teams/list-members-in-org",
+      "users/get-by-username",
+      "users/get-by-username"
+    ]
+  },
+  "snapshots": [
+    {
+      "path": "generation/sources/GRAPHQL-LICENSE",
+      "sha256": "e51a6b92d07239908dddbec0da5fa7f16c54843abaafdb7aca1fdf50b818c44c"
+    },
+    {
+      "path": "generation/sources/REST-LICENSE",
+      "sha256": "3243761cbac07e6d169a5a2f4e7c25cc544da85248e735df74c3672e055cc87b"
+    },
+    {
+      "path": "generation/sources/api.github.com.selected.json",
+      "sha256": "0d08bf58fb23d2b45d4b496db690f64cdff3f925cad68d7afebcefa60977abce"
+    },
+    {
+      "path": "generation/sources/selected.graphql",
+      "sha256": "10c343265fed0d5d2d1ff81388a7d887aaba861a917687140e14570646ddac69"
+    }
+  ],
+  "upstream": [
+    {
+      "bytes": 1069,
+      "file": "GRAPHQL-LICENSE",
+      "sha256": "e51a6b92d07239908dddbec0da5fa7f16c54843abaafdb7aca1fdf50b818c44c",
+      "url": "https://raw.githubusercontent.com/octokit/graphql-schema/82ff2d4780080e6929ebb95608cefa22dfa05ac7/LICENSE.md"
+    },
+    {
+      "bytes": 1063,
+      "file": "REST-LICENSE",
+      "sha256": "3243761cbac07e6d169a5a2f4e7c25cc544da85248e735df74c3672e055cc87b",
+      "url": "https://raw.githubusercontent.com/github/rest-api-description/58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1/LICENSE.md"
+    },
+    {
+      "bytes": 13018046,
+      "file": "api.github.com.json",
+      "sha256": "da3d22e417611cca9a4131dceea89d4d61c3be021b0917f32d9e4422e4fe60f1",
+      "url": "https://raw.githubusercontent.com/github/rest-api-description/58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1/descriptions/api.github.com/api.github.com.json"
+    },
+    {
+      "bytes": 1223842,
+      "file": "schema.graphql",
+      "sha256": "3c62d0526d133cee53221c89de9b455ade24db78b9e7ad56d642c4c15bce2654",
+      "url": "https://raw.githubusercontent.com/octokit/graphql-schema/82ff2d4780080e6929ebb95608cefa22dfa05ac7/schema.graphql"
+    }
+  ],
+  "version": 1
+}

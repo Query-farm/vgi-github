@@ -1,0 +1,175 @@
+# Native metric stages with independently specified unequal review populations.
+# Generated worker, mocked HTTP, native DuckDB/Crossfield: no live-account claim.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_ANALYSIS_WORKER
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_ANALYSIS_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT mean_first_review_hours, p90_first_review_hours FROM engineering.semantic.github(owner=>'example');
+
+statement ok
+EXPLAIN (SQL) SELECT latest_approved_reviewer_count FROM engineering.semantic.github(owner=>'example');
+
+# 8 raw records -> 7 submitted records -> 3 reviewed PR observations.
+# Means over all seven reviews would be 23/7, not the approved 10/3 answer.
+query IIIRRR
+SELECT review_record_count, submitted_review_count, reviewed_pr_count,
+       mean_first_review_hours,
+       median_first_review_hours, p90_first_review_hours
+FROM engineering.semantic.github(owner=>'example');
+----
+8	7	3	3.333	2.000	6.000
+
+# The same calculation supports selecting one repository and one PR.
+query IR
+SELECT reviewed_pr_count, mean_first_review_hours
+FROM engineering.semantic.github(repository=>'example/alpha', pull_request_number=>1);
+----
+1	2.000
+
+# One observed row per reviewed PR; alpha#3 has no reviews and contributes no zero.
+query IIR rowsort
+SELECT first_review_prs_repository_id, first_review_prs_pull_request_number,
+       mean_first_review_hours
+FROM engineering.semantic.github(owner=>'example')
+GROUP BY first_review_prs_repository_id, first_review_prs_pull_request_number;
+----
+101	1	2.000
+101	2	7.000
+102	1	1.000
+
+# Latest state uses one selected record per PR/reviewer, not all approvals.
+# bob's initial alpha#1 approval was superseded. Tied carol beta#1 picks ID22.
+query II
+SELECT latest_reviewer_review_count, latest_approved_reviewer_count
+FROM engineering.semantic.github(owner=>'example');
+----
+5	2
+
+query IIIIT rowsort
+SELECT repository_id, pull_request_number, reviewer_id, review_id, state
+FROM engineering.detail.latest_reviewer_reviews(owner=>'example');
+----
+101	1	201	12	COMMENTED
+101	1	202	14	CHANGES_REQUESTED
+101	2	202	13	APPROVED
+102	1	202	23	COMMENTED
+102	1	203	22	APPROVED
+
+# Cohort selection retains independently reviewed PR grain across repositories.
+query IR
+SELECT reviewed_pr_count, median_first_review_hours
+FROM engineering.semantic.github(repositories=>[{'repository':'example/alpha'},{'repository':'example/beta'}]);
+----
+3	2.000
+
+# Repository-share denominator is all visible authored PR groups for user/month.
+# UTC offsets place PR202 in September and PR203 in August.
+query ITTTTIIR rowsort
+SELECT activity_user_id, activity_user, authored_pr_created_month, activity_repository_id, authored_repository_name,
+       authored_pr_count, monthly_authored_pr_total,
+       monthly_repository_pr_share
+FROM engineering.semantic.github(user=>'researcher')
+GROUP BY activity_user_id, activity_user, authored_pr_created_month,
+         activity_repository_id, authored_repository_name;
+----
+701	researcher	2026-08-01	R501	lab/compiler	1	2	0.500
+701	researcher	2026-08-01	R503	outside/docs	1	2	0.500
+701	researcher	2026-09-01	R501	lab/compiler	1	3	0.333
+701	researcher	2026-09-01	R502	lab/sdk	2	3	0.667
+701	researcher	2026-10-01	R501	lab/compiler	1	1	1.000
+
+# QUALIFY filters the rendered groups after their full denominator is computed.
+query ITTTTR rowsort
+SELECT activity_user_id, activity_user, authored_pr_created_month, activity_repository_id, authored_repository_name,
+       monthly_repository_pr_share
+FROM engineering.semantic.github(user=>'researcher')
+GROUP BY activity_user_id, activity_user, authored_pr_created_month,
+         activity_repository_id, authored_repository_name
+QUALIFY monthly_repository_pr_share > 0.5;
+----
+701	researcher	2026-09-01	R502	lab/sdk	0.667
+701	researcher	2026-10-01	R501	lab/compiler	1.000
+
+# Rank considers the selected user cohort in each observed month; zero-activity
+# carol does not fabricate a PR row. No repository-owner traversal is involved.
+query ITTII rowsort
+SELECT activity_user_id, activity_user, authored_pr_created_month, authored_pr_count, monthly_user_pr_rank
+FROM engineering.semantic.github(users=>[{'login':'alice'},{'login':'bob'},{'login':'researcher'},{'login':'carol'}])
+GROUP BY activity_user_id, activity_user, authored_pr_created_month;
+----
+201	alice	2026-09-01	4	1
+202	bob	2026-09-01	1	3
+701	researcher	2026-08-01	2	1
+701	researcher	2026-09-01	3	2
+701	researcher	2026-10-01	1	1
+
+# Local calendar is an explicit fixed IANA reporting choice with UTC instants.
+# An August UTC midnight belongs to July in US Eastern.
+query TTI rowsort
+SELECT authored_pr_created_day, authored_pr_created_eastern_day, authored_pr_count
+FROM engineering.semantic.github(user=>'researcher')
+GROUP BY authored_pr_created_day, authored_pr_created_eastern_day;
+----
+2026-08-01	2026-07-31	1
+2026-08-31	2026-08-31	1
+2026-09-01	2026-08-31	1
+2026-09-08	2026-09-07	1
+2026-09-08	2026-09-08	1
+2026-10-01	2026-09-30	1
+
+# Changing the model's required UTC session cannot silently reinterpret dates.
+statement ok
+SET crossfield_mode='semantic';
+
+statement ok
+SET TimeZone='Asia/Tokyo';
+
+statement error
+SELECT authored_pr_created_eastern_day, authored_pr_count
+FROM engineering.semantic.github(user=>'researcher')
+GROUP BY authored_pr_created_eastern_day;
+----
+TIMEZONE_MISMATCH
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+SET crossfield_mode='strict';
+
+# Dropping a fixed window-grain member cannot silently change the denominator.
+statement error
+SELECT authored_pr_created_month, monthly_repository_pr_share
+FROM engineering.semantic.github(user=>'researcher')
+GROUP BY authored_pr_created_month;
+----
+WINDOW_GRAIN
+
+# Caller filtering repository groups before a denominator window is rejected.
+statement error
+SELECT activity_user_id, activity_user, authored_pr_created_month, activity_repository_id, authored_repository_name, monthly_repository_pr_share
+FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_repository_name='lab/sdk'
+GROUP BY activity_user_id, activity_user, authored_pr_created_month,
+         activity_repository_id, authored_repository_name;
+----
+WINDOW_FILTER

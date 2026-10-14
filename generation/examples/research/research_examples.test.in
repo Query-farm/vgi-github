@@ -1,0 +1,133 @@
+# Published examples share their SQL with the guide and runnable research.sql.
+# Expected values below are authored from research_fixture.py's explicit records.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='semantic';
+
+statement ok
+{{sql:activity_compare}}
+
+statement ok
+{{sql:pr_focus}}
+
+statement ok
+{{sql:activity_evidence}}
+
+statement ok
+{{sql:user_cohort}}
+
+# Idle profiles remain visible; these counts come from independent fixture records.
+query TIII
+EXECUTE github_user_cohort([{'login':'researcher'},{'login':'idle-researcher'}]);
+----
+idle-researcher	1	0	0
+researcher	1	6	6
+
+# Monthly grouping keeps the creation cohort, including the UTC boundary records.
+query TIIIR
+{{sql:monthly_pr_activity}}
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+# August has 31 days, September has 30. Distinct counts stay per activity kind.
+query TIIIIIIIRRRT
+EXECUTE github_activity_compare('researcher','2026-08-01','2026-09-01','2026-09-01','2026-10-01');
+----
+commit_comment	1	2	1	1	1	1	2	0.032	0.067	106.667	comparable
+discussion	1	2	1	1	1	1	2	0.032	0.067	106.667	comparable
+discussion_comment	1	2	1	1	1	1	1	0.032	0.067	106.667	comparable
+issue	2	3	1	1	2	2	2	0.065	0.100	55.000	comparable
+issue_or_pr_comment	2	2	0	1	2	1	2	0.065	0.067	3.333	comparable
+pull_request	2	3	1	2	2	2	2	0.065	0.100	55.000	comparable
+
+# One repository disappears, one appears, one remains. No first-ever-work claim.
+query TIIRRRT
+EXECUTE github_pr_focus('researcher','2026-08-01','2026-09-01','2026-09-01','2026-10-01');
+----
+lab/compiler	1	1	50.000	33.333	-16.667	present_in_both
+lab/sdk	0	2	0.000	66.667	66.667	new_in_comparison
+outside/docs	1	0	50.000	0.000	-50.000	absent_in_later_period
+
+# These are the supporting September records, including deleted-discussion context.
+query TTTTTTT
+EXECUTE github_activity_evidence('researcher','2026-09-01','2026-10-01');
+----
+pull_request	PR202	lab/compiler	2026-09-01 01:30:00+00	https://github.example/activity/PR202	fix: repair parse	Independent evidence for PR202.
+issue	I303	lab/sdk	2026-09-02 00:00:00+00	https://github.example/activity/I303	Bug: wrong timezone	Independent evidence for I303.
+issue_or_pr_comment	IC503	lab/sdk	2026-09-04 00:00:00+00	https://github.example/activity/IC503	NULL	Independent evidence for IC503.
+discussion	D402	lab/sdk	2026-09-05 00:00:00+00	https://github.example/activity/D402	Research notebooks	Independent evidence for D402.
+discussion	D403	outside/docs	2026-09-05 12:00:00+00	https://github.example/activity/D403	DoCs: guide feedback	Independent evidence for D403.
+discussion_comment	DC602	lab/sdk	2026-09-06 00:00:00+00	https://github.example/activity/DC602	Research notebooks	Independent evidence for DC602.
+discussion_comment	DC603	NULL	2026-09-06 12:00:00+00	https://github.example/activity/DC603	NULL	Independent evidence for DC603.
+issue	I304	lab/compiler	2026-09-07 00:00:00+00	https://github.example/activity/I304	refactor: improve cache	Independent evidence for I304.
+issue	I305	lab/compiler	2026-09-07 12:00:00+00	https://github.example/activity/I305	Feat: add importer	Independent evidence for I305.
+pull_request	PR204	lab/sdk	2026-09-08 00:00:00+00	https://github.example/activity/PR204	chore: update tooling	Independent evidence for PR204.
+pull_request	PR205	lab/sdk	2026-09-08 12:00:00+00	https://github.example/activity/PR205	feat: add query helper	Independent evidence for PR205.
+issue_or_pr_comment	IC504	lab/compiler	2026-09-09 00:00:00+00	https://github.example/activity/IC504	NULL	Independent evidence for IC504.
+commit_comment	CC702	lab/compiler	2026-09-10 00:00:00+00	https://github.example/activity/CC702	NULL	Independent evidence for CC702.
+commit_comment	CC703	lab/sdk	2026-09-10 12:00:00+00	https://github.example/activity/CC703	NULL	Independent evidence for CC703.
+
+# Empty users produce zero ungrouped counts and NULL growth, never division by zero.
+query TIIIIIIIRRRT
+EXECUTE github_activity_compare('idle-researcher','2026-08-01','2026-09-01','2026-09-01','2026-10-01');
+----
+commit_comment	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+discussion	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+discussion_comment	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+issue	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+issue_or_pr_comment	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+pull_request	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+
+# Empty grouped results do not invent repositories or records.
+query TIIRRRT
+EXECUTE github_pr_focus('idle-researcher','2026-08-01','2026-09-01','2026-09-01','2026-10-01');
+----
+
+query TTTTTTT
+EXECUTE github_activity_evidence('idle-researcher','2026-09-01','2026-10-01');
+----
+
+# An empty earlier period has no defined repository share.
+query TIIRRRT
+EXECUTE github_pr_focus('researcher','2026-07-01','2026-08-01','2026-08-01','2026-09-01');
+----
+lab/compiler	0	1	NULL	50.000	NULL	new_in_comparison
+outside/docs	0	1	NULL	50.000	NULL	new_in_comparison
+
+statement error
+EXECUTE github_activity_compare('researcher','2026-08-01','2026-09-01','2026-08-15','2026-10-01');
+----
+Use ordered, non-overlapping, nonempty [start,end) UTC periods
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

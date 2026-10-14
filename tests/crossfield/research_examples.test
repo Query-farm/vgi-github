@@ -1,0 +1,327 @@
+# Generated from generation/examples/research/research_examples.test.in.
+# SQL is included verbatim; expected results are maintained in that template.
+# Published examples share their SQL with the guide and runnable research.sql.
+# Expected values below are authored from research_fixture.py's explicit records.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='semantic';
+
+statement ok
+PREPARE github_activity_compare AS
+WITH earlier AS (
+    SELECT 'pull_request' AS activity_kind, counts.* FROM (
+        SELECT authored_pr_count AS records,
+           authored_pr_active_days AS active_days, authored_pr_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_pr_created_day >= $2 AND authored_pr_created_day < $3
+    ) counts
+    UNION ALL
+    SELECT 'issue' AS activity_kind, counts.* FROM (
+        SELECT authored_issue_count AS records,
+           authored_issue_active_days AS active_days, authored_issue_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_issue_created_day >= $2 AND authored_issue_created_day < $3
+    ) counts
+    UNION ALL
+    SELECT 'discussion' AS activity_kind, counts.* FROM (
+        SELECT authored_discussion_count AS records,
+           authored_discussion_active_days AS active_days, authored_discussion_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_discussion_created_day >= $2 AND authored_discussion_created_day < $3
+    ) counts
+    UNION ALL
+    SELECT 'issue_or_pr_comment' AS activity_kind, counts.* FROM (
+        SELECT authored_issue_comment_count AS records,
+           authored_issue_comment_active_days AS active_days, authored_issue_comment_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_issue_comment_created_day >= $2 AND authored_issue_comment_created_day < $3
+    ) counts
+    UNION ALL
+    SELECT 'discussion_comment' AS activity_kind, counts.* FROM (
+        SELECT authored_discussion_comment_count AS records,
+           authored_discussion_comment_active_days AS active_days, authored_discussion_comment_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_discussion_comment_created_day >= $2 AND authored_discussion_comment_created_day < $3
+    ) counts
+    UNION ALL
+    SELECT 'commit_comment' AS activity_kind, counts.* FROM (
+        SELECT authored_commit_comment_count AS records,
+           authored_commit_comment_active_days AS active_days, authored_commit_comment_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_commit_comment_created_day >= $2 AND authored_commit_comment_created_day < $3
+    ) counts
+), later AS (
+    SELECT 'pull_request' AS activity_kind, counts.* FROM (
+        SELECT authored_pr_count AS records,
+           authored_pr_active_days AS active_days, authored_pr_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_pr_created_day >= $4 AND authored_pr_created_day < $5
+    ) counts
+    UNION ALL
+    SELECT 'issue' AS activity_kind, counts.* FROM (
+        SELECT authored_issue_count AS records,
+           authored_issue_active_days AS active_days, authored_issue_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_issue_created_day >= $4 AND authored_issue_created_day < $5
+    ) counts
+    UNION ALL
+    SELECT 'discussion' AS activity_kind, counts.* FROM (
+        SELECT authored_discussion_count AS records,
+           authored_discussion_active_days AS active_days, authored_discussion_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_discussion_created_day >= $4 AND authored_discussion_created_day < $5
+    ) counts
+    UNION ALL
+    SELECT 'issue_or_pr_comment' AS activity_kind, counts.* FROM (
+        SELECT authored_issue_comment_count AS records,
+           authored_issue_comment_active_days AS active_days, authored_issue_comment_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_issue_comment_created_day >= $4 AND authored_issue_comment_created_day < $5
+    ) counts
+    UNION ALL
+    SELECT 'discussion_comment' AS activity_kind, counts.* FROM (
+        SELECT authored_discussion_comment_count AS records,
+           authored_discussion_comment_active_days AS active_days, authored_discussion_comment_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_discussion_comment_created_day >= $4 AND authored_discussion_comment_created_day < $5
+    ) counts
+    UNION ALL
+    SELECT 'commit_comment' AS activity_kind, counts.* FROM (
+        SELECT authored_commit_comment_count AS records,
+           authored_commit_comment_active_days AS active_days, authored_commit_comment_repository_count AS known_repositories
+        FROM engineering.semantic.github(user => $1)
+        WHERE authored_commit_comment_created_day >= $4 AND authored_commit_comment_created_day < $5
+    ) counts
+), bounds AS (
+    SELECT DATE_DIFF('day', CAST($2 AS DATE), CAST($3 AS DATE)) AS earlier_days,
+           DATE_DIFF('day', CAST($4 AS DATE), CAST($5 AS DATE)) AS later_days
+)
+SELECT earlier.activity_kind,
+       earlier.records AS earlier_records, later.records AS later_records,
+       later.records - earlier.records AS record_change,
+       earlier.active_days AS earlier_active_days, later.active_days AS later_active_days,
+       earlier.known_repositories AS earlier_repositories, later.known_repositories AS later_repositories,
+       earlier.records * 1.0 / earlier_days AS earlier_records_per_day,
+       later.records * 1.0 / later_days AS later_records_per_day,
+       100.0 * ((later.records * 1.0 / later_days) /
+                NULLIF(earlier.records * 1.0 / earlier_days, 0) - 1) AS rate_change_percent,
+       CASE WHEN earlier.records=0 AND later.records=0 THEN 'no_observed_activity'
+            WHEN earlier.records=0 THEN 'activity_without_baseline'
+            ELSE 'comparable' END AS comparison_status
+FROM earlier JOIN later USING (activity_kind) CROSS JOIN bounds
+WHERE CASE WHEN earlier_days IS NULL OR later_days IS NULL
+                OR earlier_days<=0 OR later_days<=0
+                OR CAST($3 AS DATE)>CAST($4 AS DATE)
+           THEN error('Use ordered, non-overlapping, nonempty [start,end) UTC periods')
+           ELSE true END
+ORDER BY earlier.activity_kind;
+
+statement ok
+PREPARE github_pr_focus AS
+WITH earlier AS (
+    SELECT authored_repository_name AS repository, authored_pr_count AS prs
+    FROM engineering.semantic.github(user => $1)
+    WHERE authored_pr_created_day >= $2 AND authored_pr_created_day < $3
+    GROUP BY authored_repository_name
+), later AS (
+    SELECT authored_repository_name AS repository, authored_pr_count AS prs
+    FROM engineering.semantic.github(user => $1)
+    WHERE authored_pr_created_day >= $4 AND authored_pr_created_day < $5
+    GROUP BY authored_repository_name
+), earlier_shares AS (
+    SELECT *, 100.0 * prs / SUM(prs) OVER () AS share FROM earlier
+), later_shares AS (
+    SELECT *, 100.0 * prs / SUM(prs) OVER () AS share FROM later
+)
+SELECT COALESCE(earlier_shares.repository,later_shares.repository) AS repository,
+       COALESCE(earlier_shares.prs,0) AS earlier_prs,
+       COALESCE(later_shares.prs,0) AS later_prs,
+       CASE WHEN NOT EXISTS(SELECT 1 FROM earlier) THEN NULL
+            ELSE COALESCE(earlier_shares.share,0) END AS earlier_share_percent,
+       CASE WHEN NOT EXISTS(SELECT 1 FROM later) THEN NULL
+            ELSE COALESCE(later_shares.share,0) END AS later_share_percent,
+       CASE WHEN NOT EXISTS(SELECT 1 FROM earlier) OR NOT EXISTS(SELECT 1 FROM later) THEN NULL
+            ELSE COALESCE(later_shares.share,0)-COALESCE(earlier_shares.share,0)
+            END AS share_change_percentage_points,
+       CASE WHEN earlier_shares.repository IS NULL THEN 'new_in_comparison'
+            WHEN later_shares.repository IS NULL THEN 'absent_in_later_period'
+            ELSE 'present_in_both' END AS presence
+FROM earlier_shares FULL OUTER JOIN later_shares USING(repository)
+WHERE CASE WHEN $2 IS NULL OR $3 IS NULL OR $4 IS NULL OR $5 IS NULL
+                OR CAST($3 AS DATE)<=CAST($2 AS DATE) OR CAST($5 AS DATE)<=CAST($4 AS DATE)
+                OR CAST($3 AS DATE)>CAST($4 AS DATE)
+           THEN error('Use ordered, non-overlapping, nonempty [start,end) UTC periods')
+           ELSE true END
+ORDER BY repository;
+
+statement ok
+PREPARE github_activity_evidence AS
+SELECT * FROM (
+    SELECT 'pull_request' AS activity_kind, source_id, repository_name, created_at, url, title, body FROM (
+        SELECT pull_request_node_id AS source_id, repository_name, created_at, url, title AS title, body
+        FROM engineering.detail.authored_pull_requests(user => $1)
+        WHERE authored_pr_created_day >= $2 AND authored_pr_created_day < $3
+    ) records
+    UNION ALL
+    SELECT 'issue' AS activity_kind, source_id, repository_name, created_at, url, title, body FROM (
+        SELECT issue_node_id AS source_id, repository_name, created_at, url, title AS title, body
+        FROM engineering.detail.authored_issues(user => $1)
+        WHERE authored_issue_created_day >= $2 AND authored_issue_created_day < $3
+    ) records
+    UNION ALL
+    SELECT 'discussion' AS activity_kind, source_id, repository_name, created_at, url, title, body FROM (
+        SELECT discussion_node_id AS source_id, repository_name, created_at, url, title AS title, body
+        FROM engineering.detail.authored_discussions(user => $1)
+        WHERE authored_discussion_created_day >= $2 AND authored_discussion_created_day < $3
+    ) records
+    UNION ALL
+    SELECT 'issue_or_pr_comment' AS activity_kind, source_id, repository_name, created_at, url, NULL::VARCHAR AS title, body FROM (
+        SELECT comment_node_id AS source_id, repository_name, created_at, url, body
+        FROM engineering.detail.authored_issue_comments(user => $1)
+        WHERE authored_issue_comment_created_day >= $2 AND authored_issue_comment_created_day < $3
+    ) records
+    UNION ALL
+    SELECT 'discussion_comment' AS activity_kind, source_id, repository_name, created_at, url, title, body FROM (
+        SELECT comment_node_id AS source_id, repository_name, created_at, url, subject_title AS title, body
+        FROM engineering.detail.authored_discussion_comments(user => $1)
+        WHERE authored_discussion_comment_created_day >= $2 AND authored_discussion_comment_created_day < $3
+    ) records
+    UNION ALL
+    SELECT 'commit_comment' AS activity_kind, source_id, repository_name, created_at, url, NULL::VARCHAR AS title, body FROM (
+        SELECT comment_node_id AS source_id, repository_name, created_at, url, body
+        FROM engineering.detail.authored_commit_comments(user => $1)
+        WHERE authored_commit_comment_created_day >= $2 AND authored_commit_comment_created_day < $3
+    ) records
+) evidence
+ORDER BY created_at,activity_kind,source_id;
+
+statement ok
+PREPARE github_user_cohort AS
+SELECT user_login, user_count, authored_pr_count, authored_issue_count
+FROM engineering.semantic.github(users => $1)
+GROUP BY user_login
+ORDER BY user_login;
+
+# Idle profiles remain visible; these counts come from independent fixture records.
+query TIII
+EXECUTE github_user_cohort([{'login':'researcher'},{'login':'idle-researcher'}]);
+----
+idle-researcher	1	0	0
+researcher	1	6	6
+
+# Monthly grouping keeps the creation cohort, including the UTC boundary records.
+query TIIIR
+-- Replace the fixture login 'researcher' and dates for a real account.
+SELECT authored_pr_created_month, authored_pr_count,
+       authored_pr_active_days, authored_pr_repository_count,
+       authored_median_merge_hours
+FROM engineering.semantic.github(user => 'researcher')
+WHERE authored_pr_created_day >= DATE '2026-08-01'
+  AND authored_pr_created_day < DATE '2026-10-01'
+GROUP BY authored_pr_created_month
+ORDER BY authored_pr_created_month;
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+# August has 31 days, September has 30. Distinct counts stay per activity kind.
+query TIIIIIIIRRRT
+EXECUTE github_activity_compare('researcher','2026-08-01','2026-09-01','2026-09-01','2026-10-01');
+----
+commit_comment	1	2	1	1	1	1	2	0.032	0.067	106.667	comparable
+discussion	1	2	1	1	1	1	2	0.032	0.067	106.667	comparable
+discussion_comment	1	2	1	1	1	1	1	0.032	0.067	106.667	comparable
+issue	2	3	1	1	2	2	2	0.065	0.100	55.000	comparable
+issue_or_pr_comment	2	2	0	1	2	1	2	0.065	0.067	3.333	comparable
+pull_request	2	3	1	2	2	2	2	0.065	0.100	55.000	comparable
+
+# One repository disappears, one appears, one remains. No first-ever-work claim.
+query TIIRRRT
+EXECUTE github_pr_focus('researcher','2026-08-01','2026-09-01','2026-09-01','2026-10-01');
+----
+lab/compiler	1	1	50.000	33.333	-16.667	present_in_both
+lab/sdk	0	2	0.000	66.667	66.667	new_in_comparison
+outside/docs	1	0	50.000	0.000	-50.000	absent_in_later_period
+
+# These are the supporting September records, including deleted-discussion context.
+query TTTTTTT
+EXECUTE github_activity_evidence('researcher','2026-09-01','2026-10-01');
+----
+pull_request	PR202	lab/compiler	2026-09-01 01:30:00+00	https://github.example/activity/PR202	fix: repair parse	Independent evidence for PR202.
+issue	I303	lab/sdk	2026-09-02 00:00:00+00	https://github.example/activity/I303	Bug: wrong timezone	Independent evidence for I303.
+issue_or_pr_comment	IC503	lab/sdk	2026-09-04 00:00:00+00	https://github.example/activity/IC503	NULL	Independent evidence for IC503.
+discussion	D402	lab/sdk	2026-09-05 00:00:00+00	https://github.example/activity/D402	Research notebooks	Independent evidence for D402.
+discussion	D403	outside/docs	2026-09-05 12:00:00+00	https://github.example/activity/D403	DoCs: guide feedback	Independent evidence for D403.
+discussion_comment	DC602	lab/sdk	2026-09-06 00:00:00+00	https://github.example/activity/DC602	Research notebooks	Independent evidence for DC602.
+discussion_comment	DC603	NULL	2026-09-06 12:00:00+00	https://github.example/activity/DC603	NULL	Independent evidence for DC603.
+issue	I304	lab/compiler	2026-09-07 00:00:00+00	https://github.example/activity/I304	refactor: improve cache	Independent evidence for I304.
+issue	I305	lab/compiler	2026-09-07 12:00:00+00	https://github.example/activity/I305	Feat: add importer	Independent evidence for I305.
+pull_request	PR204	lab/sdk	2026-09-08 00:00:00+00	https://github.example/activity/PR204	chore: update tooling	Independent evidence for PR204.
+pull_request	PR205	lab/sdk	2026-09-08 12:00:00+00	https://github.example/activity/PR205	feat: add query helper	Independent evidence for PR205.
+issue_or_pr_comment	IC504	lab/compiler	2026-09-09 00:00:00+00	https://github.example/activity/IC504	NULL	Independent evidence for IC504.
+commit_comment	CC702	lab/compiler	2026-09-10 00:00:00+00	https://github.example/activity/CC702	NULL	Independent evidence for CC702.
+commit_comment	CC703	lab/sdk	2026-09-10 12:00:00+00	https://github.example/activity/CC703	NULL	Independent evidence for CC703.
+
+# Empty users produce zero ungrouped counts and NULL growth, never division by zero.
+query TIIIIIIIRRRT
+EXECUTE github_activity_compare('idle-researcher','2026-08-01','2026-09-01','2026-09-01','2026-10-01');
+----
+commit_comment	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+discussion	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+discussion_comment	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+issue	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+issue_or_pr_comment	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+pull_request	0	0	0	0	0	0	0	0.000	0.000	NULL	no_observed_activity
+
+# Empty grouped results do not invent repositories or records.
+query TIIRRRT
+EXECUTE github_pr_focus('idle-researcher','2026-08-01','2026-09-01','2026-09-01','2026-10-01');
+----
+
+query TTTTTTT
+EXECUTE github_activity_evidence('idle-researcher','2026-09-01','2026-10-01');
+----
+
+# An empty earlier period has no defined repository share.
+query TIIRRRT
+EXECUTE github_pr_focus('researcher','2026-07-01','2026-08-01','2026-08-01','2026-09-01');
+----
+lab/compiler	0	1	NULL	50.000	NULL	new_in_comparison
+outside/docs	0	1	NULL	50.000	NULL	new_in_comparison
+
+statement error
+EXECUTE github_activity_compare('researcher','2026-08-01','2026-09-01','2026-08-15','2026-10-01');
+----
+Use ordered, non-overlapping, nonempty [start,end) UTC periods
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

@@ -1,0 +1,97 @@
+# Definitions below came through semantics.crossfield verbatim, not generator recipes.
+# Fixture authoring lives in generator_semantics.overlay.json. Native intake owns SQL.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_NATIVE_FIXTURES
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_NATIVE_FIXTURES}/accepted.package.json' AS proof (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT proof_p90_merge_hours FROM proof.semantic.github(user=>'researcher');
+
+statement ok
+DESCRIBE SELECT proof_title_lower FROM proof.detail.authored_pull_requests(user=>'researcher');
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+# August merge durations are 12h/12h. September creation cohort is 12h/24h;
+# the open PR contributes no duration. Linear P90 is 12 + 0.9 * (24 - 12) = 22.8h.
+query TR rowsort
+SELECT authored_pr_created_month, proof_p90_merge_hours FROM proof.semantic.github(user=>'researcher') WHERE authored_pr_created_day>=DATE '2026-08-01' AND authored_pr_created_day<DATE '2026-10-01' GROUP BY authored_pr_created_month;
+----
+2026-08-01	12.000
+2026-09-01	22.800
+
+query TI rowsort
+SELECT proof_title_lower, authored_pr_count FROM proof.semantic.github(user=>'researcher') WHERE authored_pr_created_day=DATE '2026-08-31' GROUP BY proof_title_lower;
+----
+docs: clarify setup	1
+
+query T
+SELECT proof_title_lower FROM proof.detail.authored_pull_requests(user=>'researcher') WHERE authored_pr_created_day=DATE '2026-08-31';
+----
+docs: clarify setup
+
+query R
+SELECT proof_p90_merge_hours FROM proof.semantic.github(user=>'idle-researcher');
+----
+NULL
+
+statement ok
+SET crossfield_mode='off';
+
+statement error
+ATTACH '{CROSSFIELD_GITHUB_NATIVE_FIXTURES}/bad-expression.package.json' AS malformed (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+----
+UNSUPPORTED_EXPRESSION
+
+statement error
+ATTACH '{CROSSFIELD_GITHUB_NATIVE_FIXTURES}/bad-reference.package.json' AS unresolved (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+----
+UNKNOWN_FIELD
+
+statement error
+ATTACH '{CROSSFIELD_GITHUB_NATIVE_FIXTURES}/bad-policy.package.json' AS bad_policy (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+----
+MODEL_POLICY
+
+# Failed attachments publish no partial catalog and preserve the accepted package.
+query I
+SELECT count(*) FROM duckdb_databases() WHERE database_name IN ('malformed','unresolved','bad_policy');
+----
+0
+
+query R
+SELECT proof_p90_merge_hours FROM proof.semantic.github(user=>'researcher') WHERE authored_pr_created_day>=DATE '2026-09-01' AND authored_pr_created_day<DATE '2026-10-01';
+----
+22.800

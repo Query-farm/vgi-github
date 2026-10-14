@@ -1,0 +1,20 @@
+{
+  "format": "vgi-github-semantic-overlay",
+  "version": 1,
+  "model": {
+    "name": "github",
+    "id": "queryfarm.github.generated_pilot",
+    "comment": "Connected GitHub semantic model with organization, owner, repository and personal-user scopes. User activity includes authored PRs, issues, discussions and issue/PR, discussion and commit comments. Approved counts, active-day/repository measures, UTC calendar dimensions and evidence support explicit period comparisons.",
+    "instance_id": "github.com",
+    "api_origin": "https://api.github.com"
+  },
+  "domains": [
+    "domains/repositories.json",
+    "domains/organizations.json",
+    "domains/people.json",
+    "domains/contributions.json",
+    "domains/analysis.json",
+    "domains/memberships.json",
+    "domains/cohorts.json"
+  ]
+}

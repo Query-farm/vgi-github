@@ -1,0 +1,523 @@
+{
+  "complete_worker_replacement": false,
+  "entities": [
+    {
+      "detail_relation": "detail.repositories",
+      "grain": [
+        "repository_id"
+      ],
+      "metrics": [
+        "repository_count"
+      ],
+      "name": "repositories"
+    },
+    {
+      "detail_relation": "detail.pull_requests",
+      "grain": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "metrics": [
+        "pull_request_count",
+        "merged_prs",
+        "median_merge_hours"
+      ],
+      "name": "pull_requests"
+    },
+    {
+      "detail_relation": "detail.pull_request_reviews",
+      "grain": [
+        "repository_id",
+        "pull_request_number",
+        "review_id"
+      ],
+      "metrics": [
+        "submitted_review_count",
+        "approved_review_count"
+      ],
+      "name": "pull_request_reviews"
+    },
+    {
+      "detail_relation": "detail.repository_labels",
+      "grain": [
+        "repository_id",
+        "label_id"
+      ],
+      "metrics": [
+        "label_count"
+      ],
+      "name": "repository_labels"
+    },
+    {
+      "detail_relation": "detail.organizations",
+      "grain": [
+        "organization_id"
+      ],
+      "metrics": [
+        "organization_count"
+      ],
+      "name": "organizations"
+    },
+    {
+      "detail_relation": "detail.organization_memberships",
+      "grain": [
+        "organization_id",
+        "user_id"
+      ],
+      "metrics": [
+        "organization_member_count"
+      ],
+      "name": "organization_memberships"
+    },
+    {
+      "detail_relation": "detail.teams",
+      "grain": [
+        "team_id"
+      ],
+      "metrics": [
+        "team_count"
+      ],
+      "name": "teams"
+    },
+    {
+      "detail_relation": "detail.team_memberships",
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "metrics": [
+        "team_membership_count"
+      ],
+      "name": "team_memberships"
+    },
+    {
+      "detail_relation": "detail.users",
+      "grain": [
+        "user_id"
+      ],
+      "metrics": [
+        "user_count"
+      ],
+      "name": "users"
+    },
+    {
+      "detail_relation": "detail.authored_pull_requests",
+      "grain": [
+        "pull_request_node_id"
+      ],
+      "metrics": [
+        "authored_pr_count",
+        "authored_merged_pr_count",
+        "authored_median_merge_hours",
+        "authored_pr_active_days",
+        "authored_pr_repository_count"
+      ],
+      "name": "authored_pull_requests"
+    },
+    {
+      "detail_relation": "detail.authored_issues",
+      "grain": [
+        "issue_node_id"
+      ],
+      "metrics": [
+        "authored_issue_count",
+        "authored_issue_active_days",
+        "authored_issue_repository_count"
+      ],
+      "name": "authored_issues"
+    },
+    {
+      "detail_relation": "detail.authored_discussions",
+      "grain": [
+        "discussion_node_id"
+      ],
+      "metrics": [
+        "authored_discussion_count",
+        "authored_discussion_active_days",
+        "authored_discussion_repository_count"
+      ],
+      "name": "authored_discussions"
+    },
+    {
+      "detail_relation": "detail.authored_issue_comments",
+      "grain": [
+        "comment_node_id"
+      ],
+      "metrics": [
+        "authored_issue_comment_count",
+        "authored_issue_comment_active_days",
+        "authored_issue_comment_repository_count"
+      ],
+      "name": "authored_issue_comments"
+    },
+    {
+      "detail_relation": "detail.authored_discussion_comments",
+      "grain": [
+        "comment_node_id"
+      ],
+      "metrics": [
+        "authored_discussion_comment_count",
+        "authored_discussion_comment_active_days",
+        "authored_discussion_comment_repository_count",
+        "authored_discussion_comment_unknown_repository_count"
+      ],
+      "name": "authored_discussion_comments"
+    },
+    {
+      "detail_relation": "detail.authored_commit_comments",
+      "grain": [
+        "comment_node_id"
+      ],
+      "metrics": [
+        "authored_commit_comment_count",
+        "authored_commit_comment_active_days",
+        "authored_commit_comment_repository_count"
+      ],
+      "name": "authored_commit_comments"
+    }
+  ],
+  "format": "vgi-github-generation-coverage",
+  "native_crossfield": {
+    "derived_datasets": [
+      "first_review_prs",
+      "submitted_reviews",
+      "latest_reviewer_reviews",
+      "repository_topics",
+      "pull_request_labels",
+      "pull_request_assignees"
+    ],
+    "metrics": [
+      "pr_first_review_hours",
+      "pr_first_review_at",
+      "reviewed_pr_count",
+      "mean_first_review_hours",
+      "median_first_review_hours",
+      "p90_first_review_hours",
+      "review_record_count",
+      "review_record_state",
+      "review_record_login",
+      "review_latest_rank",
+      "submitted_review_state",
+      "submitted_reviewer_login",
+      "latest_reviewer_review_count",
+      "latest_approved_reviewer_count",
+      "monthly_authored_pr_total",
+      "monthly_repository_pr_share",
+      "monthly_user_pr_rank",
+      "repository_topic_membership_count",
+      "repositories_with_topic_count",
+      "pull_request_label_membership_count",
+      "labeled_pull_request_count",
+      "pull_request_assignee_membership_count",
+      "assigned_pull_request_count"
+    ]
+  },
+  "provenance": {
+    "graphql_revision": "82ff2d4780080e6929ebb95608cefa22dfa05ac7",
+    "overlay_sha256": "0db8c10d80d41be87cbaaa71b274983feaabee3ca9c2ef7c9ae8c2138be263b4",
+    "rest_revision": "58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1",
+    "source_lock_sha256": "1fdeac5f29866c4f09d8d3b1ed4c4ab597331880917e8c6b08dc6a00c15d3704"
+  },
+  "relationships": [
+    {
+      "from": "pull_requests",
+      "from_columns": [
+        "repository_id"
+      ],
+      "name": "pull_requests_to_repositories",
+      "to": "repositories",
+      "to_columns": [
+        "repository_id"
+      ]
+    },
+    {
+      "from": "pull_request_reviews",
+      "from_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "name": "reviews_to_pull_requests",
+      "to": "pull_requests",
+      "to_columns": [
+        "repository_id",
+        "pull_request_number"
+      ]
+    },
+    {
+      "from": "repository_labels",
+      "from_columns": [
+        "repository_id"
+      ],
+      "name": "labels_to_repositories",
+      "to": "repositories",
+      "to_columns": [
+        "repository_id"
+      ]
+    },
+    {
+      "from": "repositories",
+      "from_columns": [
+        "owner_account_id"
+      ],
+      "name": "repositories_to_organizations",
+      "optional": true,
+      "to": "organizations",
+      "to_columns": [
+        "organization_id"
+      ]
+    },
+    {
+      "from": "organization_memberships",
+      "from_columns": [
+        "organization_id"
+      ],
+      "name": "memberships_to_organizations",
+      "to": "organizations",
+      "to_columns": [
+        "organization_id"
+      ]
+    },
+    {
+      "from": "teams",
+      "from_columns": [
+        "organization_id"
+      ],
+      "name": "teams_to_organizations",
+      "to": "organizations",
+      "to_columns": [
+        "organization_id"
+      ]
+    },
+    {
+      "from": "team_memberships",
+      "from_columns": [
+        "team_id"
+      ],
+      "name": "team_memberships_to_teams",
+      "to": "teams",
+      "to_columns": [
+        "team_id"
+      ]
+    },
+    {
+      "from": "authored_pull_requests",
+      "from_columns": [
+        "user_id"
+      ],
+      "name": "authored_pull_requests_to_users",
+      "to": "users",
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "from": "authored_issues",
+      "from_columns": [
+        "user_id"
+      ],
+      "name": "authored_issues_to_users",
+      "to": "users",
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "from": "authored_discussions",
+      "from_columns": [
+        "user_id"
+      ],
+      "name": "authored_discussions_to_users",
+      "to": "users",
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "from": "authored_issue_comments",
+      "from_columns": [
+        "user_id"
+      ],
+      "name": "authored_issue_comments_to_users",
+      "to": "users",
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "from": "authored_discussion_comments",
+      "from_columns": [
+        "user_id"
+      ],
+      "name": "authored_discussion_comments_to_users",
+      "to": "users",
+      "to_columns": [
+        "user_id"
+      ]
+    },
+    {
+      "from": "authored_commit_comments",
+      "from_columns": [
+        "user_id"
+      ],
+      "name": "authored_commit_comments_to_users",
+      "to": "users",
+      "to_columns": [
+        "user_id"
+      ]
+    }
+  ],
+  "scope": "connected pilot",
+  "scopes": {
+    "organizations": {
+      "comment": "Require an explicit organization scope for organization, membership and team entities.",
+      "exclusive_parameters": [
+        "organization"
+      ],
+      "select": {
+        "arguments": {
+          "organization": {
+            "parameter": "organization"
+          }
+        },
+        "entity": "organization_lookup"
+      }
+    },
+    "pull_requests": {
+      "comment": "A PR number narrows one repository to one PR. Without it, include all current open and closed PR records.",
+      "requires_parameters": {
+        "pull_request_number": [
+          "repository"
+        ]
+      },
+      "select": {
+        "if_absent": {
+          "arguments": {
+            "repository": {
+              "column": "repository",
+              "stage": "repositories"
+            }
+          },
+          "entity": "pull_request_list"
+        },
+        "if_present": {
+          "arguments": {
+            "pull_request_number": {
+              "parameter": "pull_request_number"
+            },
+            "repository": {
+              "column": "repository",
+              "stage": "repositories"
+            }
+          },
+          "entity": "pull_request_lookup"
+        },
+        "parameter": "pull_request_number"
+      }
+    },
+    "repositories": {
+      "comment": "Choose exactly one repository, owner or organization. Organization listings follow credential visibility; user-owner listings contain public owned repositories only.",
+      "exclusive_parameters": [
+        "owner",
+        "repository",
+        "organization"
+      ],
+      "select": {
+        "if_absent": {
+          "if_absent": {
+            "cases": {
+              "Organization": {
+                "arguments": {
+                  "owner": {
+                    "parameter": "owner"
+                  }
+                },
+                "entity": "organization_repositories"
+              },
+              "User": {
+                "arguments": {
+                  "owner": {
+                    "parameter": "owner"
+                  }
+                },
+                "entity": "user_repositories"
+              }
+            },
+            "field": "account_type",
+            "resolve": {
+              "arguments": {
+                "owner": {
+                  "parameter": "owner"
+                }
+              },
+              "entity": "account_lookup"
+            }
+          },
+          "if_present": {
+            "arguments": {
+              "owner": {
+                "parameter": "organization"
+              }
+            },
+            "entity": "organization_repositories"
+          },
+          "parameter": "organization"
+        },
+        "if_present": {
+          "arguments": {
+            "repository": {
+              "parameter": "repository"
+            }
+          },
+          "entity": "repository_lookup"
+        },
+        "parameter": "repository"
+      }
+    },
+    "users": {
+      "comment": "Require a personal user account; an organization login is not a user activity scope.",
+      "select": {
+        "cases": {
+          "User": {
+            "arguments": {
+              "user": {
+                "parameter": "user"
+              }
+            },
+            "entity": "user_profile_lookup"
+          }
+        },
+        "field": "account_type",
+        "resolve": {
+          "arguments": {
+            "owner": {
+              "parameter": "user"
+            }
+          },
+          "entity": "account_lookup"
+        }
+      }
+    }
+  },
+  "sources": [
+    "account_lookup",
+    "repository_lookup",
+    "organization_repositories",
+    "user_repositories",
+    "pull_request_list",
+    "pull_request_lookup",
+    "reviews_source",
+    "labels_source",
+    "organization_lookup",
+    "organization_members_source",
+    "teams_source",
+    "team_members_source",
+    "user_profile_lookup",
+    "authored_pull_requests_source",
+    "authored_issues_source",
+    "authored_discussions_source",
+    "authored_issue_comments_source",
+    "authored_discussion_comments_source",
+    "authored_commit_comments_source"
+  ],
+  "version": 1
+}

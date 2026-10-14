@@ -1,0 +1,33 @@
+{
+  "entity": "authored_pull_requests",
+  "dimensions": ["proof_title_lower"],
+  "detail_fields": ["proof_title_lower"],
+  "crossfield": {
+    "fields": {
+      "proof_title_lower": {
+        "expression": "LOWER(authored_pull_requests.title)",
+        "type": "VARCHAR",
+        "dimension": true
+      }
+    },
+    "field_semantics": {
+      "proof_title_lower": {"comment": "Original PR title normalized with Crossfield's approved LOWER scalar.", "tags": {"purpose": "independent native generator proof"}}
+    },
+    "metrics": {
+      "proof_p90_merge_hours": {
+        "expression": "PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY authored_pull_requests.merge_hours)",
+        "type": "DOUBLE"
+      }
+    },
+    "metric_semantics": {
+      "proof_p90_merge_hours": {
+        "additivity": "non_additive",
+        "missing": "null",
+        "unit": "h",
+        "population": "authored_pull_requests.state = 'MERGED'",
+        "population_id": "authored_pull_requests/proof_merged",
+        "comment": "Exact P90 of creation-to-merge hours for authored merged PRs; NULL without merges."
+      }
+    }
+  }
+}

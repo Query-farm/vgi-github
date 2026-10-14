@@ -1,0 +1,97 @@
+## Research a user's activity
+
+After attaching `engineering` as above, choose a user and ask for approved measures
+and dimensions directly. This monthly PR query is included verbatim in
+the native SQLLogicTests, with independently authored expected answers:
+
+```sql
+{{sql:monthly_pr_activity}}
+```
+
+Swap the month dimension for `authored_pr_created_week`, `authored_repository_name`,
+`authored_pr_title_category` or `authored_pr_repository_language` to investigate timing,
+repository mix or explicit title conventions. The issue, discussion and comment
+families have their own count, active-day, repository and UTC date fields listed below.
+Only the selected populations are fetched. Prefix the SELECT with `EXPLAIN (SEMANTIC)`
+to inspect the approved grain, population and expanded SQL without fetching records.
+
+To compare a cohort, pass typed resource rows instead of writing one query per user:
+
+```sql
+{{sql:user_cohort}}
+EXECUTE github_user_cohort([{'login': 'octocat'}, {'login': 'hubot'}]);
+```
+
+The profile count keeps users with no observed activity in the result. An empty
+cohort returns no grouped rows. Use `repositories => [{'repository': 'owner/name'}]`
+for an explicit repository population. `user`/`users` and the repository scope
+alternatives are mutually exclusive; discovery exposes both forms and examples.
+
+For a complete comparison, load the supplied SQL into the DuckDB CLI, then execute
+its prepared examples. Dates are inclusive start and exclusive end:
+
+```sql
+.read models/generated-pilot/research.sql
+EXECUTE github_activity_compare('octocat',
+    '2026-08-01', '2026-09-01', '2026-09-01', '2026-10-01');
+EXECUTE github_pr_focus('octocat',
+    '2026-08-01', '2026-09-01', '2026-09-01', '2026-10-01');
+EXECUTE github_activity_evidence('octocat', '2026-09-01', '2026-10-01');
+```
+
+Run the `.read` command from the worker repository root, or use an absolute path.
+Clients can send the contents of `research.sql` as SQL; `.read` is a CLI command.
+The SQL comes from `generation/examples/research/*.sql`; generation includes the same
+monthly query in this guide and the prepared queries in the runnable file. All
+statements also appear in `tests/crossfield/research_examples.test`.
+Edit those source files, not the generated copies. Test expectations live separately
+in `generation/examples/research/research_examples.test.in` and are never recorded
+from engine output.
+
+The file sets UTC and `crossfield_mode='semantic'`, so approved inner selections can
+feed ordinary outer SQL for rates, unions and comparisons. These are editable
+session queries, not model-owned saved reports or a required report interface.
+`github_activity_compare` keeps six activity types separate, supplies period counts,
+active days, known repositories and records per calendar day, and returns NULL for
+percentage growth without a baseline. `github_pr_focus` shows count and share changes
+by repository. `github_activity_evidence` returns original text, source IDs, creation
+timestamps and URLs for all six populations. A grouped query has no rows for an empty
+period; an ungrouped count returns zero. Zero is never a substitute for an API error.
+
+The independent `researcher` fixture gives this August-to-September comparison;
+these are test data, not observations about a real account:
+
+| Activity | August | September |
+| --- | ---: | ---: |
+| Authored PRs | 2 | 3 |
+| Authored issues | 2 | 3 |
+| Authored discussions | 1 | 2 |
+| Issue or PR comments | 2 | 2 |
+| Discussion comments | 1 | 2 |
+| Commit comments | 1 | 2 |
+
+That is 9 versus 14 records across disjoint activity kinds, or 0.2903 versus 0.4667
+records per calendar day (+60.74%). PR activity occupied two UTC days in each month.
+`lab/sdk` accounts for two of September's three PRs; it was absent from the August
+PR population. This supports “the observed repository mix changed.” It does not
+establish a new personal interest or the user's first-ever work on that repository.
+Evidence records explain the activity; NULL repository context remains visible for
+a comment whose discussion was deleted. Distinct days and repositories cannot be
+summed across activity kinds, months or categories.
+
+This profile covers visible authored PRs, issues, discussions and the three comment
+families. Complete user review submissions, authored commits, pushes, stars and
+historical membership are outside it. Existing repository review metrics remain
+available, but are not a complete user contribution timeline. Current titles, state
+and primary language are observed now; creation-date filtering does not reconstruct
+historical content. Classifiers recognize only literal `docs:`, `fix:`, `feat:`,
+`refactor:` and `test:` prefixes, case-insensitively; other titles stay `unclassified`.
+Repository language is context, not a claim about changed files or personal interests.
+
+User connections follow all advertised pages without a generated row or page cap,
+with explicit author checks. Provider quotas, operation deadlines and native
+cancellation still apply. Date predicates currently filter after source retrieval, so narrow windows
+can still read full visible histories. Independent live scans are not an atomic
+GitHub snapshot; saved snapshots and calendar-gap filling are not part of this
+example. Failed or incomplete source retrieval raises an exception. Tests run the
+actual worker and native engine against deterministic HTTP fixtures, not live GitHub.

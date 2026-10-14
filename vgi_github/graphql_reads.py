@@ -89,7 +89,8 @@ class GraphQLFunction(RowTransformFunction[GraphQLArgs]):
             "be a query. GraphQL errors fail the call, including partial-data responses. "
             "Results are uncached. "
             "Pagination is explicit because a query may contain multiple independent connections. "
-            "Raw GraphQL responses are not validated Crossfield reporting sources.",
+            "Crossfield detail reports retain one response envelope per request; "
+            "nested entity completeness and business metrics require typed contracts.",
             example_queries=examples(
                 (
                     "Read the authenticated account",

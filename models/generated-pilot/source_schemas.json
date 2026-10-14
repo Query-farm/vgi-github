@@ -1,0 +1,3437 @@
+{
+  "entities": [
+    {
+      "arguments": [
+        {
+          "example": "Query-farm",
+          "name": "owner",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "account_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "account_type",
+          "nullable": false,
+          "path": [
+            "type"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "login",
+          "nullable": false,
+          "path": [
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "account_id"
+      ],
+      "name": "account_lookup"
+    },
+    {
+      "arguments": [
+        {
+          "example": "Query-farm/crossfield",
+          "name": "repository",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "repository_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "repository",
+          "nullable": false,
+          "path": [
+            "full_name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "name",
+          "nullable": false,
+          "path": [
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "owner_login",
+          "nullable": false,
+          "path": [
+            "owner",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "private",
+          "nullable": false,
+          "path": [
+            "private"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BOOLEAN"
+          },
+          "type": "BOOLEAN"
+        },
+        {
+          "description": "",
+          "name": "description",
+          "nullable": true,
+          "path": [
+            "description"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "owner_account_id",
+          "nullable": false,
+          "path": [
+            "owner",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "owner_account_type",
+          "nullable": false,
+          "path": [
+            "owner",
+            "type"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Complete topic names returned by this repository REST response; no nested connection or membership cap.",
+          "name": "topic_names",
+          "nullable": false,
+          "path": [
+            "topics"
+          ],
+          "required": false,
+          "schema": {
+            "item": {
+              "kind": "scalar",
+              "nullable": false,
+              "type": "VARCHAR"
+            },
+            "kind": "list",
+            "nullable": false
+          },
+          "type": "VARCHAR[]"
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "name": "repository_lookup"
+    },
+    {
+      "arguments": [
+        {
+          "example": "Query-farm",
+          "name": "owner",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "repository_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "repository",
+          "nullable": false,
+          "path": [
+            "full_name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "name",
+          "nullable": false,
+          "path": [
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "owner_login",
+          "nullable": false,
+          "path": [
+            "owner",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "private",
+          "nullable": false,
+          "path": [
+            "private"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BOOLEAN"
+          },
+          "type": "BOOLEAN"
+        },
+        {
+          "description": "",
+          "name": "description",
+          "nullable": true,
+          "path": [
+            "description"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "owner_account_id",
+          "nullable": false,
+          "path": [
+            "owner",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "owner_account_type",
+          "nullable": false,
+          "path": [
+            "owner",
+            "type"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Complete topic names returned by this repository REST response; no nested connection or membership cap.",
+          "name": "topic_names",
+          "nullable": false,
+          "path": [
+            "topics"
+          ],
+          "required": false,
+          "schema": {
+            "item": {
+              "kind": "scalar",
+              "nullable": false,
+              "type": "VARCHAR"
+            },
+            "kind": "list",
+            "nullable": false
+          },
+          "type": "VARCHAR[]"
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "name": "organization_repositories"
+    },
+    {
+      "arguments": [
+        {
+          "example": "Query-farm",
+          "name": "owner",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "repository_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "repository",
+          "nullable": false,
+          "path": [
+            "full_name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "name",
+          "nullable": false,
+          "path": [
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "owner_login",
+          "nullable": false,
+          "path": [
+            "owner",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "private",
+          "nullable": false,
+          "path": [
+            "private"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BOOLEAN"
+          },
+          "type": "BOOLEAN"
+        },
+        {
+          "description": "",
+          "name": "description",
+          "nullable": true,
+          "path": [
+            "description"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "owner_account_id",
+          "nullable": false,
+          "path": [
+            "owner",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "owner_account_type",
+          "nullable": false,
+          "path": [
+            "owner",
+            "type"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Complete topic names returned by this repository REST response; no nested connection or membership cap.",
+          "name": "topic_names",
+          "nullable": false,
+          "path": [
+            "topics"
+          ],
+          "required": false,
+          "schema": {
+            "item": {
+              "kind": "scalar",
+              "nullable": false,
+              "type": "VARCHAR"
+            },
+            "kind": "list",
+            "nullable": false
+          },
+          "type": "VARCHAR[]"
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "name": "user_repositories"
+    },
+    {
+      "arguments": [
+        {
+          "example": "Query-farm/crossfield",
+          "name": "repository",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "repository",
+          "nullable": false,
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "source_argument": "repository",
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "number",
+          "nullable": false,
+          "path": [
+            "number"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "state",
+          "nullable": false,
+          "path": [
+            "state"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "title",
+          "nullable": false,
+          "path": [
+            "title"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "body",
+          "nullable": true,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "draft",
+          "nullable": false,
+          "path": [
+            "draft"
+          ],
+          "required": false,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BOOLEAN"
+          },
+          "type": "BOOLEAN"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "created_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "updated_at",
+          "nullable": false,
+          "path": [
+            "updated_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "closed_at",
+          "nullable": true,
+          "path": [
+            "closed_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "merged_at",
+          "nullable": true,
+          "path": [
+            "merged_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "author_id",
+          "nullable": true,
+          "path": [
+            "user",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "author_login",
+          "nullable": true,
+          "path": [
+            "user",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "html_url",
+          "nullable": false,
+          "path": [
+            "html_url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "All current labels returned by the REST pull request; identity is the label ID, not its mutable name.",
+          "name": "labels",
+          "nullable": false,
+          "path": [
+            "labels"
+          ],
+          "required": true,
+          "schema": {
+            "item": {
+              "fields": [
+                {
+                  "name": "id",
+                  "nullable": false,
+                  "required": true,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": false,
+                    "type": "BIGINT"
+                  }
+                },
+                {
+                  "name": "name",
+                  "nullable": false,
+                  "required": true,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": false,
+                    "type": "VARCHAR"
+                  }
+                }
+              ],
+              "kind": "struct",
+              "nullable": false
+            },
+            "kind": "list",
+            "nullable": false
+          },
+          "type": "STRUCT(\"id\" BIGINT, \"name\" VARCHAR)[]"
+        },
+        {
+          "description": "All current assignees returned by the REST pull request; assignment is distinct from authorship or review.",
+          "name": "assignees",
+          "nullable": false,
+          "path": [
+            "assignees"
+          ],
+          "required": false,
+          "schema": {
+            "item": {
+              "fields": [
+                {
+                  "name": "id",
+                  "nullable": false,
+                  "required": true,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": false,
+                    "type": "BIGINT"
+                  }
+                },
+                {
+                  "name": "login",
+                  "nullable": false,
+                  "required": true,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": false,
+                    "type": "VARCHAR"
+                  }
+                }
+              ],
+              "kind": "struct",
+              "nullable": false
+            },
+            "kind": "list",
+            "nullable": false
+          },
+          "type": "STRUCT(\"id\" BIGINT, \"login\" VARCHAR)[]"
+        }
+      ],
+      "grain": [
+        "repository",
+        "number"
+      ],
+      "name": "pull_request_list"
+    },
+    {
+      "arguments": [
+        {
+          "example": "Query-farm/crossfield",
+          "name": "repository",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        },
+        {
+          "example": 1,
+          "name": "pull_request_number",
+          "nullable": false,
+          "position": 1,
+          "type": "BIGINT"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "repository",
+          "nullable": false,
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "source_argument": "repository",
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "number",
+          "nullable": false,
+          "path": [
+            "number"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "state",
+          "nullable": false,
+          "path": [
+            "state"
+          ],
+          "required": true,
+          "schema": {
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "title",
+          "nullable": false,
+          "path": [
+            "title"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "body",
+          "nullable": true,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "draft",
+          "nullable": false,
+          "path": [
+            "draft"
+          ],
+          "required": false,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BOOLEAN"
+          },
+          "type": "BOOLEAN"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "created_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "updated_at",
+          "nullable": false,
+          "path": [
+            "updated_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "closed_at",
+          "nullable": true,
+          "path": [
+            "closed_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "merged_at",
+          "nullable": true,
+          "path": [
+            "merged_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "author_id",
+          "nullable": false,
+          "path": [
+            "user",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "author_login",
+          "nullable": false,
+          "path": [
+            "user",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "html_url",
+          "nullable": false,
+          "path": [
+            "html_url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "All current labels returned by the REST pull request; identity is the label ID, not its mutable name.",
+          "name": "labels",
+          "nullable": false,
+          "path": [
+            "labels"
+          ],
+          "required": true,
+          "schema": {
+            "item": {
+              "fields": [
+                {
+                  "name": "id",
+                  "nullable": false,
+                  "required": true,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": false,
+                    "type": "BIGINT"
+                  }
+                },
+                {
+                  "name": "name",
+                  "nullable": false,
+                  "required": true,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": false,
+                    "type": "VARCHAR"
+                  }
+                }
+              ],
+              "kind": "struct",
+              "nullable": false
+            },
+            "kind": "list",
+            "nullable": false
+          },
+          "type": "STRUCT(\"id\" BIGINT, \"name\" VARCHAR)[]"
+        },
+        {
+          "description": "All current assignees returned by the REST pull request; assignment is distinct from authorship or review.",
+          "name": "assignees",
+          "nullable": false,
+          "path": [
+            "assignees"
+          ],
+          "required": false,
+          "schema": {
+            "item": {
+              "fields": [
+                {
+                  "name": "id",
+                  "nullable": false,
+                  "required": true,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": false,
+                    "type": "BIGINT"
+                  }
+                },
+                {
+                  "name": "login",
+                  "nullable": false,
+                  "required": true,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": false,
+                    "type": "VARCHAR"
+                  }
+                }
+              ],
+              "kind": "struct",
+              "nullable": false
+            },
+            "kind": "list",
+            "nullable": false
+          },
+          "type": "STRUCT(\"id\" BIGINT, \"login\" VARCHAR)[]"
+        }
+      ],
+      "grain": [
+        "repository",
+        "number"
+      ],
+      "name": "pull_request_lookup"
+    },
+    {
+      "arguments": [
+        {
+          "description": "Repository as owner/name.",
+          "example": "Query-farm/crossfield",
+          "name": "repository",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Pull request number within the repository.",
+          "example": 1,
+          "name": "pull_request_number",
+          "nullable": false,
+          "position": 1,
+          "type": "BIGINT"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "repository",
+          "nullable": false,
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "source_argument": "repository",
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "pull_request_number",
+          "nullable": false,
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "source_argument": "pull_request_number",
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "node_id",
+          "nullable": false,
+          "path": [
+            "node_id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "state",
+          "nullable": false,
+          "path": [
+            "state"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "body",
+          "nullable": false,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "submitted_at",
+          "nullable": false,
+          "path": [
+            "submitted_at"
+          ],
+          "required": false,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "commit_id",
+          "nullable": true,
+          "path": [
+            "commit_id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "user",
+          "nullable": true,
+          "path": [
+            "user"
+          ],
+          "required": true,
+          "schema": {
+            "fields": [
+              {
+                "name": "avatar_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "email",
+                "nullable": true,
+                "required": false,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": true,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "events_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "followers_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "following_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "gists_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "gravatar_id",
+                "nullable": true,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": true,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "html_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "id",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "BIGINT"
+                }
+              },
+              {
+                "name": "login",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "name",
+                "nullable": true,
+                "required": false,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": true,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "node_id",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "organizations_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "received_events_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "repos_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "site_admin",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "BOOLEAN"
+                }
+              },
+              {
+                "name": "starred_at",
+                "nullable": false,
+                "required": false,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "starred_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "subscriptions_url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "type",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "url",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              },
+              {
+                "name": "user_view_type",
+                "nullable": false,
+                "required": false,
+                "schema": {
+                  "kind": "scalar",
+                  "nullable": false,
+                  "type": "VARCHAR"
+                }
+              }
+            ],
+            "kind": "struct",
+            "nullable": true
+          },
+          "type": "STRUCT(\"avatar_url\" VARCHAR, \"email\" VARCHAR, \"events_url\" VARCHAR, \"followers_url\" VARCHAR, \"following_url\" VARCHAR, \"gists_url\" VARCHAR, \"gravatar_id\" VARCHAR, \"html_url\" VARCHAR, \"id\" BIGINT, \"login\" VARCHAR, \"name\" VARCHAR, \"node_id\" VARCHAR, \"organizations_url\" VARCHAR, \"received_events_url\" VARCHAR, \"repos_url\" VARCHAR, \"site_admin\" BOOLEAN, \"starred_at\" VARCHAR, \"starred_url\" VARCHAR, \"subscriptions_url\" VARCHAR, \"type\" VARCHAR, \"url\" VARCHAR, \"user_view_type\" VARCHAR)"
+        },
+        {
+          "description": "",
+          "name": "html_url",
+          "nullable": false,
+          "path": [
+            "html_url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "pull_request_url",
+          "nullable": false,
+          "path": [
+            "pull_request_url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "author_association",
+          "nullable": false,
+          "path": [
+            "author_association"
+          ],
+          "required": true,
+          "schema": {
+            "enum": [
+              "COLLABORATOR",
+              "CONTRIBUTOR",
+              "FIRST_TIMER",
+              "FIRST_TIME_CONTRIBUTOR",
+              "MANNEQUIN",
+              "MEMBER",
+              "NONE",
+              "OWNER"
+            ],
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "links",
+          "nullable": false,
+          "path": [
+            "_links"
+          ],
+          "required": true,
+          "schema": {
+            "fields": [
+              {
+                "name": "html",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "fields": [
+                    {
+                      "name": "href",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "VARCHAR"
+                      }
+                    }
+                  ],
+                  "kind": "struct",
+                  "nullable": false
+                }
+              },
+              {
+                "name": "pull_request",
+                "nullable": false,
+                "required": true,
+                "schema": {
+                  "fields": [
+                    {
+                      "name": "href",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "VARCHAR"
+                      }
+                    }
+                  ],
+                  "kind": "struct",
+                  "nullable": false
+                }
+              }
+            ],
+            "kind": "struct",
+            "nullable": false
+          },
+          "type": "STRUCT(\"html\" STRUCT(\"href\" VARCHAR), \"pull_request\" STRUCT(\"href\" VARCHAR))"
+        },
+        {
+          "description": "",
+          "name": "reviewer_id",
+          "nullable": true,
+          "path": [
+            "user",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "reviewer_login",
+          "nullable": true,
+          "path": [
+            "user",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "repository",
+        "pull_request_number",
+        "id"
+      ],
+      "name": "reviews_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "Repository as owner/name.",
+          "example": "Query-farm/crossfield",
+          "name": "repository",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "repository",
+          "nullable": false,
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "source_argument": "repository",
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "name",
+          "nullable": false,
+          "path": [
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "color",
+          "nullable": false,
+          "path": [
+            "color"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "description",
+          "nullable": true,
+          "path": [
+            "description"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "is_default",
+          "nullable": false,
+          "path": [
+            "isDefault"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BOOLEAN"
+          },
+          "type": "BOOLEAN"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": true,
+          "path": [
+            "createdAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "updated_at",
+          "nullable": true,
+          "path": [
+            "updatedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "url",
+          "nullable": false,
+          "path": [
+            "url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "repository",
+        "id"
+      ],
+      "name": "labels_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "GitHub organization login.",
+          "example": "Query-farm",
+          "min_length": 1,
+          "name": "organization",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "organization_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "organization_login",
+          "nullable": false,
+          "path": [
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "name",
+          "nullable": false,
+          "path": [
+            "name"
+          ],
+          "required": false,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "description",
+          "nullable": true,
+          "path": [
+            "description"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "created_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        }
+      ],
+      "grain": [
+        "organization_id"
+      ],
+      "name": "organization_lookup"
+    },
+    {
+      "arguments": [
+        {
+          "description": "GitHub organization login.",
+          "example": "Query-farm",
+          "min_length": 1,
+          "name": "organization",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "user_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "member_login",
+          "nullable": false,
+          "path": [
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "member_type",
+          "nullable": false,
+          "path": [
+            "type"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "name": "organization_members_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "GitHub organization login.",
+          "example": "Query-farm",
+          "min_length": 1,
+          "name": "organization",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "team_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "team_slug",
+          "nullable": false,
+          "path": [
+            "slug"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "team_name",
+          "nullable": false,
+          "path": [
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "description",
+          "nullable": true,
+          "path": [
+            "description"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "privacy",
+          "nullable": false,
+          "path": [
+            "privacy"
+          ],
+          "required": false,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "team_type",
+          "nullable": false,
+          "path": [
+            "type"
+          ],
+          "required": true,
+          "schema": {
+            "enum": [
+              "enterprise",
+              "organization"
+            ],
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "name": "teams_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "GitHub organization login.",
+          "example": "Query-farm",
+          "min_length": 1,
+          "name": "organization",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Slug of one team in the organization.",
+          "min_length": 1,
+          "name": "team_slug",
+          "nullable": false,
+          "position": 1,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "user_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "team_member_login",
+          "nullable": false,
+          "path": [
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "member_role",
+          "nullable": false,
+          "path": [
+            "role"
+          ],
+          "required": false,
+          "schema": {
+            "enum": [
+              "member",
+              "maintainer"
+            ],
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "membership_inherited",
+          "nullable": false,
+          "path": [
+            "inherited"
+          ],
+          "required": false,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BOOLEAN"
+          },
+          "type": "BOOLEAN"
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "name": "team_members_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "One personal GitHub user login.",
+          "example": "octocat",
+          "min_length": 1,
+          "name": "user",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "user_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "user_login",
+          "nullable": false,
+          "path": [
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "account_type",
+          "nullable": false,
+          "path": [
+            "type"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "name",
+          "nullable": true,
+          "path": [
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "created_at"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "name": "user_profile_lookup"
+    },
+    {
+      "arguments": [
+        {
+          "description": "One personal GitHub user login.",
+          "example": "octocat",
+          "min_length": 1,
+          "name": "user",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "pull_request_node_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "pull_request_number",
+          "nullable": false,
+          "path": [
+            "number"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "state",
+          "nullable": false,
+          "path": [
+            "state"
+          ],
+          "required": true,
+          "schema": {
+            "enum": [
+              "CLOSED",
+              "MERGED",
+              "OPEN"
+            ],
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "title",
+          "nullable": false,
+          "path": [
+            "title"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "createdAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "merged_at",
+          "nullable": true,
+          "path": [
+            "mergedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "repository_node_id",
+          "nullable": false,
+          "path": [
+            "repository",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_name",
+          "nullable": false,
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "author_login",
+          "nullable": true,
+          "path": [
+            "author",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Source evidence from GitHub.",
+          "name": "url",
+          "nullable": false,
+          "path": [
+            "url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Source evidence from GitHub.",
+          "name": "body",
+          "nullable": false,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Source evidence from GitHub.",
+          "name": "updated_at",
+          "nullable": false,
+          "path": [
+            "updatedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "Current repository primary language, not the language of this change or historical metadata.",
+          "name": "repository_language",
+          "nullable": true,
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "pull_request_node_id"
+      ],
+      "name": "authored_pull_requests_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "One personal GitHub user login.",
+          "example": "octocat",
+          "min_length": 1,
+          "name": "user",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "issue_node_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "createdAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "updated_at",
+          "nullable": false,
+          "path": [
+            "updatedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "url",
+          "nullable": false,
+          "path": [
+            "url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "body",
+          "nullable": false,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_node_id",
+          "nullable": false,
+          "path": [
+            "repository",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_name",
+          "nullable": false,
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Current repository primary language, not the language of the contribution or its historical value.",
+          "name": "repository_language",
+          "nullable": true,
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "author_login",
+          "nullable": true,
+          "path": [
+            "author",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "number",
+          "nullable": false,
+          "path": [
+            "number"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "title",
+          "nullable": false,
+          "path": [
+            "title"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "state",
+          "nullable": false,
+          "path": [
+            "state"
+          ],
+          "required": true,
+          "schema": {
+            "enum": [
+              "CLOSED",
+              "OPEN"
+            ],
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "closed_at",
+          "nullable": true,
+          "path": [
+            "closedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        }
+      ],
+      "grain": [
+        "issue_node_id"
+      ],
+      "name": "authored_issues_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "One personal GitHub user login.",
+          "example": "octocat",
+          "min_length": 1,
+          "name": "user",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "discussion_node_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "createdAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "updated_at",
+          "nullable": false,
+          "path": [
+            "updatedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "url",
+          "nullable": false,
+          "path": [
+            "url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "body",
+          "nullable": false,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_node_id",
+          "nullable": false,
+          "path": [
+            "repository",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_name",
+          "nullable": false,
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Current repository primary language, not the language of the contribution or its historical value.",
+          "name": "repository_language",
+          "nullable": true,
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "author_login",
+          "nullable": true,
+          "path": [
+            "author",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "number",
+          "nullable": false,
+          "path": [
+            "number"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "BIGINT"
+          },
+          "type": "BIGINT"
+        },
+        {
+          "description": "",
+          "name": "title",
+          "nullable": false,
+          "path": [
+            "title"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "discussion_node_id"
+      ],
+      "name": "authored_discussions_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "One personal GitHub user login.",
+          "example": "octocat",
+          "min_length": 1,
+          "name": "user",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "comment_node_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "createdAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "updated_at",
+          "nullable": false,
+          "path": [
+            "updatedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "url",
+          "nullable": false,
+          "path": [
+            "url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "body",
+          "nullable": false,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_node_id",
+          "nullable": false,
+          "path": [
+            "repository",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_name",
+          "nullable": false,
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Current repository primary language, not the language of the contribution or its historical value.",
+          "name": "repository_language",
+          "nullable": true,
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "author_login",
+          "nullable": true,
+          "path": [
+            "author",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "name": "authored_issue_comments_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "One personal GitHub user login.",
+          "example": "octocat",
+          "min_length": 1,
+          "name": "user",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "comment_node_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "createdAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "updated_at",
+          "nullable": false,
+          "path": [
+            "updatedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "url",
+          "nullable": false,
+          "path": [
+            "url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "body",
+          "nullable": false,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_node_id",
+          "nullable": true,
+          "path": [
+            "discussion",
+            "repository",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_name",
+          "nullable": true,
+          "path": [
+            "discussion",
+            "repository",
+            "nameWithOwner"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Current repository primary language, not the language of the contribution or its historical value.",
+          "name": "repository_language",
+          "nullable": true,
+          "path": [
+            "discussion",
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "author_login",
+          "nullable": true,
+          "path": [
+            "author",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "subject_title",
+          "nullable": true,
+          "path": [
+            "discussion",
+            "title"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "name": "authored_discussion_comments_source"
+    },
+    {
+      "arguments": [
+        {
+          "description": "One personal GitHub user login.",
+          "example": "octocat",
+          "min_length": 1,
+          "name": "user",
+          "nullable": false,
+          "position": 0,
+          "type": "VARCHAR"
+        }
+      ],
+      "columns": [
+        {
+          "description": "",
+          "name": "comment_node_id",
+          "nullable": false,
+          "path": [
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "created_at",
+          "nullable": false,
+          "path": [
+            "createdAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "updated_at",
+          "nullable": false,
+          "path": [
+            "updatedAt"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "TIMESTAMP WITH TIME ZONE"
+          },
+          "type": "TIMESTAMP WITH TIME ZONE"
+        },
+        {
+          "description": "",
+          "name": "url",
+          "nullable": false,
+          "path": [
+            "url"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "body",
+          "nullable": false,
+          "path": [
+            "body"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_node_id",
+          "nullable": false,
+          "path": [
+            "repository",
+            "id"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "repository_name",
+          "nullable": false,
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": false,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "Current repository primary language, not the language of the contribution or its historical value.",
+          "name": "repository_language",
+          "nullable": true,
+          "path": [
+            "repository",
+            "primaryLanguage",
+            "name"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        },
+        {
+          "description": "",
+          "name": "author_login",
+          "nullable": true,
+          "path": [
+            "author",
+            "login"
+          ],
+          "required": true,
+          "schema": {
+            "kind": "scalar",
+            "nullable": true,
+            "type": "VARCHAR"
+          },
+          "type": "VARCHAR"
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "name": "authored_commit_comments_source"
+    }
+  ],
+  "format": "vgi-github-generated-source-schemas",
+  "version": 1
+}

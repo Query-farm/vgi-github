@@ -1,0 +1,429 @@
+# Independent August(31 days) -> September(30 days) activity oracle.
+# Mocked HTTP exercises the real generated worker; no live-account claims.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT authored_issue_count,authored_issue_active_days,authored_issue_repository_count FROM engineering.semantic.github(user=>'researcher');
+
+statement ok
+DESCRIBE SELECT * FROM engineering.detail.authored_discussion_comments(user=>'researcher');
+
+statement ok
+EXPLAIN (SQL) SELECT authored_commit_comment_created_month,authored_commit_comment_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_commit_comment_created_month;
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+# Independent sources aggregate without multiplying each other's records.
+query IIIIII
+SELECT authored_pr_count,authored_issue_count,authored_discussion_count,authored_issue_comment_count,authored_discussion_comment_count,authored_commit_comment_count FROM engineering.semantic.github(user=>'researcher');
+----
+6	6	3	4	3	3
+
+# Two explicit offsets cross UTC midnight in opposite directions. October 1
+# is the exclusive upper boundary, rather than part of September's activity.
+query TIIIR rowsort
+SELECT authored_pr_created_month,authored_pr_count,authored_pr_active_days,authored_pr_repository_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_day>=DATE '2026-08-01' AND authored_pr_created_day<DATE '2026-10-01'
+GROUP BY authored_pr_created_month;
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+# Prepared monthly queries keep the model timezone through native optimization.
+# User inputs, date inputs and both together all use the same approved metrics.
+statement ok
+PREPARE monthly_user AS SELECT authored_pr_created_month,authored_pr_count,authored_pr_active_days,authored_pr_repository_count,authored_median_merge_hours
+FROM engineering.semantic.github(user=>$1)
+WHERE authored_pr_created_day>=DATE '2026-08-01' AND authored_pr_created_day<DATE '2026-10-01'
+GROUP BY authored_pr_created_month ORDER BY authored_pr_created_month;
+
+query TIIIR
+EXECUTE monthly_user('researcher');
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+statement ok
+PREPARE monthly_dates AS SELECT authored_pr_created_month,authored_pr_count,authored_pr_active_days,authored_pr_repository_count,authored_median_merge_hours
+FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_day>=$1 AND authored_pr_created_day<$2
+GROUP BY authored_pr_created_month ORDER BY authored_pr_created_month;
+
+query TIIIR
+EXECUTE monthly_dates('2026-08-01','2026-10-01');
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+statement ok
+PREPARE monthly_all AS SELECT authored_pr_created_month,authored_pr_count,authored_pr_active_days,authored_pr_repository_count,authored_median_merge_hours
+FROM engineering.semantic.github(user=>$1)
+WHERE authored_pr_created_day>=$2 AND authored_pr_created_day<$3
+GROUP BY authored_pr_created_month ORDER BY authored_pr_created_month;
+
+query TIIIR
+EXECUTE monthly_all('researcher','2026-08-01','2026-10-01');
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+query TIIIR
+EXECUTE monthly_all('researcher','2026-09-01','2026-10-01');
+----
+2026-09-01	3	2	2	18.000
+
+query TIIIR
+EXECUTE monthly_all('idle-researcher','2026-08-01','2026-10-01');
+----
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TIIIR
+EXECUTE monthly_user('researcher');
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+query TIIIR
+EXECUTE monthly_dates(DATE '2026-08-01',DATE '2026-10-01');
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+query TIIIR
+EXECUTE monthly_all('researcher','2026-08-01','2026-10-01');
+----
+2026-08-01	2	2	2	12.000
+2026-09-01	3	2	2	18.000
+
+statement ok
+SET crossfield_mode='strict';
+
+query TI rowsort
+SELECT authored_pr_created_day,authored_pr_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_day>=DATE '2026-08-01' AND authored_pr_created_day<DATE '2026-10-01'
+GROUP BY authored_pr_created_day;
+----
+2026-08-01	1
+2026-08-31	1
+2026-09-01	1
+2026-09-08	2
+
+query I
+SELECT authored_pr_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_at>=TIMESTAMPTZ '2026-09-01 00:00:00+00' AND authored_pr_created_at<TIMESTAMPTZ '2026-10-01 00:00:00+00';
+----
+3
+
+# Creation cohorts and merge activity are intentionally different populations.
+query II
+SELECT authored_pr_count,authored_merged_pr_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_day>=DATE '2026-09-01' AND authored_pr_created_day<DATE '2026-10-01';
+----
+3	2
+
+query I
+SELECT authored_merged_pr_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_merged_day>=DATE '2026-09-01' AND authored_pr_merged_day<DATE '2026-10-01';
+----
+3
+
+query TIII rowsort
+SELECT authored_issue_created_month,authored_issue_count,authored_issue_active_days,authored_issue_repository_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_issue_created_day>=DATE '2026-08-01' AND authored_issue_created_day<DATE '2026-10-01'
+GROUP BY authored_issue_created_month;
+----
+2026-08-01	2	1	2
+2026-09-01	3	2	2
+
+query TIII rowsort
+SELECT authored_discussion_created_month,authored_discussion_count,authored_discussion_active_days,authored_discussion_repository_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_discussion_created_month;
+----
+2026-08-01	1	1	1
+2026-09-01	2	1	2
+
+query TIII rowsort
+SELECT authored_issue_comment_created_month,authored_issue_comment_count,authored_issue_comment_active_days,authored_issue_comment_repository_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_issue_comment_created_month;
+----
+2026-08-01	2	1	1
+2026-09-01	2	2	2
+
+query TIII rowsort
+SELECT authored_discussion_comment_created_month,authored_discussion_comment_count,authored_discussion_comment_active_days,authored_discussion_comment_repository_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_discussion_comment_created_month;
+----
+2026-08-01	1	1	1
+2026-09-01	2	1	1
+
+query TIII rowsort
+SELECT authored_commit_comment_created_month,authored_commit_comment_count,authored_commit_comment_active_days,authored_commit_comment_repository_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_commit_comment_created_month;
+----
+2026-08-01	1	1	1
+2026-09-01	2	1	2
+
+# Monday-start weeks are calendar buckets, independent of rows observed that week.
+query TI rowsort
+SELECT authored_pr_created_week,authored_pr_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_day>=DATE '2026-08-01' AND authored_pr_created_day<DATE '2026-10-01'
+GROUP BY authored_pr_created_week;
+----
+2026-07-27	1
+2026-08-31	2
+2026-09-07	2
+
+query TI rowsort
+SELECT authored_pr_title_category,authored_pr_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_day>=DATE '2026-09-01' AND authored_pr_created_day<DATE '2026-10-01'
+GROUP BY authored_pr_title_category;
+----
+bugfix	1
+feature	1
+unclassified	1
+
+query TTI rowsort
+SELECT authored_issue_created_month,authored_issue_title_category,authored_issue_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_issue_created_day>=DATE '2026-08-01' AND authored_issue_created_day<DATE '2026-10-01'
+GROUP BY authored_issue_created_month,authored_issue_title_category;
+----
+2026-08-01	bugfix	1
+2026-08-01	testing	1
+2026-09-01	feature	1
+2026-09-01	refactoring	1
+2026-09-01	unclassified	1
+
+query TI rowsort
+SELECT authored_discussion_title_category,authored_discussion_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_discussion_title_category;
+----
+documentation	1
+unclassified	2
+
+query TI rowsort
+SELECT authored_pr_repository_language,authored_pr_count FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_day>=DATE '2026-08-01' AND authored_pr_created_day<DATE '2026-10-01'
+GROUP BY authored_pr_repository_language;
+----
+C++	2
+NULL	1
+Python	2
+
+# The source material remains available for qualitative interpretation.
+query TTT rowsort
+SELECT pull_request_node_id,title,url FROM engineering.detail.authored_pull_requests(user=>'researcher')
+WHERE authored_pr_created_day>=DATE '2026-09-01' AND authored_pr_created_day<DATE '2026-10-01';
+----
+PR202	fix: repair parse	https://github.example/activity/PR202
+PR204	chore: update tooling	https://github.example/activity/PR204
+PR205	feat: add query helper	https://github.example/activity/PR205
+
+query TTT
+SELECT pull_request_node_id,title,authored_pr_title_category FROM engineering.detail.authored_pull_requests(user=>'researcher') WHERE authored_pr_created_day=DATE '2026-08-31';
+----
+PR203	DoCs: clarify setup	documentation
+
+query TTTT
+SELECT issue_node_id,title,body,url FROM engineering.detail.authored_issues(user=>'researcher') WHERE number=301;
+----
+I301	FiX: crash on empty query	Independent evidence for I301.	https://github.example/activity/I301
+
+query TTT rowsort
+SELECT comment_node_id,repository_name,body FROM engineering.detail.authored_discussion_comments(user=>'researcher') ORDER BY comment_node_id;
+----
+DC601	lab/compiler	Independent evidence for DC601.
+DC602	lab/sdk	Independent evidence for DC602.
+DC603	NULL	Independent evidence for DC603.
+
+query TTT rowsort
+SELECT comment_node_id,repository_name,url FROM engineering.detail.authored_commit_comments(user=>'researcher') ORDER BY comment_node_id;
+----
+CC701	lab/compiler	https://github.example/activity/CC701
+CC702	lab/compiler	https://github.example/activity/CC702
+CC703	lab/sdk	https://github.example/activity/CC703
+
+# An established user with no matching activity retains zero counts.
+query IIIIII
+SELECT user_count,authored_issue_count,authored_discussion_count,authored_issue_comment_count,authored_discussion_comment_count,authored_commit_comment_count FROM engineering.semantic.github(user=>'idle-researcher');
+----
+1	0	0	0	0	0
+
+query IIIIIIIIIIII
+SELECT authored_pr_active_days,authored_pr_repository_count,authored_issue_active_days,authored_issue_repository_count,
+authored_discussion_active_days,authored_discussion_repository_count,authored_issue_comment_active_days,authored_issue_comment_repository_count,
+authored_discussion_comment_active_days,authored_discussion_comment_repository_count,authored_commit_comment_active_days,authored_commit_comment_repository_count
+FROM engineering.semantic.github(user=>'idle-researcher');
+----
+0	0	0	0	0	0	0	0	0	0	0	0
+
+# A parent dimension keeps its row when distinct child counts are empty.
+query TIIIIIIIR
+SELECT user_login,user_count,authored_pr_count,authored_pr_active_days,authored_pr_repository_count,authored_issue_active_days,authored_issue_repository_count,authored_discussion_repository_count,authored_median_merge_hours
+FROM engineering.semantic.github(user=>'idle-researcher') GROUP BY user_login;
+----
+idle-researcher	1	0	0	0	0	0	0	NULL
+
+statement ok
+SET crossfield_mode='off';
+
+query TIIIIIIIR
+SELECT user_login,user_count,authored_pr_count,authored_pr_active_days,authored_pr_repository_count,authored_issue_active_days,authored_issue_repository_count,authored_discussion_repository_count,authored_median_merge_hours
+FROM engineering.semantic.github(user=>'idle-researcher') GROUP BY user_login;
+----
+idle-researcher	1	0	0	0	0	0	0	NULL
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TIIIIIIIR
+SELECT user_login,user_count,authored_pr_count,authored_pr_active_days,authored_pr_repository_count,authored_issue_active_days,authored_issue_repository_count,authored_discussion_repository_count,authored_median_merge_hours
+FROM engineering.semantic.github(user=>'idle-researcher') GROUP BY user_login;
+----
+idle-researcher	1	0	0	0	0	0	0	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIR
+SELECT authored_pr_count,authored_pr_active_days,authored_median_merge_hours FROM engineering.semantic.github(user=>'researcher')
+WHERE authored_pr_created_day>=DATE '2026-11-01' AND authored_pr_created_day<DATE '2026-12-01';
+----
+0	0	NULL
+
+statement ok
+PREPARE issue_period AS SELECT authored_issue_count FROM engineering.semantic.github(user=>$1)
+WHERE authored_issue_created_day >= $2 AND authored_issue_created_day < $3;
+
+query I
+EXECUTE issue_period('researcher','2026-09-01','2026-10-01');
+----
+3
+
+query I
+EXECUTE issue_period('idle-researcher','2026-09-01','2026-10-01');
+----
+0
+
+statement error
+SELECT authored_issue_count FROM engineering.semantic.github(user=>'foreign-researcher');
+----
+row assertion failed
+
+statement error
+SELECT authored_discussion_comment_count FROM engineering.semantic.github(user=>'deleted-researcher');
+----
+row assertion failed
+
+statement error
+SELECT authored_commit_comment_count FROM engineering.semantic.github(user=>'late-researcher');
+----
+503
+
+query I
+SELECT authored_issue_count FROM engineering.semantic.github(user=>'researcher');
+----
+6
+
+# Composition combines the six explicitly named event populations. This is a
+# count of these visible authored records, not all GitHub actions or quality.
+statement ok
+SET crossfield_mode='semantic';
+
+# Repository focus compares the two selected periods. A repository absent in
+# August is new in this comparison, not necessarily new in the user's history.
+query TIIIRRRI rowsort
+WITH earlier AS (
+ SELECT authored_repository_name AS repository,authored_pr_count AS contributions
+ FROM engineering.semantic.github(user=>'researcher')
+ WHERE authored_pr_created_day>=DATE '2026-08-01' AND authored_pr_created_day<DATE '2026-09-01'
+ GROUP BY authored_repository_name
+), later AS (
+ SELECT authored_repository_name AS repository,authored_pr_count AS contributions
+ FROM engineering.semantic.github(user=>'researcher')
+ WHERE authored_pr_created_day>=DATE '2026-09-01' AND authored_pr_created_day<DATE '2026-10-01'
+ GROUP BY authored_repository_name
+), earlier_total AS (SELECT SUM(contributions) AS total FROM earlier),
+   later_total AS (SELECT SUM(contributions) AS total FROM later)
+SELECT COALESCE(e.repository,l.repository),COALESCE(e.contributions,0),COALESCE(l.contributions,0),
+       COALESCE(l.contributions,0)-COALESCE(e.contributions,0),
+       100.0*COALESCE(e.contributions,0)/NULLIF(et.total,0),
+       100.0*COALESCE(l.contributions,0)/NULLIF(lt.total,0),
+       100.0*(COALESCE(l.contributions,0)/NULLIF(lt.total,0)-COALESCE(e.contributions,0)/NULLIF(et.total,0)),
+       (e.repository IS NULL)::INTEGER AS new_in_comparison
+FROM earlier e FULL OUTER JOIN later l ON e.repository=l.repository CROSS JOIN earlier_total et CROSS JOIN later_total lt;
+----
+lab/compiler	1	1	0	50.0	33.33333333333333	-16.66666666666667	0
+lab/sdk	0	2	2	0.0	66.66666666666667	66.66666666666667	1
+outside/docs	1	0	-1	50.0	0.0	-50.0	0
+
+statement ok
+CREATE VIEW monthly_research_activity AS
+WITH counts AS (
+ SELECT authored_pr_created_month AS month,authored_pr_count AS events FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_pr_created_month
+ UNION ALL SELECT authored_issue_created_month,authored_issue_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_issue_created_month
+ UNION ALL SELECT authored_discussion_created_month,authored_discussion_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_discussion_created_month
+ UNION ALL SELECT authored_issue_comment_created_month,authored_issue_comment_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_issue_comment_created_month
+ UNION ALL SELECT authored_discussion_comment_created_month,authored_discussion_comment_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_discussion_comment_created_month
+ UNION ALL SELECT authored_commit_comment_created_month,authored_commit_comment_count FROM engineering.semantic.github(user=>'researcher') GROUP BY authored_commit_comment_created_month
+)
+SELECT month,SUM(events) AS activity_count FROM counts WHERE month>=DATE '2026-08-01' AND month<DATE '2026-10-01' GROUP BY month;
+
+query TI rowsort
+SELECT month,activity_count FROM monthly_research_activity;
+----
+2026-08-01	9
+2026-09-01	14
+
+# Compare both totals and rates per calendar day; these months have unequal lengths.
+query IIIRRR
+WITH earlier AS (SELECT activity_count FROM monthly_research_activity WHERE month=DATE '2026-08-01'),
+     later AS (SELECT activity_count FROM monthly_research_activity WHERE month=DATE '2026-09-01')
+SELECT earlier.activity_count,later.activity_count,later.activity_count-earlier.activity_count,
+       earlier.activity_count/31.0,later.activity_count/30.0,
+       100.0*((later.activity_count/30.0)/(earlier.activity_count/31.0)-1)
+FROM earlier CROSS JOIN later;
+----
+9	14	5	0.2903225806451613	0.4666666666666667	60.74074074074074
+
+statement ok
+DROP VIEW monthly_research_activity;
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

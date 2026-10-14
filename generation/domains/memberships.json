@@ -1,0 +1,410 @@
+{
+  "crossfield": {
+    "invocations": {
+      "derived_datasets": {
+        "repository_topics": {
+          "id": "queryfarm.github/derived/repository_topics",
+          "from": "repositories",
+          "dataset": {
+            "name": "repository_topics",
+            "id": "queryfarm.github/repository_topics",
+            "grain": [
+              "repository_id",
+              "topic"
+            ],
+            "fields": {
+              "repository_id": {
+                "source_column": "repository_id",
+                "dimension": true
+              },
+              "repository_name": {
+                "source_column": "repository_name",
+                "dimension": true
+              },
+              "topic": {
+                "source_column": "topic",
+                "dimension": true
+              }
+            }
+          },
+          "columns": [
+            {
+              "name": "repository_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "repository_name",
+              "type": "VARCHAR",
+              "nullable": false
+            },
+            {
+              "name": "topic",
+              "type": "VARCHAR",
+              "nullable": false
+            }
+          ],
+          "parent_fields": {
+            "repository_id": "repositories.repository_id",
+            "repository_name": "repositories.repository"
+          },
+          "expand": {
+            "member": "repositories.topic_names",
+            "element_columns": {
+              "topic": []
+            }
+          }
+        },
+        "pull_request_labels": {
+          "id": "queryfarm.github/derived/pull_request_labels",
+          "from": "pull_requests",
+          "dataset": {
+            "name": "pull_request_labels",
+            "id": "queryfarm.github/pull_request_labels",
+            "grain": [
+              "repository_id",
+              "pull_request_number",
+              "label_id"
+            ],
+            "fields": {
+              "repository_id": {
+                "source_column": "repository_id",
+                "dimension": true
+              },
+              "repository_name": {
+                "source_column": "repository_name",
+                "dimension": true
+              },
+              "pull_request_number": {
+                "source_column": "pull_request_number",
+                "dimension": true
+              },
+              "pull_request_id": {
+                "source_column": "pull_request_id",
+                "dimension": true
+              },
+              "created_at": {
+                "source_column": "created_at",
+                "dimension": true
+              },
+              "label_id": {
+                "source_column": "label_id",
+                "dimension": true
+              },
+              "label_name": {
+                "source_column": "label_name",
+                "dimension": true
+              }
+            }
+          },
+          "columns": [
+            {
+              "name": "repository_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "repository_name",
+              "type": "VARCHAR",
+              "nullable": false
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "pull_request_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "created_at",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": false
+            },
+            {
+              "name": "label_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "label_name",
+              "type": "VARCHAR",
+              "nullable": false
+            }
+          ],
+          "parent_fields": {
+            "repository_id": "pull_requests.repository_id",
+            "repository_name": "pull_requests.repository",
+            "pull_request_number": "pull_requests.pull_request_number",
+            "pull_request_id": "pull_requests.pull_request_id",
+            "created_at": "pull_requests.created_at"
+          },
+          "expand": {
+            "member": "pull_requests.labels",
+            "element_columns": {
+              "label_id": [
+                "id"
+              ],
+              "label_name": [
+                "name"
+              ]
+            }
+          }
+        },
+        "pull_request_assignees": {
+          "id": "queryfarm.github/derived/pull_request_assignees",
+          "from": "pull_requests",
+          "dataset": {
+            "name": "pull_request_assignees",
+            "id": "queryfarm.github/pull_request_assignees",
+            "grain": [
+              "repository_id",
+              "pull_request_number",
+              "assignee_id"
+            ],
+            "fields": {
+              "repository_id": {
+                "source_column": "repository_id",
+                "dimension": true
+              },
+              "repository_name": {
+                "source_column": "repository_name",
+                "dimension": true
+              },
+              "pull_request_number": {
+                "source_column": "pull_request_number",
+                "dimension": true
+              },
+              "pull_request_id": {
+                "source_column": "pull_request_id",
+                "dimension": true
+              },
+              "created_at": {
+                "source_column": "created_at",
+                "dimension": true
+              },
+              "assignee_id": {
+                "source_column": "assignee_id",
+                "dimension": true
+              },
+              "assignee_login": {
+                "source_column": "assignee_login",
+                "dimension": true
+              }
+            }
+          },
+          "columns": [
+            {
+              "name": "repository_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "repository_name",
+              "type": "VARCHAR",
+              "nullable": false
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "pull_request_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "created_at",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": false
+            },
+            {
+              "name": "assignee_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "assignee_login",
+              "type": "VARCHAR",
+              "nullable": false
+            }
+          ],
+          "parent_fields": {
+            "repository_id": "pull_requests.repository_id",
+            "repository_name": "pull_requests.repository",
+            "pull_request_number": "pull_requests.pull_request_number",
+            "pull_request_id": "pull_requests.pull_request_id",
+            "created_at": "pull_requests.created_at"
+          },
+          "expand": {
+            "member": "pull_requests.assignees",
+            "element_columns": {
+              "assignee_id": [
+                "id"
+              ],
+              "assignee_login": [
+                "login"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "repository_topic_membership_count": {
+        "expression": "COUNT(*)",
+        "type": "BIGINT"
+      },
+      "repositories_with_topic_count": {
+        "expression": "COUNT(DISTINCT repository_topics.repository_id)",
+        "type": "BIGINT"
+      },
+      "pull_request_label_membership_count": {
+        "expression": "COUNT(*)",
+        "type": "BIGINT"
+      },
+      "labeled_pull_request_count": {
+        "expression": "COUNT(DISTINCT pull_request_labels.pull_request_id)",
+        "type": "BIGINT"
+      },
+      "pull_request_assignee_membership_count": {
+        "expression": "COUNT(*)",
+        "type": "BIGINT"
+      },
+      "assigned_pull_request_count": {
+        "expression": "COUNT(DISTINCT pull_request_assignees.pull_request_id)",
+        "type": "BIGINT"
+      }
+    },
+    "policy": {
+      "metrics": [
+        "repository_topic_membership_count",
+        "repositories_with_topic_count",
+        "pull_request_label_membership_count",
+        "labeled_pull_request_count",
+        "pull_request_assignee_membership_count",
+        "assigned_pull_request_count"
+      ],
+      "dimensions": [
+        "repository_topics.repository_id",
+        "repository_topics.repository_name",
+        "repository_topics.topic",
+        "pull_request_labels.repository_id",
+        "pull_request_labels.repository_name",
+        "pull_request_labels.pull_request_number",
+        "pull_request_labels.pull_request_id",
+        "pull_request_labels.created_at",
+        "pull_request_labels.label_id",
+        "pull_request_labels.label_name",
+        "pull_request_assignees.repository_id",
+        "pull_request_assignees.repository_name",
+        "pull_request_assignees.pull_request_number",
+        "pull_request_assignees.pull_request_id",
+        "pull_request_assignees.created_at",
+        "pull_request_assignees.assignee_id",
+        "pull_request_assignees.assignee_login"
+      ],
+      "filter_dimensions": [
+        "repository_topics.repository_id",
+        "repository_topics.repository_name",
+        "repository_topics.topic",
+        "pull_request_labels.repository_id",
+        "pull_request_labels.repository_name",
+        "pull_request_labels.pull_request_number",
+        "pull_request_labels.pull_request_id",
+        "pull_request_labels.created_at",
+        "pull_request_labels.label_id",
+        "pull_request_labels.label_name",
+        "pull_request_assignees.repository_id",
+        "pull_request_assignees.repository_name",
+        "pull_request_assignees.pull_request_number",
+        "pull_request_assignees.pull_request_id",
+        "pull_request_assignees.created_at",
+        "pull_request_assignees.assignee_id",
+        "pull_request_assignees.assignee_login"
+      ],
+      "detail_fields": [
+        "repository_topics.repository_id",
+        "repository_topics.repository_name",
+        "repository_topics.topic",
+        "pull_request_labels.repository_id",
+        "pull_request_labels.repository_name",
+        "pull_request_labels.pull_request_number",
+        "pull_request_labels.pull_request_id",
+        "pull_request_labels.created_at",
+        "pull_request_labels.label_id",
+        "pull_request_labels.label_name",
+        "pull_request_assignees.repository_id",
+        "pull_request_assignees.repository_name",
+        "pull_request_assignees.pull_request_number",
+        "pull_request_assignees.pull_request_id",
+        "pull_request_assignees.created_at",
+        "pull_request_assignees.assignee_id",
+        "pull_request_assignees.assignee_login"
+      ],
+      "metric_semantics": {
+        "repository_topic_membership_count": {
+          "dataset": "repository_topics",
+          "additivity": "additive",
+          "missing": "zero",
+          "comment": "Current repository-topic memberships in the selected repository/owner/organization population. Counts membership pairs; one parent can contribute to several memberships."
+        },
+        "repositories_with_topic_count": {
+          "dataset": "repository_topics",
+          "additivity": "non_additive",
+          "missing": "zero",
+          "comment": "Current repository-topic memberships in the selected repository/owner/organization population. Distinct parents represented by the selected memberships; excludes parents with no returned memberships. Never sum this count across membership groups."
+        },
+        "pull_request_label_membership_count": {
+          "dataset": "pull_request_labels",
+          "additivity": "additive",
+          "missing": "zero",
+          "comment": "Current PR-label memberships; different labels may share a name, so use label_id for identity. Counts membership pairs; one parent can contribute to several memberships."
+        },
+        "labeled_pull_request_count": {
+          "dataset": "pull_request_labels",
+          "additivity": "non_additive",
+          "missing": "zero",
+          "comment": "Current PR-label memberships; different labels may share a name, so use label_id for identity. Distinct parents represented by the selected memberships; excludes parents with no returned memberships. Never sum this count across membership groups."
+        },
+        "pull_request_assignee_membership_count": {
+          "dataset": "pull_request_assignees",
+          "additivity": "additive",
+          "missing": "zero",
+          "comment": "Current PR-assignee memberships; assignment does not establish authorship, review or team contribution. Counts membership pairs; one parent can contribute to several memberships."
+        },
+        "assigned_pull_request_count": {
+          "dataset": "pull_request_assignees",
+          "additivity": "non_additive",
+          "missing": "zero",
+          "comment": "Current PR-assignee memberships; assignment does not establish authorship, review or team contribution. Distinct parents represented by the selected memberships; excludes parents with no returned memberships. Never sum this count across membership groups."
+        }
+      },
+      "field_semantics": {
+        "repository_topics.topic": {
+          "sql_name": "repository_topic",
+          "comment": "Current topic string; a repository can have multiple topics."
+        },
+        "pull_request_labels.label_id": {
+          "sql_name": "pr_label_id",
+          "comment": "Stable identity of an assigned repository label."
+        },
+        "pull_request_labels.label_name": {
+          "sql_name": "pr_label_name",
+          "comment": "Current assigned label name; names are not unique across repositories."
+        },
+        "pull_request_assignees.assignee_id": {
+          "sql_name": "pr_assignee_id",
+          "comment": "Account identity of a current PR assignee; distinct from author/reviewer roles."
+        },
+        "pull_request_assignees.assignee_login": {
+          "sql_name": "pr_assignee_login",
+          "comment": "Current login of a PR assignee."
+        }
+      }
+    }
+  }
+}

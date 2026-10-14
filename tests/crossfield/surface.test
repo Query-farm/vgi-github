@@ -1,0 +1,224 @@
+# Whole-worker coverage uses reviewed typed entities and explicit raw response
+# grain. Expected numbers come from surface_fixture.py, not recorded SQL output.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT discussion_count FROM engineering.semantic.github(repository=>'example/project');
+
+statement ok
+EXPLAIN (SQL) SELECT * FROM engineering.reports.rest_responses_detail(operation_id=>'pulls/list-reviews',path_parameters=>'{"owner":"example","repo":"project","pull_number":1}',rest_query=>'{}',rest_accept=>'application/vnd.github+json',rest_allow_not_found=>false);
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT * FROM engineering.reports.graphql_responses_detail(graphql_document=>'query Identity($login:String!){user(login:$login){login}}',graphql_variables=>'{"login":"alice"}',graphql_operation_name=>'Identity');
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIIRRR
+SELECT discussion_count,answered_discussions,unanswered_discussions,discussion_answer_rate,mean_discussion_answer_hours,median_discussion_answer_hours FROM engineering.semantic.github(repository=>'example/project');
+----
+3	2	1	0.6666666666666666	6	6
+
+query TIIR
+SELECT discussions_category_name,discussion_count,answered_discussions,mean_discussion_answer_hours FROM engineering.semantic.github(repository=>'example/project') GROUP BY discussions_category_name ORDER BY discussions_category_name;
+----
+Ideas	1	1	10
+Q&A	2	1	2
+
+query IIIR
+SELECT * FROM engineering.reports.discussion_overview(repository=>'example/project');
+----
+3	2	1	0.6666666666666666
+
+query IRR
+SELECT * FROM engineering.reports.discussion_answer_summary(repository=>'example/project',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+2	6	6
+
+query IT
+SELECT number,node_id FROM engineering.reports.discussions_detail(repository=>'example/project') ORDER BY number;
+----
+1	D1
+2	D2
+3	D3
+
+query I
+SELECT discussion_comment_count FROM engineering.semantic.github(repository=>'example/project',discussion_number=>1);
+----
+2
+
+query I
+SELECT * FROM engineering.reports.discussion_comments_summary(repository=>'example/project',discussion_number=>1,start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+2
+
+query TT
+SELECT node_id,reply_to_id FROM engineering.reports.discussion_comments_detail(repository=>'example/project',discussion_number=>1) ORDER BY node_id;
+----
+C1	NULL
+C2	NULL
+
+query I
+SELECT discussion_reply_count FROM engineering.semantic.github(comment_node_id=>'C1');
+----
+2
+
+query I
+SELECT * FROM engineering.reports.discussion_replies_summary(comment_node_id=>'C1',start_day=>'2026-09-01',end_day=>'2026-10-01');
+----
+2
+
+query TT
+SELECT node_id,reply_to_id FROM engineering.reports.discussion_replies_detail(comment_node_id=>'C1') ORDER BY node_id;
+----
+R1	C1
+R2	C1
+
+query III
+SELECT project_count,open_projects,closed_projects FROM engineering.semantic.github(owner=>'example',project_owner_type=>'organization');
+----
+2	1	1
+
+query III
+SELECT * FROM engineering.reports.projects_summary(owner=>'example',project_owner_type=>'user');
+----
+2	1	1
+
+query IT
+SELECT number,state FROM engineering.reports.projects_detail(owner=>'example',project_owner_type=>'organization') ORDER BY number;
+----
+7	open
+8	closed
+
+query IIIII
+SELECT project_item_count,project_issue_items,project_pull_request_items,project_draft_items,archived_project_items FROM engineering.semantic.github(owner=>'example',project_number=>7,project_owner_type=>'organization');
+----
+4	2	1	1	1
+
+query IIIII
+SELECT * FROM engineering.reports.project_items_summary(owner=>'example',project_number=>7,project_owner_type=>'organization');
+----
+4	2	1	1	1
+
+# The inaccessible item and the draft retain their own identities and NULLs.
+query ITIT
+SELECT id,content_type,content_id,state FROM engineering.reports.project_items_detail(owner=>'example',project_number=>7,project_owner_type=>'organization') ORDER BY id;
+----
+101	Issue	9001	open
+102	PullRequest	9002	closed
+103	DraftIssue	9003	NULL
+104	Issue	NULL	NULL
+
+query IT
+SELECT id,fields_json FROM engineering.reports.project_item_values_detail(owner=>'example',project_number=>7,project_owner_type=>'organization',project_fields=>'1,2') WHERE id=101;
+----
+101	[{"id": 1, "value": "Ready"}, {"id": 2, "value": 2}]
+
+query I
+SELECT project_field_count FROM engineering.semantic.github(owner=>'example',project_number=>7,project_owner_type=>'organization');
+----
+2
+
+query I
+SELECT * FROM engineering.reports.project_fields_summary(owner=>'example',project_number=>7,project_owner_type=>'organization');
+----
+2
+
+query ITT
+SELECT id,name,data_type FROM engineering.reports.project_fields_detail(owner=>'example',project_number=>7,project_owner_type=>'organization') ORDER BY id;
+----
+1	Status	single_select
+2	Points	number
+
+query II
+WITH counts AS (SELECT discussion_count,merged_prs FROM engineering.semantic.github(repository=>'example/project')) SELECT * FROM counts;
+----
+3	6
+
+statement ok
+PREPARE discussion_counts AS SELECT discussion_count FROM engineering.semantic.github(repository=>$1);
+
+query I
+EXECUTE discussion_counts('example/empty');
+----
+0
+
+statement error
+EXECUTE discussion_counts('example/missing');
+----
+GitHub reporting requires an accessible GraphQL resource
+
+statement error
+EXECUTE discussion_counts('example/duplicate');
+----
+duplicate
+
+statement error
+EXECUTE discussion_counts('example/negative-duration');
+----
+<REGEX>:(?s).*(negative|duration|answer).*
+
+statement error
+EXECUTE discussion_counts('example/partial-error');
+----
+Fixture partial GraphQL error
+
+query I
+EXECUTE discussion_counts('example/project');
+----
+3
+
+statement error
+SELECT project_count FROM engineering.semantic.github(owner=>'example',project_owner_type=>'team');
+----
+INVOCATION
+
+statement error
+SELECT discussion_answer_rate*100 FROM engineering.semantic.github(repository=>'example/project');
+----
+UNAPPROVED_PROJECTION
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+DEALLOCATE discussion_counts;
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;
