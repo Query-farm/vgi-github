@@ -1,0 +1,196 @@
+# Focused opt-in overload pilot. Canonical definitions come from the generated
+# model; independent HTTP rows are the original connected fixture, not canned
+# semantic reports. Alpha has three PRs (48h,12h,unmerged), beta one (6h).
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_NATIVE_FIXTURES
+
+require-env CROSSFIELD_GITHUB_OVERLOAD_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path,'' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_OVERLOAD_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_NATIVE_FIXTURES}/github-overloads.crossfield.json' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query T
+SELECT signature_id FROM crossfield_signatures() WHERE database_name='engineering' AND object_kind='semantic' ORDER BY signature_id;
+----
+organization
+repository
+
+query TTTT
+SELECT signature_id,name,is_positional::VARCHAR,default_value FROM crossfield_parameters() WHERE database_name='engineering' AND schema_name='semantic' ORDER BY signature_id,ordinal;
+----
+organization	organization	false	NULL
+organization	user	false	null
+repository	repository	true	NULL
+repository	user	false	null
+
+statement ok
+DESCRIBE SELECT pull_request_count,merged_prs,median_merge_hours FROM SEMANTIC engineering.github('example/alpha');
+
+statement ok
+EXPLAIN (SEMANTIC) SELECT pull_request_count,merged_prs FROM SEMANTIC engineering.github(organization=>'example',user=>'alice');
+
+statement ok
+EXPLAIN (SQL) SELECT repository_name,pull_request_count FROM engineering.semantic.github('example/alpha') GROUP BY repository_name;
+
+statement error
+SELECT pull_request_count FROM SEMANTIC engineering.github();
+----
+SEMANTIC_SIGNATURE_NO_MATCH
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(user=>'alice');
+----
+SEMANTIC_SIGNATURE_NO_MATCH
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(repository=>'example/alpha',organization=>'example');
+----
+SEMANTIC_SIGNATURE_NO_MATCH
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github('example/alpha','alice');
+----
+SEMANTIC_SIGNATURE_NO_MATCH
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(organization=>NULL);
+----
+SEMANTIC_PARAMETER_NULL
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(repository=>'   ');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github('example/alpha',user=>'  ');
+----
+SEMANTIC_PARAMETER_VALUE
+
+statement error
+SELECT pull_request_count FROM engineering.semantic.github(repository=>'example/' || 'alpha');
+----
+SEMANTIC_PARAMETER_EXPRESSION
+
+# An optional author filter cannot disappear when only repository inventory is
+# selected. Choose a PR metric as well if that authored population is wanted.
+statement error
+SELECT repository_count FROM engineering.semantic.github(organization=>'example',user=>'alice');
+----
+SEMANTIC_PARAMETER_UNUSED
+
+statement ok
+PREPARE repo_scope AS SELECT pull_request_count,merged_prs,median_merge_hours FROM SEMANTIC engineering.github(repository=>$1,user=>$2);
+
+statement ok
+SET crossfield_mode='off';
+
+# All metadata, rejected calls and native preparation above perform zero HTTP.
+query I
+SELECT count(*) FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIIR
+SELECT repository_count,pull_request_count,merged_prs,median_merge_hours FROM SEMANTIC engineering.github('example/alpha');
+----
+1	3	2	30.000
+
+query IIIR
+SELECT repository_count,pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github(organization=>'example');
+----
+3	4	3	12.000
+
+# User is a filter on authored PRs within the chosen repository population.
+# Repository inventory still includes all three approved organization repos.
+query IIIR
+SELECT repository_count,pull_request_count,merged_prs,median_merge_hours FROM SEMANTIC engineering.github(organization=>'example',user=>'alice');
+----
+3	3	2	27.000
+
+query IIR
+SELECT pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github('example/alpha',user=>'alice');
+----
+2	1	48.000
+
+query TII rowsort
+SELECT author_login,pull_request_count,merged_prs FROM engineering.semantic.github(organization=>'example') GROUP BY author_login;
+----
+alice	3	2
+bob	1	1
+
+query TII rowsort
+SELECT repository_name,repository_count,pull_request_count FROM engineering.semantic.github(organization=>'example') GROUP BY repository_name;
+----
+example/alpha	1	3
+example/beta	1	1
+example/empty	1	0
+
+query II
+SELECT pull_request_count,merged_prs FROM SEMANTIC engineering.github(organization=>'example') WHERE author_login='alice' AND pull_request_created_day>=DATE '2026-09-03';
+----
+2	1
+
+query IIIR
+SELECT repository_count,pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github(organization=>'empty-org');
+----
+0	0	0	NULL
+
+query IIR
+EXECUTE repo_scope('example/alpha','alice');
+----
+2	1	48.000
+
+query IIR
+EXECUTE repo_scope('example/beta',NULL);
+----
+1	1	6.000
+
+query II rowsort
+SELECT pull_request_id,pull_request_number FROM engineering.detail.pull_requests('example/alpha',user=>'alice');
+----
+1001	1
+1003	3
+
+query IIR
+WITH selected AS (SELECT pull_request_count,merged_prs,median_merge_hours FROM SEMANTIC engineering.github('example/alpha',user=>'alice')) SELECT * FROM selected;
+----
+2	1	48.000
+
+statement ok
+CREATE VIEW overloaded_prs AS SELECT pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github(organization=>'example',user=>'alice');
+
+query IIR
+SELECT * FROM overloaded_prs;
+----
+3	2	27.000
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*)>0 FROM read_ndjson_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+1
