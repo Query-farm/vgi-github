@@ -24,8 +24,11 @@ def membership_sources():
     selected = {}
     for original in overlay["entities"]:
         if original["name"] not in {
-            "repository_lookup", "organization_repositories", "user_repositories",
-            "pull_request_list", "pull_request_lookup",
+            "repository_lookup",
+            "organization_repositories",
+            "user_repositories",
+            "pull_request_list",
+            "pull_request_lookup",
         }:
             continue
         entity = deepcopy(original)

@@ -77,8 +77,10 @@ def load_overlay(path: Path) -> dict:
         for section, definitions in fragment.items():
             if section == "crossfield":
                 merge_native(
-                    overlay.setdefault("crossfield", {}), definitions,
-                    source=str(source), origins=native_origins,
+                    overlay.setdefault("crossfield", {}),
+                    definitions,
+                    source=str(source),
+                    origins=native_origins,
                 )
                 continue
             if section in LIST_SECTIONS:

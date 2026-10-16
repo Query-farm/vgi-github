@@ -39,27 +39,39 @@ def fixture_model():
         "name": "github",
         "invocations": {"version": 1, "sources": sources, "input_contracts": {}},
         "metrics": {name: deepcopy(original["metrics"][name]) for name in sorted(METRICS)},
-        "relationships": [deepcopy(item) for item in original["relationships"] if item["name"] == RELATIONSHIP],
+        "relationships": [
+            deepcopy(item) for item in original["relationships"] if item["name"] == RELATIONSHIP
+        ],
         "policy": {
             "policy_version": policy["policy_version"],
             "timezone": policy["timezone"],
             "allow_semantic_joins": policy["allow_semantic_joins"],
             "metrics": sorted(METRICS),
-            "metric_semantics": {name: deepcopy(policy["metric_semantics"][name]) for name in sorted(METRICS)},
+            "metric_semantics": {
+                name: deepcopy(policy["metric_semantics"][name]) for name in sorted(METRICS)
+            },
             "invocation_sources": sorted(DATASETS),
             "relationships": [RELATIONSHIP],
-            "relationship_semantics": {RELATIONSHIP: deepcopy(policy["relationship_semantics"][RELATIONSHIP])},
-            "dataset_semantics": {name: deepcopy(policy["dataset_semantics"][name]) for name in sorted(DATASETS)},
+            "relationship_semantics": {
+                RELATIONSHIP: deepcopy(policy["relationship_semantics"][RELATIONSHIP])
+            },
+            "dataset_semantics": {
+                name: deepcopy(policy["dataset_semantics"][name]) for name in sorted(DATASETS)
+            },
         },
     }
     for key in ("dimensions", "filter_dimensions", "detail_fields"):
         model["policy"][key] = [name for name in policy[key] if selected_field(name)]
     for key in ("field_semantics", "local_time_fields"):
-        model["policy"][key] = {name: deepcopy(value) for name, value in policy.get(key, {}).items() if selected_field(name)}
+        model["policy"][key] = {
+            name: deepcopy(value) for name, value in policy.get(key, {}).items() if selected_field(name)
+        }
 
     overloads = []
-    for scope, calling, example in (("repository", "positional_or_named", "example/alpha"),
-                                    ("organization", "keyword_only", "example")):
+    for scope, calling, example in (
+        ("repository", "positional_or_named", "example/alpha"),
+        ("organization", "keyword_only", "example"),
+    ):
         exposed = {scope, "user"}
         bindings = {}
         for name, source in sources.items():
@@ -69,20 +81,40 @@ def fixture_model():
                 if key in exposed:
                     arguments[key] = {"parameter": key}
                 else:
-                    assert argument["nullable"], f"New required physical argument needs explicit pilot meaning: {name}.{key}"
+                    assert argument["nullable"], (
+                        f"New required physical argument needs explicit pilot meaning: {name}.{key}"
+                    )
                     arguments[key] = {"literal": None}
             bindings[source["dataset"]["name"]] = {"arguments": arguments}
-        overloads.append({
-            "id": scope,
-            "comment": f"Canonical repositories and PRs selected by {scope}; optional user intersects the PR authors.",
-            "parameters": [
-                {"name": scope, "type": "VARCHAR", "calling": calling, "nullable": False,
-                 "non_empty": True, "example": example},
-                {"name": "user", "type": "VARCHAR", "calling": "keyword_only", "nullable": True,
-                 "default": None, "non_empty": True, "example": "alice"},
-            ],
-            "request": {"version": 1, "source_bindings": bindings},
-        })
+        overloads.append(
+            {
+                "id": scope,
+                "comment": (
+                    f"Canonical repositories and PRs selected by {scope}; "
+                    "optional user intersects the PR authors."
+                ),
+                "parameters": [
+                    {
+                        "name": scope,
+                        "type": "VARCHAR",
+                        "calling": calling,
+                        "nullable": False,
+                        "non_empty": True,
+                        "example": example,
+                    },
+                    {
+                        "name": "user",
+                        "type": "VARCHAR",
+                        "calling": "keyword_only",
+                        "nullable": True,
+                        "default": None,
+                        "non_empty": True,
+                        "example": "alice",
+                    },
+                ],
+                "request": {"version": 1, "source_bindings": bindings},
+            }
+        )
     model["semantic_query"] = {"overloads": overloads}
     return model
 
