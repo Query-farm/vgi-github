@@ -1,0 +1,411 @@
+# Canonical issue populations, cross-repository edges and typed mixed timeline observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT issue_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha');
+----
+2
+
+# The REST discovery includes a PR whose pull_request.url is NULL. Object presence excludes it.
+query I
+SELECT issue_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_state=>'all');
+----
+2
+
+query TI
+SELECT issue_state,issue_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_state=>'all') GROUP BY issue_state ORDER BY issue_state;
+----
+CLOSED	1
+OPEN	1
+
+query TTI
+SELECT issue_node_id,repository_name,number FROM engineering.detail.issues(repository=>'issue-fixture/alpha',issue_number=>2);
+----
+I2102	issue-fixture/alpha	2
+
+query TTI
+SELECT issue_node_id,repository_name,number FROM engineering.detail.issues(issue_node_id=>'I2101');
+----
+I2101	issue-fixture/alpha	1
+
+query I
+SELECT issue_count FROM engineering.semantic.github(user=>'issue-author');
+----
+2
+
+# Canonical GraphQL metadata adds no capped nested relationship collection.
+query TI
+SELECT issue_state_reason,issue_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha') GROUP BY issue_state_reason ORDER BY issue_state_reason NULLS LAST;
+----
+NOT_PLANNED	1
+NULL	1
+
+query IIT
+SELECT number,issue_id,locked FROM engineering.detail.issues(repository=>'issue-fixture/alpha') ORDER BY number;
+----
+1	2101	false
+2	2102	true
+
+query IIII
+SELECT number,sub_issue_total,sub_issue_completed,sub_issue_completion_percentage FROM engineering.detail.issues(repository=>'issue-fixture/beta');
+----
+1	1	1	100
+
+statement ok
+CREATE TEMP TABLE issue_enriched_rest AS SELECT * FROM engineering.detail.issues(repository=>'issue-fixture/alpha',issue_state=>'all');
+
+statement ok
+CREATE TEMP TABLE issue_enriched_graph AS SELECT * FROM engineering.detail.issues(issue_node_id=>'I2101');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITITT
+SELECT number,assignee.login,closed_by.id,issue_type.name,performed_via_app.slug FROM issue_enriched_rest ORDER BY number;
+----
+1	issue-author	NULL	Bug	issue-automation
+2	issue-bob	1201	NULL	NULL
+
+query IIIII
+SELECT number,len(assignees),reaction_summary.total_count,dependency_summary.blocked_by,dependency_summary.blocking FROM issue_enriched_rest ORDER BY number;
+----
+1	2	5	0	0
+2	1	1	1	0
+
+query ITTR
+SELECT number,milestone_node_id,milestone.title,milestone.progressPercentage FROM issue_enriched_rest ORDER BY number;
+----
+1	M401	Milestone 1	60.0
+2	NULL	NULL	NULL
+
+query TT
+SELECT assignees IS NULL,reaction_summary IS NULL FROM issue_enriched_graph;
+----
+true	true
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT issue_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_creator=>'issue-author');
+----
+1
+
+# Authentication participation scopes are explicit and have different populations.
+query I
+SELECT issue_count FROM engineering.semantic.github(viewer_issues=>true,issue_state=>'all');
+----
+3
+
+query I
+SELECT issue_count FROM engineering.semantic.github(viewer_member_issues=>true,issue_state=>'all');
+----
+1
+
+query I
+SELECT issue_count FROM engineering.semantic.github(organization=>'issue-fixture',viewer_organization_issues=>true,issue_state=>'all');
+----
+1
+
+query TI
+SELECT issue_repository_name,issue_count FROM engineering.semantic.github(viewer_issues=>true,issue_state=>'all') GROUP BY issue_repository_name ORDER BY issue_repository_name;
+----
+issue-fixture/alpha	2
+issue-fixture/beta	1
+
+# Parent hydration keeps the target's actual repository and number, not the anchor's.
+query TTI
+SELECT issue_node_id,repository_name,number FROM engineering.detail.issues(repository=>'issue-fixture/alpha',issue_parent_of=>2);
+----
+I2103	issue-fixture/beta	1
+
+query TTI
+SELECT issue_node_id,repository_name,number FROM engineering.detail.issues(repository=>'issue-fixture/beta',issue_children_of=>1);
+----
+I2102	issue-fixture/alpha	2
+
+query TT
+SELECT parent_node_id,child_node_id FROM engineering.detail.issue_subissue_memberships(repository=>'issue-fixture/alpha',issue_parent_of=>2);
+----
+I2103	I2102
+
+query TT
+SELECT parent_node_id,child_node_id FROM engineering.detail.issue_subissue_memberships(repository=>'issue-fixture/beta',issue_children_of=>1);
+----
+I2103	I2102
+
+query I
+SELECT issue_subissue_membership_count FROM engineering.semantic.github(repository=>'issue-fixture/beta',issue_children_of=>1);
+----
+1
+
+query TT
+SELECT blocking_node_id,blocked_node_id FROM engineering.detail.issue_dependencies(repository=>'issue-fixture/alpha',issue_blocked_by=>2);
+----
+I2103	I2102
+
+query TT
+SELECT blocking_node_id,blocked_node_id FROM engineering.detail.issue_dependencies(repository=>'issue-fixture/beta',issue_blocking=>1);
+----
+I2103	I2102
+
+query I
+SELECT issue_dependency_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_blocked_by=>2);
+----
+1
+
+query TT
+SELECT source_node_id,related_node_id FROM engineering.detail.issue_related_memberships(repository=>'issue-fixture/alpha',issue_related_to=>1);
+----
+I2101	I2103
+
+query TT
+SELECT source_node_id,related_node_id FROM engineering.detail.issue_related_memberships(repository=>'issue-fixture/beta',issue_related_to=>1);
+----
+I2103	I2101
+
+query I
+SELECT issue_related_membership_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_related_to=>1);
+----
+1
+
+query I
+SELECT issue_comment_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha');
+----
+2
+
+query I
+SELECT issue_comment_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1);
+----
+1
+
+query TT
+SELECT comment_node_id,body FROM engineering.detail.issue_comments(repository=>'issue-fixture/alpha',issue_comment_id=>501);
+----
+C501	First comment
+
+query I
+SELECT issue_event_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha');
+----
+2
+
+query I
+SELECT issue_event_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1);
+----
+1
+
+query ITTT
+SELECT event_id,actor_login,assigner_login,assignee_login FROM engineering.detail.issue_events(repository=>'issue-fixture/alpha',issue_event_id=>302);
+----
+302	issue-author	issue-author	issue-bob
+
+query TI
+SELECT issue_events_event,issue_event_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha') GROUP BY issue_events_event ORDER BY issue_events_event;
+----
+assigned	1
+labeled	1
+
+# Mixed timeline entries include a commit without an event ID and remain four occurrences.
+query I
+SELECT issue_timeline_entry_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1);
+----
+4
+
+query ITI
+SELECT entry_ordinal,event,event_id FROM engineering.detail.issue_timeline_entries(repository=>'issue-fixture/alpha',issue_number=>1) ORDER BY entry_ordinal;
+----
+1	labeled	301
+2	commented	501
+3	committed	NULL
+4	closed	303
+
+# Separate public STRUCT columns retain the selected branch and leave other branches NULL.
+statement ok
+CREATE TEMP TABLE issue_timeline_payloads AS SELECT * FROM engineering.detail.issue_timeline_entries(repository=>'issue-fixture/alpha',issue_number=>1);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTTTI
+SELECT event_types[1],labeled_payload.label.name,commented_payload.body,committed_payload.author.name,committed_payload.committer.name,state_change_payload.id FROM issue_timeline_payloads ORDER BY entry_ordinal;
+----
+variant_1	bug	NULL	NULL	NULL	NULL
+variant_14	NULL	First comment	NULL	NULL	NULL
+variant_16	NULL	NULL	Original author	Integrator	NULL
+variant_22	NULL	NULL	NULL	NULL	303
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT issue_field_value_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1);
+----
+2
+
+query IT
+SELECT issue_field_id,data_type FROM engineering.detail.issue_field_values(repository=>'issue-fixture/alpha',issue_number=>1) ORDER BY issue_field_id;
+----
+1	number
+2	multi_select
+
+query II
+SELECT issue_suggestion_count,issue_applied_suggestion_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1);
+----
+3	1
+
+query TI
+SELECT issue_suggestions_state,issue_suggestion_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1) GROUP BY issue_suggestions_state ORDER BY issue_suggestions_state;
+----
+applied	1
+dismissed	1
+pending	1
+
+query II
+SELECT issue_suggestion_count,issue_applied_suggestion_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1,issue_suggestion_action=>'add_field');
+----
+2	1
+
+query IIII
+SELECT suggestion_id,actor_id,resolved_by,issue_event_id FROM engineering.detail.issue_suggestions(repository=>'issue-fixture/alpha',issue_number=>1,issue_suggestion_state=>'applied');
+----
+702	1301	1202	301
+
+# Milestone work item counters include PRs and are snapshots, not completed issue throughput.
+query III
+SELECT milestone_count,milestone_open_work_item_count,milestone_closed_work_item_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha');
+----
+2	2	7
+
+query TI
+SELECT milestones_state,milestone_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha') GROUP BY milestones_state ORDER BY milestones_state;
+----
+closed	1
+open	1
+
+query IIT
+SELECT milestone_id,milestone_number,state FROM engineering.detail.milestones(repository=>'issue-fixture/alpha',milestone_number=>2);
+----
+402	2	closed
+
+query I
+SELECT milestone_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',milestone_state=>'closed');
+----
+1
+
+query I
+SELECT repository_assignee_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha');
+----
+2
+
+query I
+SELECT issue_assignment_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1);
+----
+2
+
+query II
+SELECT issue_assignment_capability_count,issue_assignable_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',assignee_login=>'issue-author');
+----
+1	1
+
+query II
+SELECT issue_assignment_capability_count,issue_assignable_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1,assignee_login=>'unavailable');
+----
+1	0
+
+# The scope discriminator keeps repository observation 0 separate from an actual issue number.
+query TII
+SELECT scope_kind,context_issue_number,status_code FROM engineering.detail.issue_assignment_capabilities(repository=>'issue-fixture/alpha',assignee_login=>'issue-author');
+----
+repository	0	204
+
+query TII
+SELECT scope_kind,context_issue_number,status_code FROM engineering.detail.issue_assignment_capabilities(repository=>'issue-fixture/alpha',issue_number=>1,assignee_login=>'unavailable');
+----
+issue	1	404
+
+query I
+SELECT label_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',label_collection=>true);
+----
+2
+
+query I
+SELECT label_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',label_issue_number=>1);
+----
+2
+
+query TT
+SELECT label_id,name FROM engineering.detail.repository_labels(repository=>'issue-fixture/alpha',label=>'bug');
+----
+L11	bug
+
+query TT
+SELECT label_id,name FROM engineering.detail.repository_labels(repository=>'issue-fixture/alpha',milestone_number=>1);
+----
+L11	bug
+
+# Independent repository facts align without fanout.
+query TIII
+SELECT repository_name,issue_event_count,milestone_count,repository_assignee_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha') GROUP BY repository_name;
+----
+issue-fixture/alpha	2	2	2
+
+query IIIII
+SELECT issue_count,issue_comment_count,issue_event_count,milestone_count,repository_assignee_count FROM engineering.semantic.github(repository=>'issue-fixture/empty');
+----
+0	0	0	0	0
+
+# Incompatible scopes must fail before any request.
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT issue_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1,issue_state=>'closed');
+----
+arguments do not apply
+
+statement error
+SELECT issue_event_count FROM engineering.semantic.github(repository=>'issue-fixture/alpha',issue_number=>1,issue_event_id=>301);
+----
+arguments do not apply
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

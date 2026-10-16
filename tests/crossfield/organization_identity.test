@@ -1,0 +1,194 @@
+# Canonical organizations, active/pending memberships and visibility observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT organization_count FROM engineering.semantic.github(organization_directory=>true);
+----
+3
+
+query I
+SELECT organization_count FROM engineering.semantic.github(organization_directory=>true,organization_since_id=>3101);
+----
+2
+
+query IT
+SELECT organization_id,organization_login FROM engineering.detail.organizations(authenticated_user=>true);
+----
+3101	membership-fixture-alpha
+
+query III
+SELECT organization_member_count,organization_membership_record_count,pending_organization_membership_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha');
+----
+3	3	0
+
+query III
+SELECT organization_member_count,organization_membership_record_count,pending_organization_membership_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha',organization_public_members=>true);
+----
+1	1	0
+
+query III
+SELECT organization_member_count,organization_membership_record_count,pending_organization_membership_count FROM engineering.semantic.github(user=>'membership-alice');
+----
+1	1	0
+
+query I
+SELECT organization_membership_record_count FROM engineering.semantic.github(user=>'membership-bob');
+----
+0
+
+# Summary member-list routes establish active membership, but not object-only roles.
+query ITTT
+SELECT user_id,membership_state,membership_role,direct_membership FROM engineering.detail.organization_memberships(organization=>'membership-fixture-alpha') ORDER BY user_id;
+----
+903	active	NULL	NULL
+3001	active	NULL	NULL
+3002	active	NULL	NULL
+
+query III
+SELECT organization_member_count,organization_membership_record_count,pending_organization_membership_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha',membership_user=>'membership-carol');
+----
+0	1	1
+
+# Nullable observed body.user does not erase independently resolved member identity.
+statement ok
+CREATE TEMP TABLE organization_identity_detail_1 AS SELECT * FROM engineering.detail.organization_memberships(organization=>'membership-fixture-alpha',membership_user=>'membership-bob');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IITTTTTI
+SELECT organization_id,user_id,member_login,membership_state,membership_role,direct_membership,enterprise_team_slugs[2],observed_member_id FROM organization_identity_detail_1;
+----
+3101	3002	membership-bob	active	admin	false	ent:reviewers	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT organization_member_count,organization_membership_record_count,pending_organization_membership_count FROM engineering.semantic.github(authenticated_user=>true);
+----
+1	2	1
+
+query TIII
+SELECT organization_memberships_membership_state,organization_member_count,organization_membership_record_count,pending_organization_membership_count FROM engineering.semantic.github(authenticated_user=>true) GROUP BY organization_memberships_membership_state ORDER BY organization_memberships_membership_state;
+----
+active	1	1	0
+pending	0	1	1
+
+query IIT
+SELECT organization_id,user_id,membership_state FROM engineering.detail.organization_memberships(authenticated_user=>true,organization=>'membership-fixture-beta');
+----
+3102	903	pending
+
+query III
+SELECT organization_member_count,organization_membership_record_count,pending_organization_membership_count FROM engineering.semantic.github(authenticated_user=>true,organization_membership_state=>'pending');
+----
+0	1	1
+
+query I
+SELECT organization_membership_record_count FROM engineering.semantic.github(authenticated_user=>true,organization=>'membership-fixture-beta',organization_membership_state=>'active');
+----
+0
+
+query I
+SELECT organization_member_count FROM engineering.semantic.github(organization=>'membership-fixture-empty');
+----
+0
+
+query III
+SELECT organization_membership_check_count,confirmed_organization_membership_check_count,unconfirmed_organization_membership_check_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha',membership_user=>'membership-alice',organization_membership_check=>'public');
+----
+1	1	0
+
+query III
+SELECT organization_membership_check_count,confirmed_organization_membership_check_count,unconfirmed_organization_membership_check_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha',membership_user=>'membership-bob',organization_membership_check=>'visible');
+----
+1	1	0
+
+# Bob is a private active member: public 404 is unconfirmed visibility, not absence.
+query III
+SELECT organization_membership_check_count,confirmed_organization_membership_check_count,unconfirmed_organization_membership_check_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha',membership_user=>'membership-bob',organization_membership_check=>'public');
+----
+1	0	1
+
+# The visible endpoint redirects to public membership and retains that 404 outcome.
+query TI
+SELECT check_kind,status_code FROM engineering.detail.organization_membership_checks(organization=>'membership-fixture-alpha',membership_user=>'membership-carol',organization_membership_check=>'visible');
+----
+visible	404
+
+statement error
+SELECT organization_membership_record_count FROM engineering.semantic.github(authenticated_user=>true,organization=>'membership-fixture-empty');
+----
+404
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT organization_count FROM engineering.semantic.github(organization_directory=>true,organization=>'membership-fixture-alpha');
+----
+arguments do not apply
+
+statement error
+SELECT organization_membership_record_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha',organization_public_members=>true,membership_user=>'membership-alice');
+----
+arguments do not apply
+
+statement error
+SELECT organization_membership_record_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha',membership_user=>'membership-alice',authenticated_user=>true);
+----
+arguments do not apply
+
+statement error
+SELECT organization_membership_record_count FROM engineering.semantic.github(authenticated_user=>true,organization_membership_state=>'disabled');
+----
+organization_membership_state
+
+statement error
+SELECT organization_membership_check_count FROM engineering.semantic.github(organization=>'membership-fixture-alpha',membership_user=>'membership-alice',organization_membership_check=>'all');
+----
+organization_membership_check
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

@@ -10,7 +10,19 @@ import re
 from pathlib import Path
 
 SOURCE = Path(__file__).resolve().parents[2] / "generation/examples/research"
-STATEMENTS = ("monthly_pr_activity", "activity_compare", "pr_focus", "activity_evidence", "user_cohort")
+STATEMENTS = (
+    "monthly_pr_activity",
+    "activity_compare",
+    "pr_focus",
+    "activity_evidence",
+    "user_cohort",
+    "repository_activity",
+    "member_organizations",
+    "team_repositories",
+    "release_inventory",
+    "ci_outcomes",
+    "check_results",
+)
 SQL_REFERENCE = re.compile(r"\{\{sql:([a-z_]+)\}\}")
 SETUP = "SET TimeZone='UTC';\nSET crossfield_mode='semantic';"
 
@@ -70,7 +82,8 @@ ANALYSIS_EXAMPLES = (
     (
         "first_review",
         "First-review latency gives each reviewed PR one observation before the mean, median and P90. "
-        "Pending or untimestamped records do not qualify; unreviewed PRs are absent, not zero-hour responses.",
+        "Pending or untimestamped records do not qualify; "
+        "unreviewed PRs are absent, not zero-hour responses.",
     ),
     (
         "latest_review",

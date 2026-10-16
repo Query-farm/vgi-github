@@ -1,0 +1,5876 @@
+{
+  "entities": [
+    {
+      "name": "dependabot_repository_source",
+      "description": "dependabot/list-alerts-for-repo pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "dependabot_state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional comma-separated Dependabot alert states; omission preserves the complete visible state population.",
+          "example": "open,fixed",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_severity",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional comma-separated Dependabot alert severities.",
+          "example": "high,critical",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_ecosystem",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional comma-separated Dependabot dependency ecosystems.",
+          "example": "npm,pip",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_package",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional comma-separated dependency package names; these are not GitHub Packages registry identities.",
+          "example": "example-library",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_scope",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional vulnerable dependency execution scope.",
+          "example": "runtime",
+          "min_length": 1,
+          "enum": [
+            "runtime",
+            "development"
+          ],
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "alert_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "dependency_ecosystem",
+          "path": [
+            "dependency",
+            "package",
+            "ecosystem"
+          ]
+        },
+        {
+          "name": "dependency_name",
+          "path": [
+            "dependency",
+            "package",
+            "name"
+          ]
+        },
+        {
+          "name": "manifest_path",
+          "path": [
+            "dependency",
+            "manifest_path"
+          ]
+        },
+        {
+          "name": "dependency_scope",
+          "path": [
+            "dependency",
+            "scope"
+          ]
+        },
+        {
+          "name": "dependency_relationship",
+          "path": [
+            "dependency",
+            "relationship"
+          ]
+        },
+        {
+          "name": "ghsa_id",
+          "path": [
+            "security_advisory",
+            "ghsa_id"
+          ]
+        },
+        {
+          "name": "cve_id",
+          "path": [
+            "security_advisory",
+            "cve_id"
+          ]
+        },
+        {
+          "name": "advisory_summary",
+          "path": [
+            "security_advisory",
+            "summary"
+          ]
+        },
+        {
+          "name": "advisory_classification",
+          "path": [
+            "security_advisory",
+            "classification"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "security_vulnerability",
+            "severity"
+          ]
+        },
+        {
+          "name": "vulnerable_version_range",
+          "path": [
+            "security_vulnerability",
+            "vulnerable_version_range"
+          ]
+        },
+        {
+          "name": "first_patched_version",
+          "path": [
+            "security_vulnerability",
+            "first_patched_version",
+            "identifier"
+          ]
+        },
+        {
+          "name": "cvss_v3_score",
+          "path": [
+            "security_advisory",
+            "cvss_severities",
+            "cvss_v3",
+            "score"
+          ]
+        },
+        {
+          "name": "cvss_v4_score",
+          "path": [
+            "security_advisory",
+            "cvss_severities",
+            "cvss_v4",
+            "score"
+          ]
+        },
+        {
+          "name": "epss_percentage",
+          "path": [
+            "security_advisory",
+            "epss",
+            "percentage"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "fixed_at",
+          "path": [
+            "fixed_at"
+          ]
+        },
+        {
+          "name": "dismissed_at",
+          "path": [
+            "dismissed_at"
+          ]
+        },
+        {
+          "name": "auto_dismissed_at",
+          "path": [
+            "auto_dismissed_at"
+          ]
+        },
+        {
+          "name": "dismissed_reason",
+          "path": [
+            "dismissed_reason"
+          ]
+        },
+        {
+          "name": "dismissed_comment",
+          "path": [
+            "dismissed_comment"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "assignees",
+          "path": [
+            "assignees"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "type": true
+          }
+        },
+        {
+          "name": "dismissal_request",
+          "path": [
+            "dismissal_request"
+          ],
+          "selection": {
+            "id": true,
+            "status": true,
+            "requester": {
+              "id": true,
+              "login": true
+            },
+            "created_at": true,
+            "url": true
+          }
+        },
+        {
+          "name": "dismisser_id",
+          "path": [
+            "dismissed_by",
+            "id"
+          ]
+        },
+        {
+          "name": "dismisser_login",
+          "path": [
+            "dismissed_by",
+            "login"
+          ]
+        },
+        {
+          "name": "dismisser_type",
+          "path": [
+            "dismissed_by",
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "alert_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "dependabot/list-alerts-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "dependabot_state"
+          },
+          "severity": {
+            "argument": "dependabot_severity"
+          },
+          "ecosystem": {
+            "argument": "dependabot_ecosystem"
+          },
+          "package": {
+            "argument": "dependabot_package"
+          },
+          "scope": {
+            "argument": "dependabot_scope"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "dependabot_organization_source",
+      "description": "dependabot/list-alerts-for-org pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "dependabot_state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional comma-separated Dependabot alert states; omission preserves the complete visible state population.",
+          "example": "open,fixed",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_severity",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional comma-separated Dependabot alert severities.",
+          "example": "high,critical",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_ecosystem",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional comma-separated Dependabot dependency ecosystems.",
+          "example": "npm,pip",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_package",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional comma-separated dependency package names; these are not GitHub Packages registry identities.",
+          "example": "example-library",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_scope",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional vulnerable dependency execution scope.",
+          "example": "runtime",
+          "min_length": 1,
+          "enum": [
+            "runtime",
+            "development"
+          ],
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "alert_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "dependency_ecosystem",
+          "path": [
+            "dependency",
+            "package",
+            "ecosystem"
+          ]
+        },
+        {
+          "name": "dependency_name",
+          "path": [
+            "dependency",
+            "package",
+            "name"
+          ]
+        },
+        {
+          "name": "manifest_path",
+          "path": [
+            "dependency",
+            "manifest_path"
+          ]
+        },
+        {
+          "name": "dependency_scope",
+          "path": [
+            "dependency",
+            "scope"
+          ]
+        },
+        {
+          "name": "dependency_relationship",
+          "path": [
+            "dependency",
+            "relationship"
+          ]
+        },
+        {
+          "name": "ghsa_id",
+          "path": [
+            "security_advisory",
+            "ghsa_id"
+          ]
+        },
+        {
+          "name": "cve_id",
+          "path": [
+            "security_advisory",
+            "cve_id"
+          ]
+        },
+        {
+          "name": "advisory_summary",
+          "path": [
+            "security_advisory",
+            "summary"
+          ]
+        },
+        {
+          "name": "advisory_classification",
+          "path": [
+            "security_advisory",
+            "classification"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "security_vulnerability",
+            "severity"
+          ]
+        },
+        {
+          "name": "vulnerable_version_range",
+          "path": [
+            "security_vulnerability",
+            "vulnerable_version_range"
+          ]
+        },
+        {
+          "name": "first_patched_version",
+          "path": [
+            "security_vulnerability",
+            "first_patched_version",
+            "identifier"
+          ]
+        },
+        {
+          "name": "cvss_v3_score",
+          "path": [
+            "security_advisory",
+            "cvss_severities",
+            "cvss_v3",
+            "score"
+          ]
+        },
+        {
+          "name": "cvss_v4_score",
+          "path": [
+            "security_advisory",
+            "cvss_severities",
+            "cvss_v4",
+            "score"
+          ]
+        },
+        {
+          "name": "epss_percentage",
+          "path": [
+            "security_advisory",
+            "epss",
+            "percentage"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "fixed_at",
+          "path": [
+            "fixed_at"
+          ]
+        },
+        {
+          "name": "dismissed_at",
+          "path": [
+            "dismissed_at"
+          ]
+        },
+        {
+          "name": "auto_dismissed_at",
+          "path": [
+            "auto_dismissed_at"
+          ]
+        },
+        {
+          "name": "dismissed_reason",
+          "path": [
+            "dismissed_reason"
+          ]
+        },
+        {
+          "name": "dismissed_comment",
+          "path": [
+            "dismissed_comment"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "assignees",
+          "path": [
+            "assignees"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "type": true
+          }
+        },
+        {
+          "name": "dismissal_request",
+          "path": [
+            "dismissal_request"
+          ],
+          "selection": {
+            "id": true,
+            "status": true,
+            "requester": {
+              "id": true,
+              "login": true
+            },
+            "created_at": true,
+            "url": true
+          }
+        },
+        {
+          "name": "dismisser_id",
+          "path": [
+            "dismissed_by",
+            "id"
+          ]
+        },
+        {
+          "name": "dismisser_login",
+          "path": [
+            "dismissed_by",
+            "login"
+          ]
+        },
+        {
+          "name": "dismisser_type",
+          "path": [
+            "dismissed_by",
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "alert_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "dependabot/list-alerts-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "dependabot_state"
+          },
+          "severity": {
+            "argument": "dependabot_severity"
+          },
+          "ecosystem": {
+            "argument": "dependabot_ecosystem"
+          },
+          "package": {
+            "argument": "dependabot_package"
+          },
+          "scope": {
+            "argument": "dependabot_scope"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "dependabot_lookup_source",
+      "description": "dependabot/get-alert pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "dependabot_alert_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Repository-local Dependabot alert number; identity also includes the stable repository ID.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "alert_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "dependency_ecosystem",
+          "path": [
+            "dependency",
+            "package",
+            "ecosystem"
+          ]
+        },
+        {
+          "name": "dependency_name",
+          "path": [
+            "dependency",
+            "package",
+            "name"
+          ]
+        },
+        {
+          "name": "manifest_path",
+          "path": [
+            "dependency",
+            "manifest_path"
+          ]
+        },
+        {
+          "name": "dependency_scope",
+          "path": [
+            "dependency",
+            "scope"
+          ]
+        },
+        {
+          "name": "dependency_relationship",
+          "path": [
+            "dependency",
+            "relationship"
+          ]
+        },
+        {
+          "name": "ghsa_id",
+          "path": [
+            "security_advisory",
+            "ghsa_id"
+          ]
+        },
+        {
+          "name": "cve_id",
+          "path": [
+            "security_advisory",
+            "cve_id"
+          ]
+        },
+        {
+          "name": "advisory_summary",
+          "path": [
+            "security_advisory",
+            "summary"
+          ]
+        },
+        {
+          "name": "advisory_classification",
+          "path": [
+            "security_advisory",
+            "classification"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "security_vulnerability",
+            "severity"
+          ]
+        },
+        {
+          "name": "vulnerable_version_range",
+          "path": [
+            "security_vulnerability",
+            "vulnerable_version_range"
+          ]
+        },
+        {
+          "name": "first_patched_version",
+          "path": [
+            "security_vulnerability",
+            "first_patched_version",
+            "identifier"
+          ]
+        },
+        {
+          "name": "cvss_v3_score",
+          "path": [
+            "security_advisory",
+            "cvss_severities",
+            "cvss_v3",
+            "score"
+          ]
+        },
+        {
+          "name": "cvss_v4_score",
+          "path": [
+            "security_advisory",
+            "cvss_severities",
+            "cvss_v4",
+            "score"
+          ]
+        },
+        {
+          "name": "epss_percentage",
+          "path": [
+            "security_advisory",
+            "epss",
+            "percentage"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "fixed_at",
+          "path": [
+            "fixed_at"
+          ]
+        },
+        {
+          "name": "dismissed_at",
+          "path": [
+            "dismissed_at"
+          ]
+        },
+        {
+          "name": "auto_dismissed_at",
+          "path": [
+            "auto_dismissed_at"
+          ]
+        },
+        {
+          "name": "dismissed_reason",
+          "path": [
+            "dismissed_reason"
+          ]
+        },
+        {
+          "name": "dismissed_comment",
+          "path": [
+            "dismissed_comment"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "assignees",
+          "path": [
+            "assignees"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "type": true
+          }
+        },
+        {
+          "name": "dismissal_request",
+          "path": [
+            "dismissal_request"
+          ],
+          "selection": {
+            "id": true,
+            "status": true,
+            "requester": {
+              "id": true,
+              "login": true
+            },
+            "created_at": true,
+            "url": true
+          }
+        },
+        {
+          "name": "dismisser_id",
+          "path": [
+            "dismissed_by",
+            "id"
+          ]
+        },
+        {
+          "name": "dismisser_login",
+          "path": [
+            "dismissed_by",
+            "login"
+          ]
+        },
+        {
+          "name": "dismisser_type",
+          "path": [
+            "dismissed_by",
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "alert_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "dependabot/get-alert",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "alert_number": {
+            "argument": "dependabot_alert_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "alert_number",
+            "argument": "dependabot_alert_number",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "advisory_global_source",
+      "description": "security-advisories/list-global-advisories pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": true
+        },
+        {
+          "name": "advisory_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit global advisory population, including malware and unreviewed records when selected.",
+          "example": "reviewed",
+          "min_length": 1,
+          "enum": [
+            "reviewed",
+            "unreviewed",
+            "malware"
+          ]
+        },
+        {
+          "name": "advisory_population",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "absent_state",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_closed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_submission_accepted",
+          "type": "BOOLEAN",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_author_id",
+          "type": "BIGINT",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_author_login",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_author_type",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_publisher_id",
+          "type": "BIGINT",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_publisher_login",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_publisher_type",
+          "type": "VARCHAR",
+          "nullable": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "ghsa_id",
+          "path": [
+            "ghsa_id"
+          ]
+        },
+        {
+          "name": "cve_id",
+          "path": [
+            "cve_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "summary",
+          "path": [
+            "summary"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "severity"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ]
+        },
+        {
+          "name": "withdrawn_at",
+          "path": [
+            "withdrawn_at"
+          ]
+        },
+        {
+          "name": "identifiers",
+          "path": [
+            "identifiers"
+          ],
+          "selection": {
+            "type": true,
+            "value": true
+          }
+        },
+        {
+          "name": "cwes",
+          "path": [
+            "cwes"
+          ],
+          "selection": {
+            "cwe_id": true,
+            "name": true
+          }
+        },
+        {
+          "name": "cvss_v3_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v3",
+            "score"
+          ]
+        },
+        {
+          "name": "cvss_v4_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v4",
+            "score"
+          ]
+        },
+        {
+          "name": "advisory_population",
+          "source_argument": "advisory_population"
+        },
+        {
+          "name": "advisory_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "state",
+          "source_argument": "absent_state"
+        },
+        {
+          "name": "created_at",
+          "source_argument": "absent_created_at"
+        },
+        {
+          "name": "closed_at",
+          "source_argument": "absent_closed_at"
+        },
+        {
+          "name": "github_reviewed_at",
+          "path": [
+            "github_reviewed_at"
+          ]
+        },
+        {
+          "name": "nvd_published_at",
+          "path": [
+            "nvd_published_at"
+          ]
+        },
+        {
+          "name": "source_code_location",
+          "path": [
+            "source_code_location"
+          ]
+        },
+        {
+          "name": "repository_advisory_url",
+          "path": [
+            "repository_advisory_url"
+          ]
+        },
+        {
+          "name": "epss_percentage",
+          "path": [
+            "epss",
+            "percentage"
+          ]
+        },
+        {
+          "name": "submission_accepted",
+          "source_argument": "absent_submission_accepted"
+        },
+        {
+          "name": "advisory_author_id",
+          "source_argument": "absent_advisory_author_id"
+        },
+        {
+          "name": "advisory_author_login",
+          "source_argument": "absent_advisory_author_login"
+        },
+        {
+          "name": "advisory_author_type",
+          "source_argument": "absent_advisory_author_type"
+        },
+        {
+          "name": "advisory_publisher_id",
+          "source_argument": "absent_advisory_publisher_id"
+        },
+        {
+          "name": "advisory_publisher_login",
+          "source_argument": "absent_advisory_publisher_login"
+        },
+        {
+          "name": "advisory_publisher_type",
+          "source_argument": "absent_advisory_publisher_type"
+        },
+        {
+          "name": "vulnerabilities",
+          "path": [
+            "vulnerabilities"
+          ],
+          "selection": {
+            "package": {
+              "ecosystem": true,
+              "name": true
+            },
+            "vulnerable_version_range": true,
+            "first_patched_version": true,
+            "vulnerable_functions": true
+          }
+        },
+        {
+          "name": "credits",
+          "path": [
+            "credits"
+          ],
+          "selection": {
+            "user": {
+              "id": true,
+              "login": true
+            },
+            "type": true
+          }
+        }
+      ],
+      "grain": [
+        "ghsa_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "security-advisories/list-global-advisories",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "type": {
+            "argument": "advisory_type"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "advisory_global_lookup_source",
+      "description": "security-advisories/get-global-advisory pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": true
+        },
+        {
+          "name": "global_advisory_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "GitHub Security Advisory identifier for global database lookup; the canonical output identity remains ghsa_id.",
+          "example": "GHSA-xxxx-yyyy-zzzz",
+          "min_length": 1
+        },
+        {
+          "name": "advisory_population",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "absent_state",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_closed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_submission_accepted",
+          "type": "BOOLEAN",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_author_id",
+          "type": "BIGINT",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_author_login",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_author_type",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_publisher_id",
+          "type": "BIGINT",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_publisher_login",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_advisory_publisher_type",
+          "type": "VARCHAR",
+          "nullable": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "ghsa_id",
+          "path": [
+            "ghsa_id"
+          ]
+        },
+        {
+          "name": "cve_id",
+          "path": [
+            "cve_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "summary",
+          "path": [
+            "summary"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "severity"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ]
+        },
+        {
+          "name": "withdrawn_at",
+          "path": [
+            "withdrawn_at"
+          ]
+        },
+        {
+          "name": "identifiers",
+          "path": [
+            "identifiers"
+          ],
+          "selection": {
+            "type": true,
+            "value": true
+          }
+        },
+        {
+          "name": "cwes",
+          "path": [
+            "cwes"
+          ],
+          "selection": {
+            "cwe_id": true,
+            "name": true
+          }
+        },
+        {
+          "name": "cvss_v3_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v3",
+            "score"
+          ]
+        },
+        {
+          "name": "cvss_v4_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v4",
+            "score"
+          ]
+        },
+        {
+          "name": "advisory_population",
+          "source_argument": "advisory_population"
+        },
+        {
+          "name": "advisory_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "state",
+          "source_argument": "absent_state"
+        },
+        {
+          "name": "created_at",
+          "source_argument": "absent_created_at"
+        },
+        {
+          "name": "closed_at",
+          "source_argument": "absent_closed_at"
+        },
+        {
+          "name": "github_reviewed_at",
+          "path": [
+            "github_reviewed_at"
+          ]
+        },
+        {
+          "name": "nvd_published_at",
+          "path": [
+            "nvd_published_at"
+          ]
+        },
+        {
+          "name": "source_code_location",
+          "path": [
+            "source_code_location"
+          ]
+        },
+        {
+          "name": "repository_advisory_url",
+          "path": [
+            "repository_advisory_url"
+          ]
+        },
+        {
+          "name": "epss_percentage",
+          "path": [
+            "epss",
+            "percentage"
+          ]
+        },
+        {
+          "name": "submission_accepted",
+          "source_argument": "absent_submission_accepted"
+        },
+        {
+          "name": "advisory_author_id",
+          "source_argument": "absent_advisory_author_id"
+        },
+        {
+          "name": "advisory_author_login",
+          "source_argument": "absent_advisory_author_login"
+        },
+        {
+          "name": "advisory_author_type",
+          "source_argument": "absent_advisory_author_type"
+        },
+        {
+          "name": "advisory_publisher_id",
+          "source_argument": "absent_advisory_publisher_id"
+        },
+        {
+          "name": "advisory_publisher_login",
+          "source_argument": "absent_advisory_publisher_login"
+        },
+        {
+          "name": "advisory_publisher_type",
+          "source_argument": "absent_advisory_publisher_type"
+        },
+        {
+          "name": "vulnerabilities",
+          "path": [
+            "vulnerabilities"
+          ],
+          "selection": {
+            "package": {
+              "ecosystem": true,
+              "name": true
+            },
+            "vulnerable_version_range": true,
+            "first_patched_version": true,
+            "vulnerable_functions": true
+          }
+        },
+        {
+          "name": "credits",
+          "path": [
+            "credits"
+          ],
+          "selection": {
+            "user": {
+              "id": true,
+              "login": true
+            },
+            "type": true
+          }
+        }
+      ],
+      "grain": [
+        "ghsa_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "security-advisories/get-global-advisory",
+        "path_bindings": {
+          "ghsa_id": {
+            "argument": "global_advisory_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "ghsa_id",
+            "argument": "global_advisory_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "advisory_repository_source",
+      "description": "security-advisories/list-repository-advisories pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "advisory_state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional repository advisory state filter; omission retains all visible states.",
+          "example": "published",
+          "min_length": 1,
+          "enum": [
+            "triage",
+            "draft",
+            "published",
+            "closed"
+          ],
+          "default": null
+        },
+        {
+          "name": "advisory_population",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "absent_advisory_type",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_github_reviewed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_nvd_published_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_source_code_location",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_repository_advisory_url",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_epss_percentage",
+          "type": "DOUBLE",
+          "nullable": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "ghsa_id",
+          "path": [
+            "ghsa_id"
+          ]
+        },
+        {
+          "name": "cve_id",
+          "path": [
+            "cve_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "summary",
+          "path": [
+            "summary"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "severity"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ]
+        },
+        {
+          "name": "withdrawn_at",
+          "path": [
+            "withdrawn_at"
+          ]
+        },
+        {
+          "name": "identifiers",
+          "path": [
+            "identifiers"
+          ],
+          "selection": {
+            "type": true,
+            "value": true
+          }
+        },
+        {
+          "name": "cwes",
+          "path": [
+            "cwes"
+          ],
+          "selection": {
+            "cwe_id": true,
+            "name": true
+          }
+        },
+        {
+          "name": "cvss_v3_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v3",
+            "score"
+          ]
+        },
+        {
+          "name": "cvss_v4_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v4",
+            "score"
+          ]
+        },
+        {
+          "name": "advisory_population",
+          "source_argument": "advisory_population"
+        },
+        {
+          "name": "advisory_type",
+          "source_argument": "absent_advisory_type"
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "closed_at",
+          "path": [
+            "closed_at"
+          ]
+        },
+        {
+          "name": "github_reviewed_at",
+          "source_argument": "absent_github_reviewed_at"
+        },
+        {
+          "name": "nvd_published_at",
+          "source_argument": "absent_nvd_published_at"
+        },
+        {
+          "name": "source_code_location",
+          "source_argument": "absent_source_code_location"
+        },
+        {
+          "name": "repository_advisory_url",
+          "source_argument": "absent_repository_advisory_url"
+        },
+        {
+          "name": "epss_percentage",
+          "source_argument": "absent_epss_percentage"
+        },
+        {
+          "name": "submission_accepted",
+          "path": [
+            "submission",
+            "accepted"
+          ]
+        },
+        {
+          "name": "advisory_author_id",
+          "path": [
+            "author",
+            "id"
+          ]
+        },
+        {
+          "name": "advisory_author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        },
+        {
+          "name": "advisory_author_type",
+          "path": [
+            "author",
+            "type"
+          ]
+        },
+        {
+          "name": "advisory_publisher_id",
+          "path": [
+            "publisher",
+            "id"
+          ]
+        },
+        {
+          "name": "advisory_publisher_login",
+          "path": [
+            "publisher",
+            "login"
+          ]
+        },
+        {
+          "name": "advisory_publisher_type",
+          "path": [
+            "publisher",
+            "type"
+          ]
+        },
+        {
+          "name": "vulnerabilities",
+          "path": [
+            "vulnerabilities"
+          ],
+          "selection": {
+            "package": {
+              "ecosystem": true,
+              "name": true
+            },
+            "vulnerable_version_range": true,
+            "patched_versions": true,
+            "vulnerable_functions": true
+          }
+        },
+        {
+          "name": "credits",
+          "path": [
+            "credits_detailed"
+          ],
+          "selection": {
+            "user": {
+              "id": true,
+              "login": true
+            },
+            "type": true,
+            "state": true
+          }
+        }
+      ],
+      "grain": [
+        "ghsa_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "security-advisories/list-repository-advisories",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "advisory_state"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "advisory_repository_lookup_source",
+      "description": "security-advisories/get-repository-advisory pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "ghsa_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "GitHub Security Advisory identifier for a repository advisory lookup; requires repository.",
+          "example": "GHSA-xxxx-yyyy-zzzz",
+          "min_length": 1
+        },
+        {
+          "name": "advisory_population",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "absent_advisory_type",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_github_reviewed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_nvd_published_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_source_code_location",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_repository_advisory_url",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_epss_percentage",
+          "type": "DOUBLE",
+          "nullable": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "ghsa_id",
+          "path": [
+            "ghsa_id"
+          ]
+        },
+        {
+          "name": "cve_id",
+          "path": [
+            "cve_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "summary",
+          "path": [
+            "summary"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "severity"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ]
+        },
+        {
+          "name": "withdrawn_at",
+          "path": [
+            "withdrawn_at"
+          ]
+        },
+        {
+          "name": "identifiers",
+          "path": [
+            "identifiers"
+          ],
+          "selection": {
+            "type": true,
+            "value": true
+          }
+        },
+        {
+          "name": "cwes",
+          "path": [
+            "cwes"
+          ],
+          "selection": {
+            "cwe_id": true,
+            "name": true
+          }
+        },
+        {
+          "name": "cvss_v3_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v3",
+            "score"
+          ]
+        },
+        {
+          "name": "cvss_v4_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v4",
+            "score"
+          ]
+        },
+        {
+          "name": "advisory_population",
+          "source_argument": "advisory_population"
+        },
+        {
+          "name": "advisory_type",
+          "source_argument": "absent_advisory_type"
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "closed_at",
+          "path": [
+            "closed_at"
+          ]
+        },
+        {
+          "name": "github_reviewed_at",
+          "source_argument": "absent_github_reviewed_at"
+        },
+        {
+          "name": "nvd_published_at",
+          "source_argument": "absent_nvd_published_at"
+        },
+        {
+          "name": "source_code_location",
+          "source_argument": "absent_source_code_location"
+        },
+        {
+          "name": "repository_advisory_url",
+          "source_argument": "absent_repository_advisory_url"
+        },
+        {
+          "name": "epss_percentage",
+          "source_argument": "absent_epss_percentage"
+        },
+        {
+          "name": "submission_accepted",
+          "path": [
+            "submission",
+            "accepted"
+          ]
+        },
+        {
+          "name": "advisory_author_id",
+          "path": [
+            "author",
+            "id"
+          ]
+        },
+        {
+          "name": "advisory_author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        },
+        {
+          "name": "advisory_author_type",
+          "path": [
+            "author",
+            "type"
+          ]
+        },
+        {
+          "name": "advisory_publisher_id",
+          "path": [
+            "publisher",
+            "id"
+          ]
+        },
+        {
+          "name": "advisory_publisher_login",
+          "path": [
+            "publisher",
+            "login"
+          ]
+        },
+        {
+          "name": "advisory_publisher_type",
+          "path": [
+            "publisher",
+            "type"
+          ]
+        },
+        {
+          "name": "vulnerabilities",
+          "path": [
+            "vulnerabilities"
+          ],
+          "selection": {
+            "package": {
+              "ecosystem": true,
+              "name": true
+            },
+            "vulnerable_version_range": true,
+            "patched_versions": true,
+            "vulnerable_functions": true
+          }
+        },
+        {
+          "name": "credits",
+          "path": [
+            "credits_detailed"
+          ],
+          "selection": {
+            "user": {
+              "id": true,
+              "login": true
+            },
+            "type": true,
+            "state": true
+          }
+        }
+      ],
+      "grain": [
+        "ghsa_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "security-advisories/get-repository-advisory",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "ghsa_id": {
+            "argument": "ghsa_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "ghsa_id",
+            "argument": "ghsa_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "advisory_organization_source",
+      "description": "security-advisories/list-org-repository-advisories pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": true
+        },
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "advisory_state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional repository advisory state filter; omission retains all visible states.",
+          "example": "published",
+          "min_length": 1,
+          "enum": [
+            "triage",
+            "draft",
+            "published",
+            "closed"
+          ],
+          "default": null
+        },
+        {
+          "name": "advisory_population",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "absent_advisory_type",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_github_reviewed_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_nvd_published_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true
+        },
+        {
+          "name": "absent_source_code_location",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_repository_advisory_url",
+          "type": "VARCHAR",
+          "nullable": true
+        },
+        {
+          "name": "absent_epss_percentage",
+          "type": "DOUBLE",
+          "nullable": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "ghsa_id",
+          "path": [
+            "ghsa_id"
+          ]
+        },
+        {
+          "name": "cve_id",
+          "path": [
+            "cve_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "summary",
+          "path": [
+            "summary"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "severity"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ]
+        },
+        {
+          "name": "withdrawn_at",
+          "path": [
+            "withdrawn_at"
+          ]
+        },
+        {
+          "name": "identifiers",
+          "path": [
+            "identifiers"
+          ],
+          "selection": {
+            "type": true,
+            "value": true
+          }
+        },
+        {
+          "name": "cwes",
+          "path": [
+            "cwes"
+          ],
+          "selection": {
+            "cwe_id": true,
+            "name": true
+          }
+        },
+        {
+          "name": "cvss_v3_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v3",
+            "score"
+          ]
+        },
+        {
+          "name": "cvss_v4_score",
+          "path": [
+            "cvss_severities",
+            "cvss_v4",
+            "score"
+          ]
+        },
+        {
+          "name": "advisory_population",
+          "source_argument": "advisory_population"
+        },
+        {
+          "name": "advisory_type",
+          "source_argument": "absent_advisory_type"
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "closed_at",
+          "path": [
+            "closed_at"
+          ]
+        },
+        {
+          "name": "github_reviewed_at",
+          "source_argument": "absent_github_reviewed_at"
+        },
+        {
+          "name": "nvd_published_at",
+          "source_argument": "absent_nvd_published_at"
+        },
+        {
+          "name": "source_code_location",
+          "source_argument": "absent_source_code_location"
+        },
+        {
+          "name": "repository_advisory_url",
+          "source_argument": "absent_repository_advisory_url"
+        },
+        {
+          "name": "epss_percentage",
+          "source_argument": "absent_epss_percentage"
+        },
+        {
+          "name": "submission_accepted",
+          "path": [
+            "submission",
+            "accepted"
+          ]
+        },
+        {
+          "name": "advisory_author_id",
+          "path": [
+            "author",
+            "id"
+          ]
+        },
+        {
+          "name": "advisory_author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        },
+        {
+          "name": "advisory_author_type",
+          "path": [
+            "author",
+            "type"
+          ]
+        },
+        {
+          "name": "advisory_publisher_id",
+          "path": [
+            "publisher",
+            "id"
+          ]
+        },
+        {
+          "name": "advisory_publisher_login",
+          "path": [
+            "publisher",
+            "login"
+          ]
+        },
+        {
+          "name": "advisory_publisher_type",
+          "path": [
+            "publisher",
+            "type"
+          ]
+        },
+        {
+          "name": "vulnerabilities",
+          "path": [
+            "vulnerabilities"
+          ],
+          "selection": {
+            "package": {
+              "ecosystem": true,
+              "name": true
+            },
+            "vulnerable_version_range": true,
+            "patched_versions": true,
+            "vulnerable_functions": true
+          }
+        },
+        {
+          "name": "credits",
+          "path": [
+            "credits_detailed"
+          ],
+          "selection": {
+            "user": {
+              "id": true,
+              "login": true
+            },
+            "type": true,
+            "state": true
+          }
+        }
+      ],
+      "grain": [
+        "ghsa_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "security-advisories/list-org-repository-advisories",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "advisory_state"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "dependency_changes_source",
+      "description": "dependency-graph/diff-range pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "dependency_compare",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Dependency comparison lookup token in base...head form. Named refs can move; this is a comparison observation rather than a commit identity.",
+          "example": "main...topic",
+          "min_length": 1
+        },
+        {
+          "name": "dependency_manifest",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional exact dependency manifest path relative to the repository root.",
+          "example": "package-lock.json",
+          "min_length": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "comparison",
+          "source_argument": "dependency_compare"
+        },
+        {
+          "name": "change_type",
+          "path": [
+            "change_type"
+          ]
+        },
+        {
+          "name": "manifest",
+          "path": [
+            "manifest"
+          ]
+        },
+        {
+          "name": "ecosystem",
+          "path": [
+            "ecosystem"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "version",
+          "path": [
+            "version"
+          ]
+        },
+        {
+          "name": "package_url",
+          "path": [
+            "package_url"
+          ]
+        },
+        {
+          "name": "license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "source_repository_url",
+          "path": [
+            "source_repository_url"
+          ]
+        },
+        {
+          "name": "scope",
+          "path": [
+            "scope"
+          ]
+        },
+        {
+          "name": "vulnerabilities",
+          "path": [
+            "vulnerabilities"
+          ],
+          "selection": {
+            "severity": true,
+            "advisory_ghsa_id": true,
+            "advisory_summary": true,
+            "advisory_url": true
+          }
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "comparison",
+        "manifest",
+        "ecosystem",
+        "name",
+        "version",
+        "scope",
+        "change_type"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "dependency-graph/diff-range",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "basehead": {
+            "argument": "dependency_compare"
+          }
+        },
+        "query_bindings": {
+          "name": {
+            "argument": "dependency_manifest"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "dependency_sbom_source",
+      "description": "dependency-graph/export-sbom pinned schema-derived analytical source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "document_namespace",
+          "path": [
+            "documentNamespace"
+          ]
+        },
+        {
+          "name": "spdx_id",
+          "path": [
+            "SPDXID"
+          ]
+        },
+        {
+          "name": "spdx_version",
+          "path": [
+            "spdxVersion"
+          ]
+        },
+        {
+          "name": "document_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "data_license",
+          "path": [
+            "dataLicense"
+          ]
+        },
+        {
+          "name": "comment",
+          "path": [
+            "comment"
+          ]
+        },
+        {
+          "name": "created_text",
+          "path": [
+            "creationInfo",
+            "created"
+          ]
+        },
+        {
+          "name": "creators",
+          "path": [
+            "creationInfo",
+            "creators"
+          ]
+        },
+        {
+          "name": "packages",
+          "path": [
+            "packages"
+          ],
+          "selection": {
+            "SPDXID": true,
+            "name": true,
+            "versionInfo": true,
+            "downloadLocation": true,
+            "filesAnalyzed": true,
+            "licenseConcluded": true,
+            "licenseDeclared": true,
+            "supplier": true,
+            "copyrightText": true,
+            "externalRefs": true
+          }
+        },
+        {
+          "name": "relationships",
+          "path": [
+            "relationships"
+          ],
+          "selection": {
+            "relationshipType": true,
+            "spdxElementId": true,
+            "relatedSpdxElement": true
+          }
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "document_namespace"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "dependency-graph/export-sbom",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "sbom"
+        ],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "dependabot_alerts",
+      "description": "Dependabot vulnerability alerts at repository ID plus alert number, unified across repository, organization and direct lookup. Dismisser and assignees retain distinct roles. Package ecosystem/name describe a dependency, not a GitHub Packages registry entity. All visible states are retained when filters are omitted; fixed and dismissed are distinct outcomes. Direct repository context is analytical; advisory and dismisser navigation do not create additional actor/repository analytical paths.",
+      "grain": [
+        "repository_id",
+        "alert_number"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "alert_number",
+          "state",
+          "dependency_ecosystem",
+          "dependency_name",
+          "manifest_path",
+          "dependency_scope",
+          "dependency_relationship",
+          "ghsa_id",
+          "cve_id",
+          "advisory_summary",
+          "advisory_classification",
+          "severity",
+          "vulnerable_version_range",
+          "first_patched_version",
+          "cvss_v3_score",
+          "cvss_v4_score",
+          "epss_percentage",
+          "created_at",
+          "updated_at",
+          "fixed_at",
+          "dismissed_at",
+          "auto_dismissed_at",
+          "dismissed_reason",
+          "dismissed_comment",
+          "url",
+          "html_url",
+          "assignees",
+          "dismissal_request",
+          "dismisser_id",
+          "dismisser_login",
+          "dismisser_type",
+          "dependabot_created_day"
+        ],
+        "dimensions": [
+          "repository",
+          "alert_number",
+          "state",
+          "severity",
+          "dependency_ecosystem",
+          "dependency_name",
+          "manifest_path",
+          "dependency_scope",
+          "dependency_relationship",
+          "ghsa_id",
+          "dismisser_id",
+          "dismisser_login",
+          "created_at",
+          "fixed_at",
+          "dependabot_created_day"
+        ],
+        "metrics": [
+          {
+            "name": "dependabot_alert_count",
+            "kind": "count",
+            "comment": "Selected alerts, not advisory or dependency occurrences."
+          },
+          {
+            "name": "open_dependabot_alert_count",
+            "kind": "count",
+            "comment": "Alerts explicitly reported open.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "open"
+            }
+          },
+          {
+            "name": "fixed_dependabot_alert_count",
+            "kind": "count",
+            "comment": "Alerts explicitly reported fixed.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "fixed"
+            }
+          },
+          {
+            "name": "dismissed_dependabot_alert_count",
+            "kind": "count",
+            "comment": "Manual and automatic dismissals, distinct from fixed alerts.",
+            "where": {
+              "field": "state",
+              "op": "in",
+              "values": [
+                "dismissed",
+                "auto_dismissed"
+              ]
+            }
+          },
+          {
+            "name": "critical_dependabot_alert_count",
+            "kind": "count",
+            "comment": "Alerts with critical vulnerability severity.",
+            "where": {
+              "field": "severity",
+              "op": "eq",
+              "value": "critical"
+            }
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "dependabot_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC date from the returned created_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "dependabot_alerts_repository",
+          "alert_number": "dependabot_alerts_alert_number",
+          "state": "dependabot_alerts_state",
+          "severity": "dependabot_alerts_severity",
+          "dependency_ecosystem": "dependabot_alerts_dependency_ecosystem",
+          "dependency_name": "dependabot_alerts_dependency_name",
+          "manifest_path": "dependabot_alerts_manifest_path",
+          "dependency_scope": "dependabot_alerts_dependency_scope",
+          "dependency_relationship": "dependabot_alerts_dependency_relationship",
+          "ghsa_id": "dependabot_alerts_ghsa_id",
+          "dismisser_id": "dependabot_alerts_dismisser_id",
+          "dismisser_login": "dependabot_alerts_dismisser_login",
+          "created_at": "dependabot_alerts_created_at",
+          "fixed_at": "dependabot_alerts_fixed_at",
+          "dependabot_created_day": "dependabot_alerts_dependabot_created_day"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "dependabot_alert_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Repository-local Dependabot alert number; identity also includes the stable repository ID.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "dependabot_alert_number"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "alert_number",
+              "source_stage": "records",
+              "source_column": "alert_number"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "dependency_ecosystem",
+              "source_stage": "records",
+              "source_column": "dependency_ecosystem"
+            },
+            {
+              "name": "dependency_name",
+              "source_stage": "records",
+              "source_column": "dependency_name"
+            },
+            {
+              "name": "manifest_path",
+              "source_stage": "records",
+              "source_column": "manifest_path"
+            },
+            {
+              "name": "dependency_scope",
+              "source_stage": "records",
+              "source_column": "dependency_scope"
+            },
+            {
+              "name": "dependency_relationship",
+              "source_stage": "records",
+              "source_column": "dependency_relationship"
+            },
+            {
+              "name": "ghsa_id",
+              "source_stage": "records",
+              "source_column": "ghsa_id"
+            },
+            {
+              "name": "cve_id",
+              "source_stage": "records",
+              "source_column": "cve_id"
+            },
+            {
+              "name": "advisory_summary",
+              "source_stage": "records",
+              "source_column": "advisory_summary"
+            },
+            {
+              "name": "advisory_classification",
+              "source_stage": "records",
+              "source_column": "advisory_classification"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "vulnerable_version_range",
+              "source_stage": "records",
+              "source_column": "vulnerable_version_range"
+            },
+            {
+              "name": "first_patched_version",
+              "source_stage": "records",
+              "source_column": "first_patched_version"
+            },
+            {
+              "name": "cvss_v3_score",
+              "source_stage": "records",
+              "source_column": "cvss_v3_score"
+            },
+            {
+              "name": "cvss_v4_score",
+              "source_stage": "records",
+              "source_column": "cvss_v4_score"
+            },
+            {
+              "name": "epss_percentage",
+              "source_stage": "records",
+              "source_column": "epss_percentage"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "fixed_at",
+              "source_stage": "records",
+              "source_column": "fixed_at"
+            },
+            {
+              "name": "dismissed_at",
+              "source_stage": "records",
+              "source_column": "dismissed_at"
+            },
+            {
+              "name": "auto_dismissed_at",
+              "source_stage": "records",
+              "source_column": "auto_dismissed_at"
+            },
+            {
+              "name": "dismissed_reason",
+              "source_stage": "records",
+              "source_column": "dismissed_reason"
+            },
+            {
+              "name": "dismissed_comment",
+              "source_stage": "records",
+              "source_column": "dismissed_comment"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "assignees",
+              "source_stage": "records",
+              "source_column": "assignees"
+            },
+            {
+              "name": "dismissal_request",
+              "source_stage": "records",
+              "source_column": "dismissal_request"
+            },
+            {
+              "name": "dismisser_id",
+              "source_stage": "records",
+              "source_column": "dismisser_id"
+            },
+            {
+              "name": "dismisser_login",
+              "source_stage": "records",
+              "source_column": "dismisser_login"
+            },
+            {
+              "name": "dismisser_type",
+              "source_stage": "records",
+              "source_column": "dismisser_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "dependabot_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "dependabot_alert_number": {
+                    "parameter": "dependabot_alert_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected records, following every advertised collection page; API failures do not become empty populations."
+        },
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "dependabot_state",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional comma-separated Dependabot alert states; omission preserves the complete visible state population.",
+              "example": "open,fixed",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_severity",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional comma-separated Dependabot alert severities.",
+              "example": "high,critical",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_ecosystem",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional comma-separated Dependabot dependency ecosystems.",
+              "example": "npm,pip",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_package",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional comma-separated dependency package names; these are not GitHub Packages registry identities.",
+              "example": "example-library",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_scope",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional vulnerable dependency execution scope.",
+              "example": "runtime",
+              "min_length": 1,
+              "enum": [
+                "runtime",
+                "development"
+              ],
+              "default": null
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "alert_number",
+              "source_stage": "records",
+              "source_column": "alert_number"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "dependency_ecosystem",
+              "source_stage": "records",
+              "source_column": "dependency_ecosystem"
+            },
+            {
+              "name": "dependency_name",
+              "source_stage": "records",
+              "source_column": "dependency_name"
+            },
+            {
+              "name": "manifest_path",
+              "source_stage": "records",
+              "source_column": "manifest_path"
+            },
+            {
+              "name": "dependency_scope",
+              "source_stage": "records",
+              "source_column": "dependency_scope"
+            },
+            {
+              "name": "dependency_relationship",
+              "source_stage": "records",
+              "source_column": "dependency_relationship"
+            },
+            {
+              "name": "ghsa_id",
+              "source_stage": "records",
+              "source_column": "ghsa_id"
+            },
+            {
+              "name": "cve_id",
+              "source_stage": "records",
+              "source_column": "cve_id"
+            },
+            {
+              "name": "advisory_summary",
+              "source_stage": "records",
+              "source_column": "advisory_summary"
+            },
+            {
+              "name": "advisory_classification",
+              "source_stage": "records",
+              "source_column": "advisory_classification"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "vulnerable_version_range",
+              "source_stage": "records",
+              "source_column": "vulnerable_version_range"
+            },
+            {
+              "name": "first_patched_version",
+              "source_stage": "records",
+              "source_column": "first_patched_version"
+            },
+            {
+              "name": "cvss_v3_score",
+              "source_stage": "records",
+              "source_column": "cvss_v3_score"
+            },
+            {
+              "name": "cvss_v4_score",
+              "source_stage": "records",
+              "source_column": "cvss_v4_score"
+            },
+            {
+              "name": "epss_percentage",
+              "source_stage": "records",
+              "source_column": "epss_percentage"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "fixed_at",
+              "source_stage": "records",
+              "source_column": "fixed_at"
+            },
+            {
+              "name": "dismissed_at",
+              "source_stage": "records",
+              "source_column": "dismissed_at"
+            },
+            {
+              "name": "auto_dismissed_at",
+              "source_stage": "records",
+              "source_column": "auto_dismissed_at"
+            },
+            {
+              "name": "dismissed_reason",
+              "source_stage": "records",
+              "source_column": "dismissed_reason"
+            },
+            {
+              "name": "dismissed_comment",
+              "source_stage": "records",
+              "source_column": "dismissed_comment"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "assignees",
+              "source_stage": "records",
+              "source_column": "assignees"
+            },
+            {
+              "name": "dismissal_request",
+              "source_stage": "records",
+              "source_column": "dismissal_request"
+            },
+            {
+              "name": "dismisser_id",
+              "source_stage": "records",
+              "source_column": "dismisser_id"
+            },
+            {
+              "name": "dismisser_login",
+              "source_stage": "records",
+              "source_column": "dismisser_login"
+            },
+            {
+              "name": "dismisser_type",
+              "source_stage": "records",
+              "source_column": "dismisser_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "dependabot_organization_source",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  },
+                  "dependabot_state": {
+                    "parameter": "dependabot_state"
+                  },
+                  "dependabot_severity": {
+                    "parameter": "dependabot_severity"
+                  },
+                  "dependabot_ecosystem": {
+                    "parameter": "dependabot_ecosystem"
+                  },
+                  "dependabot_package": {
+                    "parameter": "dependabot_package"
+                  },
+                  "dependabot_scope": {
+                    "parameter": "dependabot_scope"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected records, following every advertised collection page; API failures do not become empty populations."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "dependabot_state",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional comma-separated Dependabot alert states; omission preserves the complete visible state population.",
+              "example": "open,fixed",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_severity",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional comma-separated Dependabot alert severities.",
+              "example": "high,critical",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_ecosystem",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional comma-separated Dependabot dependency ecosystems.",
+              "example": "npm,pip",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_package",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional comma-separated dependency package names; these are not GitHub Packages registry identities.",
+              "example": "example-library",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_scope",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional vulnerable dependency execution scope.",
+              "example": "runtime",
+              "min_length": 1,
+              "enum": [
+                "runtime",
+                "development"
+              ],
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "alert_number",
+              "source_stage": "records",
+              "source_column": "alert_number"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "dependency_ecosystem",
+              "source_stage": "records",
+              "source_column": "dependency_ecosystem"
+            },
+            {
+              "name": "dependency_name",
+              "source_stage": "records",
+              "source_column": "dependency_name"
+            },
+            {
+              "name": "manifest_path",
+              "source_stage": "records",
+              "source_column": "manifest_path"
+            },
+            {
+              "name": "dependency_scope",
+              "source_stage": "records",
+              "source_column": "dependency_scope"
+            },
+            {
+              "name": "dependency_relationship",
+              "source_stage": "records",
+              "source_column": "dependency_relationship"
+            },
+            {
+              "name": "ghsa_id",
+              "source_stage": "records",
+              "source_column": "ghsa_id"
+            },
+            {
+              "name": "cve_id",
+              "source_stage": "records",
+              "source_column": "cve_id"
+            },
+            {
+              "name": "advisory_summary",
+              "source_stage": "records",
+              "source_column": "advisory_summary"
+            },
+            {
+              "name": "advisory_classification",
+              "source_stage": "records",
+              "source_column": "advisory_classification"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "vulnerable_version_range",
+              "source_stage": "records",
+              "source_column": "vulnerable_version_range"
+            },
+            {
+              "name": "first_patched_version",
+              "source_stage": "records",
+              "source_column": "first_patched_version"
+            },
+            {
+              "name": "cvss_v3_score",
+              "source_stage": "records",
+              "source_column": "cvss_v3_score"
+            },
+            {
+              "name": "cvss_v4_score",
+              "source_stage": "records",
+              "source_column": "cvss_v4_score"
+            },
+            {
+              "name": "epss_percentage",
+              "source_stage": "records",
+              "source_column": "epss_percentage"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "fixed_at",
+              "source_stage": "records",
+              "source_column": "fixed_at"
+            },
+            {
+              "name": "dismissed_at",
+              "source_stage": "records",
+              "source_column": "dismissed_at"
+            },
+            {
+              "name": "auto_dismissed_at",
+              "source_stage": "records",
+              "source_column": "auto_dismissed_at"
+            },
+            {
+              "name": "dismissed_reason",
+              "source_stage": "records",
+              "source_column": "dismissed_reason"
+            },
+            {
+              "name": "dismissed_comment",
+              "source_stage": "records",
+              "source_column": "dismissed_comment"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "assignees",
+              "source_stage": "records",
+              "source_column": "assignees"
+            },
+            {
+              "name": "dismissal_request",
+              "source_stage": "records",
+              "source_column": "dismissal_request"
+            },
+            {
+              "name": "dismisser_id",
+              "source_stage": "records",
+              "source_column": "dismisser_id"
+            },
+            {
+              "name": "dismisser_login",
+              "source_stage": "records",
+              "source_column": "dismisser_login"
+            },
+            {
+              "name": "dismisser_type",
+              "source_stage": "records",
+              "source_column": "dismisser_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "dependabot_repository_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "dependabot_state": {
+                    "parameter": "dependabot_state"
+                  },
+                  "dependabot_severity": {
+                    "parameter": "dependabot_severity"
+                  },
+                  "dependabot_ecosystem": {
+                    "parameter": "dependabot_ecosystem"
+                  },
+                  "dependabot_package": {
+                    "parameter": "dependabot_package"
+                  },
+                  "dependabot_scope": {
+                    "parameter": "dependabot_scope"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected records, following every advertised collection page; API failures do not become empty populations."
+        }
+      ]
+    },
+    {
+      "name": "security_advisories",
+      "description": "One canonical GHSA identity across global database and repository advisory populations. Global type and repository workflow state remain separate nullable concepts. Repository and global patch metadata retain their distinct first-patched-version and patched-ranges fields. Organization responses contain no owning repository identity, so repository context is honestly NULL there; global source-code URLs are not invented repository keys. Author, publisher and credited accounts remain distinct. Global, organization and repository visibility differs; inaccessible private records fail rather than disappearing.",
+      "grain": [
+        "ghsa_id"
+      ],
+      "nullable_struct_fields": [
+        "vulnerabilities[].first_patched_version",
+        "vulnerabilities[].patched_versions",
+        "credits[].state"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "ghsa_id",
+          "cve_id",
+          "url",
+          "html_url",
+          "summary",
+          "description",
+          "severity",
+          "updated_at",
+          "published_at",
+          "withdrawn_at",
+          "identifiers",
+          "cwes",
+          "cvss_v3_score",
+          "cvss_v4_score",
+          "advisory_population",
+          "advisory_type",
+          "state",
+          "created_at",
+          "closed_at",
+          "github_reviewed_at",
+          "nvd_published_at",
+          "source_code_location",
+          "repository_advisory_url",
+          "epss_percentage",
+          "submission_accepted",
+          "advisory_author_id",
+          "advisory_author_login",
+          "advisory_author_type",
+          "advisory_publisher_id",
+          "advisory_publisher_login",
+          "advisory_publisher_type",
+          "vulnerabilities",
+          "credits",
+          "security_advisory_published_day"
+        ],
+        "dimensions": [
+          "repository",
+          "ghsa_id",
+          "cve_id",
+          "severity",
+          "advisory_type",
+          "state",
+          "advisory_population",
+          "advisory_author_id",
+          "advisory_author_login",
+          "advisory_publisher_id",
+          "advisory_publisher_login",
+          "published_at",
+          "withdrawn_at",
+          "security_advisory_published_day"
+        ],
+        "metrics": [
+          {
+            "name": "security_advisory_count",
+            "kind": "count",
+            "comment": "Selected distinct GHSA advisory records."
+          },
+          {
+            "name": "critical_security_advisory_count",
+            "kind": "count",
+            "comment": "Advisories explicitly assigned critical severity.",
+            "where": {
+              "field": "severity",
+              "op": "eq",
+              "value": "critical"
+            }
+          },
+          {
+            "name": "draft_security_advisory_count",
+            "kind": "count",
+            "comment": "Repository advisories explicitly in draft workflow state; no draft state is inferred for global records.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "draft"
+            }
+          },
+          {
+            "name": "malware_security_advisory_count",
+            "kind": "count",
+            "comment": "Global advisories explicitly classified malware.",
+            "where": {
+              "field": "advisory_type",
+              "op": "eq",
+              "value": "malware"
+            }
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "security_advisory_published_day",
+            "kind": "date",
+            "source": "published_at",
+            "timezone": "UTC",
+            "comment": "UTC date from the returned published_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "security_advisories_repository",
+          "ghsa_id": "security_advisories_ghsa_id",
+          "cve_id": "security_advisories_cve_id",
+          "severity": "security_advisories_severity",
+          "advisory_type": "security_advisories_advisory_type",
+          "state": "security_advisories_state",
+          "advisory_population": "security_advisories_advisory_population",
+          "advisory_author_id": "security_advisories_advisory_author_id",
+          "advisory_author_login": "security_advisories_advisory_author_login",
+          "advisory_publisher_id": "security_advisories_advisory_publisher_id",
+          "advisory_publisher_login": "security_advisories_advisory_publisher_login",
+          "published_at": "security_advisories_published_at",
+          "withdrawn_at": "security_advisories_withdrawn_at",
+          "security_advisory_published_day": "security_advisories_security_advisory_published_day"
+        }
+      },
+      "routes": [
+        {
+          "name": "global_lookup",
+          "arguments": [
+            {
+              "name": "global_advisory_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "GitHub Security Advisory identifier for global database lookup; the canonical output identity remains ghsa_id.",
+              "example": "GHSA-xxxx-yyyy-zzzz",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "global_advisory_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "ghsa_id",
+              "source_stage": "records",
+              "source_column": "ghsa_id"
+            },
+            {
+              "name": "cve_id",
+              "source_stage": "records",
+              "source_column": "cve_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "summary",
+              "source_stage": "records",
+              "source_column": "summary"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "published_at",
+              "source_stage": "records",
+              "source_column": "published_at"
+            },
+            {
+              "name": "withdrawn_at",
+              "source_stage": "records",
+              "source_column": "withdrawn_at"
+            },
+            {
+              "name": "identifiers",
+              "source_stage": "records",
+              "source_column": "identifiers"
+            },
+            {
+              "name": "cwes",
+              "source_stage": "records",
+              "source_column": "cwes"
+            },
+            {
+              "name": "cvss_v3_score",
+              "source_stage": "records",
+              "source_column": "cvss_v3_score"
+            },
+            {
+              "name": "cvss_v4_score",
+              "source_stage": "records",
+              "source_column": "cvss_v4_score"
+            },
+            {
+              "name": "advisory_population",
+              "source_stage": "records",
+              "source_column": "advisory_population"
+            },
+            {
+              "name": "advisory_type",
+              "source_stage": "records",
+              "source_column": "advisory_type"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "closed_at",
+              "source_stage": "records",
+              "source_column": "closed_at"
+            },
+            {
+              "name": "github_reviewed_at",
+              "source_stage": "records",
+              "source_column": "github_reviewed_at"
+            },
+            {
+              "name": "nvd_published_at",
+              "source_stage": "records",
+              "source_column": "nvd_published_at"
+            },
+            {
+              "name": "source_code_location",
+              "source_stage": "records",
+              "source_column": "source_code_location"
+            },
+            {
+              "name": "repository_advisory_url",
+              "source_stage": "records",
+              "source_column": "repository_advisory_url"
+            },
+            {
+              "name": "epss_percentage",
+              "source_stage": "records",
+              "source_column": "epss_percentage"
+            },
+            {
+              "name": "submission_accepted",
+              "source_stage": "records",
+              "source_column": "submission_accepted"
+            },
+            {
+              "name": "advisory_author_id",
+              "source_stage": "records",
+              "source_column": "advisory_author_id"
+            },
+            {
+              "name": "advisory_author_login",
+              "source_stage": "records",
+              "source_column": "advisory_author_login"
+            },
+            {
+              "name": "advisory_author_type",
+              "source_stage": "records",
+              "source_column": "advisory_author_type"
+            },
+            {
+              "name": "advisory_publisher_id",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_id"
+            },
+            {
+              "name": "advisory_publisher_login",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_login"
+            },
+            {
+              "name": "advisory_publisher_type",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_type"
+            },
+            {
+              "name": "vulnerabilities",
+              "source_stage": "records",
+              "source_column": "vulnerabilities"
+            },
+            {
+              "name": "credits",
+              "source_stage": "records",
+              "source_column": "credits"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "advisory_global_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "literal": null
+                  },
+                  "repository_id": {
+                    "literal": null
+                  },
+                  "global_advisory_id": {
+                    "parameter": "global_advisory_id"
+                  },
+                  "advisory_population": {
+                    "literal": "global"
+                  },
+                  "absent_state": {
+                    "literal": null
+                  },
+                  "absent_created_at": {
+                    "literal": null
+                  },
+                  "absent_closed_at": {
+                    "literal": null
+                  },
+                  "absent_submission_accepted": {
+                    "literal": null
+                  },
+                  "absent_advisory_author_id": {
+                    "literal": null
+                  },
+                  "absent_advisory_author_login": {
+                    "literal": null
+                  },
+                  "absent_advisory_author_type": {
+                    "literal": null
+                  },
+                  "absent_advisory_publisher_id": {
+                    "literal": null
+                  },
+                  "absent_advisory_publisher_login": {
+                    "literal": null
+                  },
+                  "absent_advisory_publisher_type": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One global advisory identified by GHSA; private unpublished repository advisories are not promised in the global database."
+        },
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "ghsa_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "GitHub Security Advisory identifier for a repository advisory lookup; requires repository.",
+              "example": "GHSA-xxxx-yyyy-zzzz",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "ghsa_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "ghsa_id",
+              "source_stage": "records",
+              "source_column": "ghsa_id"
+            },
+            {
+              "name": "cve_id",
+              "source_stage": "records",
+              "source_column": "cve_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "summary",
+              "source_stage": "records",
+              "source_column": "summary"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "published_at",
+              "source_stage": "records",
+              "source_column": "published_at"
+            },
+            {
+              "name": "withdrawn_at",
+              "source_stage": "records",
+              "source_column": "withdrawn_at"
+            },
+            {
+              "name": "identifiers",
+              "source_stage": "records",
+              "source_column": "identifiers"
+            },
+            {
+              "name": "cwes",
+              "source_stage": "records",
+              "source_column": "cwes"
+            },
+            {
+              "name": "cvss_v3_score",
+              "source_stage": "records",
+              "source_column": "cvss_v3_score"
+            },
+            {
+              "name": "cvss_v4_score",
+              "source_stage": "records",
+              "source_column": "cvss_v4_score"
+            },
+            {
+              "name": "advisory_population",
+              "source_stage": "records",
+              "source_column": "advisory_population"
+            },
+            {
+              "name": "advisory_type",
+              "source_stage": "records",
+              "source_column": "advisory_type"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "closed_at",
+              "source_stage": "records",
+              "source_column": "closed_at"
+            },
+            {
+              "name": "github_reviewed_at",
+              "source_stage": "records",
+              "source_column": "github_reviewed_at"
+            },
+            {
+              "name": "nvd_published_at",
+              "source_stage": "records",
+              "source_column": "nvd_published_at"
+            },
+            {
+              "name": "source_code_location",
+              "source_stage": "records",
+              "source_column": "source_code_location"
+            },
+            {
+              "name": "repository_advisory_url",
+              "source_stage": "records",
+              "source_column": "repository_advisory_url"
+            },
+            {
+              "name": "epss_percentage",
+              "source_stage": "records",
+              "source_column": "epss_percentage"
+            },
+            {
+              "name": "submission_accepted",
+              "source_stage": "records",
+              "source_column": "submission_accepted"
+            },
+            {
+              "name": "advisory_author_id",
+              "source_stage": "records",
+              "source_column": "advisory_author_id"
+            },
+            {
+              "name": "advisory_author_login",
+              "source_stage": "records",
+              "source_column": "advisory_author_login"
+            },
+            {
+              "name": "advisory_author_type",
+              "source_stage": "records",
+              "source_column": "advisory_author_type"
+            },
+            {
+              "name": "advisory_publisher_id",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_id"
+            },
+            {
+              "name": "advisory_publisher_login",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_login"
+            },
+            {
+              "name": "advisory_publisher_type",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_type"
+            },
+            {
+              "name": "vulnerabilities",
+              "source_stage": "records",
+              "source_column": "vulnerabilities"
+            },
+            {
+              "name": "credits",
+              "source_stage": "records",
+              "source_column": "credits"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "advisory_repository_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "ghsa_id": {
+                    "parameter": "ghsa_id"
+                  },
+                  "advisory_population": {
+                    "literal": "repository"
+                  },
+                  "absent_advisory_type": {
+                    "literal": null
+                  },
+                  "absent_github_reviewed_at": {
+                    "literal": null
+                  },
+                  "absent_nvd_published_at": {
+                    "literal": null
+                  },
+                  "absent_source_code_location": {
+                    "literal": null
+                  },
+                  "absent_repository_advisory_url": {
+                    "literal": null
+                  },
+                  "absent_epss_percentage": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One visible repository advisory identified by GHSA, including unpublished states visible to the current credentials."
+        },
+        {
+          "name": "global",
+          "arguments": [
+            {
+              "name": "advisory_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Explicit global advisory population, including malware and unreviewed records when selected.",
+              "example": "reviewed",
+              "min_length": 1,
+              "enum": [
+                "reviewed",
+                "unreviewed",
+                "malware"
+              ]
+            }
+          ],
+          "select": [
+            "advisory_type"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "ghsa_id",
+              "source_stage": "records",
+              "source_column": "ghsa_id"
+            },
+            {
+              "name": "cve_id",
+              "source_stage": "records",
+              "source_column": "cve_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "summary",
+              "source_stage": "records",
+              "source_column": "summary"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "published_at",
+              "source_stage": "records",
+              "source_column": "published_at"
+            },
+            {
+              "name": "withdrawn_at",
+              "source_stage": "records",
+              "source_column": "withdrawn_at"
+            },
+            {
+              "name": "identifiers",
+              "source_stage": "records",
+              "source_column": "identifiers"
+            },
+            {
+              "name": "cwes",
+              "source_stage": "records",
+              "source_column": "cwes"
+            },
+            {
+              "name": "cvss_v3_score",
+              "source_stage": "records",
+              "source_column": "cvss_v3_score"
+            },
+            {
+              "name": "cvss_v4_score",
+              "source_stage": "records",
+              "source_column": "cvss_v4_score"
+            },
+            {
+              "name": "advisory_population",
+              "source_stage": "records",
+              "source_column": "advisory_population"
+            },
+            {
+              "name": "advisory_type",
+              "source_stage": "records",
+              "source_column": "advisory_type"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "closed_at",
+              "source_stage": "records",
+              "source_column": "closed_at"
+            },
+            {
+              "name": "github_reviewed_at",
+              "source_stage": "records",
+              "source_column": "github_reviewed_at"
+            },
+            {
+              "name": "nvd_published_at",
+              "source_stage": "records",
+              "source_column": "nvd_published_at"
+            },
+            {
+              "name": "source_code_location",
+              "source_stage": "records",
+              "source_column": "source_code_location"
+            },
+            {
+              "name": "repository_advisory_url",
+              "source_stage": "records",
+              "source_column": "repository_advisory_url"
+            },
+            {
+              "name": "epss_percentage",
+              "source_stage": "records",
+              "source_column": "epss_percentage"
+            },
+            {
+              "name": "submission_accepted",
+              "source_stage": "records",
+              "source_column": "submission_accepted"
+            },
+            {
+              "name": "advisory_author_id",
+              "source_stage": "records",
+              "source_column": "advisory_author_id"
+            },
+            {
+              "name": "advisory_author_login",
+              "source_stage": "records",
+              "source_column": "advisory_author_login"
+            },
+            {
+              "name": "advisory_author_type",
+              "source_stage": "records",
+              "source_column": "advisory_author_type"
+            },
+            {
+              "name": "advisory_publisher_id",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_id"
+            },
+            {
+              "name": "advisory_publisher_login",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_login"
+            },
+            {
+              "name": "advisory_publisher_type",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_type"
+            },
+            {
+              "name": "vulnerabilities",
+              "source_stage": "records",
+              "source_column": "vulnerabilities"
+            },
+            {
+              "name": "credits",
+              "source_stage": "records",
+              "source_column": "credits"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "advisory_global_source",
+                "arguments": {
+                  "repository": {
+                    "literal": null
+                  },
+                  "repository_id": {
+                    "literal": null
+                  },
+                  "advisory_type": {
+                    "parameter": "advisory_type"
+                  },
+                  "advisory_population": {
+                    "literal": "global"
+                  },
+                  "absent_state": {
+                    "literal": null
+                  },
+                  "absent_created_at": {
+                    "literal": null
+                  },
+                  "absent_closed_at": {
+                    "literal": null
+                  },
+                  "absent_submission_accepted": {
+                    "literal": null
+                  },
+                  "absent_advisory_author_id": {
+                    "literal": null
+                  },
+                  "absent_advisory_author_login": {
+                    "literal": null
+                  },
+                  "absent_advisory_author_type": {
+                    "literal": null
+                  },
+                  "absent_advisory_publisher_id": {
+                    "literal": null
+                  },
+                  "absent_advisory_publisher_login": {
+                    "literal": null
+                  },
+                  "absent_advisory_publisher_type": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All global advisories in the explicitly selected reviewed, unreviewed or malware population; all pages are exhausted."
+        },
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "advisory_state",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional repository advisory state filter; omission retains all visible states.",
+              "example": "published",
+              "min_length": 1,
+              "enum": [
+                "triage",
+                "draft",
+                "published",
+                "closed"
+              ],
+              "default": null
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "ghsa_id",
+              "source_stage": "records",
+              "source_column": "ghsa_id"
+            },
+            {
+              "name": "cve_id",
+              "source_stage": "records",
+              "source_column": "cve_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "summary",
+              "source_stage": "records",
+              "source_column": "summary"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "published_at",
+              "source_stage": "records",
+              "source_column": "published_at"
+            },
+            {
+              "name": "withdrawn_at",
+              "source_stage": "records",
+              "source_column": "withdrawn_at"
+            },
+            {
+              "name": "identifiers",
+              "source_stage": "records",
+              "source_column": "identifiers"
+            },
+            {
+              "name": "cwes",
+              "source_stage": "records",
+              "source_column": "cwes"
+            },
+            {
+              "name": "cvss_v3_score",
+              "source_stage": "records",
+              "source_column": "cvss_v3_score"
+            },
+            {
+              "name": "cvss_v4_score",
+              "source_stage": "records",
+              "source_column": "cvss_v4_score"
+            },
+            {
+              "name": "advisory_population",
+              "source_stage": "records",
+              "source_column": "advisory_population"
+            },
+            {
+              "name": "advisory_type",
+              "source_stage": "records",
+              "source_column": "advisory_type"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "closed_at",
+              "source_stage": "records",
+              "source_column": "closed_at"
+            },
+            {
+              "name": "github_reviewed_at",
+              "source_stage": "records",
+              "source_column": "github_reviewed_at"
+            },
+            {
+              "name": "nvd_published_at",
+              "source_stage": "records",
+              "source_column": "nvd_published_at"
+            },
+            {
+              "name": "source_code_location",
+              "source_stage": "records",
+              "source_column": "source_code_location"
+            },
+            {
+              "name": "repository_advisory_url",
+              "source_stage": "records",
+              "source_column": "repository_advisory_url"
+            },
+            {
+              "name": "epss_percentage",
+              "source_stage": "records",
+              "source_column": "epss_percentage"
+            },
+            {
+              "name": "submission_accepted",
+              "source_stage": "records",
+              "source_column": "submission_accepted"
+            },
+            {
+              "name": "advisory_author_id",
+              "source_stage": "records",
+              "source_column": "advisory_author_id"
+            },
+            {
+              "name": "advisory_author_login",
+              "source_stage": "records",
+              "source_column": "advisory_author_login"
+            },
+            {
+              "name": "advisory_author_type",
+              "source_stage": "records",
+              "source_column": "advisory_author_type"
+            },
+            {
+              "name": "advisory_publisher_id",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_id"
+            },
+            {
+              "name": "advisory_publisher_login",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_login"
+            },
+            {
+              "name": "advisory_publisher_type",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_type"
+            },
+            {
+              "name": "vulnerabilities",
+              "source_stage": "records",
+              "source_column": "vulnerabilities"
+            },
+            {
+              "name": "credits",
+              "source_stage": "records",
+              "source_column": "credits"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "advisory_organization_source",
+                "arguments": {
+                  "repository": {
+                    "literal": null
+                  },
+                  "repository_id": {
+                    "literal": null
+                  },
+                  "organization": {
+                    "parameter": "organization"
+                  },
+                  "advisory_state": {
+                    "parameter": "advisory_state"
+                  },
+                  "advisory_population": {
+                    "literal": "organization"
+                  },
+                  "absent_advisory_type": {
+                    "literal": null
+                  },
+                  "absent_github_reviewed_at": {
+                    "literal": null
+                  },
+                  "absent_nvd_published_at": {
+                    "literal": null
+                  },
+                  "absent_source_code_location": {
+                    "literal": null
+                  },
+                  "absent_repository_advisory_url": {
+                    "literal": null
+                  },
+                  "absent_epss_percentage": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible organization repository advisories, optionally filtered by workflow state. The response does not identify the owning repository."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "advisory_state",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional repository advisory state filter; omission retains all visible states.",
+              "example": "published",
+              "min_length": 1,
+              "enum": [
+                "triage",
+                "draft",
+                "published",
+                "closed"
+              ],
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "ghsa_id",
+              "source_stage": "records",
+              "source_column": "ghsa_id"
+            },
+            {
+              "name": "cve_id",
+              "source_stage": "records",
+              "source_column": "cve_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "summary",
+              "source_stage": "records",
+              "source_column": "summary"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "published_at",
+              "source_stage": "records",
+              "source_column": "published_at"
+            },
+            {
+              "name": "withdrawn_at",
+              "source_stage": "records",
+              "source_column": "withdrawn_at"
+            },
+            {
+              "name": "identifiers",
+              "source_stage": "records",
+              "source_column": "identifiers"
+            },
+            {
+              "name": "cwes",
+              "source_stage": "records",
+              "source_column": "cwes"
+            },
+            {
+              "name": "cvss_v3_score",
+              "source_stage": "records",
+              "source_column": "cvss_v3_score"
+            },
+            {
+              "name": "cvss_v4_score",
+              "source_stage": "records",
+              "source_column": "cvss_v4_score"
+            },
+            {
+              "name": "advisory_population",
+              "source_stage": "records",
+              "source_column": "advisory_population"
+            },
+            {
+              "name": "advisory_type",
+              "source_stage": "records",
+              "source_column": "advisory_type"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "closed_at",
+              "source_stage": "records",
+              "source_column": "closed_at"
+            },
+            {
+              "name": "github_reviewed_at",
+              "source_stage": "records",
+              "source_column": "github_reviewed_at"
+            },
+            {
+              "name": "nvd_published_at",
+              "source_stage": "records",
+              "source_column": "nvd_published_at"
+            },
+            {
+              "name": "source_code_location",
+              "source_stage": "records",
+              "source_column": "source_code_location"
+            },
+            {
+              "name": "repository_advisory_url",
+              "source_stage": "records",
+              "source_column": "repository_advisory_url"
+            },
+            {
+              "name": "epss_percentage",
+              "source_stage": "records",
+              "source_column": "epss_percentage"
+            },
+            {
+              "name": "submission_accepted",
+              "source_stage": "records",
+              "source_column": "submission_accepted"
+            },
+            {
+              "name": "advisory_author_id",
+              "source_stage": "records",
+              "source_column": "advisory_author_id"
+            },
+            {
+              "name": "advisory_author_login",
+              "source_stage": "records",
+              "source_column": "advisory_author_login"
+            },
+            {
+              "name": "advisory_author_type",
+              "source_stage": "records",
+              "source_column": "advisory_author_type"
+            },
+            {
+              "name": "advisory_publisher_id",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_id"
+            },
+            {
+              "name": "advisory_publisher_login",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_login"
+            },
+            {
+              "name": "advisory_publisher_type",
+              "source_stage": "records",
+              "source_column": "advisory_publisher_type"
+            },
+            {
+              "name": "vulnerabilities",
+              "source_stage": "records",
+              "source_column": "vulnerabilities"
+            },
+            {
+              "name": "credits",
+              "source_stage": "records",
+              "source_column": "credits"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "advisory_repository_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "advisory_state": {
+                    "parameter": "advisory_state"
+                  },
+                  "advisory_population": {
+                    "literal": "repository"
+                  },
+                  "absent_advisory_type": {
+                    "literal": null
+                  },
+                  "absent_github_reviewed_at": {
+                    "literal": null
+                  },
+                  "absent_nvd_published_at": {
+                    "literal": null
+                  },
+                  "absent_source_code_location": {
+                    "literal": null
+                  },
+                  "absent_repository_advisory_url": {
+                    "literal": null
+                  },
+                  "absent_epss_percentage": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible advisories from selected repositories or an explicit cohort, optionally filtered by workflow state; all pages are exhausted."
+        }
+      ]
+    },
+    {
+      "name": "dependency_changes",
+      "description": "Dependency additions/removals observed for a requested base...head comparison, qualified by repository, comparison token, manifest, ecosystem, name, version, scope and change direction. Moving ref tokens are observation context rather than stable commit IDs. Repeated exact identities fail instead of inflating counts. Vulnerability associations remain typed nested evidence, not extra changed dependency rows.",
+      "grain": [
+        "repository_id",
+        "comparison",
+        "manifest",
+        "ecosystem",
+        "name",
+        "version",
+        "scope",
+        "change_type"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "comparison",
+          "change_type",
+          "manifest",
+          "ecosystem",
+          "name",
+          "version",
+          "package_url",
+          "license",
+          "source_repository_url",
+          "scope",
+          "vulnerabilities"
+        ],
+        "dimensions": [
+          "repository",
+          "comparison",
+          "change_type",
+          "manifest",
+          "ecosystem",
+          "name",
+          "version",
+          "scope",
+          "license"
+        ],
+        "metrics": [
+          {
+            "name": "dependency_change_count",
+            "kind": "count",
+            "comment": "Selected changed dependency coordinates within one comparison observation."
+          },
+          {
+            "name": "added_dependency_count",
+            "kind": "count",
+            "comment": "Dependency coordinates reported added.",
+            "where": {
+              "field": "change_type",
+              "op": "eq",
+              "value": "added"
+            }
+          },
+          {
+            "name": "removed_dependency_count",
+            "kind": "count",
+            "comment": "Dependency coordinates reported removed.",
+            "where": {
+              "field": "change_type",
+              "op": "eq",
+              "value": "removed"
+            }
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "dependency_changes_repository",
+          "comparison": "dependency_changes_comparison",
+          "change_type": "dependency_changes_change_type",
+          "manifest": "dependency_changes_manifest",
+          "ecosystem": "dependency_changes_ecosystem",
+          "name": "dependency_changes_name",
+          "version": "dependency_changes_version",
+          "scope": "dependency_changes_scope",
+          "license": "dependency_changes_license"
+        },
+        "crossfield": {
+          "metrics": {
+            "dependency_change_vulnerability_count": {
+              "expression": "SUM(length(dependency_changes.vulnerabilities))"
+            }
+          },
+          "metric_semantics": {
+            "dependency_change_vulnerability_count": {
+              "dataset": "dependency_changes",
+              "comment": "Advisory associations on changed dependency records; one advisory affecting several coordinates counts several associations.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "comparisons",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "dependency_compare",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Dependency comparison lookup token in base...head form. Named refs can move; this is a comparison observation rather than a commit identity.",
+              "example": "main...topic",
+              "min_length": 1
+            },
+            {
+              "name": "dependency_manifest",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional exact dependency manifest path relative to the repository root.",
+              "example": "package-lock.json",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "select": [
+            "dependency_compare"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "comparison",
+              "source_stage": "records",
+              "source_column": "comparison"
+            },
+            {
+              "name": "change_type",
+              "source_stage": "records",
+              "source_column": "change_type"
+            },
+            {
+              "name": "manifest",
+              "source_stage": "records",
+              "source_column": "manifest"
+            },
+            {
+              "name": "ecosystem",
+              "source_stage": "records",
+              "source_column": "ecosystem"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "version",
+              "source_stage": "records",
+              "source_column": "version"
+            },
+            {
+              "name": "package_url",
+              "source_stage": "records",
+              "source_column": "package_url"
+            },
+            {
+              "name": "license",
+              "source_stage": "records",
+              "source_column": "license"
+            },
+            {
+              "name": "source_repository_url",
+              "source_stage": "records",
+              "source_column": "source_repository_url"
+            },
+            {
+              "name": "scope",
+              "source_stage": "records",
+              "source_column": "scope"
+            },
+            {
+              "name": "vulnerabilities",
+              "source_stage": "records",
+              "source_column": "vulnerabilities"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "dependency_changes_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "dependency_compare": {
+                    "parameter": "dependency_compare"
+                  },
+                  "dependency_manifest": {
+                    "parameter": "dependency_manifest"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected records, following every advertised collection page; API failures do not become empty populations."
+        }
+      ]
+    },
+    {
+      "name": "dependency_sboms",
+      "description": "Typed SPDX document snapshots at repository ID and document namespace. Packages and SPDX relationships retain typed nested fields; entries are not equated with GitHub Packages registry records. creationInfo.created is a string in the pinned API, so it remains unparsed text. Optional SPDX fields and missing relationships remain unknown. This synchronous export is deprecated in the pinned contract; asynchronous report downloads have a separate content/status contract and are not silently counted as typed SBOM snapshots.",
+      "grain": [
+        "repository_id",
+        "document_namespace"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "document_namespace",
+          "spdx_id",
+          "spdx_version",
+          "document_name",
+          "data_license",
+          "comment",
+          "created_text",
+          "creators",
+          "packages",
+          "relationships"
+        ],
+        "dimensions": [
+          "repository",
+          "document_namespace",
+          "spdx_id",
+          "spdx_version",
+          "document_name",
+          "data_license",
+          "created_text"
+        ],
+        "metrics": [
+          {
+            "name": "dependency_sbom_count",
+            "kind": "count",
+            "comment": "Selected SPDX document snapshots, not historical SBOM inventory."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "dependency_sboms_repository",
+          "document_namespace": "dependency_sboms_document_namespace",
+          "spdx_id": "dependency_sboms_spdx_id",
+          "spdx_version": "dependency_sboms_spdx_version",
+          "document_name": "dependency_sboms_document_name",
+          "data_license": "dependency_sboms_data_license",
+          "created_text": "dependency_sboms_created_text"
+        },
+        "crossfield": {
+          "metrics": {
+            "sbom_package_entry_count": {
+              "expression": "SUM(length(dependency_sboms.packages))"
+            },
+            "sbom_relationship_entry_count": {
+              "expression": "SUM(length(dependency_sboms.relationships))"
+            }
+          },
+          "metric_semantics": {
+            "sbom_package_entry_count": {
+              "dataset": "dependency_sboms",
+              "comment": "Declared package entries in selected documents, including the root repository package; not distinct registry packages.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "sbom_relationship_entry_count": {
+              "dataset": "dependency_sboms",
+              "comment": "SPDX relationship entries where reported; absent relationship data remains NULL.",
+              "additivity": "additive",
+              "missing": "null"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "document_namespace",
+              "source_stage": "records",
+              "source_column": "document_namespace"
+            },
+            {
+              "name": "spdx_id",
+              "source_stage": "records",
+              "source_column": "spdx_id"
+            },
+            {
+              "name": "spdx_version",
+              "source_stage": "records",
+              "source_column": "spdx_version"
+            },
+            {
+              "name": "document_name",
+              "source_stage": "records",
+              "source_column": "document_name"
+            },
+            {
+              "name": "data_license",
+              "source_stage": "records",
+              "source_column": "data_license"
+            },
+            {
+              "name": "comment",
+              "source_stage": "records",
+              "source_column": "comment"
+            },
+            {
+              "name": "created_text",
+              "source_stage": "records",
+              "source_column": "created_text"
+            },
+            {
+              "name": "creators",
+              "source_stage": "records",
+              "source_column": "creators"
+            },
+            {
+              "name": "packages",
+              "source_stage": "records",
+              "source_column": "packages"
+            },
+            {
+              "name": "relationships",
+              "source_stage": "records",
+              "source_column": "relationships"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "dependency_sbom_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected records, following every advertised collection page; API failures do not become empty populations."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "dependabot_alerts_to_repositories",
+      "from": "dependabot_alerts",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "security_advisories_to_repositories",
+      "from": "security_advisories",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "dependency_changes_to_repositories",
+      "from": "dependency_changes",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dependency_sboms_to_repositories",
+      "from": "dependency_sboms",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dependabot_alerts_to_advisories",
+      "from": "dependabot_alerts",
+      "to": "security_advisories",
+      "from_columns": [
+        "ghsa_id"
+      ],
+      "to_columns": [
+        "ghsa_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "global_lookup",
+          "bindings": {
+            "global_advisory_id": "ghsa_id"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "dependabot_alerts_to_dismissers",
+      "from": "dependabot_alerts",
+      "to": "users",
+      "from_columns": [
+        "dismisser_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "dismisser_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "security_advisories_to_advisory_author",
+      "from": "security_advisories",
+      "to": "users",
+      "from_columns": [
+        "advisory_author_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "advisory_author_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "security_advisories_to_advisory_publisher",
+      "from": "security_advisories",
+      "to": "users",
+      "from_columns": [
+        "advisory_publisher_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "advisory_publisher_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    }
+  ]
+}

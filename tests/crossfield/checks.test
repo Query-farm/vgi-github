@@ -1,0 +1,262 @@
+# Independent Checks fixture: two suites, three runs, two same-name reruns,
+# and four annotation occurrences including two identical failures.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT check_suite_count FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'main');
+----
+2
+
+# A failed run followed by a successful rerun remains two check identities.
+query IIII
+SELECT check_run_count,successful_check_run_count,failed_check_run_count,unfinished_check_run_count FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'main');
+----
+3	1	1	1
+
+query TI
+SELECT check_run_conclusion,check_run_count FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'main') GROUP BY check_run_conclusion ORDER BY check_run_conclusion NULLS LAST;
+----
+failure	1
+success	1
+NULL	1
+
+query II
+SELECT check_run_count,successful_check_run_count FROM engineering.semantic.github(repository=>'example/alpha',check_suite_id=>100);
+----
+2	1
+
+query II
+SELECT check_annotation_count,failure_annotation_count FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'main');
+----
+4	2
+
+query III
+SELECT check_run_id,annotation_position,start_line FROM engineering.detail.check_annotations(repository=>'example/alpha',git_ref=>'main') ORDER BY check_run_id,annotation_position;
+----
+6001	1	10
+6001	2	10
+6001	3	10
+6002	1	10
+
+query II
+SELECT check_annotation_count,failure_annotation_count FROM engineering.semantic.github(repository=>'example/alpha',check_run_id=>6001);
+----
+3	2
+
+query I
+SELECT check_annotation_count FROM engineering.semantic.github(repository=>'example/alpha',check_run_id=>6003);
+----
+0
+
+query II
+SELECT check_run_id,check_suite_id FROM engineering.detail.check_runs(repository=>'example/alpha',check_run_id=>6005);
+----
+6005	NULL
+
+query I
+SELECT check_run_count FROM engineering.semantic.github(repository=>'example/empty',git_ref=>'main');
+----
+0
+
+query I
+SELECT check_suite_count FROM engineering.semantic.github(repository=>'example/alpha',check_suite_id=>101);
+----
+1
+
+query I
+SELECT check_run_count FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+3
+
+statement error
+SELECT check_run_count FROM engineering.semantic.github(repository=>'example/alpha');
+----
+select
+
+statement error
+SELECT check_run_count FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'main',check_suite_id=>100);
+----
+arguments
+
+statement error
+SELECT check_run_count FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'private-ref');
+----
+403
+
+statement error
+SELECT check_annotation_count FROM engineering.semantic.github(repository=>'example/alpha',check_run_id=>6006);
+----
+503
+
+# Each fact reaches repository identity through one approved analytical path.
+# Repeated annotations and reruns cannot multiply suites or successful runs.
+query TIIIIIII
+SELECT repository_name,check_suite_count,check_run_count,successful_check_run_count,failed_check_run_count,unfinished_check_run_count,check_annotation_count,failure_annotation_count FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'main') GROUP BY repository_name;
+----
+example/alpha	2	3	1	1	1	4	2
+
+# A run without a suite still has a known repository, as do its annotations.
+query TII
+SELECT repository_name,check_run_count,check_annotation_count FROM engineering.semantic.github(repository=>'example/alpha',check_run_id=>6005) GROUP BY repository_name;
+----
+example/alpha	1	1
+
+# No direct reference-run request: it silently caps discovery at 1000 suites.
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path LIKE '%/commits/%/check-runs';
+----
+0
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path LIKE '%/check-suites/%/check-runs' AND query NOT LIKE '%filter=all%';
+----
+0
+
+# GraphQL-only child connection: all steps retain reruns and their parent-local number.
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT check_step_count,failed_check_step_count,check_step_reported_seconds FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'main');
+----
+5	1	30
+
+query TIII
+SELECT repository_name,check_step_count,failed_check_step_count,check_step_reported_seconds FROM engineering.semantic.github(repository=>'example/alpha',check_suite_id=>100) GROUP BY repository_name;
+----
+example/alpha	4	1	30
+
+query III
+SELECT check_step_count,failed_check_step_count,check_step_reported_seconds FROM engineering.semantic.github(repository=>'example/alpha',check_run_id=>6001);
+----
+2	1	17
+
+query III
+SELECT check_step_count,failed_check_step_count,check_step_reported_seconds FROM engineering.semantic.github(repository=>'example/beta',check_run_id=>6004);
+----
+0	0	0
+
+query TII
+SELECT check_step_status,check_step_count,check_step_reported_seconds FROM engineering.semantic.github(repository=>'example/alpha',git_ref=>'main') GROUP BY check_step_status ORDER BY check_step_status;
+----
+COMPLETED	4	30
+IN_PROGRESS	1	NULL
+
+# An observed pending step has unknown duration, unlike the empty run above.
+query II
+SELECT check_step_count,check_step_reported_seconds FROM engineering.semantic.github(repository=>'example/alpha',check_run_id=>6005);
+----
+1	NULL
+
+query TII
+SELECT check_step_status,check_step_count,check_step_reported_seconds FROM engineering.semantic.github(repository=>'example/alpha',check_run_id=>6005) GROUP BY check_step_status;
+----
+PENDING	1	NULL
+
+# Explicit enrichment selectors retain the canonical entity and its ordinary counts.
+query TI
+SELECT repository_name,check_suite_count FROM engineering.semantic.github(repository=>'example/alpha',check_suite_node_id=>'CS100') GROUP BY repository_name;
+----
+example/alpha	1
+
+query II
+SELECT check_run_count,failed_check_run_count FROM engineering.semantic.github(repository=>'example/alpha',check_run_node_id=>'CR6001');
+----
+1	1
+
+statement ok
+CREATE TEMP TABLE check_graph_suite AS SELECT * FROM engineering.detail.check_suites(repository=>'example/alpha',check_suite_node_id=>'CS100');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITTTI
+SELECT creator_id,creator_login,pusher_type,pusher_login,workflow_run_id FROM check_graph_suite;
+----
+1	alice	Bot	ci-bot	9001
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTII
+SELECT branch.prefix,branch.name,workflow_run.file.repositoryName,workflow_run.file.viewerCanReadRepository,workflow_run.file.viewerCanPushRepository FROM check_graph_suite;
+----
+refs/heads/	main	other/reusable	true	false
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE check_graph_run AS SELECT * FROM engineering.detail.check_runs(repository=>'example/alpha',check_run_node_id=>'CR6003');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IITII
+SELECT deployment_id,pending_deployment_request.waitTimer,pending_deployment_request.environment.name,pending_deployment_request.currentUserCanApprove,pending_deployment_request.waitTimerStartedAt IS NULL FROM check_graph_run;
+----
+NULL	5	production	false	true
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE check_graph_steps AS SELECT * FROM engineering.detail.check_steps(repository=>'example/alpha',check_run_id=>6005);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITIII
+SELECT step_number,status,seconds_to_completion,started_at IS NULL,completed_at IS NULL FROM check_graph_steps;
+----
+1	PENDING	NULL	true	true
+
+statement ok
+SET crossfield_mode='strict';
+
+# Basic deployment context is present on ordinary REST routes, without GraphQL enrichment.
+statement ok
+CREATE TEMP TABLE check_rest_deployment AS SELECT * FROM engineering.detail.check_runs(repository=>'example/alpha',check_run_id=>6001);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITII
+SELECT deployment_id,deployment.environment,deployment.production_environment,deployment_context IS NULL FROM check_rest_deployment;
+----
+501	production	true	true
+
+statement ok
+SET crossfield_mode='strict';

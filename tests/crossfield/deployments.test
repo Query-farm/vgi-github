@@ -1,0 +1,200 @@
+# Independent deployment and environment populations. All API list pages contain one row.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT deployment_count,production_deployment_count,transient_deployment_count FROM engineering.semantic.github(organization=>'deployment-fixture');
+----
+4	3	1
+
+# Historical status events are not replaced by their latest state.
+query IIII
+SELECT deployment_status_count,successful_deployment_status_count,failed_deployment_status_count,pending_deployment_status_count FROM engineering.semantic.github(organization=>'deployment-fixture');
+----
+6	2	2	2
+
+# Direct repository enrichment has one approved path from each population.
+query TII
+SELECT repository_name,deployment_count,deployment_status_count FROM engineering.semantic.github(organization=>'deployment-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+deployment-fixture/alpha	3	5
+deployment-fixture/beta	1	1
+
+query III
+SELECT deployment_count,deployment_status_count,successful_deployment_status_count FROM engineering.semantic.github(repository=>'deployment-fixture/alpha',deployment_id=>11);
+----
+1	2	1
+
+query IT
+SELECT deployment_status_id,state FROM engineering.detail.deployment_statuses(repository=>'deployment-fixture/alpha',deployment_id=>11,deployment_status_id=>111);
+----
+111	pending
+
+# A deployment label may refer to an environment resource that no longer exists.
+query II
+SELECT deployment_count,deployment_status_count FROM engineering.semantic.github(repository=>'deployment-fixture/alpha',environment_name=>'deleted-environment');
+----
+1	0
+
+query IT
+SELECT deployment_id,deployment_creator_login FROM engineering.detail.deployments(repository=>'deployment-fixture/alpha',deployment_id=>13);
+----
+13	NULL
+
+query IT
+SELECT deployment_status_id,status_creator_login FROM engineering.detail.deployment_statuses(repository=>'deployment-fixture/alpha',deployment_id=>12) ORDER BY deployment_status_id;
+----
+121	bob
+122	bob
+123	NULL
+
+query TI
+SELECT deployments_deployment_created_day,deployment_count FROM engineering.semantic.github(organization=>'deployment-fixture') GROUP BY deployments_deployment_created_day;
+----
+2026-09-01	4
+
+# The unused environment is counted even though it has no deployments or child policies.
+query III
+SELECT environment_count,protected_branch_environment_count,custom_branch_environment_count FROM engineering.semantic.github(organization=>'deployment-fixture');
+----
+4	1	1
+
+statement ok
+CREATE TEMP TABLE deployment_environment_flags AS SELECT * FROM engineering.detail.environments(repository=>'deployment-fixture/alpha');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TII
+SELECT environment_name,protected_branches::INTEGER,custom_branch_policies::INTEGER FROM deployment_environment_flags ORDER BY environment_name;
+----
+production	1	0
+staging	0	1
+unused	NULL	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT deployment_branch_policy_count,deployment_branch_pattern_count,deployment_tag_pattern_count FROM engineering.semantic.github(organization=>'deployment-fixture');
+----
+2	1	1
+
+query IITT
+SELECT environment_id,deployment_branch_policy_id,name_pattern,target_type FROM engineering.detail.deployment_branch_policies(repository=>'deployment-fixture/alpha',environment_name=>'staging') ORDER BY deployment_branch_policy_id;
+----
+702	901	release/*	branch
+702	902	v*	tag
+
+query IIT
+SELECT environment_id,deployment_branch_policy_id,target_type FROM engineering.detail.deployment_branch_policies(repository=>'deployment-fixture/alpha',environment_name=>'staging',deployment_branch_policy_id=>902);
+----
+702	902	tag
+
+query II
+SELECT deployment_protection_rule_count,deployment_rule_integration_count FROM engineering.semantic.github(organization=>'deployment-fixture');
+----
+2	4
+
+# One integration can be available in multiple environment populations.
+query IIT
+SELECT environment_id,integration_id,integration_slug FROM engineering.detail.deployment_rule_integrations(repository=>'deployment-fixture/alpha') ORDER BY environment_id,integration_id;
+----
+701	201	quality
+701	202	security
+702	202	security
+
+query IIT
+SELECT environment_id,deployment_protection_rule_id,integration_slug FROM engineering.detail.deployment_protection_rules(repository=>'deployment-fixture/alpha',environment_name=>'production',deployment_protection_rule_id=>1001);
+----
+701	1001	quality
+
+query III
+SELECT environment_count,deployment_branch_policy_count,deployment_protection_rule_count FROM engineering.semantic.github(repository=>'deployment-fixture/alpha',environment_name=>'unused');
+----
+1	0	0
+
+query IIII
+SELECT deployment_count,deployment_status_count,environment_count,deployment_branch_policy_count FROM engineering.semantic.github(repository=>'deployment-fixture/empty');
+----
+0	0	0	0
+
+query II
+SELECT deployment_count,environment_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0
+
+# The Pages API reports lookup observations; absent status is unknown.
+query II
+SELECT pages_deployment_status_count,successful_pages_deployment_status_count FROM engineering.semantic.github(repository=>'deployment-fixture/alpha',pages_deployment_id=>'101');
+----
+1	1
+
+query II
+SELECT pages_deployment_status_count,successful_pages_deployment_status_count FROM engineering.semantic.github(repository=>'deployment-fixture/alpha',pages_deployment_id=>'unknown');
+----
+1	0
+
+query TT
+SELECT pages_deployment_id,status FROM engineering.detail.pages_deployment_statuses(repository=>'deployment-fixture/alpha',pages_deployment_id=>'unknown');
+----
+unknown	NULL
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT deployment_status_count FROM engineering.semantic.github(repository=>'deployment-fixture/alpha',deployment_status_id=>111);
+----
+deployment_id
+
+statement error
+SELECT deployment_branch_policy_count FROM engineering.semantic.github(repository=>'deployment-fixture/alpha',deployment_branch_policy_id=>901);
+----
+environment_name
+
+statement error
+SELECT deployment_count FROM engineering.semantic.github(repository=>'deployment-fixture/alpha',deployment_id=>11,environment_name=>'staging');
+----
+arguments do not apply
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

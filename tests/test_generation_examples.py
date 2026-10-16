@@ -16,7 +16,7 @@ def test_sql_edit_reaches_guide_and_native_test_without_rewriting_answers(tmp_pa
     original = research_artifacts(source)
     monthly = source / "monthly_pr_activity.sql"
     sql = monthly.read_text().replace(
-        "ORDER BY authored_pr_created_month;", "ORDER BY authored_pr_created_month ASC;"
+        "ORDER BY pull_request_created_month;", "ORDER BY pull_request_created_month ASC;"
     )
     monthly.write_text(sql)
     updated = research_artifacts(source)

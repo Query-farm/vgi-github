@@ -1,11 +1,11 @@
 {
-  "entity": "authored_pull_requests",
+  "entity": "pull_requests",
   "dimensions": ["proof_title_lower"],
   "detail_fields": ["proof_title_lower"],
   "crossfield": {
     "fields": {
       "proof_title_lower": {
-        "expression": "LOWER(authored_pull_requests.title)",
+        "expression": "LOWER(pull_requests.title)",
         "type": "VARCHAR",
         "dimension": true
       }
@@ -15,7 +15,7 @@
     },
     "metrics": {
       "proof_p90_merge_hours": {
-        "expression": "PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY authored_pull_requests.merge_hours)",
+        "expression": "PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY pull_requests.merge_hours)",
         "type": "DOUBLE"
       }
     },
@@ -24,8 +24,8 @@
         "additivity": "non_additive",
         "missing": "null",
         "unit": "h",
-        "population": "authored_pull_requests.state = 'MERGED'",
-        "population_id": "authored_pull_requests/proof_merged",
+        "population": "pull_requests.merged_at IS NOT NULL",
+        "population_id": "pull_requests/proof_merged",
         "comment": "Exact P90 of creation-to-merge hours for authored merged PRs; NULL without merges."
       }
     }

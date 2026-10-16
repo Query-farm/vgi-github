@@ -8,8 +8,10 @@ import re
 import uuid
 from copy import deepcopy
 
+from vgi_github.generation.coverage import audit_coverage
 from vgi_github.generation.examples import analysis_documentation, research_artifacts, research_documentation
 from vgi_github.generation.native_overlay import apply_native_overlay
+from vgi_github.generation.schema import _binding
 
 ENGINE = "6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd"
 NAMESPACE = uuid.UUID("9952d457-873c-5e13-965e-07fbdc1cfe2b")
@@ -311,10 +313,16 @@ def validate_semantics(contract, overlay):
     relationships = set()
     for relation in contract["relationships"]:
         required = {"name", "from", "to", "from_columns", "to_columns"}
-        if not required <= set(relation) or set(relation) - required - {"optional"}:
+        if not required <= set(relation) or set(relation) - required - {
+            "optional",
+            "retrievals",
+            "analytical",
+        }:
             raise ValueError("Relationships require named many-to-one key mappings")
         if "optional" in relation and type(relation["optional"]) is not bool:
             raise ValueError("Relationship optional must be a boolean")
+        if "analytical" in relation and type(relation["analytical"]) is not bool:
+            raise ValueError("Relationship analytical must be a boolean")
         name = identifier(relation["name"])
         if name in relationships or relation["from"] not in functions or relation["to"] not in functions:
             raise ValueError("Relationship names and entity references must be valid and unique")
@@ -322,7 +330,7 @@ def validate_semantics(contract, overlay):
         if relation["to_columns"] != functions[relation["to"]]["grain"] or len(
             relation["from_columns"]
         ) != len(relation["to_columns"]):
-            raise ValueError("Relationship targets must cover the complete entity grain")
+            raise ValueError(f"Relationship {name}: targets must cover the complete entity grain")
         for left, right in zip(relation["from_columns"], relation["to_columns"], strict=True):
             source, target = (
                 fields.get(relation["from"] + "." + left),
@@ -337,9 +345,96 @@ def validate_semantics(contract, overlay):
                 raise ValueError(
                     "Relationship keys require declared scalar columns with matching exact types"
                 )
+        for retrieval in relation.get("retrievals", []):
+            if (
+                not {"direction", "route", "bindings"} <= set(retrieval)
+                or set(retrieval) - {"direction", "route", "bindings", "when", "when_not_null", "when_null"}
+                or retrieval["direction"]
+                not in {
+                    "forward",
+                    "reverse",
+                }
+            ):
+                raise ValueError("Relationship retrievals require a direction, route and parameter bindings")
+            start, target = (
+                (relation["from"], relation["to"])
+                if retrieval["direction"] == "forward"
+                else (relation["to"], relation["from"])
+            )
+            entity = functions[target]
+            if "when" in retrieval:
+                conditions = retrieval["when"]
+                if not isinstance(conditions, dict) or not conditions:
+                    raise ValueError("Relationship retrieval conditions require scalar field equalities")
+                for column, value in conditions.items():
+                    field = fields.get(start + "." + column)
+                    if field is None or field["schema"]["kind"] != "scalar":
+                        raise ValueError("Relationship retrieval conditions require declared scalar fields")
+                    _binding({"literal": value}, {}, field["type"], field["nullable"], name)
+            for guard in ("when_null", "when_not_null"):
+                if guard not in retrieval:
+                    continue
+                columns = retrieval[guard]
+                if (
+                    not isinstance(columns, list)
+                    or not columns
+                    or any(not isinstance(column, str) for column in columns)
+                    or len(set(columns)) != len(columns)
+                    or any(start + "." + column not in fields for column in columns)
+                ):
+                    raise ValueError("Relationship null guards require distinct declared typed fields")
+                if any(
+                    column in retrieval.get("when", {})
+                    and ((retrieval["when"][column] is None) != (guard == "when_null"))
+                    for column in columns
+                ):
+                    raise ValueError("Relationship retrieval conditions contradict their null guards")
+            if set(retrieval.get("when_null", [])) & set(retrieval.get("when_not_null", [])):
+                raise ValueError("Relationship retrieval conditions cannot require both NULL and non-NULL")
+            route_name = target + "__" + retrieval["route"] if "routes" in entity else target
+            route = next(
+                (route for route in entity.get("routes", [entity]) if route["name"] == route_name), None
+            )
+            if route is None or ("routes" not in entity and retrieval["route"] != target):
+                raise ValueError(
+                    f"Relationship retrieval refers to an unknown target route: {name} -> {route_name}"
+                )
+            parameters = {arg["name"]: arg for arg in route["arguments"]}
+            bindings = retrieval["bindings"]
+            if not isinstance(bindings, dict) or not bindings:
+                raise ValueError("Relationship retrieval requires parameter bindings")
+            for parameter, column in bindings.items():
+                if isinstance(column, dict):
+                    if set(column) != {"literal"} or parameter not in parameters:
+                        raise ValueError("Relationship retrieval literal must bind a known parameter")
+                    argument = parameters[parameter]
+                    _binding(column, {}, argument["type"], argument["nullable"], name)
+                    if "enum" in argument and column["literal"] not in argument["enum"]:
+                        raise ValueError("Relationship retrieval literal is outside the parameter enum")
+                    continue
+                if not isinstance(column, str):
+                    raise ValueError("Relationship retrieval bindings require a source field or literal")
+                field = fields.get(start + "." + column)
+                if (
+                    parameter not in parameters
+                    or field is None
+                    or parameters[parameter]["type"] != field["type"]
+                ):
+                    raise ValueError(
+                        "Relationship retrieval bindings must preserve exact source field and parameter types"
+                    )
+            if not {arg["name"] for arg in route["arguments"] if not arg["nullable"]} <= bindings.keys():
+                raise ValueError("Relationship retrieval must bind all required route parameters")
+            if (
+                "selection" in route
+                and not route.get("default")
+                and not set(route["selection"]).intersection(bindings)
+            ):
+                raise ValueError("Relationship retrieval bindings must select their route")
     edges = {name: [] for name in functions}
     for relation in contract["relationships"]:
-        edges[relation["from"]].append(relation["to"])
+        if relation.get("analytical", True):
+            edges[relation["from"]].append(relation["to"])
     complete, active = set(), set()
 
     def visit(name):
@@ -373,6 +468,66 @@ def _parameter_constraints(contract):
     """Preserve each scope rule only on public datasets that execute that scope."""
     grouped = {}
     for entity in contract["functions"]:
+        if "routes" in entity:
+            alternatives = set()
+
+            def shared_requirements(trigger, dependencies, routes=entity["routes"]):
+                # Native presence constraints apply to the whole dataset, not to
+                # an individual route. A parameter can also be an optional
+                # context argument on another route selected by a different key.
+                # Keep only implications that every such valid route guarantees.
+                dependencies = set(dependencies) - {trigger}
+                for peer in routes:
+                    if trigger not in {arg["name"] for arg in peer["arguments"]}:
+                        continue
+                    guaranteed = {arg["name"] for arg in peer["arguments"] if not arg["nullable"]}
+                    guaranteed.add(trigger)
+                    rules = [
+                        (parameter, required)
+                        for stage in peer["traversal"]["stages"]
+                        for parameter, required in contract["scopes"]
+                        .get(stage.get("scope"), {})
+                        .get("requires_parameters", {})
+                        .items()
+                    ]
+                    while True:
+                        previous = guaranteed.copy()
+                        for parameter, required in rules:
+                            if parameter in guaranteed:
+                                guaranteed.update(required)
+                        if guaranteed == previous:
+                            break
+                    dependencies.intersection_update(guaranteed)
+                return tuple(sorted(dependencies))
+
+            for selection in entity.get("filters", []):
+                cohort = selection["root"]["cohort"]
+                key = ("at_most_one", "", tuple(sorted([*cohort["alternatives"], cohort["parameter"]])))
+                grouped.setdefault(key, set()).add(entity["name"])
+            for route in entity["routes"]:
+                cohort = route.get("cohort")
+                parameters = tuple(sorted(route["selection"]))
+                alternatives.update(parameters)
+                if cohort:
+                    cohort_parameters = tuple(sorted([*cohort["alternatives"], cohort["parameter"]]))
+                    grouped.setdefault(("at_most_one", "", cohort_parameters), set()).add(entity["name"])
+                required = {arg["name"] for arg in route["arguments"] if not arg["nullable"]}
+                for trigger in parameters:
+                    dependencies = shared_requirements(trigger, required)
+                    if dependencies:
+                        grouped.setdefault(("requires", trigger, dependencies), set()).add(entity["name"])
+                for stage in route["traversal"]["stages"]:
+                    scope = contract["scopes"].get(stage.get("scope"), {})
+                    for trigger, required in scope.get("requires_parameters", {}).items():
+                        dependencies = shared_requirements(trigger, required)
+                        if dependencies:
+                            key = ("requires", trigger, dependencies)
+                            grouped.setdefault(key, set()).add(entity["name"])
+            if not any(route.get("default") for route in entity["routes"]):
+                grouped.setdefault(("at_least_one", "", tuple(sorted(alternatives))), set()).add(
+                    entity["name"]
+                )
+            continue
         cohort = entity.get("cohort")
         if cohort:
             key = ("exactly_one", "", tuple(sorted([*cohort["alternatives"], cohort["parameter"]])))
@@ -416,6 +571,16 @@ def build_model(contract, overlay):
         "relationships": [],
         "relationship_semantics": {},
         "allow_semantic_joins": True,
+        "tags": {
+            "github.relationship_retrievals": json.dumps(
+                {
+                    relation["name"]: relation["retrievals"]
+                    for relation in contract["relationships"]
+                    if relation.get("retrievals")
+                },
+                sort_keys=True,
+            )
+        },
     }
     model = {
         "crossfield": 1,
@@ -426,7 +591,11 @@ def build_model(contract, overlay):
         "metrics": {},
         "policy": policy,
         "relationships": [
-            {key: value for key, value in relation.items() if key != "optional"}
+            {
+                key: value
+                for key, value in relation.items()
+                if key not in {"optional", "retrievals", "analytical"}
+            }
             for relation in contract["relationships"]
         ],
         "semantic_query": {
@@ -557,7 +726,30 @@ def build_model(contract, overlay):
             },
         }
         policy["invocation_sources"].append(name)
-        policy["dataset_semantics"][name] = {"comment": entity["description"], "key_evidence": "declared"}
+        route_comments = [
+            f"Route {route['name']}, "
+            + ("default" if route.get("default") else "selected by " + ", ".join(route["selection"]))
+            + f": {route['population']}"
+            for route in entity.get("routes", [])
+            if "population" in route
+        ]
+        policy["dataset_semantics"][name] = {
+            "comment": " ".join([entity["description"], *route_comments]),
+            "key_evidence": "declared",
+            "tags": {
+                "github.retrieval_routes": json.dumps(
+                    [
+                        {
+                            key: route[key]
+                            for key in ("name", "selection", "select_values", "default", "population")
+                            if key in route
+                        }
+                        for route in entity.get("routes", [])
+                    ],
+                    sort_keys=True,
+                )
+            },
+        }
         for recipe in reviewed["metrics"]:
             metric_name = recipe["name"]
             expression, population, additivity, unit = _recipe(entity, recipe, columns)
@@ -601,17 +793,21 @@ def build_model(contract, overlay):
             if "default" in arg:
                 public["default"] = arg["default"]
             if "min_length" in arg:
-                if arg["min_length"] not in (0, 1):
-                    raise ValueError(
-                        "Semantic parameters only support min_length 0 or 1; "
-                        f"cannot preserve {arg['name']} min_length {arg['min_length']}"
-                    )
                 if arg["min_length"] == 1:
                     public["non_empty"] = True
+                else:
+                    public["min_length"] = arg["min_length"]
+            for bound in ("max_length", "pattern"):
+                if bound in arg:
+                    public[bound] = arg[bound]
             if "minimum" in arg:
                 public["minimum"] = arg["minimum"]
             if "example" in arg:
                 public["example"] = arg["example"]
+            if "enum" in arg:
+                public["comment"] += (
+                    " Allowed values: " + json.dumps(arg["enum"]) + ". Validated before retrieval."
+                )
             existing = model["semantic_query"]["parameters"].setdefault(parameter["name"], public)
             if existing != public:
                 raise ValueError(f"Inconsistent shared semantic parameter {parameter['name']}")
@@ -640,7 +836,8 @@ def build_model(contract, overlay):
                 }
             )
     for relation in contract["relationships"]:
-        policy["relationships"].append(relation["name"])
+        if relation.get("analytical", True):
+            policy["relationships"].append(relation["name"])
         policy["relationship_semantics"][relation["name"]] = {
             "optional": relation.get("optional", False),
             "key_evidence": "declared",
@@ -650,11 +847,17 @@ def build_model(contract, overlay):
     return model, reports
 
 
-def documentation(contract, overlay):
+def documentation(contract, overlay, coverage_audit=None):
     lines = [
         "# Connected generated GitHub model",
         "",
         overlay["model"]["comment"],
+        "",
+        "[coverage.json](coverage.json) compares this model with every pinned REST GET operation "
+        "and the complete query-reachable GraphQL type graph. It records implemented routes, "
+        "unselected API fields, possible opposite-direction fields and upstream schema errors. "
+        "These schema candidates do not establish equivalent populations or approved retrieval paths; "
+        "the audit does not execute live endpoints.",
         "",
         "Start with an organization, a user or a repository. Organizations connect to visible members, "
         "teams and repository activity; users connect to authored pull requests, issues, discussions "
@@ -687,19 +890,19 @@ def documentation(contract, overlay):
         "GROUP BY team_slug ORDER BY team_slug;",
         "",
         "-- User activity includes PRs in repositories the user does not own.",
-        "SELECT user_login, user_count, authored_pr_count, authored_merged_pr_count,",
-        "       authored_median_merge_hours",
+        "SELECT user_login, user_count, pull_request_count, merged_prs,",
+        "       median_merge_hours",
         "FROM engineering.semantic.github(user => 'octocat') GROUP BY user_login;",
         "",
-        "SELECT authored_repository_name, authored_pr_count, authored_merged_pr_count",
+        "SELECT pull_request_repository_name, pull_request_count, merged_prs",
         "FROM engineering.semantic.github(user => 'octocat')",
-        "GROUP BY authored_repository_name ORDER BY authored_repository_name;",
+        "GROUP BY pull_request_repository_name ORDER BY pull_request_repository_name;",
         "",
-        "SELECT authored_pr_merged_day, authored_merged_pr_count, authored_median_merge_hours",
+        "SELECT pull_request_merged_day, merged_prs, median_merge_hours",
         "FROM engineering.semantic.github(user => 'octocat')",
-        "WHERE authored_pr_merged_day >= DATE '2026-09-01'",
-        "  AND authored_pr_merged_day < DATE '2026-10-01'",
-        "GROUP BY authored_pr_merged_day ORDER BY authored_pr_merged_day;",
+        "WHERE pull_request_merged_day >= DATE '2026-09-01'",
+        "  AND pull_request_merged_day < DATE '2026-10-01'",
+        "GROUP BY pull_request_merged_day ORDER BY pull_request_merged_day;",
         "",
         "SELECT * FROM engineering.detail.organization_memberships(organization => 'Query-farm');",
         "SELECT * FROM engineering.detail.users(user => 'octocat');",
@@ -738,8 +941,9 @@ def documentation(contract, overlay):
         "  AND invocation_name='engineering.semantic.github' ORDER BY ordinal;",
         "```",
         "",
-        "For repository inventory, PRs, reviews and labels, choose exactly one of `organization`, "
-        "`owner` and `repository`. `organization` explicitly selects an organization's visible "
+        "For repository inventory and label definitions, choose exactly one of `organization`, "
+        "`owner`, `repository` and `repositories`. `organization` explicitly selects an organization's "
+        "visible "
         "repositories. The existing `owner` route resolves account type; a user owner lists PUBLIC "
         "owned repositories, not that person's contributions or private user inventory. Optional "
         "`pull_request_number` requires `repository`. Invalid, empty or conflicting scope arguments "
@@ -754,8 +958,7 @@ def documentation(contract, overlay):
         "Detail entries publish the same rules for their own sources. NULL defaults count as "
         "absent when choosing a scope.",
         "",
-        "Organization profiles, organization memberships, teams and team memberships require "
-        "`organization`. User profiles and all `authored_*` entities accept `user` or `users`. Only sources "
+        "The entity contracts below list each selectable population and retrieval route. Only sources "
         "needed by the selected measures, dimensions and filters are fetched. Requesting a profile "
         "does not enumerate repositories; zero-activity users and empty organizations remain "
         "visible when `user_count` or `organization_count` establishes the inventory population.",
@@ -763,17 +966,30 @@ def documentation(contract, overlay):
         "For explicit cohorts use `users => [{'login': 'octocat'}, {'login': 'hubot'}]` or "
         "`repositories => [{'repository': 'Query-farm/crossfield'}, {'repository': 'Query-farm/vgi'}]`. "
         "Cohorts are mutually exclusive with their singular scope alternatives. NULL means absent; "
-        "an empty list selects an empty population. Names must be nonempty and unique ignoring case, "
-        "and resolved duplicate identities raise an error. `pull_request_number` continues to require "
-        "one `repository`. Discovery publishes the exact LIST/STRUCT types and examples.",
+        "an empty list selects an empty population. Names must be nonempty and unique ignoring case. "
+        "Source pages must respect their declared grain. Distinct-entity routes remove repeated targets "
+        "across parents; membership routes retain each identity pair. Object numbers require one "
+        "`repository`. Discovery publishes the exact LIST/STRUCT types and examples.",
+        "",
+        "`pull_requests` is one entity under either repository or author selection. Supply a repository "
+        "scope, `user`/`users`, or both; both selects their intersection. Reviews and PR label/assignee "
+        "memberships follow the same PR population. For reviews, `user` means PR author, never reviewer. "
+        "One metric family (`pull_request_count`, `merged_prs`, `median_merge_hours`) works across scopes. "
+        "Use `pull_request_repository_name` for the repository carried on each PR; `repository_name` "
+        "belongs to the separately selected repository inventory. The former `authored_*` public names "
+        "are removed. Issues, discussions and comments also expose reverse retrieval routes; the entity "
+        "contracts below describe each selectable population and its visibility.",
         "",
         "Each selected function streams its own traversal. Separate functions may fetch the same "
         "ancestors; cross-function HTTP sharing awaits a paginated row-map interface in VGI. "
         "Native stages reuse their own parent relation without mixing independent fact grains.",
         "",
-        "User PRs come from GitHub's cursor-paginated user connection across visible repositories. "
+        "User PR discovery uses GitHub's cursor-paginated user connection across visible repositories. "
         "Each row must identify the selected canonical user as its author; missing or different "
-        "authors fail rather than silently changing the population. This is authored-PR activity, "
+        "authors fail rather than silently changing the population. Each discovered PR is hydrated "
+        "through repository and PR REST lookups, adding two requests per PR to preserve the same "
+        "complete fields under either scope. PR state is open/closed; a merge timestamp identifies "
+        "merged PRs. This is authored-PR activity, "
         "not an all-contributions score, an events timeline or a capped search result. Authored issues, "
         "discussions and issue/discussion/commit comments use their own cursor-paginated user "
         "connections with the same author check. Issue comments include comments on pull requests; "
@@ -808,8 +1024,8 @@ def documentation(contract, overlay):
         "Count metrics return zero for an established group with no matching records. "
         "Median merge time remains NULL for an empty merged cohort.",
         "",
-        "`pull_request_created_day`, `pull_request_merged_day`, `review_submitted_day`, "
-        "`authored_pr_created_day` and `authored_pr_merged_day` are approved DATE dimensions "
+        "`pull_request_created_day`, `pull_request_merged_day` and `review_submitted_day` are approved "
+        "DATE dimensions "
         "computed by DuckDB from the corresponding timestamp. "
         "They use Gregorian UTC calendar days, with a required `TimeZone='UTC'` session. "
         "Unmerged PRs have a NULL merge day; a missing review submission timestamp stays NULL. "
@@ -822,6 +1038,18 @@ def documentation(contract, overlay):
         "and semantic relationships define approved many-to-one joins. Business recipes define "
         "populations and "
         "elapsed-hour calculations. Saved reports are optional; this package needs none.",
+        "Relationship retrieval bindings are validated against source fields and target route parameters. "
+        "The generated model publishes them in `policy.tags.github.relationship_retrievals`; "
+        "dataset tags publish `github.retrieval_routes`. Supplying the declared parameters executes "
+        "the corresponding provider route. These metadata tags describe navigation; analytical "
+        "join planning continues to use the approved relationship keys and cardinalities.",
+        "A retrieval's `when` equalities and `when_null`/`when_not_null` field guards must all hold "
+        "before using its bindings. Unavailable identity evidence does not establish a navigable parent.",
+        "Relationships marked `analytical: false` retain their declared keys and retrieval bindings "
+        "but are not approved as analytical join paths. Actions jobs and attempts join through "
+        "runs and workflows. Artifacts join directly to repositories so artifacts without run "
+        "metadata retain their repository context. Artifact run associations remain available "
+        "for retrieval and identity fields; analytical enrichment by run outcome is not approved.",
         "",
         research_documentation(),
         "",
@@ -842,9 +1070,24 @@ def documentation(contract, overlay):
             "",
             "Grain: " + ", ".join(f"`{key}`" for key in entity["grain"]) + ".",
             "",
-            "| Column | SQL type | Nullable |",
-            "| --- | --- | --- |",
         ]
+        if "routes" in entity:
+            lines += ["| Retrieval route | Selection | Population |", "| --- | --- | --- |"]
+            for route in entity["routes"]:
+                selection = (
+                    "Default"
+                    if route.get("default")
+                    else ", ".join(f"`{name}`" for name in route["selection"])
+                )
+                if route.get("select_values"):
+                    selection += "; " + ", ".join(
+                        f"`{key}` in {json.dumps(values)}" for key, values in route["select_values"].items()
+                    )
+                lines.append(
+                    f"| `{route['name']}` | {selection} | {route.get('population', entity['description'])} |"
+                )
+            lines.append("")
+        lines += ["| Column | SQL type | Nullable |", "| --- | --- | --- |"]
         for column in _columns(entity).values():
             nullable = (
                 "native expression"
@@ -878,10 +1121,76 @@ def documentation(contract, overlay):
         "followed without a generated row or page cap; operation deadlines still apply. "
         "Crossfield adds no row cap; SQL LIMIT controls presentation.",
     ]
+    if coverage_audit is not None:
+        summary = coverage_audit["summary"]
+        measured = [
+            "",
+            "## Measured API coverage",
+            "",
+            f"The generated model selects {summary['rest_selected_operations']} of "
+            f"{summary['rest_operations']} pinned REST read operations. The implementation scope "
+            f"contains {summary['rest_in_scope_operations']} operations, of which "
+            f"{summary['rest_in_scope_selected_operations']} are selected. "
+            f"The {summary['rest_excluded_operations']} explicitly excluded operations remain in "
+            "the ledger. [Coverage policy](../../generation/coverage-policy.json) records the "
+            "user-selected scope and operation decisions; raw access does not count as semantic selection.",
+            "",
+        ]
+        keys = coverage_audit.get("contract_keys", {})
+        for product, value in keys.get("rest", {}).get("products", {}).items():
+            counts = value["summary"]
+            measured.extend(
+                [
+                    f"For `{product}`, {counts['in_scope_public_response_properties']} of "
+                    f"{counts['in_scope_response_properties']} in-scope named response-property "
+                    "declarations are projected into public entity fields. Shared declarations count "
+                    "once; dynamic map keys are unenumerated. "
+                    f"{counts['in_scope_bound_parameters']} of {counts['in_scope_parameters']} "
+                    "operation parameters are bound, including literal and runtime pagination bindings. "
+                    "A binding does not imply that every allowed parameter value is supported.",
+                    "",
+                ]
+            )
+        graph = keys.get("graphql", {}).get("summary")
+        if graph:
+            measured.extend(
+                [
+                    f"GraphQL queries fetch {graph['in_scope_fetched_fields']} of "
+                    f"{graph['in_scope_read_fields']} in-scope read-field coordinates; "
+                    f"{graph['in_scope_public_fields']} are projected into public fields. "
+                    f"The policy explicitly excludes {graph['excluded_fields']} coordinates from the "
+                    f"{graph['read_fields']} raw total. Raw measurements remain "
+                    f"{graph['fetched_fields']} fetched and {graph['public_fields']} publicly projected "
+                    "coordinates, including any excluded fields. Exclusions name exact owning types "
+                    "or fields and do not remove shared user, repository or actor fields transitively.",
+                    "",
+                    f"GraphQL queries bind {graph['in_scope_bound_arguments']} of "
+                    f"{graph['in_scope_declared_arguments']} in-scope field arguments; raw totals are "
+                    f"{graph['bound_arguments']} bound of {graph['declared_arguments']} declared, with "
+                    f"{graph['excluded_declared_arguments']} declared arguments excluded by their "
+                    "owning field's scope. Fetching requires an actual query selection; public exposure "
+                    "also requires a typed entity projection. Business information available through "
+                    "REST and fields merely present in the selected schema do not increase these "
+                    "GraphQL measurements. These measurements do not establish live endpoint "
+                    "qualification or business-domain completeness.",
+                    "",
+                ]
+            )
+        for operation_id, decision in (
+            coverage_audit.get("coverage_policy", {}).get("operation_decisions", {}).items()
+        ):
+            measured.extend([f"`{operation_id}`: {decision['reason']}", ""])
+        for entity, limitation in (
+            coverage_audit.get("coverage_policy", {}).get("entity_limitations", {}).items()
+        ):
+            measured.extend([f"`{entity}`: {limitation}", ""])
+        lines[7:7] = measured
     return "\n".join(lines) + "\n"
 
 
-def emit_artifacts(contract, overlay, provenance):
+def emit_artifacts(
+    contract, overlay, provenance, *, api_inventory=None, selected_sdl=None, coverage_policy=None
+):
     model, reports = build_model(contract, overlay)
     raw = json_text(model)
     documents = {"github-generated.crossfield.json": raw}
@@ -889,7 +1198,7 @@ def emit_artifacts(contract, overlay, provenance):
         "format": "crossfield.package",
         "version": 2,
         "package_id": str(NAMESPACE),
-        "revision": 8,
+        "revision": 11,
         "entrypoint": "github-generated.crossfield.json",
         "comment": model["comment"],
         "tags": {"owner": "Query Farm", "scope": "connected generation pilot"},
@@ -936,6 +1245,14 @@ def emit_artifacts(contract, overlay, provenance):
             ),
         },
     }
+    if api_inventory is not None:
+        coverage["api_audit"] = audit_coverage(
+            contract,
+            api_inventory,
+            selected_sdl,
+            overlay.get("crossfield", {}).get("invocations", {}).get("derived_datasets", {}),
+            policy=coverage_policy,
+        )
     schemas = {
         "format": "vgi-github-generated-source-schemas",
         "version": 1,
@@ -957,5 +1274,5 @@ def emit_artifacts(contract, overlay, provenance):
         "models/generated-pilot/reports.json": json_text(reports),
         "models/generated-pilot/source_schemas.json": json_text(schemas),
         "models/generated-pilot/coverage.json": json_text(coverage),
-        "models/generated-pilot/README.md": documentation(contract, overlay),
+        "models/generated-pilot/README.md": documentation(contract, overlay, coverage.get("api_audit")),
     }

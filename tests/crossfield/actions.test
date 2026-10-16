@@ -1,0 +1,268 @@
+# Independent Actions facts: reruns, all-attempt jobs, nested steps and artifacts.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT workflow_count FROM engineering.semantic.github(repository=>'example/alpha');
+----
+2
+
+query TI
+SELECT workflows_state,workflow_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY workflows_state ORDER BY workflows_state;
+----
+active	1
+disabled_manually	1
+
+query I
+SELECT workflow_count FROM engineering.semantic.github(repository=>'example/alpha',workflow_id=>601);
+----
+1
+
+# Run 1001 counts once although it was rerun. Unknown outcomes are not successes.
+query IIII
+SELECT workflow_run_count,workflow_run_success_count,workflow_run_failure_count,workflow_run_cancelled_count FROM engineering.semantic.github(repository=>'example/alpha');
+----
+3	1	1	0
+
+query II
+SELECT workflow_run_count,workflow_run_success_count FROM engineering.semantic.github(repository=>'example/alpha',workflow_id=>601);
+----
+2	1
+
+query IITTT
+SELECT run_id,run_attempt,conclusion,actor_login,triggering_actor_login FROM engineering.detail.workflow_runs(repository=>'example/alpha',run_id=>1001);
+----
+1001	2	success	alice	bob
+
+query III
+SELECT workflow_run_attempt_count,workflow_run_attempt_failure_count,workflow_run_attempt_success_count FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001,attempt_number=>1);
+----
+1	1	0
+
+query IIT
+SELECT run_id,attempt_number,conclusion FROM engineering.detail.workflow_run_attempts(repository=>'example/alpha',run_id=>1001,attempt_number=>2);
+----
+1001	2	success
+
+# All-attempt job population includes failed executions superseded by a rerun.
+query IIIR
+SELECT workflow_job_count,workflow_job_success_count,workflow_job_failure_count,median_workflow_job_execution_hours FROM engineering.semantic.github(repository=>'example/alpha');
+----
+4	2	2	1.5
+
+query IIIR
+SELECT workflow_job_count,workflow_job_success_count,workflow_job_failure_count,median_workflow_job_execution_hours FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001);
+----
+3	2	1	1.0
+
+query II
+SELECT workflow_jobs_run_attempt,workflow_job_count FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001) GROUP BY workflow_jobs_run_attempt ORDER BY workflow_jobs_run_attempt;
+----
+1	1
+2	2
+
+query II
+SELECT workflow_job_count,workflow_job_success_count FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001,attempt_number=>2);
+----
+2	2
+
+query I
+SELECT workflow_job_count FROM engineering.semantic.github(repository=>'example/alpha',workflow_id=>601);
+----
+3
+
+query II
+SELECT job_id,run_attempt FROM engineering.detail.workflow_jobs(repository=>'example/alpha',job_id=>2001);
+----
+2001	1
+
+# Nested steps have job/step-number grain, and never multiply the job count.
+query III
+SELECT workflow_job_count,workflow_job_step_count,workflow_job_step_failure_count FROM engineering.semantic.github(repository=>'example/alpha');
+----
+4	7	2
+
+query III
+SELECT workflow_job_count,workflow_job_step_count,workflow_job_step_failure_count FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001);
+----
+3	5	1
+
+query III
+SELECT workflow_job_count,workflow_job_step_count,workflow_job_step_failure_count FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001,attempt_number=>2);
+----
+2	3	0
+
+# Artifact names repeat; expired and unlinked metadata remain visible.
+query II
+SELECT workflow_artifact_count,workflow_artifact_bytes FROM engineering.semantic.github(repository=>'example/alpha',workflow_id=>601);
+----
+2	30
+
+query II
+SELECT workflow_artifact_count,workflow_artifact_bytes FROM engineering.semantic.github(repository=>'example/alpha');
+----
+4	75
+
+query II
+SELECT workflow_artifact_count,workflow_artifact_bytes FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001);
+----
+2	30
+
+query IIT
+SELECT artifact_id,size_in_bytes,expired FROM engineering.detail.workflow_artifacts(repository=>'example/alpha',artifact_id=>3002);
+----
+3002	20	true
+
+query II
+SELECT workflow_artifacts_run_id,workflow_artifact_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY workflow_artifacts_run_id ORDER BY workflow_artifacts_run_id NULLS LAST;
+----
+1001	2
+1003	1
+NULL	1
+
+query IIII
+SELECT workflow_count,workflow_run_count,workflow_job_count,workflow_artifact_count FROM engineering.semantic.github(repository=>'example/empty');
+----
+0	0	0	0
+
+# Workflow/run/job fanout does not multiply canonical parent counts.
+query TII
+SELECT workflows_name,workflow_run_count,workflow_job_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY workflows_name ORDER BY workflows_name;
+----
+CI	2	3
+Package	1	1
+
+# Known artifact repository context survives even when optional run context is absent.
+query TII
+SELECT workflow_artifacts_repository,workflow_artifact_count,workflow_artifact_bytes FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY workflow_artifacts_repository;
+----
+example/alpha	4	75
+
+# Direct repository enrichment preserves artifacts with unknown run identity.
+query TI
+SELECT repository_name,workflow_artifact_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY repository_name;
+----
+example/alpha	4
+
+# Canonical parent paths also support repository enrichment without a diamond.
+query TI
+SELECT repository_name,workflow_job_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY repository_name;
+----
+example/alpha	4
+
+# Attempt-local outcomes do not silently become the run's latest outcome.
+query TI
+SELECT workflow_run_attempts_conclusion,workflow_run_attempt_count FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001,attempt_number=>1) GROUP BY workflow_run_attempts_conclusion;
+----
+failure	1
+
+# Missing attempt selectors fail before network enumeration.
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+# Run retrieval is declared, but unapproved run enrichment must fail before HTTP.
+statement error
+SELECT workflow_runs_conclusion,workflow_artifact_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY workflow_runs_conclusion;
+----
+CROSSFIELD_INCOMPATIBLE_GRAIN
+
+statement error
+SELECT workflow_run_attempt_count FROM engineering.semantic.github(repository=>'example/alpha',run_id=>1001);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement error
+SELECT workflow_job_count FROM engineering.semantic.github(attempt_number=>2);
+----
+repository
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+# Typed run context keeps Git authors, Actions actors, matching PRs and reused workflow refs distinct.
+statement ok
+CREATE TEMP TABLE actions_run_context AS SELECT * FROM engineering.detail.workflow_runs(repository=>'example/alpha',run_id=>1001);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTTT
+SELECT event,actor.login,triggering_actor.login,head_commit.author.name,head_commit.author.email FROM actions_run_context;
+----
+push	alice	bob	Git Author	author@example.invalid
+
+query ITT
+SELECT matching_pull_requests[1].number,referenced_workflows[1].path,referenced_workflows[1].ref FROM actions_run_context;
+----
+7	other/reusable/.github/workflows/build.yml@main	refs/heads/main
+
+query IITII
+SELECT repository_snapshot.id,head_repository_id,head_repository,reported_head_repository_id,head_commit.committer IS NULL FROM actions_run_context;
+----
+101	901	contributor/fork	901	true
+
+query TT
+SELECT check_suite_node_id,previous_attempt_url FROM actions_run_context;
+----
+CS10001	https://api.github.com/repos/example/alpha/actions/runs/1001/attempts/1
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE actions_artifact_context AS SELECT * FROM engineering.detail.workflow_artifacts(repository=>'example/alpha');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IIII
+SELECT artifact_id,run_repository_id,head_repository_id,workflow_run IS NULL FROM actions_artifact_context ORDER BY artifact_id;
+----
+3001	101	901	false
+3002	101	901	false
+3003	101	101	false
+3004	NULL	NULL	true
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

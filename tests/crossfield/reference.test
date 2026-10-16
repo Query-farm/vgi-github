@@ -1,0 +1,315 @@
+# Independent reference catalogs, dictionary facts and current-caller observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Default discovery hydrates the same canonical records as direct lookup.
+query II
+SELECT license_count,featured_license_count FROM engineering.semantic.github();
+----
+2	1
+
+query II
+SELECT license_count,featured_license_count FROM engineering.semantic.github(license_featured=>true);
+----
+1	1
+
+query II
+SELECT license_count,featured_license_count FROM engineering.semantic.github(license_key=>'apache-2.0');
+----
+1	0
+
+statement ok
+CREATE TEMP TABLE reference_detail_1 AS SELECT * FROM engineering.detail.licenses(license_key=>'mit');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIII
+SELECT license_key,len(permissions),len(conditions),len(limitations) FROM reference_detail_1;
+----
+mit	2	1	1
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT code_of_conduct_count FROM engineering.semantic.github();
+----
+2
+
+query I
+SELECT gitignore_template_count FROM engineering.semantic.github();
+----
+2
+
+statement ok
+CREATE TEMP TABLE reference_detail_2 AS SELECT * FROM engineering.detail.gitignore_templates(gitignore_name=>'C++');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TT
+SELECT template_name,hex(source) FROM reference_detail_2;
+----
+C++	2A2E6F0A2A2E736F0A
+
+statement ok
+SET crossfield_mode='strict';
+
+# Named emoji aliases remain distinct keys even when their image URL is shared.
+query I
+SELECT emoji_count FROM engineering.semantic.github();
+----
+3
+
+statement ok
+CREATE TEMP TABLE reference_detail_3 AS SELECT * FROM engineering.detail.emojis();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query II
+SELECT COUNT(*),COUNT(DISTINCT image_url) FROM reference_detail_3;
+----
+3	2
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT api_version_count FROM engineering.semantic.github();
+----
+2
+
+statement ok
+CREATE TEMP TABLE reference_detail_4 AS SELECT * FROM engineering.detail.api_versions();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TT
+SELECT CAST(api_version AS VARCHAR),typeof(api_version) FROM reference_detail_4 ORDER BY api_version;
+----
+2022-11-28	DATE
+2026-03-10	DATE
+
+statement ok
+SET crossfield_mode='strict';
+
+# Include the repository population so empty language dictionaries retain their parent.
+query TIII
+SELECT repository_name,repository_count,repository_language_count,repository_language_bytes FROM engineering.semantic.github(organization=>'reference-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+reference-fixture/alpha	1	2	2000
+reference-fixture/beta	1	0	0
+
+query TII
+SELECT repository_languages_language,repository_language_count,repository_language_bytes FROM engineering.semantic.github(repository=>'reference-fixture/alpha') GROUP BY repository_languages_language ORDER BY repository_languages_language;
+----
+C++	1	800
+Python	1	1200
+
+query II
+SELECT repository_language_count,repository_language_bytes FROM engineering.semantic.github(repositories=>[]);
+----
+0	0
+
+# File presence, recognized license classification and encoded content remain separate facts.
+query TII
+SELECT repository_name,repository_license_file_count,repository_license_file_bytes FROM engineering.semantic.github(organization=>'reference-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+reference-fixture/alpha	1	4
+reference-fixture/beta	1	0
+
+statement ok
+CREATE TEMP TABLE reference_detail_5 AS SELECT * FROM engineering.detail.repository_license_files(organization=>'reference-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIT
+SELECT repository,CAST(detected_license IS NULL AS INTEGER),encoding FROM reference_detail_5 ORDER BY repository;
+----
+reference-fixture/alpha	0	base64
+reference-fixture/beta	1	base64
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE reference_detail_6 AS SELECT * FROM engineering.detail.repository_license_files(repository=>'reference-fixture/alpha',license_ref=>'old');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTT
+SELECT requested_ref,blob_sha,encoded_content FROM reference_detail_6;
+----
+old	bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb	TUlUCg==
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT repository_license_file_count FROM engineering.semantic.github(repository=>'reference-fixture/missing');
+----
+404
+
+# These are one-call observations, not inventories of durable API resources.
+query I
+SELECT api_root_observation_count FROM engineering.semantic.github();
+----
+1
+
+statement ok
+CREATE TEMP TABLE reference_detail_7 AS SELECT * FROM engineering.detail.api_root_observations();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query T
+SELECT repository_url FROM reference_detail_7;
+----
+https://api.github.com/repos/{owner}/{repo}
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT api_metadata_observation_count FROM engineering.semantic.github();
+----
+1
+
+statement ok
+CREATE TEMP TABLE reference_detail_8 AS SELECT * FROM engineering.detail.api_metadata_observations();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IT
+SELECT len(hooks),domains.actions_inbound.full_domains[1] FROM reference_detail_8;
+----
+1	fixture.actions.invalid
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT api_rate_limit_observation_count,api_core_requests_remaining FROM engineering.semantic.github();
+----
+1	4900
+
+statement ok
+CREATE TEMP TABLE reference_detail_9 AS SELECT * FROM engineering.detail.api_rate_limit_observations();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIII
+SELECT core_limit,core_remaining,core_used,core_reset FROM reference_detail_9;
+----
+5000	4900	100	1800000000
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE reference_detail_10 AS SELECT * FROM engineering.detail.api_rate_limit_observations();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query III
+SELECT resources.graphql.remaining,resources.search.remaining,CAST(resources.dependency_sbom IS NULL AS INTEGER) FROM reference_detail_10;
+----
+4990	29	1
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT api_zen_observation_count FROM engineering.semantic.github();
+----
+1
+
+statement ok
+CREATE TEMP TABLE reference_detail_11 AS SELECT * FROM engineering.detail.api_zen_observations();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TII
+SELECT typeof(body),byte_length,CAST(encode(text)=body AS INTEGER) FROM reference_detail_11;
+----
+BLOB	15	1
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE reference_detail_12 AS SELECT * FROM engineering.detail.api_zen_observations();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query T
+SELECT hex(body) FROM reference_detail_12;
+----
+4B65657020697420636C6561722E0A
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT api_octocat_observation_count FROM engineering.semantic.github(octocat_speech=>'Hi');
+----
+1
+
+statement ok
+CREATE TEMP TABLE reference_detail_13 AS SELECT * FROM engineering.detail.api_octocat_observations(octocat_speech=>'Hi');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TI
+SELECT speech,byte_length FROM reference_detail_13;
+----
+Hi	14
+
+
+statement ok
+SET crossfield_mode='strict';

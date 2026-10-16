@@ -1,0 +1,1437 @@
+{
+  "entities": [
+    {
+      "name": "repository_agent_tasks_source",
+      "description": "Complete Link-paginated task discovery; hydrate each task through its matching full-detail endpoint. Envelope active/archive totals describe separate populations and are not used as filtered row-count guarantees.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "agent_task_states",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Comma-separated task states to select; omitted means any state within the chosen archived population.",
+          "default": null,
+          "min_length": 1,
+          "example": "completed,failed"
+        },
+        {
+          "name": "agent_task_archived",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Select archived tasks when true, or active non-archived tasks when false or omitted.",
+          "default": null,
+          "example": false
+        },
+        {
+          "name": "agent_task_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only tasks updated at or after this instant.",
+          "default": null,
+          "example": "2026-09-01T00:00:00Z"
+        },
+        {
+          "name": "agent_task_sort",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "API task ordering field; ordering does not limit the fully paginated population.",
+          "enum": [
+            "updated_at",
+            "created_at"
+          ],
+          "default": null,
+          "min_length": 1,
+          "example": "updated_at"
+        },
+        {
+          "name": "agent_task_direction",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "API task ordering direction; ordering does not limit the fully paginated population.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": null,
+          "min_length": 1,
+          "example": "desc"
+        },
+        {
+          "name": "agent_task_creator_ids",
+          "type": "BIGINT[]",
+          "nullable": true,
+          "description": "Repository task creator user IDs; serialized as repeated creator_id query parameters.",
+          "default": null,
+          "example": [
+            8101,
+            8102
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "task_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "task_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "agent-tasks/list-tasks-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "agent_task_states"
+          },
+          "is_archived": {
+            "argument": "agent_task_archived"
+          },
+          "since": {
+            "argument": "agent_task_since"
+          },
+          "sort": {
+            "argument": "agent_task_sort"
+          },
+          "direction": {
+            "argument": "agent_task_direction"
+          },
+          "creator_id": {
+            "argument": "agent_task_creator_ids"
+          }
+        },
+        "result_path": [
+          "tasks"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_agent_tasks_lookup_source",
+      "description": "Full task observation, retaining every typed task/session/artifact field. Repository ownership, task creation and session creation are distinct actor roles.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "agent_task_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact globally unique agent task identifier; repository optionally selects the repository-specific lookup endpoint.",
+          "min_length": 1,
+          "example": "task-001"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "task_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "creator_id",
+          "path": [
+            "creator",
+            "id"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "creator_type",
+          "path": [
+            "creator_type"
+          ]
+        },
+        {
+          "name": "user_collaborators",
+          "path": [
+            "user_collaborators"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "session_count",
+          "path": [
+            "session_count"
+          ]
+        },
+        {
+          "name": "artifacts",
+          "path": [
+            "artifacts"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "provider": true,
+            "type": true,
+            "data": {
+              "variant_1": true,
+              "variant_2": true
+            }
+          }
+        },
+        {
+          "name": "archived_at",
+          "path": [
+            "archived_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "custom_agent_id",
+          "path": [
+            "custom_agent",
+            "id"
+          ]
+        },
+        {
+          "name": "sessions",
+          "path": [
+            "sessions"
+          ]
+        }
+      ],
+      "grain": [
+        "task_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "agent-tasks/get-task-by-repo-and-id",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "task_id": {
+            "argument": "agent_task_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "task_id",
+            "argument": "agent_task_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authenticated_agent_tasks_source",
+      "description": "Complete Link-paginated task discovery; hydrate each task through its matching full-detail endpoint. Envelope active/archive totals describe separate populations and are not used as filtered row-count guarantees.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield",
+          "default": null
+        },
+        {
+          "name": "agent_task_states",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Comma-separated task states to select; omitted means any state within the chosen archived population.",
+          "default": null,
+          "min_length": 1,
+          "example": "completed,failed"
+        },
+        {
+          "name": "agent_task_archived",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Select archived tasks when true, or active non-archived tasks when false or omitted.",
+          "default": null,
+          "example": false
+        },
+        {
+          "name": "agent_task_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only tasks updated at or after this instant.",
+          "default": null,
+          "example": "2026-09-01T00:00:00Z"
+        },
+        {
+          "name": "agent_task_sort",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "API task ordering field; ordering does not limit the fully paginated population.",
+          "enum": [
+            "updated_at",
+            "created_at"
+          ],
+          "default": null,
+          "min_length": 1,
+          "example": "updated_at"
+        },
+        {
+          "name": "agent_task_direction",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "API task ordering direction; ordering does not limit the fully paginated population.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": null,
+          "min_length": 1,
+          "example": "desc"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "task_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "task_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "agent-tasks/list-tasks",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "agent_task_states"
+          },
+          "is_archived": {
+            "argument": "agent_task_archived"
+          },
+          "since": {
+            "argument": "agent_task_since"
+          },
+          "sort": {
+            "argument": "agent_task_sort"
+          },
+          "direction": {
+            "argument": "agent_task_direction"
+          }
+        },
+        "result_path": [
+          "tasks"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "authenticated_agent_tasks_lookup_source",
+      "description": "Full task observation, retaining every typed task/session/artifact field. Repository ownership, task creation and session creation are distinct actor roles.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield",
+          "default": null
+        },
+        {
+          "name": "agent_task_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact globally unique agent task identifier; repository optionally selects the repository-specific lookup endpoint.",
+          "min_length": 1,
+          "example": "task-001"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "task_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "creator_id",
+          "path": [
+            "creator",
+            "id"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "creator_type",
+          "path": [
+            "creator_type"
+          ]
+        },
+        {
+          "name": "user_collaborators",
+          "path": [
+            "user_collaborators"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "session_count",
+          "path": [
+            "session_count"
+          ]
+        },
+        {
+          "name": "artifacts",
+          "path": [
+            "artifacts"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "provider": true,
+            "type": true,
+            "data": {
+              "variant_1": true,
+              "variant_2": true
+            }
+          }
+        },
+        {
+          "name": "archived_at",
+          "path": [
+            "archived_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "custom_agent_id",
+          "path": [
+            "custom_agent",
+            "id"
+          ]
+        },
+        {
+          "name": "sessions",
+          "path": [
+            "sessions"
+          ]
+        }
+      ],
+      "grain": [
+        "task_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "agent-tasks/get-task-by-id",
+        "path_bindings": {
+          "task_id": {
+            "argument": "agent_task_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "task_id",
+            "argument": "agent_task_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "agent_tasks",
+      "description": "Canonical agent tasks identified by globally unique task ID. Repository and authenticated routes hydrate full details, including typed artifact alternatives and session observations. The listing defaults to non-archived tasks; archived tasks require explicit selection. Global responses supply optional numeric repository and actor IDs, without account logins or repository full names; unknown names stay NULL and no unsupported ID-to-name endpoint is invented. Creator, repository owner and nested session user are separate roles. Session billing units remain typed detail and are not combined into a usage metric.",
+      "grain": [
+        "task_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository",
+          "task_id",
+          "repository_id",
+          "repository_owner_id",
+          "creator_id",
+          "creator_type",
+          "user_collaborators",
+          "url",
+          "html_url",
+          "name",
+          "state",
+          "session_count",
+          "artifacts",
+          "archived_at",
+          "created_at",
+          "updated_at",
+          "custom_agent_id",
+          "sessions",
+          "task_created_day"
+        ],
+        "dimensions": [
+          "task_id",
+          "repository",
+          "repository_id",
+          "repository_owner_id",
+          "creator_id",
+          "creator_type",
+          "state",
+          "custom_agent_id",
+          "created_at",
+          "updated_at",
+          "archived_at",
+          "task_created_day"
+        ],
+        "sql_names": {
+          "task_id": "agent_tasks_task_id",
+          "repository": "agent_tasks_repository",
+          "repository_id": "agent_tasks_repository_id",
+          "repository_owner_id": "agent_tasks_repository_owner_id",
+          "creator_id": "agent_tasks_creator_id",
+          "creator_type": "agent_tasks_creator_type",
+          "state": "agent_tasks_state",
+          "custom_agent_id": "agent_tasks_custom_agent_id",
+          "created_at": "agent_tasks_created_at",
+          "updated_at": "agent_tasks_updated_at",
+          "archived_at": "agent_tasks_archived_at",
+          "task_created_day": "agent_tasks_task_created_day"
+        },
+        "metrics": [
+          {
+            "name": "agent_task_count",
+            "kind": "count",
+            "comment": "Enumerated task identities in the explicitly selected population."
+          },
+          {
+            "name": "completed_agent_task_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "completed"
+            },
+            "comment": "Tasks whose current API state is completed."
+          },
+          {
+            "name": "failed_agent_task_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "failed"
+            },
+            "comment": "Tasks whose current API state is failed."
+          },
+          {
+            "name": "in_progress_agent_task_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "in_progress"
+            },
+            "comment": "Tasks whose current API state is in_progress."
+          },
+          {
+            "name": "queued_agent_task_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "queued"
+            },
+            "comment": "Tasks whose current API state is queued."
+          },
+          {
+            "name": "waiting_for_user_agent_task_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "waiting_for_user"
+            },
+            "comment": "Tasks whose current API state is waiting_for_user."
+          },
+          {
+            "name": "timed_out_agent_task_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "timed_out"
+            },
+            "comment": "Tasks whose current API state is timed_out."
+          },
+          {
+            "name": "cancelled_agent_task_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "cancelled"
+            },
+            "comment": "Tasks whose current API state is cancelled."
+          },
+          {
+            "name": "idle_agent_task_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "idle"
+            },
+            "comment": "Tasks whose current API state is idle."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "task_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC date of task creation."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "reported_agent_session_count": {
+              "expression": "SUM(agent_tasks.session_count)"
+            },
+            "observed_agent_session_count": {
+              "expression": "SUM(length(agent_tasks.sessions))"
+            },
+            "agent_task_artifact_count": {
+              "expression": "SUM(length(agent_tasks.artifacts))"
+            },
+            "archived_agent_task_count": {
+              "expression": "COUNT(*) FILTER (WHERE agent_tasks.archived_at IS NOT NULL)"
+            }
+          },
+          "metric_semantics": {
+            "reported_agent_session_count": {
+              "dataset": "agent_tasks",
+              "comment": "Sum of API-reported session counters, which may differ from nested session observations.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "observed_agent_session_count": {
+              "dataset": "agent_tasks",
+              "comment": "Number of observed nested sessions; missing session arrays remain unknown, while empty arrays count zero.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "agent_task_artifact_count": {
+              "dataset": "agent_tasks",
+              "comment": "Typed artifact associations returned with selected tasks, not distinct PRs or branches.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "archived_agent_task_count": {
+              "dataset": "agent_tasks",
+              "comment": "Tasks with a reported archive timestamp; no inferred archive time.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "agent_task_id"
+          ],
+          "arguments": [
+            {
+              "name": "agent_task_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact globally unique agent task identifier; repository optionally selects the repository-specific lookup endpoint.",
+              "min_length": 1,
+              "example": "task-001"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "task_id",
+              "source_stage": "records",
+              "source_column": "task_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository_owner_id",
+              "source_stage": "records",
+              "source_column": "repository_owner_id"
+            },
+            {
+              "name": "creator_id",
+              "source_stage": "records",
+              "source_column": "creator_id"
+            },
+            {
+              "name": "creator_type",
+              "source_stage": "records",
+              "source_column": "creator_type"
+            },
+            {
+              "name": "user_collaborators",
+              "source_stage": "records",
+              "source_column": "user_collaborators"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "session_count",
+              "source_stage": "records",
+              "source_column": "session_count"
+            },
+            {
+              "name": "artifacts",
+              "source_stage": "records",
+              "source_column": "artifacts"
+            },
+            {
+              "name": "archived_at",
+              "source_stage": "records",
+              "source_column": "archived_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "custom_agent_id",
+              "source_stage": "records",
+              "source_column": "custom_agent_id"
+            },
+            {
+              "name": "sessions",
+              "source_stage": "records",
+              "source_column": "sessions"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "scope": "agent_task_lookup"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One globally identified task. Supplying repository uses the repository-scoped API; omitting it uses the authenticated global task lookup. Listing filters are deliberately not accepted by lookup."
+        },
+        {
+          "name": "authenticated",
+          "select": [
+            "authenticated_user"
+          ],
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "agent_task_states",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Comma-separated task states to select; omitted means any state within the chosen archived population.",
+              "default": null,
+              "min_length": 1,
+              "example": "completed,failed"
+            },
+            {
+              "name": "agent_task_archived",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "description": "Select archived tasks when true, or active non-archived tasks when false or omitted.",
+              "default": null,
+              "example": false
+            },
+            {
+              "name": "agent_task_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only tasks updated at or after this instant.",
+              "default": null,
+              "example": "2026-09-01T00:00:00Z"
+            },
+            {
+              "name": "agent_task_sort",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "API task ordering field; ordering does not limit the fully paginated population.",
+              "enum": [
+                "updated_at",
+                "created_at"
+              ],
+              "default": null,
+              "min_length": 1,
+              "example": "updated_at"
+            },
+            {
+              "name": "agent_task_direction",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "API task ordering direction; ordering does not limit the fully paginated population.",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": null,
+              "min_length": 1,
+              "example": "desc"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "task_id",
+              "source_stage": "records",
+              "source_column": "task_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository_owner_id",
+              "source_stage": "records",
+              "source_column": "repository_owner_id"
+            },
+            {
+              "name": "creator_id",
+              "source_stage": "records",
+              "source_column": "creator_id"
+            },
+            {
+              "name": "creator_type",
+              "source_stage": "records",
+              "source_column": "creator_type"
+            },
+            {
+              "name": "user_collaborators",
+              "source_stage": "records",
+              "source_column": "user_collaborators"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "session_count",
+              "source_stage": "records",
+              "source_column": "session_count"
+            },
+            {
+              "name": "artifacts",
+              "source_stage": "records",
+              "source_column": "artifacts"
+            },
+            {
+              "name": "archived_at",
+              "source_stage": "records",
+              "source_column": "archived_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "custom_agent_id",
+              "source_stage": "records",
+              "source_column": "custom_agent_id"
+            },
+            {
+              "name": "sessions",
+              "source_stage": "records",
+              "source_column": "sessions"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "tasks",
+                "entity": "authenticated_agent_tasks_source",
+                "arguments": {
+                  "repository": {
+                    "literal": null
+                  },
+                  "agent_task_states": {
+                    "parameter": "agent_task_states"
+                  },
+                  "agent_task_archived": {
+                    "parameter": "agent_task_archived"
+                  },
+                  "agent_task_since": {
+                    "parameter": "agent_task_since"
+                  },
+                  "agent_task_sort": {
+                    "parameter": "agent_task_sort"
+                  },
+                  "agent_task_direction": {
+                    "parameter": "agent_task_direction"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "authenticated_agent_tasks_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "tasks",
+                    "column": "repository"
+                  },
+                  "agent_task_id": {
+                    "stage": "tasks",
+                    "column": "task_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Tasks visible to the authenticated user, defaulting to non-archived tasks; agent_task_archived=true selects archived tasks. Full detail is hydrated for every discovered task. Numeric repository IDs may be known while repository names remain unknown."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "agent_task_states",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Comma-separated task states to select; omitted means any state within the chosen archived population.",
+              "default": null,
+              "min_length": 1,
+              "example": "completed,failed"
+            },
+            {
+              "name": "agent_task_archived",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "description": "Select archived tasks when true, or active non-archived tasks when false or omitted.",
+              "default": null,
+              "example": false
+            },
+            {
+              "name": "agent_task_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only tasks updated at or after this instant.",
+              "default": null,
+              "example": "2026-09-01T00:00:00Z"
+            },
+            {
+              "name": "agent_task_sort",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "API task ordering field; ordering does not limit the fully paginated population.",
+              "enum": [
+                "updated_at",
+                "created_at"
+              ],
+              "default": null,
+              "min_length": 1,
+              "example": "updated_at"
+            },
+            {
+              "name": "agent_task_direction",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "API task ordering direction; ordering does not limit the fully paginated population.",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": null,
+              "min_length": 1,
+              "example": "desc"
+            },
+            {
+              "name": "agent_task_creator_ids",
+              "type": "BIGINT[]",
+              "nullable": true,
+              "description": "Repository task creator user IDs; serialized as repeated creator_id query parameters.",
+              "default": null,
+              "example": [
+                8101,
+                8102
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "task_id",
+              "source_stage": "records",
+              "source_column": "task_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository_owner_id",
+              "source_stage": "records",
+              "source_column": "repository_owner_id"
+            },
+            {
+              "name": "creator_id",
+              "source_stage": "records",
+              "source_column": "creator_id"
+            },
+            {
+              "name": "creator_type",
+              "source_stage": "records",
+              "source_column": "creator_type"
+            },
+            {
+              "name": "user_collaborators",
+              "source_stage": "records",
+              "source_column": "user_collaborators"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "session_count",
+              "source_stage": "records",
+              "source_column": "session_count"
+            },
+            {
+              "name": "artifacts",
+              "source_stage": "records",
+              "source_column": "artifacts"
+            },
+            {
+              "name": "archived_at",
+              "source_stage": "records",
+              "source_column": "archived_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "custom_agent_id",
+              "source_stage": "records",
+              "source_column": "custom_agent_id"
+            },
+            {
+              "name": "sessions",
+              "source_stage": "records",
+              "source_column": "sessions"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "tasks",
+                "entity": "repository_agent_tasks_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "agent_task_states": {
+                    "parameter": "agent_task_states"
+                  },
+                  "agent_task_archived": {
+                    "parameter": "agent_task_archived"
+                  },
+                  "agent_task_since": {
+                    "parameter": "agent_task_since"
+                  },
+                  "agent_task_sort": {
+                    "parameter": "agent_task_sort"
+                  },
+                  "agent_task_direction": {
+                    "parameter": "agent_task_direction"
+                  },
+                  "agent_task_creator_ids": {
+                    "parameter": "agent_task_creator_ids"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "repository_agent_tasks_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "tasks",
+                    "column": "repository"
+                  },
+                  "agent_task_id": {
+                    "stage": "tasks",
+                    "column": "task_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All selected repositories or repository cohorts, preserving every Link page. Default non-archived and explicitly selected archived tasks are separate API populations, with optional state, update-time and creator filters."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "agent_tasks_to_repositories",
+      "from": "agent_tasks",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "optional": true,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    }
+  ],
+  "scopes": {
+    "agent_task_lookup": {
+      "comment": "Use a repository-specific lookup when repository is supplied; otherwise use the globally identified authenticated task endpoint.",
+      "select": {
+        "parameter": "repository",
+        "if_present": {
+          "entity": "repository_agent_tasks_lookup_source",
+          "arguments": {
+            "repository": {
+              "parameter": "repository"
+            },
+            "agent_task_id": {
+              "parameter": "agent_task_id"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "authenticated_agent_tasks_lookup_source",
+          "arguments": {
+            "repository": {
+              "literal": null
+            },
+            "agent_task_id": {
+              "parameter": "agent_task_id"
+            }
+          }
+        }
+      }
+    }
+  }
+}

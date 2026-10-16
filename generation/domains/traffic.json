@@ -1,0 +1,2090 @@
+{
+  "entities": [
+    {
+      "name": "repository_clone_traffic_source",
+      "description": "repos/get-clones pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        },
+        {
+          "name": "traffic_granularity",
+          "type": "VARCHAR",
+          "nullable": false,
+          "enum": [
+            "day",
+            "week"
+          ],
+          "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+          "example": "day"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "traffic_granularity",
+          "source_argument": "traffic_granularity"
+        },
+        {
+          "name": "total_count",
+          "path": [
+            "count"
+          ]
+        },
+        {
+          "name": "unique_count",
+          "path": [
+            "uniques"
+          ]
+        },
+        {
+          "name": "buckets",
+          "path": [
+            "clones"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "traffic_granularity"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-clones",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per": {
+            "argument": "traffic_granularity"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "repository_clone_traffic_buckets_source",
+      "description": "repos/get-clones pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        },
+        {
+          "name": "traffic_granularity",
+          "type": "VARCHAR",
+          "nullable": false,
+          "enum": [
+            "day",
+            "week"
+          ],
+          "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+          "example": "day"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "traffic_granularity",
+          "source_argument": "traffic_granularity"
+        },
+        {
+          "name": "bucket_start",
+          "path": [
+            "timestamp"
+          ]
+        },
+        {
+          "name": "event_count",
+          "path": [
+            "count"
+          ]
+        },
+        {
+          "name": "unique_count",
+          "path": [
+            "uniques"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "traffic_granularity",
+        "bucket_start"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-clones",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per": {
+            "argument": "traffic_granularity"
+          }
+        },
+        "result_path": [
+          "clones"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_view_traffic_source",
+      "description": "repos/get-views pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        },
+        {
+          "name": "traffic_granularity",
+          "type": "VARCHAR",
+          "nullable": false,
+          "enum": [
+            "day",
+            "week"
+          ],
+          "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+          "example": "day"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "traffic_granularity",
+          "source_argument": "traffic_granularity"
+        },
+        {
+          "name": "total_count",
+          "path": [
+            "count"
+          ]
+        },
+        {
+          "name": "unique_count",
+          "path": [
+            "uniques"
+          ]
+        },
+        {
+          "name": "buckets",
+          "path": [
+            "views"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "traffic_granularity"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-views",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per": {
+            "argument": "traffic_granularity"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "repository_view_traffic_buckets_source",
+      "description": "repos/get-views pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        },
+        {
+          "name": "traffic_granularity",
+          "type": "VARCHAR",
+          "nullable": false,
+          "enum": [
+            "day",
+            "week"
+          ],
+          "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+          "example": "day"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "traffic_granularity",
+          "source_argument": "traffic_granularity"
+        },
+        {
+          "name": "bucket_start",
+          "path": [
+            "timestamp"
+          ]
+        },
+        {
+          "name": "event_count",
+          "path": [
+            "count"
+          ]
+        },
+        {
+          "name": "unique_count",
+          "path": [
+            "uniques"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "traffic_granularity",
+        "bucket_start"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-views",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per": {
+            "argument": "traffic_granularity"
+          }
+        },
+        "result_path": [
+          "views"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_top_paths_source",
+      "description": "repos/get-top-paths pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "title",
+          "path": [
+            "title"
+          ]
+        },
+        {
+          "name": "event_count",
+          "path": [
+            "count"
+          ]
+        },
+        {
+          "name": "unique_count",
+          "path": [
+            "uniques"
+          ]
+        },
+        {
+          "name": "response_position",
+          "source_ordinal": true
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "path"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-top-paths",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_top_referrers_source",
+      "description": "repos/get-top-referrers pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "referrer",
+          "path": [
+            "referrer"
+          ]
+        },
+        {
+          "name": "event_count",
+          "path": [
+            "count"
+          ]
+        },
+        {
+          "name": "unique_count",
+          "path": [
+            "uniques"
+          ]
+        },
+        {
+          "name": "response_position",
+          "source_ordinal": true
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "referrer"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-top-referrers",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "repository_clone_traffic",
+      "description": "Current rolling 14-day clone traffic window per repository and requested day/week aggregation. Window unique counts are not additive across repositories or overlapping retrievals; they are never calculated by summing bucket uniques. Bucket timestamps start at UTC midnight; weeks start Monday. This is one current observation per retrieval, not an append-only historical window identity.",
+      "grain": [
+        "repository_id",
+        "traffic_granularity"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "granularity",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "traffic_granularity",
+              "type": "VARCHAR",
+              "nullable": false,
+              "enum": [
+                "day",
+                "week"
+              ],
+              "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+              "example": "day"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "traffic_granularity",
+              "source_stage": "records",
+              "source_column": "traffic_granularity"
+            },
+            {
+              "name": "total_count",
+              "source_stage": "records",
+              "source_column": "total_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            },
+            {
+              "name": "buckets",
+              "source_stage": "records",
+              "source_column": "buckets"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_clone_traffic_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "traffic_granularity": {
+                    "parameter": "traffic_granularity"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Current rolling 14-day clone traffic window per repository and requested day/week aggregation. Window unique counts are not additive across repositories or overlapping retrievals; they are never calculated by summing bucket uniques. Bucket timestamps start at UTC midnight; weeks start Monday. This is one current observation per retrieval, not an append-only historical window identity.",
+          "select": [
+            "traffic_granularity"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "traffic_granularity",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                "day",
+                "week"
+              ],
+              "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+              "example": "day"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "traffic_granularity",
+              "source_stage": "records",
+              "source_column": "traffic_granularity"
+            },
+            {
+              "name": "total_count",
+              "source_stage": "records",
+              "source_column": "total_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            },
+            {
+              "name": "buckets",
+              "source_stage": "records",
+              "source_column": "buckets"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_clone_traffic_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "traffic_granularity": {
+                    "literal": "day"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Current rolling 14-day clone traffic window per repository and requested day/week aggregation. Window unique counts are not additive across repositories or overlapping retrievals; they are never calculated by summing bucket uniques. Bucket timestamps start at UTC midnight; weeks start Monday. This is one current observation per retrieval, not an append-only historical window identity."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "traffic_granularity",
+          "total_count",
+          "unique_count",
+          "buckets"
+        ],
+        "dimensions": [
+          "repository",
+          "traffic_granularity"
+        ],
+        "sql_names": {
+          "repository": "repository_clone_traffic_repository",
+          "traffic_granularity": "repository_clone_traffic_traffic_granularity"
+        },
+        "metrics": [
+          {
+            "name": "repository_clone_traffic_observation_count",
+            "kind": "count",
+            "comment": "Successfully retrieved repository traffic-window observations."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_clone_count": {
+              "expression": "COALESCE(SUM(repository_clone_traffic.total_count), 0)"
+            },
+            "repository_clone_unique_max": {
+              "expression": "MAX(repository_clone_traffic.unique_count)"
+            }
+          },
+          "metric_semantics": {
+            "repository_clone_count": {
+              "dataset": "repository_clone_traffic",
+              "additivity": "additive",
+              "comment": "Reported clone events summed across disjoint selected repositories within the current response window.",
+              "missing": "zero"
+            },
+            "repository_clone_unique_max": {
+              "dataset": "repository_clone_traffic",
+              "additivity": "non_additive",
+              "comment": "Maximum repository-window unique clone count; not global distinct people and not a sum of bucket uniques."
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "repository_clone_traffic_buckets",
+      "description": "Timestamped clone traffic buckets within the current 14-day API window. Grain includes requested day/week aggregation so overlapping representations are not conflated. Timestamp is UTC midnight, with weeks starting Monday. Unique counts are non-additive across buckets and repositories.",
+      "grain": [
+        "repository_id",
+        "traffic_granularity",
+        "bucket_start"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "granularity",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "traffic_granularity",
+              "type": "VARCHAR",
+              "nullable": false,
+              "enum": [
+                "day",
+                "week"
+              ],
+              "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+              "example": "day"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "traffic_granularity",
+              "source_stage": "records",
+              "source_column": "traffic_granularity"
+            },
+            {
+              "name": "bucket_start",
+              "source_stage": "records",
+              "source_column": "bucket_start"
+            },
+            {
+              "name": "event_count",
+              "source_stage": "records",
+              "source_column": "event_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_clone_traffic_buckets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "traffic_granularity": {
+                    "parameter": "traffic_granularity"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Timestamped clone traffic buckets within the current 14-day API window. Grain includes requested day/week aggregation so overlapping representations are not conflated. Timestamp is UTC midnight, with weeks starting Monday. Unique counts are non-additive across buckets and repositories.",
+          "select": [
+            "traffic_granularity"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "traffic_granularity",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                "day",
+                "week"
+              ],
+              "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+              "example": "day"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "traffic_granularity",
+              "source_stage": "records",
+              "source_column": "traffic_granularity"
+            },
+            {
+              "name": "bucket_start",
+              "source_stage": "records",
+              "source_column": "bucket_start"
+            },
+            {
+              "name": "event_count",
+              "source_stage": "records",
+              "source_column": "event_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_clone_traffic_buckets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "traffic_granularity": {
+                    "literal": "day"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Timestamped clone traffic buckets within the current 14-day API window. Grain includes requested day/week aggregation so overlapping representations are not conflated. Timestamp is UTC midnight, with weeks starting Monday. Unique counts are non-additive across buckets and repositories."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "traffic_granularity",
+          "bucket_start",
+          "event_count",
+          "unique_count"
+        ],
+        "dimensions": [
+          "repository",
+          "traffic_granularity",
+          "bucket_start"
+        ],
+        "sql_names": {
+          "repository": "repository_clone_traffic_buckets_repository",
+          "traffic_granularity": "repository_clone_traffic_buckets_traffic_granularity",
+          "bucket_start": "repository_clone_traffic_buckets_bucket_start"
+        },
+        "metrics": [
+          {
+            "name": "repository_clone_traffic_buckets_count",
+            "kind": "count",
+            "comment": "Returned traffic buckets, not repositories or unique people."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_clone_bucket_event_count": {
+              "expression": "COALESCE(SUM(repository_clone_traffic_buckets.event_count), 0)"
+            },
+            "repository_clone_bucket_unique_max": {
+              "expression": "MAX(repository_clone_traffic_buckets.unique_count)"
+            }
+          },
+          "metric_semantics": {
+            "repository_clone_bucket_event_count": {
+              "dataset": "repository_clone_traffic_buckets",
+              "additivity": "additive",
+              "comment": "Reported events summed over selected non-overlapping buckets of one requested aggregation.",
+              "missing": "zero"
+            },
+            "repository_clone_bucket_unique_max": {
+              "dataset": "repository_clone_traffic_buckets",
+              "additivity": "non_additive",
+              "comment": "Maximum single bucket unique count; not distinct people across buckets."
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "repository_view_traffic",
+      "description": "Current rolling 14-day view traffic window per repository and requested day/week aggregation. Window unique counts are not additive across repositories or overlapping retrievals; they are never calculated by summing bucket uniques. Bucket timestamps start at UTC midnight; weeks start Monday. This is one current observation per retrieval, not an append-only historical window identity.",
+      "grain": [
+        "repository_id",
+        "traffic_granularity"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "granularity",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "traffic_granularity",
+              "type": "VARCHAR",
+              "nullable": false,
+              "enum": [
+                "day",
+                "week"
+              ],
+              "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+              "example": "day"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "traffic_granularity",
+              "source_stage": "records",
+              "source_column": "traffic_granularity"
+            },
+            {
+              "name": "total_count",
+              "source_stage": "records",
+              "source_column": "total_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            },
+            {
+              "name": "buckets",
+              "source_stage": "records",
+              "source_column": "buckets"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_view_traffic_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "traffic_granularity": {
+                    "parameter": "traffic_granularity"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Current rolling 14-day view traffic window per repository and requested day/week aggregation. Window unique counts are not additive across repositories or overlapping retrievals; they are never calculated by summing bucket uniques. Bucket timestamps start at UTC midnight; weeks start Monday. This is one current observation per retrieval, not an append-only historical window identity.",
+          "select": [
+            "traffic_granularity"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "traffic_granularity",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                "day",
+                "week"
+              ],
+              "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+              "example": "day"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "traffic_granularity",
+              "source_stage": "records",
+              "source_column": "traffic_granularity"
+            },
+            {
+              "name": "total_count",
+              "source_stage": "records",
+              "source_column": "total_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            },
+            {
+              "name": "buckets",
+              "source_stage": "records",
+              "source_column": "buckets"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_view_traffic_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "traffic_granularity": {
+                    "literal": "day"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Current rolling 14-day view traffic window per repository and requested day/week aggregation. Window unique counts are not additive across repositories or overlapping retrievals; they are never calculated by summing bucket uniques. Bucket timestamps start at UTC midnight; weeks start Monday. This is one current observation per retrieval, not an append-only historical window identity."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "traffic_granularity",
+          "total_count",
+          "unique_count",
+          "buckets"
+        ],
+        "dimensions": [
+          "repository",
+          "traffic_granularity"
+        ],
+        "sql_names": {
+          "repository": "repository_view_traffic_repository",
+          "traffic_granularity": "repository_view_traffic_traffic_granularity"
+        },
+        "metrics": [
+          {
+            "name": "repository_view_traffic_observation_count",
+            "kind": "count",
+            "comment": "Successfully retrieved repository traffic-window observations."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_view_count": {
+              "expression": "COALESCE(SUM(repository_view_traffic.total_count), 0)"
+            },
+            "repository_view_unique_max": {
+              "expression": "MAX(repository_view_traffic.unique_count)"
+            }
+          },
+          "metric_semantics": {
+            "repository_view_count": {
+              "dataset": "repository_view_traffic",
+              "additivity": "additive",
+              "comment": "Reported view events summed across disjoint selected repositories within the current response window.",
+              "missing": "zero"
+            },
+            "repository_view_unique_max": {
+              "dataset": "repository_view_traffic",
+              "additivity": "non_additive",
+              "comment": "Maximum repository-window unique view count; not global distinct people and not a sum of bucket uniques."
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "repository_view_traffic_buckets",
+      "description": "Timestamped view traffic buckets within the current 14-day API window. Grain includes requested day/week aggregation so overlapping representations are not conflated. Timestamp is UTC midnight, with weeks starting Monday. Unique counts are non-additive across buckets and repositories.",
+      "grain": [
+        "repository_id",
+        "traffic_granularity",
+        "bucket_start"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "granularity",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "traffic_granularity",
+              "type": "VARCHAR",
+              "nullable": false,
+              "enum": [
+                "day",
+                "week"
+              ],
+              "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+              "example": "day"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "traffic_granularity",
+              "source_stage": "records",
+              "source_column": "traffic_granularity"
+            },
+            {
+              "name": "bucket_start",
+              "source_stage": "records",
+              "source_column": "bucket_start"
+            },
+            {
+              "name": "event_count",
+              "source_stage": "records",
+              "source_column": "event_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_view_traffic_buckets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "traffic_granularity": {
+                    "parameter": "traffic_granularity"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Timestamped view traffic buckets within the current 14-day API window. Grain includes requested day/week aggregation so overlapping representations are not conflated. Timestamp is UTC midnight, with weeks starting Monday. Unique counts are non-additive across buckets and repositories.",
+          "select": [
+            "traffic_granularity"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "traffic_granularity",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                "day",
+                "week"
+              ],
+              "description": "Traffic bucket aggregation: day or week. Omission means day. Both retain the current rolling 14-day response window.",
+              "example": "day"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "traffic_granularity",
+              "source_stage": "records",
+              "source_column": "traffic_granularity"
+            },
+            {
+              "name": "bucket_start",
+              "source_stage": "records",
+              "source_column": "bucket_start"
+            },
+            {
+              "name": "event_count",
+              "source_stage": "records",
+              "source_column": "event_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_view_traffic_buckets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "traffic_granularity": {
+                    "literal": "day"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Timestamped view traffic buckets within the current 14-day API window. Grain includes requested day/week aggregation so overlapping representations are not conflated. Timestamp is UTC midnight, with weeks starting Monday. Unique counts are non-additive across buckets and repositories."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "traffic_granularity",
+          "bucket_start",
+          "event_count",
+          "unique_count"
+        ],
+        "dimensions": [
+          "repository",
+          "traffic_granularity",
+          "bucket_start"
+        ],
+        "sql_names": {
+          "repository": "repository_view_traffic_buckets_repository",
+          "traffic_granularity": "repository_view_traffic_buckets_traffic_granularity",
+          "bucket_start": "repository_view_traffic_buckets_bucket_start"
+        },
+        "metrics": [
+          {
+            "name": "repository_view_traffic_buckets_count",
+            "kind": "count",
+            "comment": "Returned traffic buckets, not repositories or unique people."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_view_bucket_event_count": {
+              "expression": "COALESCE(SUM(repository_view_traffic_buckets.event_count), 0)"
+            },
+            "repository_view_bucket_unique_max": {
+              "expression": "MAX(repository_view_traffic_buckets.unique_count)"
+            }
+          },
+          "metric_semantics": {
+            "repository_view_bucket_event_count": {
+              "dataset": "repository_view_traffic_buckets",
+              "additivity": "additive",
+              "comment": "Reported events summed over selected non-overlapping buckets of one requested aggregation.",
+              "missing": "zero"
+            },
+            "repository_view_bucket_unique_max": {
+              "dataset": "repository_view_traffic_buckets",
+              "additivity": "non_additive",
+              "comment": "Maximum single bucket unique count; not distinct people across buckets."
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "repository_top_paths",
+      "description": "At most the top 10 paths over the current rolling 14 days. This deliberately ranked response is not a complete population of all paths. Response position records current API order, not durable rank. Unique counts cannot be added across paths or repositories.",
+      "grain": [
+        "repository_id",
+        "path"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "title",
+              "source_stage": "records",
+              "source_column": "title"
+            },
+            {
+              "name": "event_count",
+              "source_stage": "records",
+              "source_column": "event_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            },
+            {
+              "name": "response_position",
+              "source_stage": "records",
+              "source_column": "response_position"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_top_paths_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "At most the top 10 paths over the current rolling 14 days. This deliberately ranked response is not a complete population of all paths. Response position records current API order, not durable rank. Unique counts cannot be added across paths or repositories."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "path",
+          "title",
+          "event_count",
+          "unique_count",
+          "response_position"
+        ],
+        "dimensions": [
+          "repository",
+          "path"
+        ],
+        "sql_names": {
+          "repository": "repository_top_paths_repository",
+          "path": "repository_top_paths_path"
+        },
+        "metrics": [
+          {
+            "name": "repository_top_paths_count",
+            "kind": "count",
+            "comment": "Returned top-10 paths observations, not all paths."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_top_paths_event_count": {
+              "expression": "COALESCE(SUM(repository_top_paths.event_count), 0)"
+            },
+            "repository_top_paths_unique_max": {
+              "expression": "MAX(repository_top_paths.unique_count)"
+            }
+          },
+          "metric_semantics": {
+            "repository_top_paths_event_count": {
+              "dataset": "repository_top_paths",
+              "additivity": "additive",
+              "comment": "Events attributed to the returned top-10 paths only, not all repository traffic.",
+              "missing": "zero"
+            },
+            "repository_top_paths_unique_max": {
+              "dataset": "repository_top_paths",
+              "additivity": "non_additive",
+              "comment": "Maximum unique count for one returned path; not a distinct visitor total."
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "repository_top_referrers",
+      "description": "At most the top 10 referrers over the current rolling 14 days. This deliberately ranked response is not a complete population of all referrers. Response position records current API order, not durable rank. Unique counts cannot be added across referrers or repositories.",
+      "grain": [
+        "repository_id",
+        "referrer"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "referrer",
+              "source_stage": "records",
+              "source_column": "referrer"
+            },
+            {
+              "name": "event_count",
+              "source_stage": "records",
+              "source_column": "event_count"
+            },
+            {
+              "name": "unique_count",
+              "source_stage": "records",
+              "source_column": "unique_count"
+            },
+            {
+              "name": "response_position",
+              "source_stage": "records",
+              "source_column": "response_position"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_top_referrers_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "At most the top 10 referrers over the current rolling 14 days. This deliberately ranked response is not a complete population of all referrers. Response position records current API order, not durable rank. Unique counts cannot be added across referrers or repositories."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "referrer",
+          "event_count",
+          "unique_count",
+          "response_position"
+        ],
+        "dimensions": [
+          "repository",
+          "referrer"
+        ],
+        "sql_names": {
+          "repository": "repository_top_referrers_repository",
+          "referrer": "repository_top_referrers_referrer"
+        },
+        "metrics": [
+          {
+            "name": "repository_top_referrers_count",
+            "kind": "count",
+            "comment": "Returned top-10 referrers observations, not all referrers."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_top_referrers_event_count": {
+              "expression": "COALESCE(SUM(repository_top_referrers.event_count), 0)"
+            },
+            "repository_top_referrers_unique_max": {
+              "expression": "MAX(repository_top_referrers.unique_count)"
+            }
+          },
+          "metric_semantics": {
+            "repository_top_referrers_event_count": {
+              "dataset": "repository_top_referrers",
+              "additivity": "additive",
+              "comment": "Events attributed to the returned top-10 referrers only, not all repository traffic.",
+              "missing": "zero"
+            },
+            "repository_top_referrers_unique_max": {
+              "dataset": "repository_top_referrers",
+              "additivity": "non_additive",
+              "comment": "Maximum unique count for one returned referrer; not a distinct visitor total."
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "repository_clone_traffic_to_repositories",
+      "from": "repository_clone_traffic",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_clone_traffic_buckets_to_repositories",
+      "from": "repository_clone_traffic_buckets",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_view_traffic_to_repositories",
+      "from": "repository_view_traffic",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_view_traffic_buckets_to_repositories",
+      "from": "repository_view_traffic_buckets",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_top_paths_to_repositories",
+      "from": "repository_top_paths",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_top_referrers_to_repositories",
+      "from": "repository_top_referrers",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    }
+  ]
+}

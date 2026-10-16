@@ -58,8 +58,8 @@ pull_request_number	false	1
 query TTT
 SELECT name,json_extract_string(requirements,'$.parameter_constraints[0].kind'),json_extract_string(requirements,'$.parameter_constraints[1].kind') FROM crossfield_catalog_capabilities() WHERE database_name='engineering' AND name IN ('repository_count','merged_prs') ORDER BY name;
 ----
-merged_prs	exactly_one	requires
-repository_count	exactly_one	NULL
+merged_prs	at_least_one	at_most_one
+repository_count	at_least_one	at_most_one
 
 statement ok
 SET crossfield_mode='off';
@@ -122,12 +122,12 @@ alice	2
 
 # Timestamp literals and implicit bounds retain approved ICU conversion semantics.
 query I
-SELECT merged_prs FROM engineering.semantic.github(owner=>'example') WHERE merged_at >= TIMESTAMPTZ '2026-09-03 00:00:00+00';
+SELECT merged_prs FROM engineering.semantic.github(owner=>'example') WHERE pull_request_merged_at >= TIMESTAMPTZ '2026-09-03 00:00:00+00';
 ----
 2
 
 query I
-SELECT merged_prs FROM engineering.semantic.github(owner=>'example') WHERE merged_at >= '2026-09-03 00:00:00+00' AND merged_at < '2026-09-04 00:00:00+00';
+SELECT merged_prs FROM engineering.semantic.github(owner=>'example') WHERE pull_request_merged_at >= '2026-09-03 00:00:00+00' AND pull_request_merged_at < '2026-09-04 00:00:00+00';
 ----
 2
 
@@ -246,10 +246,10 @@ SELECT COUNT(*) FROM engineering.detail.pull_request_reviews(owner=>'example');
 ----
 CROSSFIELD
 
-statement error
+query I
 SELECT label_count FROM engineering.semantic.github(repository=>'example/alpha',pull_request_number=>1);
 ----
-SEMANTIC_PARAMETER_UNUSED
+2
 
 statement error
 SELECT repository_count FROM engineering.semantic.github(repository=>'example/alpha',unexpected=>1);

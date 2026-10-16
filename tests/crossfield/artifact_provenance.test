@@ -1,0 +1,212 @@
+# Returned artifact records preserve optional IDs, typed metadata and retrieval-scoped attestation occurrences.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT artifact_deployment_record_count,artifact_storage_record_count,active_artifact_storage_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+3	2	1
+
+query TI
+SELECT artifact_deployment_records_cluster,artifact_deployment_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') GROUP BY artifact_deployment_records_cluster ORDER BY artifact_deployment_records_cluster;
+----
+production	2
+staging	1
+
+query IIT
+SELECT record_ordinal,record_id,created_at_raw FROM engineering.detail.artifact_deployment_records(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ORDER BY record_ordinal;
+----
+1	55001	2026-10-01T12:00:00Z
+2	NULL	upstream-unformatted-time
+3	NULL	NULL
+
+statement ok
+CREATE TEMP TABLE artifact_deployment_shapes AS SELECT * FROM engineering.detail.artifact_deployment_records(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITITI
+SELECT record_ordinal,tags['env'],cardinality(tags),runtime_risks[1],len(runtime_risks) FROM artifact_deployment_shapes ORDER BY record_ordinal;
+----
+1	prod	2	internet-exposed	2
+2	NULL	0	NULL	0
+3	NULL	NULL	NULL	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+query IITTT
+SELECT record_ordinal,record_id,registry_repository,status,updated_at_raw FROM engineering.detail.artifact_storage_records(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ORDER BY record_ordinal;
+----
+1	55101	bar	active	2026-10-15T12:00:00Z
+2	NULL	archive	deleted	NULL
+
+query II
+SELECT artifact_storage_record_count,active_artifact_storage_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+----
+0	0
+
+query IIIIII
+SELECT artifact_metadata_job_count,pending_artifact_metadata_job_count,processing_artifact_metadata_job_count,completed_artifact_metadata_job_count,failed_artifact_metadata_job_count,artifact_metadata_mutated_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_cluster=>'production',artifact_metadata_job_id=>57001);
+----
+1	0	0	1	0	5
+
+query III
+SELECT artifact_metadata_job_count,pending_artifact_metadata_job_count,artifact_metadata_mutated_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_cluster=>'production',artifact_metadata_job_id=>57002);
+----
+1	1	NULL
+
+query III
+SELECT artifact_metadata_job_count,failed_artifact_metadata_job_count,artifact_metadata_mutated_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_cluster=>'production',artifact_metadata_job_id=>57003);
+----
+1	1	NULL
+
+query ITTI
+SELECT job_id,status,started_at,mutated_record_count FROM engineering.detail.artifact_metadata_jobs(organization=>'provenance-fixture',artifact_cluster=>'production',artifact_metadata_job_id=>57002);
+----
+57002	pending	NULL	NULL
+
+query I
+SELECT repository_count FROM engineering.semantic.github(organization=>'provenance-fixture',attested_repositories=>true);
+----
+2
+
+query IT
+SELECT repository_id,repository FROM engineering.detail.repositories(organization=>'provenance-fixture',attested_repositories=>true,attestation_predicate_type=>'sbom');
+----
+54101	provenance-fixture/alpha
+
+query I
+SELECT attestation_envelope_count FROM engineering.semantic.github(organization=>'provenance-fixture',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+3
+
+query II
+SELECT attestation_envelopes_reported_repository_id,attestation_envelope_count FROM engineering.semantic.github(organization=>'provenance-fixture',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') GROUP BY attestation_envelopes_reported_repository_id ORDER BY attestation_envelopes_reported_repository_id NULLS LAST;
+----
+54101	1
+54102	1
+NULL	1
+
+query TIIIIT
+SELECT retrieval_scope_type,retrieval_scope_id,attestation_ordinal,repository_id,retrieval_organization_id,repository FROM engineering.detail.attestation_envelopes(organization=>'provenance-fixture',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ORDER BY attestation_ordinal;
+----
+organization	54000	1	54101	54000	NULL
+organization	54000	2	54102	54000	NULL
+organization	54000	3	NULL	54000	NULL
+
+query I
+SELECT attestation_envelope_count FROM engineering.semantic.github(user=>'provenance-user',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+2
+
+query TIIIIT
+SELECT retrieval_scope_type,retrieval_scope_id,attestation_ordinal,repository_id,retrieval_user_id,retrieval_organization_login FROM engineering.detail.attestation_envelopes(user=>'provenance-user',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ORDER BY attestation_ordinal;
+----
+user	54001	1	54201	54001	NULL
+user	54001	2	NULL	54001	NULL
+
+query I
+SELECT attestation_envelope_count FROM engineering.semantic.github(user=>'provenance-user',attestation_subject_digest=>'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+----
+0
+
+query TIIIT
+SELECT retrieval_scope_type,retrieval_scope_id,attestation_ordinal,repository_id,repository FROM engineering.detail.attestation_envelopes(repository=>'provenance-fixture/alpha',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+repository	54101	1	54101	provenance-fixture/alpha
+
+statement error
+SELECT artifact_metadata_job_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_cluster=>'production',artifact_metadata_job_id=>57999);
+----
+404
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT artifact_storage_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>'short');
+----
+must contain at least 71
+
+statement error
+SELECT artifact_storage_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+must contain at most 71
+
+statement error
+SELECT artifact_storage_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>'sha512:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+must match its declared string pattern
+
+statement error
+SELECT artifact_storage_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+----
+must match its declared string pattern
+
+statement error
+SELECT artifact_storage_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>'sha256:gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg');
+----
+must match its declared string pattern
+
+statement error
+SELECT artifact_storage_record_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_subject_digest=>E'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n');
+----
+must contain at most 71
+
+statement error
+SELECT artifact_metadata_job_count FROM engineering.semantic.github(organization=>'provenance-fixture',artifact_metadata_job_id=>57001);
+----
+artifact_cluster
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(organization=>'provenance-fixture',attested_repositories=>true,repository=>'provenance-fixture/alpha');
+----
+Specify at most one
+
+statement error
+SELECT attestation_envelope_count FROM engineering.semantic.github(organization=>'provenance-fixture',user=>'provenance-user',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+arguments do not apply to the selected population
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

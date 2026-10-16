@@ -1,0 +1,5293 @@
+{
+  "entities": [
+    {
+      "name": "gist_get_source",
+      "description": "gists/get pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+          "example": "aa5a315d61ae9438b18d",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "forks_url",
+          "path": [
+            "forks_url"
+          ]
+        },
+        {
+          "name": "commits_url",
+          "path": [
+            "commits_url"
+          ]
+        },
+        {
+          "name": "git_pull_url",
+          "path": [
+            "git_pull_url"
+          ]
+        },
+        {
+          "name": "git_push_url",
+          "path": [
+            "git_push_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "files",
+          "path": [
+            "files"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at_raw",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at_raw",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "comments",
+          "path": [
+            "comments"
+          ]
+        },
+        {
+          "name": "comments_enabled",
+          "path": [
+            "comments_enabled"
+          ]
+        },
+        {
+          "name": "comments_url",
+          "path": [
+            "comments_url"
+          ]
+        },
+        {
+          "name": "truncated",
+          "path": [
+            "truncated"
+          ]
+        },
+        {
+          "name": "owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "owner_type",
+          "path": [
+            "owner",
+            "type"
+          ]
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "node_id": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "parent_gist_id",
+          "path": [
+            "fork_of",
+            "id"
+          ]
+        },
+        {
+          "name": "fork_of",
+          "path": [
+            "fork_of"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "url": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "node_id": true,
+              "type": true,
+              "html_url": true
+            },
+            "created_at": true,
+            "updated_at": true
+          }
+        }
+      ],
+      "grain": [
+        "gist_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/get",
+        "path_bindings": {
+          "gist_id": {
+            "argument": "gist_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "required_non_null_fields": [
+          "gist_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "gist_id",
+            "argument": "gist_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "gist_visible_list_source",
+      "description": "gists/list pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+          "example": "2025-01-01T00:00:00Z",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/list",
+        "path_bindings": {},
+        "query_bindings": {
+          "since": {
+            "argument": "gist_since"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 3000
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "gist_id"
+        ]
+      }
+    },
+    {
+      "name": "gist_public_list_source",
+      "description": "gists/list-public pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+          "example": "2025-01-01T00:00:00Z",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/list-public",
+        "path_bindings": {},
+        "query_bindings": {
+          "since": {
+            "argument": "gist_since"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 3000
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "gist_id"
+        ]
+      }
+    },
+    {
+      "name": "gist_starred_list_source",
+      "description": "gists/list-starred pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+          "example": "2025-01-01T00:00:00Z",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/list-starred",
+        "path_bindings": {},
+        "query_bindings": {
+          "since": {
+            "argument": "gist_since"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "gist_id"
+        ]
+      }
+    },
+    {
+      "name": "gist_user_list_source",
+      "description": "gists/list-for-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        },
+        {
+          "name": "gist_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+          "example": "2025-01-01T00:00:00Z",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/list-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {
+          "since": {
+            "argument": "gist_since"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "gist_id"
+        ]
+      }
+    },
+    {
+      "name": "gist_forks_list_source",
+      "description": "gists/list-forks pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "parent_gist_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One opaque parent gist ID whose current forks are selected.",
+          "example": "aa5a315d61ae9438b18d",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/list-forks",
+        "path_bindings": {
+          "gist_id": {
+            "argument": "parent_gist_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "gist_id"
+        ]
+      }
+    },
+    {
+      "name": "gist_comment_list_source",
+      "description": "gists/list-comments pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+          "example": "aa5a315d61ae9438b18d",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "source_argument": "gist_id"
+        },
+        {
+          "name": "gist_comment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "author_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "author",
+          "path": [
+            "user"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "node_id": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id",
+        "gist_comment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/list-comments",
+        "path_bindings": {
+          "gist_id": {
+            "argument": "gist_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "gist_comment_get_source",
+      "description": "gists/get-comment pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+          "example": "aa5a315d61ae9438b18d",
+          "min_length": 1
+        },
+        {
+          "name": "gist_comment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "One gist comment ID; requires gist_id.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "source_argument": "gist_id"
+        },
+        {
+          "name": "gist_comment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "author_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "author",
+          "path": [
+            "user"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "node_id": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id",
+        "gist_comment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/get-comment",
+        "path_bindings": {
+          "gist_id": {
+            "argument": "gist_id"
+          },
+          "comment_id": {
+            "argument": "gist_comment_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "gist_comment_id",
+            "argument": "gist_comment_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "gist_commit_list_source",
+      "description": "gists/list-commits pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+          "example": "aa5a315d61ae9438b18d",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "source_argument": "gist_id"
+        },
+        {
+          "name": "revision_sha",
+          "path": [
+            "version"
+          ]
+        },
+        {
+          "name": "commit_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "committed_at",
+          "path": [
+            "committed_at"
+          ]
+        },
+        {
+          "name": "committer_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "committer_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "committer",
+          "path": [
+            "user"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "node_id": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "change_status",
+          "path": [
+            "change_status"
+          ]
+        },
+        {
+          "name": "additions",
+          "path": [
+            "change_status",
+            "additions"
+          ]
+        },
+        {
+          "name": "deletions",
+          "path": [
+            "change_status",
+            "deletions"
+          ]
+        },
+        {
+          "name": "total_changes",
+          "path": [
+            "change_status",
+            "total"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id",
+        "revision_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/list-commits",
+        "path_bindings": {
+          "gist_id": {
+            "argument": "gist_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "gist_revision_get_source",
+      "description": "gists/get-revision pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+          "example": "aa5a315d61ae9438b18d",
+          "min_length": 1
+        },
+        {
+          "name": "gist_revision",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Optional exact gist revision SHA; filters the complete selected gist commit listing before revision hydration.",
+          "example": "57a7f021a713b1c5a6a199b54cc514735d2d462f",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "forks_url",
+          "path": [
+            "forks_url"
+          ]
+        },
+        {
+          "name": "commits_url",
+          "path": [
+            "commits_url"
+          ]
+        },
+        {
+          "name": "git_pull_url",
+          "path": [
+            "git_pull_url"
+          ]
+        },
+        {
+          "name": "git_push_url",
+          "path": [
+            "git_push_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "files",
+          "path": [
+            "files"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at_raw",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at_raw",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "comments",
+          "path": [
+            "comments"
+          ]
+        },
+        {
+          "name": "comments_enabled",
+          "path": [
+            "comments_enabled"
+          ]
+        },
+        {
+          "name": "comments_url",
+          "path": [
+            "comments_url"
+          ]
+        },
+        {
+          "name": "truncated",
+          "path": [
+            "truncated"
+          ]
+        },
+        {
+          "name": "owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "owner_type",
+          "path": [
+            "owner",
+            "type"
+          ]
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "node_id": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "parent_gist_id",
+          "path": [
+            "fork_of",
+            "id"
+          ]
+        },
+        {
+          "name": "fork_of",
+          "path": [
+            "fork_of"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "url": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "node_id": true,
+              "type": true,
+              "html_url": true
+            },
+            "created_at": true,
+            "updated_at": true
+          }
+        },
+        {
+          "name": "revision_sha",
+          "source_argument": "gist_revision"
+        }
+      ],
+      "grain": [
+        "gist_id",
+        "revision_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/get-revision",
+        "path_bindings": {
+          "gist_id": {
+            "argument": "gist_id"
+          },
+          "sha": {
+            "argument": "gist_revision"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "required_non_null_fields": [
+          "gist_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "gist_id",
+            "argument": "gist_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "gist_files_source",
+      "description": "gists/get pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+          "example": "aa5a315d61ae9438b18d",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "source_argument": "gist_id"
+        },
+        {
+          "name": "filename",
+          "source_entry": "key"
+        },
+        {
+          "name": "file",
+          "source_entry": "value"
+        },
+        {
+          "name": "declared_filename",
+          "source_entry": "value",
+          "path": [
+            "filename"
+          ]
+        },
+        {
+          "name": "media_type",
+          "source_entry": "value",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "language",
+          "source_entry": "value",
+          "path": [
+            "language"
+          ]
+        },
+        {
+          "name": "raw_url",
+          "source_entry": "value",
+          "path": [
+            "raw_url"
+          ]
+        },
+        {
+          "name": "byte_size",
+          "source_entry": "value",
+          "path": [
+            "size"
+          ]
+        },
+        {
+          "name": "truncated",
+          "source_entry": "value",
+          "path": [
+            "truncated"
+          ]
+        },
+        {
+          "name": "content",
+          "source_entry": "value",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "encoding",
+          "source_entry": "value",
+          "path": [
+            "encoding"
+          ]
+        }
+      ],
+      "grain": [
+        "gist_id",
+        "filename"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/get",
+        "path_bindings": {
+          "gist_id": {
+            "argument": "gist_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "files"
+        ],
+        "result_shape": "object_entries",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "collaboration_authenticated_account_source",
+      "description": "users/get-authenticated pinned, schema-derived read source.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "caller_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "caller_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "caller_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-authenticated",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "gist_star_status_source",
+      "description": "gists/check-is-starred pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gist_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+          "example": "aa5a315d61ae9438b18d",
+          "min_length": 1
+        },
+        {
+          "name": "caller_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Authenticated GitHub account identity resolved before the status request.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "gist_id",
+          "source_argument": "gist_id"
+        },
+        {
+          "name": "caller_id",
+          "source_argument": "caller_id"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "caller_id",
+        "gist_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gists/check-is-starred",
+        "path_bindings": {
+          "gist_id": {
+            "argument": "gist_id"
+          }
+        },
+        "query_bindings": {},
+        "pagination": {
+          "kind": "none"
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "gists",
+      "description": "Canonical current gists keyed by opaque gist ID. Typed file maps retain content, encoding and truncation. Owner is distinct from comment authors and revision committers. Pinned detail creation/update fields are unformatted strings and remain raw text; no unsupported timestamp conversion. Deprecated embedded forks/history are replaced by paginated child routes.",
+      "grain": [
+        "gist_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "gist_id",
+          "node_id",
+          "url",
+          "forks_url",
+          "commits_url",
+          "git_pull_url",
+          "git_push_url",
+          "html_url",
+          "files",
+          "public",
+          "created_at_raw",
+          "updated_at_raw",
+          "description",
+          "comments",
+          "comments_enabled",
+          "comments_url",
+          "truncated",
+          "owner_id",
+          "owner_login",
+          "owner_type",
+          "owner",
+          "parent_gist_id",
+          "fork_of"
+        ],
+        "dimensions": [
+          "gist_id",
+          "owner_login",
+          "public",
+          "truncated"
+        ],
+        "sql_names": {
+          "gist_id": "gists_gist_id",
+          "owner_login": "gists_owner_login",
+          "public": "gists_public",
+          "truncated": "gists_truncated"
+        },
+        "metrics": [
+          {
+            "name": "gist_count",
+            "kind": "count",
+            "comment": "Canonical current gists, regardless of lookup/discovery route. Secret visibility follows the caller. Counts exclude historical revisions."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "public_gist_count": {
+              "expression": "COUNT(*) FILTER (WHERE gists.public = TRUE)"
+            },
+            "truncated_gist_count": {
+              "expression": "COUNT(*) FILTER (WHERE gists.truncated = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "public_gist_count": {
+              "comment": "Selected current gists explicitly marked public.",
+              "additivity": "additive",
+              "dataset": "gists"
+            },
+            "truncated_gist_count": {
+              "comment": "Selected gist snapshots flagged truncated by GitHub; content is never advertised as fully downloaded.",
+              "additivity": "additive",
+              "dataset": "gists"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "gist_id"
+          ],
+          "arguments": [
+            {
+              "name": "gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "gists",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "gists",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "gists",
+              "source_column": "url"
+            },
+            {
+              "name": "forks_url",
+              "source_stage": "gists",
+              "source_column": "forks_url"
+            },
+            {
+              "name": "commits_url",
+              "source_stage": "gists",
+              "source_column": "commits_url"
+            },
+            {
+              "name": "git_pull_url",
+              "source_stage": "gists",
+              "source_column": "git_pull_url"
+            },
+            {
+              "name": "git_push_url",
+              "source_stage": "gists",
+              "source_column": "git_push_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "gists",
+              "source_column": "html_url"
+            },
+            {
+              "name": "files",
+              "source_stage": "gists",
+              "source_column": "files"
+            },
+            {
+              "name": "public",
+              "source_stage": "gists",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "gists",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "gists",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "description",
+              "source_stage": "gists",
+              "source_column": "description"
+            },
+            {
+              "name": "comments",
+              "source_stage": "gists",
+              "source_column": "comments"
+            },
+            {
+              "name": "comments_enabled",
+              "source_stage": "gists",
+              "source_column": "comments_enabled"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "gists",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "gists",
+              "source_column": "truncated"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "gists",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "gists",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "owner_type",
+              "source_stage": "gists",
+              "source_column": "owner_type"
+            },
+            {
+              "name": "owner",
+              "source_stage": "gists",
+              "source_column": "owner"
+            },
+            {
+              "name": "parent_gist_id",
+              "source_stage": "gists",
+              "source_column": "parent_gist_id"
+            },
+            {
+              "name": "fork_of",
+              "source_stage": "gists",
+              "source_column": "fork_of"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "parameter": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "gists"
+          },
+          "population": "One exact current gist, including secret gists visible to the caller. Missing/inaccessible hydration fails."
+        },
+        {
+          "name": "user",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "gists",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "gists",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "gists",
+              "source_column": "url"
+            },
+            {
+              "name": "forks_url",
+              "source_stage": "gists",
+              "source_column": "forks_url"
+            },
+            {
+              "name": "commits_url",
+              "source_stage": "gists",
+              "source_column": "commits_url"
+            },
+            {
+              "name": "git_pull_url",
+              "source_stage": "gists",
+              "source_column": "git_pull_url"
+            },
+            {
+              "name": "git_push_url",
+              "source_stage": "gists",
+              "source_column": "git_push_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "gists",
+              "source_column": "html_url"
+            },
+            {
+              "name": "files",
+              "source_stage": "gists",
+              "source_column": "files"
+            },
+            {
+              "name": "public",
+              "source_stage": "gists",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "gists",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "gists",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "description",
+              "source_stage": "gists",
+              "source_column": "description"
+            },
+            {
+              "name": "comments",
+              "source_stage": "gists",
+              "source_column": "comments"
+            },
+            {
+              "name": "comments_enabled",
+              "source_stage": "gists",
+              "source_column": "comments_enabled"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "gists",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "gists",
+              "source_column": "truncated"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "gists",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "gists",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "owner_type",
+              "source_stage": "gists",
+              "source_column": "owner_type"
+            },
+            {
+              "name": "owner",
+              "source_stage": "gists",
+              "source_column": "owner"
+            },
+            {
+              "name": "parent_gist_id",
+              "source_stage": "gists",
+              "source_column": "parent_gist_id"
+            },
+            {
+              "name": "fork_of",
+              "source_stage": "gists",
+              "source_column": "fork_of"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_user_list_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  },
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "gists"
+          },
+          "population": "Every public gist owned by the selected user, following advertised pages; each discovered ID is hydrated to canonical current detail.",
+          "select": [
+            "user"
+          ]
+        },
+        {
+          "name": "forks",
+          "arguments": [
+            {
+              "name": "parent_gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque parent gist ID whose current forks are selected.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "gists",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "gists",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "gists",
+              "source_column": "url"
+            },
+            {
+              "name": "forks_url",
+              "source_stage": "gists",
+              "source_column": "forks_url"
+            },
+            {
+              "name": "commits_url",
+              "source_stage": "gists",
+              "source_column": "commits_url"
+            },
+            {
+              "name": "git_pull_url",
+              "source_stage": "gists",
+              "source_column": "git_pull_url"
+            },
+            {
+              "name": "git_push_url",
+              "source_stage": "gists",
+              "source_column": "git_push_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "gists",
+              "source_column": "html_url"
+            },
+            {
+              "name": "files",
+              "source_stage": "gists",
+              "source_column": "files"
+            },
+            {
+              "name": "public",
+              "source_stage": "gists",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "gists",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "gists",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "description",
+              "source_stage": "gists",
+              "source_column": "description"
+            },
+            {
+              "name": "comments",
+              "source_stage": "gists",
+              "source_column": "comments"
+            },
+            {
+              "name": "comments_enabled",
+              "source_stage": "gists",
+              "source_column": "comments_enabled"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "gists",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "gists",
+              "source_column": "truncated"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "gists",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "gists",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "owner_type",
+              "source_stage": "gists",
+              "source_column": "owner_type"
+            },
+            {
+              "name": "owner",
+              "source_stage": "gists",
+              "source_column": "owner"
+            },
+            {
+              "name": "parent_gist_id",
+              "source_stage": "gists",
+              "source_column": "parent_gist_id"
+            },
+            {
+              "name": "fork_of",
+              "source_stage": "gists",
+              "source_column": "fork_of"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_forks_list_source",
+                "arguments": {
+                  "parent_gist_id": {
+                    "parameter": "parent_gist_id"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "gists"
+          },
+          "population": "All current fork gists of the selected parent across advertised pages; each discovered ID is hydrated.",
+          "select": [
+            "parent_gist_id"
+          ]
+        },
+        {
+          "name": "public",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "gists",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "gists",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "gists",
+              "source_column": "url"
+            },
+            {
+              "name": "forks_url",
+              "source_stage": "gists",
+              "source_column": "forks_url"
+            },
+            {
+              "name": "commits_url",
+              "source_stage": "gists",
+              "source_column": "commits_url"
+            },
+            {
+              "name": "git_pull_url",
+              "source_stage": "gists",
+              "source_column": "git_pull_url"
+            },
+            {
+              "name": "git_push_url",
+              "source_stage": "gists",
+              "source_column": "git_push_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "gists",
+              "source_column": "html_url"
+            },
+            {
+              "name": "files",
+              "source_stage": "gists",
+              "source_column": "files"
+            },
+            {
+              "name": "public",
+              "source_stage": "gists",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "gists",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "gists",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "description",
+              "source_stage": "gists",
+              "source_column": "description"
+            },
+            {
+              "name": "comments",
+              "source_stage": "gists",
+              "source_column": "comments"
+            },
+            {
+              "name": "comments_enabled",
+              "source_stage": "gists",
+              "source_column": "comments_enabled"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "gists",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "gists",
+              "source_column": "truncated"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "gists",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "gists",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "owner_type",
+              "source_stage": "gists",
+              "source_column": "owner_type"
+            },
+            {
+              "name": "owner",
+              "source_stage": "gists",
+              "source_column": "owner"
+            },
+            {
+              "name": "parent_gist_id",
+              "source_stage": "gists",
+              "source_column": "parent_gist_id"
+            },
+            {
+              "name": "fork_of",
+              "source_stage": "gists",
+              "source_column": "fork_of"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_public_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "gists"
+          },
+          "population": "Public gists ordered by last update. Reaching the documented 3000-result ceiling fails rather than reporting the public universe as complete.",
+          "select": [
+            "gist_population"
+          ],
+          "select_values": {
+            "gist_population": [
+              "public"
+            ]
+          }
+        },
+        {
+          "name": "starred",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "gists",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "gists",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "gists",
+              "source_column": "url"
+            },
+            {
+              "name": "forks_url",
+              "source_stage": "gists",
+              "source_column": "forks_url"
+            },
+            {
+              "name": "commits_url",
+              "source_stage": "gists",
+              "source_column": "commits_url"
+            },
+            {
+              "name": "git_pull_url",
+              "source_stage": "gists",
+              "source_column": "git_pull_url"
+            },
+            {
+              "name": "git_push_url",
+              "source_stage": "gists",
+              "source_column": "git_push_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "gists",
+              "source_column": "html_url"
+            },
+            {
+              "name": "files",
+              "source_stage": "gists",
+              "source_column": "files"
+            },
+            {
+              "name": "public",
+              "source_stage": "gists",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "gists",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "gists",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "description",
+              "source_stage": "gists",
+              "source_column": "description"
+            },
+            {
+              "name": "comments",
+              "source_stage": "gists",
+              "source_column": "comments"
+            },
+            {
+              "name": "comments_enabled",
+              "source_stage": "gists",
+              "source_column": "comments_enabled"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "gists",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "gists",
+              "source_column": "truncated"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "gists",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "gists",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "owner_type",
+              "source_stage": "gists",
+              "source_column": "owner_type"
+            },
+            {
+              "name": "owner",
+              "source_stage": "gists",
+              "source_column": "owner"
+            },
+            {
+              "name": "parent_gist_id",
+              "source_stage": "gists",
+              "source_column": "parent_gist_id"
+            },
+            {
+              "name": "fork_of",
+              "source_stage": "gists",
+              "source_column": "fork_of"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_starred_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "gists"
+          },
+          "population": "Gists starred by the authenticated caller, across advertised pages, hydrated to canonical current detail.",
+          "select": [
+            "gist_population"
+          ],
+          "select_values": {
+            "gist_population": [
+              "starred"
+            ]
+          }
+        },
+        {
+          "name": "visible",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "gists",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "gists",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "gists",
+              "source_column": "url"
+            },
+            {
+              "name": "forks_url",
+              "source_stage": "gists",
+              "source_column": "forks_url"
+            },
+            {
+              "name": "commits_url",
+              "source_stage": "gists",
+              "source_column": "commits_url"
+            },
+            {
+              "name": "git_pull_url",
+              "source_stage": "gists",
+              "source_column": "git_pull_url"
+            },
+            {
+              "name": "git_push_url",
+              "source_stage": "gists",
+              "source_column": "git_push_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "gists",
+              "source_column": "html_url"
+            },
+            {
+              "name": "files",
+              "source_stage": "gists",
+              "source_column": "files"
+            },
+            {
+              "name": "public",
+              "source_stage": "gists",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "gists",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "gists",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "description",
+              "source_stage": "gists",
+              "source_column": "description"
+            },
+            {
+              "name": "comments",
+              "source_stage": "gists",
+              "source_column": "comments"
+            },
+            {
+              "name": "comments_enabled",
+              "source_stage": "gists",
+              "source_column": "comments_enabled"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "gists",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "gists",
+              "source_column": "truncated"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "gists",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "gists",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "owner_type",
+              "source_stage": "gists",
+              "source_column": "owner_type"
+            },
+            {
+              "name": "owner",
+              "source_stage": "gists",
+              "source_column": "owner"
+            },
+            {
+              "name": "parent_gist_id",
+              "source_stage": "gists",
+              "source_column": "parent_gist_id"
+            },
+            {
+              "name": "fork_of",
+              "source_stage": "gists",
+              "source_column": "fork_of"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_visible_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "gists"
+          },
+          "population": "Authenticated caller-owned gists; anonymously GitHub returns public gists. Reaching 3000 rows is rejected conservatively because anonymous discovery has the public-feed ceiling.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "gist_comments",
+      "description": "Canonical gist-qualified comments with nullable author identity retained as NULL. Comment author roles do not stand in for gist ownership.",
+      "grain": [
+        "gist_id",
+        "gist_comment_id"
+      ],
+      "routes": [
+        {
+          "name": "comment_lookup",
+          "select": [
+            "gist_comment_id"
+          ],
+          "arguments": [
+            {
+              "name": "gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            },
+            {
+              "name": "gist_comment_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One gist comment ID; requires gist_id.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "comments",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "gist_comment_id",
+              "source_stage": "comments",
+              "source_column": "gist_comment_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "comments",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "comments",
+              "source_column": "url"
+            },
+            {
+              "name": "body",
+              "source_stage": "comments",
+              "source_column": "body"
+            },
+            {
+              "name": "author_id",
+              "source_stage": "comments",
+              "source_column": "author_id"
+            },
+            {
+              "name": "author_login",
+              "source_stage": "comments",
+              "source_column": "author_login"
+            },
+            {
+              "name": "author",
+              "source_stage": "comments",
+              "source_column": "author"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "comments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "comments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "comments",
+              "source_column": "author_association"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "parameter": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "comments",
+                "entity": "gist_comment_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  },
+                  "gist_comment_id": {
+                    "parameter": "gist_comment_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "comments"
+          },
+          "population": "One exact comment in a current visible gist, with parent and comment identity validation."
+        },
+        {
+          "name": "lookup",
+          "select": [
+            "gist_id"
+          ],
+          "arguments": [
+            {
+              "name": "gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "comments",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "gist_comment_id",
+              "source_stage": "comments",
+              "source_column": "gist_comment_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "comments",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "comments",
+              "source_column": "url"
+            },
+            {
+              "name": "body",
+              "source_stage": "comments",
+              "source_column": "body"
+            },
+            {
+              "name": "author_id",
+              "source_stage": "comments",
+              "source_column": "author_id"
+            },
+            {
+              "name": "author_login",
+              "source_stage": "comments",
+              "source_column": "author_login"
+            },
+            {
+              "name": "author",
+              "source_stage": "comments",
+              "source_column": "author"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "comments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "comments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "comments",
+              "source_column": "author_association"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "parameter": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "comments",
+                "entity": "gist_comment_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "comments"
+          },
+          "population": "Within One exact current gist, including secret gists visible to the caller. Missing/inaccessible hydration fails. Child retrieval follows every advertised page and aborts on errors."
+        },
+        {
+          "name": "user",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "comments",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "gist_comment_id",
+              "source_stage": "comments",
+              "source_column": "gist_comment_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "comments",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "comments",
+              "source_column": "url"
+            },
+            {
+              "name": "body",
+              "source_stage": "comments",
+              "source_column": "body"
+            },
+            {
+              "name": "author_id",
+              "source_stage": "comments",
+              "source_column": "author_id"
+            },
+            {
+              "name": "author_login",
+              "source_stage": "comments",
+              "source_column": "author_login"
+            },
+            {
+              "name": "author",
+              "source_stage": "comments",
+              "source_column": "author"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "comments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "comments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "comments",
+              "source_column": "author_association"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_user_list_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  },
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "comments",
+                "entity": "gist_comment_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "comments"
+          },
+          "population": "Within Every public gist owned by the selected user, following advertised pages; each discovered ID is hydrated to canonical current detail. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "user"
+          ]
+        },
+        {
+          "name": "forks",
+          "arguments": [
+            {
+              "name": "parent_gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque parent gist ID whose current forks are selected.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "comments",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "gist_comment_id",
+              "source_stage": "comments",
+              "source_column": "gist_comment_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "comments",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "comments",
+              "source_column": "url"
+            },
+            {
+              "name": "body",
+              "source_stage": "comments",
+              "source_column": "body"
+            },
+            {
+              "name": "author_id",
+              "source_stage": "comments",
+              "source_column": "author_id"
+            },
+            {
+              "name": "author_login",
+              "source_stage": "comments",
+              "source_column": "author_login"
+            },
+            {
+              "name": "author",
+              "source_stage": "comments",
+              "source_column": "author"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "comments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "comments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "comments",
+              "source_column": "author_association"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_forks_list_source",
+                "arguments": {
+                  "parent_gist_id": {
+                    "parameter": "parent_gist_id"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "comments",
+                "entity": "gist_comment_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "comments"
+          },
+          "population": "Within All current fork gists of the selected parent across advertised pages; each discovered ID is hydrated. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "parent_gist_id"
+          ]
+        },
+        {
+          "name": "public",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "comments",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "gist_comment_id",
+              "source_stage": "comments",
+              "source_column": "gist_comment_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "comments",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "comments",
+              "source_column": "url"
+            },
+            {
+              "name": "body",
+              "source_stage": "comments",
+              "source_column": "body"
+            },
+            {
+              "name": "author_id",
+              "source_stage": "comments",
+              "source_column": "author_id"
+            },
+            {
+              "name": "author_login",
+              "source_stage": "comments",
+              "source_column": "author_login"
+            },
+            {
+              "name": "author",
+              "source_stage": "comments",
+              "source_column": "author"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "comments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "comments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "comments",
+              "source_column": "author_association"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_public_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "comments",
+                "entity": "gist_comment_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "comments"
+          },
+          "population": "Within Public gists ordered by last update. Reaching the documented 3000-result ceiling fails rather than reporting the public universe as complete. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "gist_population"
+          ],
+          "select_values": {
+            "gist_population": [
+              "public"
+            ]
+          }
+        },
+        {
+          "name": "starred",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "comments",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "gist_comment_id",
+              "source_stage": "comments",
+              "source_column": "gist_comment_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "comments",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "comments",
+              "source_column": "url"
+            },
+            {
+              "name": "body",
+              "source_stage": "comments",
+              "source_column": "body"
+            },
+            {
+              "name": "author_id",
+              "source_stage": "comments",
+              "source_column": "author_id"
+            },
+            {
+              "name": "author_login",
+              "source_stage": "comments",
+              "source_column": "author_login"
+            },
+            {
+              "name": "author",
+              "source_stage": "comments",
+              "source_column": "author"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "comments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "comments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "comments",
+              "source_column": "author_association"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_starred_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "comments",
+                "entity": "gist_comment_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "comments"
+          },
+          "population": "Within Gists starred by the authenticated caller, across advertised pages, hydrated to canonical current detail. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "gist_population"
+          ],
+          "select_values": {
+            "gist_population": [
+              "starred"
+            ]
+          }
+        },
+        {
+          "name": "visible",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "comments",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "gist_comment_id",
+              "source_stage": "comments",
+              "source_column": "gist_comment_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "comments",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "comments",
+              "source_column": "url"
+            },
+            {
+              "name": "body",
+              "source_stage": "comments",
+              "source_column": "body"
+            },
+            {
+              "name": "author_id",
+              "source_stage": "comments",
+              "source_column": "author_id"
+            },
+            {
+              "name": "author_login",
+              "source_stage": "comments",
+              "source_column": "author_login"
+            },
+            {
+              "name": "author",
+              "source_stage": "comments",
+              "source_column": "author"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "comments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "comments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "comments",
+              "source_column": "author_association"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_visible_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "comments",
+                "entity": "gist_comment_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "comments"
+          },
+          "population": "Within Authenticated caller-owned gists; anonymously GitHub returns public gists. Reaching 3000 rows is rejected conservatively because anonymous discovery has the public-feed ceiling. Child retrieval follows every advertised page and aborts on errors.",
+          "default": true
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "gist_id",
+          "gist_comment_id",
+          "node_id",
+          "url",
+          "body",
+          "author_id",
+          "author_login",
+          "author",
+          "created_at",
+          "updated_at",
+          "author_association"
+        ],
+        "dimensions": [
+          "gist_id",
+          "author_login",
+          "created_at",
+          "author_association"
+        ],
+        "sql_names": {
+          "gist_id": "gist_comments_gist_id",
+          "author_login": "gist_comments_author_login",
+          "created_at": "gist_comments_created_at",
+          "author_association": "gist_comments_author_association"
+        },
+        "metrics": [
+          {
+            "name": "gist_comment_count",
+            "kind": "count",
+            "comment": "Current comments belonging to selected gists; a deleted author remains a comment."
+          }
+        ]
+      }
+    },
+    {
+      "name": "gist_revisions",
+      "description": "Gist commit identity, committer, changes and exact revision files in one canonical entity. Revisions retain immutable gist/SHA grain and typed file maps; current gist ownership is only traversal context. Optional exact SHA narrows after complete commit discovery.",
+      "grain": [
+        "gist_id",
+        "revision_sha"
+      ],
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "gist_id"
+          ],
+          "arguments": [
+            {
+              "name": "gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            },
+            {
+              "name": "gist_revision",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional exact gist revision SHA; filters the complete selected gist commit listing before revision hydration.",
+              "example": "57a7f021a713b1c5a6a199b54cc514735d2d462f",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "commits",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "revision_sha",
+              "source_stage": "commits",
+              "source_column": "revision_sha"
+            },
+            {
+              "name": "commit_url",
+              "source_stage": "commits",
+              "source_column": "commit_url"
+            },
+            {
+              "name": "committed_at",
+              "source_stage": "commits",
+              "source_column": "committed_at"
+            },
+            {
+              "name": "committer_id",
+              "source_stage": "commits",
+              "source_column": "committer_id"
+            },
+            {
+              "name": "committer_login",
+              "source_stage": "commits",
+              "source_column": "committer_login"
+            },
+            {
+              "name": "committer",
+              "source_stage": "commits",
+              "source_column": "committer"
+            },
+            {
+              "name": "change_status",
+              "source_stage": "commits",
+              "source_column": "change_status"
+            },
+            {
+              "name": "additions",
+              "source_stage": "commits",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "commits",
+              "source_column": "deletions"
+            },
+            {
+              "name": "total_changes",
+              "source_stage": "commits",
+              "source_column": "total_changes"
+            },
+            {
+              "name": "files",
+              "source_stage": "revision",
+              "source_column": "files"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "revision",
+              "source_column": "truncated"
+            },
+            {
+              "name": "description",
+              "source_stage": "revision",
+              "source_column": "description"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "parameter": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "commits",
+                "entity": "gist_commit_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                },
+                "where_parameters": {
+                  "revision_sha": "gist_revision"
+                }
+              },
+              {
+                "name": "revision",
+                "entity": "gist_revision_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "commits",
+                    "column": "gist_id"
+                  },
+                  "gist_revision": {
+                    "stage": "commits",
+                    "column": "revision_sha"
+                  }
+                }
+              }
+            ],
+            "output_stage": "revision"
+          },
+          "population": "Within One exact current gist, including secret gists visible to the caller. Missing/inaccessible hydration fails. Child retrieval follows every advertised page and aborts on errors."
+        },
+        {
+          "name": "user",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            },
+            {
+              "name": "gist_revision",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional exact gist revision SHA; filters the complete selected gist commit listing before revision hydration.",
+              "example": "57a7f021a713b1c5a6a199b54cc514735d2d462f",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "commits",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "revision_sha",
+              "source_stage": "commits",
+              "source_column": "revision_sha"
+            },
+            {
+              "name": "commit_url",
+              "source_stage": "commits",
+              "source_column": "commit_url"
+            },
+            {
+              "name": "committed_at",
+              "source_stage": "commits",
+              "source_column": "committed_at"
+            },
+            {
+              "name": "committer_id",
+              "source_stage": "commits",
+              "source_column": "committer_id"
+            },
+            {
+              "name": "committer_login",
+              "source_stage": "commits",
+              "source_column": "committer_login"
+            },
+            {
+              "name": "committer",
+              "source_stage": "commits",
+              "source_column": "committer"
+            },
+            {
+              "name": "change_status",
+              "source_stage": "commits",
+              "source_column": "change_status"
+            },
+            {
+              "name": "additions",
+              "source_stage": "commits",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "commits",
+              "source_column": "deletions"
+            },
+            {
+              "name": "total_changes",
+              "source_stage": "commits",
+              "source_column": "total_changes"
+            },
+            {
+              "name": "files",
+              "source_stage": "revision",
+              "source_column": "files"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "revision",
+              "source_column": "truncated"
+            },
+            {
+              "name": "description",
+              "source_stage": "revision",
+              "source_column": "description"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_user_list_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  },
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "commits",
+                "entity": "gist_commit_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                },
+                "where_parameters": {
+                  "revision_sha": "gist_revision"
+                }
+              },
+              {
+                "name": "revision",
+                "entity": "gist_revision_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "commits",
+                    "column": "gist_id"
+                  },
+                  "gist_revision": {
+                    "stage": "commits",
+                    "column": "revision_sha"
+                  }
+                }
+              }
+            ],
+            "output_stage": "revision"
+          },
+          "population": "Within Every public gist owned by the selected user, following advertised pages; each discovered ID is hydrated to canonical current detail. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "user"
+          ]
+        },
+        {
+          "name": "forks",
+          "arguments": [
+            {
+              "name": "parent_gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque parent gist ID whose current forks are selected.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            },
+            {
+              "name": "gist_revision",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional exact gist revision SHA; filters the complete selected gist commit listing before revision hydration.",
+              "example": "57a7f021a713b1c5a6a199b54cc514735d2d462f",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "commits",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "revision_sha",
+              "source_stage": "commits",
+              "source_column": "revision_sha"
+            },
+            {
+              "name": "commit_url",
+              "source_stage": "commits",
+              "source_column": "commit_url"
+            },
+            {
+              "name": "committed_at",
+              "source_stage": "commits",
+              "source_column": "committed_at"
+            },
+            {
+              "name": "committer_id",
+              "source_stage": "commits",
+              "source_column": "committer_id"
+            },
+            {
+              "name": "committer_login",
+              "source_stage": "commits",
+              "source_column": "committer_login"
+            },
+            {
+              "name": "committer",
+              "source_stage": "commits",
+              "source_column": "committer"
+            },
+            {
+              "name": "change_status",
+              "source_stage": "commits",
+              "source_column": "change_status"
+            },
+            {
+              "name": "additions",
+              "source_stage": "commits",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "commits",
+              "source_column": "deletions"
+            },
+            {
+              "name": "total_changes",
+              "source_stage": "commits",
+              "source_column": "total_changes"
+            },
+            {
+              "name": "files",
+              "source_stage": "revision",
+              "source_column": "files"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "revision",
+              "source_column": "truncated"
+            },
+            {
+              "name": "description",
+              "source_stage": "revision",
+              "source_column": "description"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_forks_list_source",
+                "arguments": {
+                  "parent_gist_id": {
+                    "parameter": "parent_gist_id"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "commits",
+                "entity": "gist_commit_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                },
+                "where_parameters": {
+                  "revision_sha": "gist_revision"
+                }
+              },
+              {
+                "name": "revision",
+                "entity": "gist_revision_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "commits",
+                    "column": "gist_id"
+                  },
+                  "gist_revision": {
+                    "stage": "commits",
+                    "column": "revision_sha"
+                  }
+                }
+              }
+            ],
+            "output_stage": "revision"
+          },
+          "population": "Within All current fork gists of the selected parent across advertised pages; each discovered ID is hydrated. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "parent_gist_id"
+          ]
+        },
+        {
+          "name": "public",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            },
+            {
+              "name": "gist_revision",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional exact gist revision SHA; filters the complete selected gist commit listing before revision hydration.",
+              "example": "57a7f021a713b1c5a6a199b54cc514735d2d462f",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "commits",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "revision_sha",
+              "source_stage": "commits",
+              "source_column": "revision_sha"
+            },
+            {
+              "name": "commit_url",
+              "source_stage": "commits",
+              "source_column": "commit_url"
+            },
+            {
+              "name": "committed_at",
+              "source_stage": "commits",
+              "source_column": "committed_at"
+            },
+            {
+              "name": "committer_id",
+              "source_stage": "commits",
+              "source_column": "committer_id"
+            },
+            {
+              "name": "committer_login",
+              "source_stage": "commits",
+              "source_column": "committer_login"
+            },
+            {
+              "name": "committer",
+              "source_stage": "commits",
+              "source_column": "committer"
+            },
+            {
+              "name": "change_status",
+              "source_stage": "commits",
+              "source_column": "change_status"
+            },
+            {
+              "name": "additions",
+              "source_stage": "commits",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "commits",
+              "source_column": "deletions"
+            },
+            {
+              "name": "total_changes",
+              "source_stage": "commits",
+              "source_column": "total_changes"
+            },
+            {
+              "name": "files",
+              "source_stage": "revision",
+              "source_column": "files"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "revision",
+              "source_column": "truncated"
+            },
+            {
+              "name": "description",
+              "source_stage": "revision",
+              "source_column": "description"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_public_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "commits",
+                "entity": "gist_commit_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                },
+                "where_parameters": {
+                  "revision_sha": "gist_revision"
+                }
+              },
+              {
+                "name": "revision",
+                "entity": "gist_revision_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "commits",
+                    "column": "gist_id"
+                  },
+                  "gist_revision": {
+                    "stage": "commits",
+                    "column": "revision_sha"
+                  }
+                }
+              }
+            ],
+            "output_stage": "revision"
+          },
+          "population": "Within Public gists ordered by last update. Reaching the documented 3000-result ceiling fails rather than reporting the public universe as complete. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "gist_population"
+          ],
+          "select_values": {
+            "gist_population": [
+              "public"
+            ]
+          }
+        },
+        {
+          "name": "starred",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            },
+            {
+              "name": "gist_revision",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional exact gist revision SHA; filters the complete selected gist commit listing before revision hydration.",
+              "example": "57a7f021a713b1c5a6a199b54cc514735d2d462f",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "commits",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "revision_sha",
+              "source_stage": "commits",
+              "source_column": "revision_sha"
+            },
+            {
+              "name": "commit_url",
+              "source_stage": "commits",
+              "source_column": "commit_url"
+            },
+            {
+              "name": "committed_at",
+              "source_stage": "commits",
+              "source_column": "committed_at"
+            },
+            {
+              "name": "committer_id",
+              "source_stage": "commits",
+              "source_column": "committer_id"
+            },
+            {
+              "name": "committer_login",
+              "source_stage": "commits",
+              "source_column": "committer_login"
+            },
+            {
+              "name": "committer",
+              "source_stage": "commits",
+              "source_column": "committer"
+            },
+            {
+              "name": "change_status",
+              "source_stage": "commits",
+              "source_column": "change_status"
+            },
+            {
+              "name": "additions",
+              "source_stage": "commits",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "commits",
+              "source_column": "deletions"
+            },
+            {
+              "name": "total_changes",
+              "source_stage": "commits",
+              "source_column": "total_changes"
+            },
+            {
+              "name": "files",
+              "source_stage": "revision",
+              "source_column": "files"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "revision",
+              "source_column": "truncated"
+            },
+            {
+              "name": "description",
+              "source_stage": "revision",
+              "source_column": "description"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_starred_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "commits",
+                "entity": "gist_commit_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                },
+                "where_parameters": {
+                  "revision_sha": "gist_revision"
+                }
+              },
+              {
+                "name": "revision",
+                "entity": "gist_revision_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "commits",
+                    "column": "gist_id"
+                  },
+                  "gist_revision": {
+                    "stage": "commits",
+                    "column": "revision_sha"
+                  }
+                }
+              }
+            ],
+            "output_stage": "revision"
+          },
+          "population": "Within Gists starred by the authenticated caller, across advertised pages, hydrated to canonical current detail. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "gist_population"
+          ],
+          "select_values": {
+            "gist_population": [
+              "starred"
+            ]
+          }
+        },
+        {
+          "name": "visible",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            },
+            {
+              "name": "gist_revision",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional exact gist revision SHA; filters the complete selected gist commit listing before revision hydration.",
+              "example": "57a7f021a713b1c5a6a199b54cc514735d2d462f",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "commits",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "revision_sha",
+              "source_stage": "commits",
+              "source_column": "revision_sha"
+            },
+            {
+              "name": "commit_url",
+              "source_stage": "commits",
+              "source_column": "commit_url"
+            },
+            {
+              "name": "committed_at",
+              "source_stage": "commits",
+              "source_column": "committed_at"
+            },
+            {
+              "name": "committer_id",
+              "source_stage": "commits",
+              "source_column": "committer_id"
+            },
+            {
+              "name": "committer_login",
+              "source_stage": "commits",
+              "source_column": "committer_login"
+            },
+            {
+              "name": "committer",
+              "source_stage": "commits",
+              "source_column": "committer"
+            },
+            {
+              "name": "change_status",
+              "source_stage": "commits",
+              "source_column": "change_status"
+            },
+            {
+              "name": "additions",
+              "source_stage": "commits",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "commits",
+              "source_column": "deletions"
+            },
+            {
+              "name": "total_changes",
+              "source_stage": "commits",
+              "source_column": "total_changes"
+            },
+            {
+              "name": "files",
+              "source_stage": "revision",
+              "source_column": "files"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "revision",
+              "source_column": "truncated"
+            },
+            {
+              "name": "description",
+              "source_stage": "revision",
+              "source_column": "description"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_visible_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "commits",
+                "entity": "gist_commit_list_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                },
+                "where_parameters": {
+                  "revision_sha": "gist_revision"
+                }
+              },
+              {
+                "name": "revision",
+                "entity": "gist_revision_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "commits",
+                    "column": "gist_id"
+                  },
+                  "gist_revision": {
+                    "stage": "commits",
+                    "column": "revision_sha"
+                  }
+                }
+              }
+            ],
+            "output_stage": "revision"
+          },
+          "population": "Within Authenticated caller-owned gists; anonymously GitHub returns public gists. Reaching 3000 rows is rejected conservatively because anonymous discovery has the public-feed ceiling. Child retrieval follows every advertised page and aborts on errors.",
+          "default": true
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "gist_id",
+          "revision_sha",
+          "commit_url",
+          "committed_at",
+          "committer_id",
+          "committer_login",
+          "committer",
+          "change_status",
+          "additions",
+          "deletions",
+          "total_changes",
+          "files",
+          "truncated",
+          "description"
+        ],
+        "dimensions": [
+          "gist_id",
+          "revision_sha",
+          "committer_login",
+          "committed_at",
+          "truncated"
+        ],
+        "sql_names": {
+          "gist_id": "gist_revisions_gist_id",
+          "revision_sha": "gist_revisions_revision_sha",
+          "committer_login": "gist_revisions_committer_login",
+          "committed_at": "gist_revisions_committed_at",
+          "truncated": "gist_revisions_truncated"
+        },
+        "metrics": [
+          {
+            "name": "gist_revision_count",
+            "kind": "count",
+            "comment": "Gist-qualified immutable revision identities discovered through the complete commit listing and hydrated by exact SHA; an absent optional SHA filter returns zero."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "gist_revision_additions": {
+              "expression": "SUM(gist_revisions.additions)"
+            },
+            "gist_revision_deletions": {
+              "expression": "SUM(gist_revisions.deletions)"
+            }
+          },
+          "metric_semantics": {
+            "gist_revision_additions": {
+              "comment": "Reported line changes for selected gist revision records; missing upstream counters are not invented. Empty selected populations yield zero; an observed population with no reported values yields NULL. Mixed populations sum only reported values.",
+              "additivity": "additive",
+              "dataset": "gist_revisions",
+              "missing": "zero"
+            },
+            "gist_revision_deletions": {
+              "comment": "Reported line changes for selected gist revision records; missing upstream counters are not invented. Empty selected populations yield zero; an observed population with no reported values yields NULL. Mixed populations sum only reported values.",
+              "additivity": "additive",
+              "dataset": "gist_revisions",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gist_files",
+      "description": "Current gist-qualified file dictionary entries, with exact filename key, typed nullable value, encoding and truncation. Raw URLs are descriptive and never followed automatically. A missing files object fails, while an empty object yields zero entries.",
+      "grain": [
+        "gist_id",
+        "filename"
+      ],
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "gist_id"
+          ],
+          "arguments": [
+            {
+              "name": "gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "files",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "filename",
+              "source_stage": "files",
+              "source_column": "filename"
+            },
+            {
+              "name": "file",
+              "source_stage": "files",
+              "source_column": "file"
+            },
+            {
+              "name": "declared_filename",
+              "source_stage": "files",
+              "source_column": "declared_filename"
+            },
+            {
+              "name": "media_type",
+              "source_stage": "files",
+              "source_column": "media_type"
+            },
+            {
+              "name": "language",
+              "source_stage": "files",
+              "source_column": "language"
+            },
+            {
+              "name": "raw_url",
+              "source_stage": "files",
+              "source_column": "raw_url"
+            },
+            {
+              "name": "byte_size",
+              "source_stage": "files",
+              "source_column": "byte_size"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "files",
+              "source_column": "truncated"
+            },
+            {
+              "name": "content",
+              "source_stage": "files",
+              "source_column": "content"
+            },
+            {
+              "name": "encoding",
+              "source_stage": "files",
+              "source_column": "encoding"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "parameter": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "files",
+                "entity": "gist_files_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "files"
+          },
+          "population": "Within One exact current gist, including secret gists visible to the caller. Missing/inaccessible hydration fails. Child retrieval follows every advertised page and aborts on errors."
+        },
+        {
+          "name": "user",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "files",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "filename",
+              "source_stage": "files",
+              "source_column": "filename"
+            },
+            {
+              "name": "file",
+              "source_stage": "files",
+              "source_column": "file"
+            },
+            {
+              "name": "declared_filename",
+              "source_stage": "files",
+              "source_column": "declared_filename"
+            },
+            {
+              "name": "media_type",
+              "source_stage": "files",
+              "source_column": "media_type"
+            },
+            {
+              "name": "language",
+              "source_stage": "files",
+              "source_column": "language"
+            },
+            {
+              "name": "raw_url",
+              "source_stage": "files",
+              "source_column": "raw_url"
+            },
+            {
+              "name": "byte_size",
+              "source_stage": "files",
+              "source_column": "byte_size"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "files",
+              "source_column": "truncated"
+            },
+            {
+              "name": "content",
+              "source_stage": "files",
+              "source_column": "content"
+            },
+            {
+              "name": "encoding",
+              "source_stage": "files",
+              "source_column": "encoding"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_user_list_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  },
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "files",
+                "entity": "gist_files_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "files"
+          },
+          "population": "Within Every public gist owned by the selected user, following advertised pages; each discovered ID is hydrated to canonical current detail. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "user"
+          ]
+        },
+        {
+          "name": "forks",
+          "arguments": [
+            {
+              "name": "parent_gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque parent gist ID whose current forks are selected.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "files",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "filename",
+              "source_stage": "files",
+              "source_column": "filename"
+            },
+            {
+              "name": "file",
+              "source_stage": "files",
+              "source_column": "file"
+            },
+            {
+              "name": "declared_filename",
+              "source_stage": "files",
+              "source_column": "declared_filename"
+            },
+            {
+              "name": "media_type",
+              "source_stage": "files",
+              "source_column": "media_type"
+            },
+            {
+              "name": "language",
+              "source_stage": "files",
+              "source_column": "language"
+            },
+            {
+              "name": "raw_url",
+              "source_stage": "files",
+              "source_column": "raw_url"
+            },
+            {
+              "name": "byte_size",
+              "source_stage": "files",
+              "source_column": "byte_size"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "files",
+              "source_column": "truncated"
+            },
+            {
+              "name": "content",
+              "source_stage": "files",
+              "source_column": "content"
+            },
+            {
+              "name": "encoding",
+              "source_stage": "files",
+              "source_column": "encoding"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_forks_list_source",
+                "arguments": {
+                  "parent_gist_id": {
+                    "parameter": "parent_gist_id"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "files",
+                "entity": "gist_files_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "files"
+          },
+          "population": "Within All current fork gists of the selected parent across advertised pages; each discovered ID is hydrated. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "parent_gist_id"
+          ]
+        },
+        {
+          "name": "public",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "files",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "filename",
+              "source_stage": "files",
+              "source_column": "filename"
+            },
+            {
+              "name": "file",
+              "source_stage": "files",
+              "source_column": "file"
+            },
+            {
+              "name": "declared_filename",
+              "source_stage": "files",
+              "source_column": "declared_filename"
+            },
+            {
+              "name": "media_type",
+              "source_stage": "files",
+              "source_column": "media_type"
+            },
+            {
+              "name": "language",
+              "source_stage": "files",
+              "source_column": "language"
+            },
+            {
+              "name": "raw_url",
+              "source_stage": "files",
+              "source_column": "raw_url"
+            },
+            {
+              "name": "byte_size",
+              "source_stage": "files",
+              "source_column": "byte_size"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "files",
+              "source_column": "truncated"
+            },
+            {
+              "name": "content",
+              "source_stage": "files",
+              "source_column": "content"
+            },
+            {
+              "name": "encoding",
+              "source_stage": "files",
+              "source_column": "encoding"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_public_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "files",
+                "entity": "gist_files_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "files"
+          },
+          "population": "Within Public gists ordered by last update. Reaching the documented 3000-result ceiling fails rather than reporting the public universe as complete. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "gist_population"
+          ],
+          "select_values": {
+            "gist_population": [
+              "public"
+            ]
+          }
+        },
+        {
+          "name": "starred",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "files",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "filename",
+              "source_stage": "files",
+              "source_column": "filename"
+            },
+            {
+              "name": "file",
+              "source_stage": "files",
+              "source_column": "file"
+            },
+            {
+              "name": "declared_filename",
+              "source_stage": "files",
+              "source_column": "declared_filename"
+            },
+            {
+              "name": "media_type",
+              "source_stage": "files",
+              "source_column": "media_type"
+            },
+            {
+              "name": "language",
+              "source_stage": "files",
+              "source_column": "language"
+            },
+            {
+              "name": "raw_url",
+              "source_stage": "files",
+              "source_column": "raw_url"
+            },
+            {
+              "name": "byte_size",
+              "source_stage": "files",
+              "source_column": "byte_size"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "files",
+              "source_column": "truncated"
+            },
+            {
+              "name": "content",
+              "source_stage": "files",
+              "source_column": "content"
+            },
+            {
+              "name": "encoding",
+              "source_stage": "files",
+              "source_column": "encoding"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_starred_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "files",
+                "entity": "gist_files_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "files"
+          },
+          "population": "Within Gists starred by the authenticated caller, across advertised pages, hydrated to canonical current detail. Child retrieval follows every advertised page and aborts on errors.",
+          "select": [
+            "gist_population"
+          ],
+          "select_values": {
+            "gist_population": [
+              "starred"
+            ]
+          }
+        },
+        {
+          "name": "visible",
+          "arguments": [
+            {
+              "name": "gist_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Gist discovery population: visible uses the caller-owned listing when authenticated and public listing otherwise; public selects the public feed; starred selects the authenticated caller stars.",
+              "example": "public",
+              "enum": [
+                "visible",
+                "public",
+                "starred"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "gist_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only gists updated after this timestamp, applied by GitHub to the selected listing population.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "files",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "filename",
+              "source_stage": "files",
+              "source_column": "filename"
+            },
+            {
+              "name": "file",
+              "source_stage": "files",
+              "source_column": "file"
+            },
+            {
+              "name": "declared_filename",
+              "source_stage": "files",
+              "source_column": "declared_filename"
+            },
+            {
+              "name": "media_type",
+              "source_stage": "files",
+              "source_column": "media_type"
+            },
+            {
+              "name": "language",
+              "source_stage": "files",
+              "source_column": "language"
+            },
+            {
+              "name": "raw_url",
+              "source_stage": "files",
+              "source_column": "raw_url"
+            },
+            {
+              "name": "byte_size",
+              "source_stage": "files",
+              "source_column": "byte_size"
+            },
+            {
+              "name": "truncated",
+              "source_stage": "files",
+              "source_column": "truncated"
+            },
+            {
+              "name": "content",
+              "source_stage": "files",
+              "source_column": "content"
+            },
+            {
+              "name": "encoding",
+              "source_stage": "files",
+              "source_column": "encoding"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "gist_visible_list_source",
+                "arguments": {
+                  "gist_since": {
+                    "parameter": "gist_since"
+                  }
+                }
+              },
+              {
+                "name": "gists",
+                "entity": "gist_get_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "discovered",
+                    "column": "gist_id"
+                  }
+                }
+              },
+              {
+                "name": "files",
+                "entity": "gist_files_source",
+                "arguments": {
+                  "gist_id": {
+                    "stage": "gists",
+                    "column": "gist_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "files"
+          },
+          "population": "Within Authenticated caller-owned gists; anonymously GitHub returns public gists. Reaching 3000 rows is rejected conservatively because anonymous discovery has the public-feed ceiling. Child retrieval follows every advertised page and aborts on errors.",
+          "default": true
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "gist_id",
+          "filename",
+          "file",
+          "declared_filename",
+          "media_type",
+          "language",
+          "raw_url",
+          "byte_size",
+          "truncated",
+          "content",
+          "encoding"
+        ],
+        "dimensions": [
+          "gist_id",
+          "filename",
+          "language",
+          "encoding",
+          "truncated"
+        ],
+        "sql_names": {
+          "gist_id": "gist_files_gist_id",
+          "filename": "gist_files_filename",
+          "language": "gist_files_language",
+          "encoding": "gist_files_encoding",
+          "truncated": "gist_files_truncated"
+        },
+        "metrics": [
+          {
+            "name": "gist_file_entry_count",
+            "kind": "count",
+            "comment": "Current gist file dictionary entries. A nullable file value remains an entry; this count does not assert complete file content."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "gist_file_bytes": {
+              "expression": "SUM(gist_files.byte_size)"
+            }
+          },
+          "metric_semantics": {
+            "gist_file_bytes": {
+              "comment": "Reported byte sizes for returned current file entries; NULL sizes remain unknown and are not inferred from truncated content. Empty selected populations yield zero; an observed population with no reported values yields NULL. Mixed populations sum only reported values.",
+              "additivity": "additive",
+              "dataset": "gist_files",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "gist_star_observations",
+      "description": "Authenticated caller-qualified observations of gist star status. 204 means starred; 404 is the endpoint negative status and does not establish whether a target exists or is visible. Repeated invocations are current snapshots, not history.",
+      "grain": [
+        "caller_id",
+        "gist_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "gist_id",
+          "caller_id",
+          "status_code",
+          "caller_login"
+        ],
+        "dimensions": [
+          "gist_id",
+          "caller_login",
+          "status_code"
+        ],
+        "sql_names": {
+          "gist_id": "gist_star_observations_gist_id",
+          "caller_login": "gist_star_observations_caller_login",
+          "status_code": "gist_star_observations_status_code"
+        },
+        "metrics": [
+          {
+            "name": "gist_star_observation_count",
+            "kind": "count",
+            "comment": "Current authenticated caller/gist star-status observations; not durable star-event history."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "starred_gist_observation_count": {
+              "expression": "COUNT(*) FILTER (WHERE gist_star_observations.status_code = 204)"
+            }
+          },
+          "metric_semantics": {
+            "starred_gist_observation_count": {
+              "comment": "Observations for which GitHub returned the documented starred status. A 404 does not prove target existence or visibility.",
+              "additivity": "additive",
+              "dataset": "gist_star_observations"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "gist_id"
+          ],
+          "arguments": [
+            {
+              "name": "gist_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One opaque GitHub gist ID; omit to discover the selected gist population.",
+              "example": "aa5a315d61ae9438b18d",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "gist_id",
+              "source_stage": "status",
+              "source_column": "gist_id"
+            },
+            {
+              "name": "caller_id",
+              "source_stage": "status",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "status",
+              "source_column": "status_code"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "caller",
+              "source_column": "caller_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "caller",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "status",
+                "entity": "gist_star_status_source",
+                "arguments": {
+                  "gist_id": {
+                    "parameter": "gist_id"
+                  },
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "status"
+          },
+          "population": "One current authenticated-caller star predicate for the exact requested target. No existence lookup precedes the predicate; 404 retains its documented negative status without asserting target existence."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "gists_to_users",
+      "from": "gists",
+      "to": "users",
+      "from_columns": [
+        "owner_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "owner_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "user",
+          "bindings": {
+            "user": "user_login"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "gists_to_parent_gists",
+      "from": "gists",
+      "to": "gists",
+      "from_columns": [
+        "parent_gist_id"
+      ],
+      "to_columns": [
+        "gist_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "parent_gist_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "forks",
+          "bindings": {
+            "parent_gist_id": "gist_id"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "gist_comments_to_gists",
+      "from": "gist_comments",
+      "to": "gists",
+      "from_columns": [
+        "gist_id"
+      ],
+      "to_columns": [
+        "gist_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "gist_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "gist_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "gist_revisions_to_gists",
+      "from": "gist_revisions",
+      "to": "gists",
+      "from_columns": [
+        "gist_id"
+      ],
+      "to_columns": [
+        "gist_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "gist_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "gist_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "gist_files_to_gists",
+      "from": "gist_files",
+      "to": "gists",
+      "from_columns": [
+        "gist_id"
+      ],
+      "to_columns": [
+        "gist_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "gist_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "gist_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "gist_comments_to_users",
+      "from": "gist_comments",
+      "to": "users",
+      "from_columns": [
+        "author_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "author_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "gist_revisions_to_users",
+      "from": "gist_revisions",
+      "to": "users",
+      "from_columns": [
+        "committer_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "committer_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "gist_star_observations_to_users",
+      "from": "gist_star_observations",
+      "to": "users",
+      "from_columns": [
+        "caller_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "caller_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "gist_star_observations_to_gists",
+      "from": "gist_star_observations",
+      "to": "gists",
+      "from_columns": [
+        "gist_id"
+      ],
+      "to_columns": [
+        "gist_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "gist_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "gist_id": "gist_id"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    }
+  ]
+}

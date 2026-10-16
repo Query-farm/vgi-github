@@ -1,0 +1,272 @@
+# Independent Git identities, line changes, recursive trees and typed blob content.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT commit_count,commit_added_lines,commit_deleted_lines FROM engineering.semantic.github(repository=>'git-fixture/alpha');
+----
+3	15	3
+
+query I
+SELECT commit_count FROM engineering.semantic.github(owner=>'git-fixture');
+----
+3
+
+query IIII
+SELECT commit_count,commit_file_change_count,commit_file_added_lines,commit_file_deleted_lines FROM engineering.semantic.github(repository=>'git-fixture/alpha');
+----
+3	4	15	3
+
+# Canonical commits agree through repository ref and Git-object lookup.
+query III
+SELECT commit_count,commit_added_lines,commit_deleted_lines FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_ref=>'feature');
+----
+1	3	1
+
+query III
+SELECT commit_count,commit_added_lines,commit_deleted_lines FROM engineering.semantic.github(repository=>'git-fixture/alpha',git_commit_sha=>'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+----
+1	3	1
+
+query I
+SELECT commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_history_ref=>'feature');
+----
+2
+
+query I
+SELECT commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_path=>'beta.txt');
+----
+2
+
+# Authorship and committer account roles deliberately differ.
+query TT
+SELECT author_login,committer_login FROM engineering.detail.commits(repository=>'git-fixture/alpha',commit_ref=>'feature');
+----
+bob	alice
+
+query TI
+SELECT commits_author_login,commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha') GROUP BY commits_author_login ORDER BY commits_author_login NULLS LAST;
+----
+alice	1
+bob	1
+NULL	1
+
+query TI
+SELECT commits_authored_day,commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha') GROUP BY commits_authored_day ORDER BY commits_authored_day;
+----
+2026-09-01	2
+2026-09-02	1
+
+query TI
+SELECT commits_committed_day,commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha') GROUP BY commits_committed_day ORDER BY commits_committed_day;
+----
+2026-09-01	1
+2026-09-02	1
+2026-09-03	1
+
+query III
+SELECT commit_count,commit_added_lines,commit_deleted_lines FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_author=>'alice');
+----
+1	10	0
+
+query III
+SELECT commit_count,commit_added_lines,commit_deleted_lines FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_committer=>'alice');
+----
+1	3	1
+
+query I
+SELECT commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_since=>'2026-09-02 00:00:00+00');
+----
+2
+
+# Per-commit files exhaust Link pages; binary patch absence stays NULL.
+query TTT
+SELECT filename,previous_filename,patch FROM engineering.detail.commit_files(repository=>'git-fixture/alpha',commit_ref=>'feature') ORDER BY filename;
+----
+beta.txt	alpha.txt	@@ independent patch @@
+binary.png	NULL	NULL
+
+query III
+SELECT commit_comparison_count,comparison_file_change_count,commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_comparison=>'v1...main');
+----
+1	2	2
+
+query TIII
+SELECT status,ahead_by,behind_by,total_commits FROM engineering.detail.commit_comparisons(repository=>'git-fixture/alpha',commit_comparison=>'v1...main');
+----
+ahead	2	0	2
+
+query I
+SELECT branch_count FROM engineering.semantic.github(repository=>'git-fixture/alpha');
+----
+3
+
+query I
+SELECT branch_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',branch_protected=>true);
+----
+1
+
+query I
+SELECT branch_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',branch_name=>'feature');
+----
+1
+
+# Reverse lookup means exactly current HEAD, not branch containment.
+query I
+SELECT branch_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',head_commit_sha=>'cccccccccccccccccccccccccccccccccccccccc');
+----
+2
+
+query I
+SELECT repository_tag_count FROM engineering.semantic.github(repository=>'git-fixture/alpha');
+----
+2
+
+query I
+SELECT git_reference_count FROM engineering.semantic.github(repository=>'git-fixture/alpha');
+----
+6
+
+query TI
+SELECT git_references_object_type,git_reference_count FROM engineering.semantic.github(repository=>'git-fixture/alpha') GROUP BY git_references_object_type ORDER BY git_references_object_type;
+----
+blob	1
+commit	4
+tag	1
+
+query I
+SELECT git_reference_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',ref_prefix=>'heads/');
+----
+3
+
+query I
+SELECT git_reference_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',reference_name=>'heads/main');
+----
+1
+
+query I
+SELECT git_tag_object_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',git_tag_sha=>'2222222222222222222222222222222222222222');
+----
+1
+
+query I
+SELECT git_tag_object_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',reference_name=>'tags/v1');
+----
+1
+
+# A lightweight tag is a reference to a commit, not an annotated tag object.
+query I
+SELECT git_tag_object_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',reference_name=>'tags/v0');
+----
+0
+
+query I
+SELECT git_tree_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',tree_sha=>'dddddddddddddddddddddddddddddddddddddddd');
+----
+1
+
+query I
+SELECT git_tree_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_ref=>'main');
+----
+1
+
+query III
+SELECT git_tree_entry_count,git_tree_blob_entry_count,git_tree_entry_bytes FROM engineering.semantic.github(repository=>'git-fixture/alpha',tree_sha=>'dddddddddddddddddddddddddddddddddddddddd');
+----
+4	2	20
+
+query III
+SELECT git_tree_entry_count,git_tree_blob_entry_count,git_tree_entry_bytes FROM engineering.semantic.github(repository=>'git-fixture/alpha',recursive_tree_sha=>'dddddddddddddddddddddddddddddddddddddddd');
+----
+5	3	40
+
+query II
+SELECT git_blob_count,git_blob_bytes FROM engineering.semantic.github(repository=>'git-fixture/alpha',tree_sha=>'dddddddddddddddddddddddddddddddddddddddd');
+----
+1	10
+
+query II
+SELECT git_blob_count,git_blob_bytes FROM engineering.semantic.github(repository=>'git-fixture/alpha',recursive_tree_sha=>'dddddddddddddddddddddddddddddddddddddddd');
+----
+2	30
+
+query ITT
+SELECT size_bytes,encoding,content FROM engineering.detail.git_blobs(repository=>'git-fixture/alpha',blob_sha=>'3333333333333333333333333333333333333333');
+----
+10	base64	MDEyMzQ1Njc4OQ==
+
+query I
+SELECT commit_pull_request_membership_count FROM engineering.semantic.github(repository=>'git-fixture/alpha');
+----
+3
+
+query II
+SELECT commit_pull_request_memberships_pull_request_number,commit_pull_request_membership_count FROM engineering.semantic.github(repository=>'git-fixture/alpha') GROUP BY commit_pull_request_memberships_pull_request_number ORDER BY commit_pull_request_memberships_pull_request_number;
+----
+11	2
+12	1
+
+query TI
+SELECT repository_name,commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha') GROUP BY repository_name;
+----
+git-fixture/alpha	3
+
+query III
+SELECT commit_count,branch_count,repository_tag_count FROM engineering.semantic.github(repository=>'git-fixture/empty');
+----
+0	0	0
+
+# Incompatible selector combinations reject before any HTTP request.
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT commit_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',commit_ref=>'main',commit_author=>'alice');
+----
+arguments do not apply
+
+statement error
+SELECT git_blob_count FROM engineering.semantic.github(repository=>'git-fixture/alpha',blob_sha=>'3333333333333333333333333333333333333333',tree_sha=>'dddddddddddddddddddddddddddddddddddddddd');
+----
+arguments do not apply
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

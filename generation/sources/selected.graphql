@@ -2,20 +2,347 @@
 Represents an object which can take actions on GitHub. Typically a User or Bot.
 """
 interface Actor {
+  """A URL pointing to the actor's public avatar."""
+  avatarUrl(
+    """The size of the resulting square image."""
+    size: Int
+  ): URI!
   """The username of the actor."""
   login: String!
 }
 
+"""Represents an 'added_to_merge_queue' event on a given pull request."""
+type AddedToMergeQueueEvent implements Node {
+  """The Node ID of the AddedToMergeQueueEvent object"""
+  id: ID!
+}
+
+"""
+Represents a 'added_to_project' event on a given issue or pull request.
+"""
+type AddedToProjectEvent implements Node {
+  """The Node ID of the AddedToProjectEvent object"""
+  id: ID!
+}
+
+"""A GitHub App."""
+type App implements Node {
+  """The Node ID of the App object"""
+  id: ID!
+}
+
+"""Represents an 'assigned' event on any assignable object."""
+type AssignedEvent implements Node {
+  """The Node ID of the AssignedEvent object"""
+  id: ID!
+}
+
+"""Represents a 'auto_merge_disabled' event on a given pull request."""
+type AutoMergeDisabledEvent implements Node {
+  """The Node ID of the AutoMergeDisabledEvent object"""
+  id: ID!
+}
+
+"""Represents a 'auto_merge_enabled' event on a given pull request."""
+type AutoMergeEnabledEvent implements Node {
+  """The Node ID of the AutoMergeEnabledEvent object"""
+  id: ID!
+}
+
+"""Represents a 'auto_rebase_enabled' event on a given pull request."""
+type AutoRebaseEnabledEvent implements Node {
+  """The Node ID of the AutoRebaseEnabledEvent object"""
+  id: ID!
+}
+
+"""Represents a 'auto_squash_enabled' event on a given pull request."""
+type AutoSquashEnabledEvent implements Node {
+  """The Node ID of the AutoSquashEnabledEvent object"""
+  id: ID!
+}
+
+"""
+Represents a 'automatic_base_change_failed' event on a given pull request.
+"""
+type AutomaticBaseChangeFailedEvent implements Node {
+  """The Node ID of the AutomaticBaseChangeFailedEvent object"""
+  id: ID!
+}
+
+"""
+Represents a 'automatic_base_change_succeeded' event on a given pull request.
+"""
+type AutomaticBaseChangeSucceededEvent implements Node {
+  """The Node ID of the AutomaticBaseChangeSucceededEvent object"""
+  id: ID!
+}
+
+"""
+Represents a 'base_ref_changed' event on a given issue or pull request.
+"""
+type BaseRefChangedEvent implements Node {
+  """The Node ID of the BaseRefChangedEvent object"""
+  id: ID!
+}
+
+"""Represents a 'base_ref_deleted' event on a given pull request."""
+type BaseRefDeletedEvent implements Node {
+  """The Node ID of the BaseRefDeletedEvent object"""
+  id: ID!
+}
+
+"""Represents a 'base_ref_force_pushed' event on a given pull request."""
+type BaseRefForcePushedEvent implements Node {
+  """The Node ID of the BaseRefForcePushedEvent object"""
+  id: ID!
+}
+
+"""
+Represents non-fractional signed whole numeric values. Since the value may
+exceed the size of a 32-bit integer, it's encoded as a string.
+"""
+scalar BigInt
+
+"""Represents a Git blob."""
+type Blob implements Node {
+  """The Node ID of the Blob object"""
+  id: ID!
+}
+
+"""A special type of user which takes actions on behalf of GitHub Apps."""
+type Bot implements Actor & Node {
+  """A URL pointing to the GitHub App's public avatar."""
+  avatarUrl(
+    """The size of the resulting square image."""
+    size: Int
+  ): URI!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the Bot object"""
+  id: ID!
+  """The username of the actor."""
+  login: String!
+}
+
+"""A branch protection rule."""
+type BranchProtectionRule implements Node {
+  """The Node ID of the BranchProtectionRule object"""
+  id: ID!
+}
+
+"""
+A user, team, or app who has the ability to bypass a force push requirement on a protected branch.
+"""
+type BypassForcePushAllowance implements Node {
+  """The Node ID of the BypassForcePushAllowance object"""
+  id: ID!
+}
+
+"""
+A user, team, or app who has the ability to bypass a pull request requirement on a protected branch.
+"""
+type BypassPullRequestAllowance implements Node {
+  """The Node ID of the BypassPullRequestAllowance object"""
+  id: ID!
+}
+
+"""A common weakness enumeration"""
+type CWE implements Node {
+  """The Node ID of the CWE object"""
+  id: ID!
+}
+
+"""The possible states for a check suite or run conclusion."""
+enum CheckConclusionState {
+  """The check suite or run requires action."""
+  ACTION_REQUIRED
+  """The check suite or run has been cancelled."""
+  CANCELLED
+  """The check suite or run has failed."""
+  FAILURE
+  """The check suite or run was neutral."""
+  NEUTRAL
+  """The check suite or run was skipped."""
+  SKIPPED
+  """
+  The check suite or run was marked stale by GitHub. Only GitHub can use this conclusion.
+  """
+  STALE
+  """The check suite or run has failed at startup."""
+  STARTUP_FAILURE
+  """The check suite or run has succeeded."""
+  SUCCESS
+  """The check suite or run has timed out."""
+  TIMED_OUT
+}
+
+"""A check run."""
+type CheckRun implements Node {
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The corresponding deployment for this job, if any"""
+  deployment: Deployment
+  """The Node ID of the CheckRun object"""
+  id: ID!
+  """Information about a pending deployment, if any, in this check run"""
+  pendingDeploymentRequest: DeploymentRequest
+  """The permalink to the check run summary."""
+  permalink: URI!
+  """The repository associated with this check run."""
+  repository: Repository!
+  """The HTTP path for this check run."""
+  resourcePath: URI!
+  """The check run's steps"""
+  steps(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Step number"""
+    number: Int
+  ): CheckStepConnection
+}
+
+"""The possible states for a check suite or run status."""
+enum CheckStatusState {
+  """The check suite or run has been completed."""
+  COMPLETED
+  """The check suite or run is in progress."""
+  IN_PROGRESS
+  """The check suite or run is in pending state."""
+  PENDING
+  """The check suite or run has been queued."""
+  QUEUED
+  """The check suite or run has been requested."""
+  REQUESTED
+  """The check suite or run is in waiting state."""
+  WAITING
+}
+
+"""A single check step."""
+type CheckStep {
+  """Identifies the date and time when the check step was completed."""
+  completedAt: DateTime
+  """The conclusion of the check step."""
+  conclusion: CheckConclusionState
+  """A reference for the check step on the integrator's system."""
+  externalId: String
+  """The step's name."""
+  name: String!
+  """The index of the step in the list of steps of the parent check run."""
+  number: Int!
+  """Number of seconds to completion."""
+  secondsToCompletion: Int
+  """Identifies the date and time when the check step was started."""
+  startedAt: DateTime
+  """The current status of the check step."""
+  status: CheckStatusState!
+}
+
+"""The connection type for CheckStep."""
+type CheckStepConnection {
+  """A list of nodes."""
+  nodes: [CheckStep]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""A check suite."""
+type CheckSuite implements Node {
+  """The name of the branch for this check suite."""
+  branch: Ref
+  """The user who triggered the check suite."""
+  creator: User
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the CheckSuite object"""
+  id: ID!
+  """The push that triggered this check suite."""
+  push: Push
+  """The repository associated with this check suite."""
+  repository: Repository!
+  """The HTTP path for this check suite"""
+  resourcePath: URI!
+  """The HTTP URL for this check suite"""
+  url: URI!
+  """The workflow run associated with this check suite."""
+  workflowRun: WorkflowRun
+}
+
+"""Represents a 'closed' event on any `Closable`."""
+type ClosedEvent implements Node {
+  """The Node ID of the ClosedEvent object"""
+  id: ID!
+}
+
+"""The Code of Conduct for a repository"""
+type CodeOfConduct implements Node {
+  """The Node ID of the CodeOfConduct object"""
+  id: ID!
+}
+
+"""A comment author association with repository."""
+enum CommentAuthorAssociation {
+  """Author has been invited to collaborate on the repository."""
+  COLLABORATOR
+  """Author has previously committed to the repository."""
+  CONTRIBUTOR
+  """Author has not previously committed to GitHub."""
+  FIRST_TIMER
+  """Author has not previously committed to the repository."""
+  FIRST_TIME_CONTRIBUTOR
+  """Author is a placeholder for an unclaimed user."""
+  MANNEQUIN
+  """Author is a member of the organization that owns the repository."""
+  MEMBER
+  """Author has no association with the repository."""
+  NONE
+  """Author is the owner of the repository."""
+  OWNER
+}
+
+"""Represents a 'comment_deleted' event on a given issue or pull request."""
+type CommentDeletedEvent implements Node {
+  """The Node ID of the CommentDeletedEvent object"""
+  id: ID!
+}
+
+"""Represents a Git commit."""
+type Commit implements Node {
+  """The Node ID of the Commit object"""
+  id: ID!
+  """The Git object ID"""
+  oid: GitObjectID!
+}
+
 """Represents a comment on a given Commit."""
-type CommitComment {
+type CommitComment implements Node {
   """The actor who authored the comment."""
   author: Actor
+  """Author's association with the subject of the comment."""
+  authorAssociation: CommentAuthorAssociation!
   """Identifies the comment body."""
   body: String!
+  """
+  Identifies the commit associated with the comment, if the commit exists.
+  """
+  commit: Commit
   """Identifies the date and time when the object was created."""
   createdAt: DateTime!
+  """Identifies the primary key from the database."""
+  databaseId: Int
   """The Node ID of the CommitComment object"""
   id: ID!
+  """Identifies the file path associated with the comment."""
+  path: String
+  """Identifies the line position associated with the comment."""
+  position: Int
   """The repository associated with this node."""
   repository: Repository!
   """Identifies the date and time when the object was last updated."""
@@ -32,15 +359,191 @@ type CommitCommentConnection {
   pageInfo: PageInfo!
 }
 
+"""A thread of comments on a commit."""
+type CommitCommentThread implements Node {
+  """The Node ID of the CommitCommentThread object"""
+  id: ID!
+}
+
+"""Represents a comparison between two commit revisions."""
+type Comparison implements Node {
+  """The Node ID of the Comparison object"""
+  id: ID!
+}
+
+"""Represents a 'connected' event on a given issue or pull request."""
+type ConnectedEvent implements Node {
+  """The Node ID of the ConnectedEvent object"""
+  id: ID!
+}
+
+"""Represents a 'convert_to_draft' event on a given pull request."""
+type ConvertToDraftEvent implements Node {
+  """The Node ID of the ConvertToDraftEvent object"""
+  id: ID!
+}
+
+"""
+Represents a 'converted_note_to_issue' event on a given issue or pull request.
+"""
+type ConvertedNoteToIssueEvent implements Node {
+  """The Node ID of the ConvertedNoteToIssueEvent object"""
+  id: ID!
+}
+
+"""Represents a 'converted_to_discussion' event on a given issue."""
+type ConvertedToDiscussionEvent implements Node {
+  """The Node ID of the ConvertedToDiscussionEvent object"""
+  id: ID!
+}
+
+"""Represents a mention made by one issue or pull request to another."""
+type CrossReferencedEvent implements Node {
+  """The Node ID of the CrossReferencedEvent object"""
+  id: ID!
+}
+
+"""An ISO-8601 encoded date string."""
+scalar Date
+
 """An ISO-8601 encoded UTC date string."""
 scalar DateTime
 
+"""Represents a 'demilestoned' event on a given issue or pull request."""
+type DemilestonedEvent implements Node {
+  """The Node ID of the DemilestonedEvent object"""
+  id: ID!
+}
+
+"""Dependency manifest for a repository"""
+type DependencyGraphManifest implements Node {
+  """The Node ID of the DependencyGraphManifest object"""
+  id: ID!
+}
+
+"""A repository deploy key."""
+type DeployKey implements Node {
+  """The Node ID of the DeployKey object"""
+  id: ID!
+}
+
+"""Represents a 'deployed' event on a given pull request."""
+type DeployedEvent implements Node {
+  """The Node ID of the DeployedEvent object"""
+  id: ID!
+}
+
+"""Represents triggered deployment instance."""
+type Deployment implements Node {
+  """
+  Identifies the oid of the deployment commit, even if the commit has been deleted.
+  """
+  commitOid: String!
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The deployment description."""
+  description: String
+  """The latest environment to which this deployment was made."""
+  environment: String
+  """The Node ID of the Deployment object"""
+  id: ID!
+  """The latest environment to which this deployment was made."""
+  latestEnvironment: String
+  """The original environment to which this deployment was made."""
+  originalEnvironment: String
+  """The current state of the deployment."""
+  state: DeploymentState
+  """The deployment task."""
+  task: String
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
+"""
+Represents a 'deployment_environment_changed' event on a given pull request.
+"""
+type DeploymentEnvironmentChangedEvent implements Node {
+  """The Node ID of the DeploymentEnvironmentChangedEvent object"""
+  id: ID!
+}
+
+"""A request to deploy a workflow run to an environment."""
+type DeploymentRequest {
+  """Whether or not the current user can approve the deployment"""
+  currentUserCanApprove: Boolean!
+  """The target environment of the deployment"""
+  environment: Environment!
+  """The wait timer in minutes configured in the environment"""
+  waitTimer: Int!
+  """The wait timer in minutes configured in the environment"""
+  waitTimerStartedAt: DateTime
+}
+
+"""A deployment review."""
+type DeploymentReview implements Node {
+  """The Node ID of the DeploymentReview object"""
+  id: ID!
+}
+
+"""The possible states in which a deployment can be."""
+enum DeploymentState {
+  """The pending deployment was not updated after 30 minutes."""
+  ABANDONED
+  """The deployment is currently active."""
+  ACTIVE
+  """An inactive transient deployment."""
+  DESTROYED
+  """The deployment experienced an error."""
+  ERROR
+  """The deployment has failed."""
+  FAILURE
+  """The deployment is inactive."""
+  INACTIVE
+  """The deployment is in progress."""
+  IN_PROGRESS
+  """The deployment is pending."""
+  PENDING
+  """The deployment has queued"""
+  QUEUED
+  """The deployment was successful."""
+  SUCCESS
+  """The deployment is waiting."""
+  WAITING
+}
+
+"""Describes the status of a given deployment attempt."""
+type DeploymentStatus implements Node {
+  """The Node ID of the DeploymentStatus object"""
+  id: ID!
+}
+
+"""Represents a 'disconnected' event on a given issue or pull request."""
+type DisconnectedEvent implements Node {
+  """The Node ID of the DisconnectedEvent object"""
+  id: ID!
+}
+
 """A discussion in a repository."""
-type Discussion {
+type Discussion implements Node {
   """The actor who authored the comment."""
   author: Actor
   """The main text of the discussion post."""
   body: String!
+  """The replies to the discussion."""
+  comments(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+  ): DiscussionCommentConnection!
   """Identifies the date and time when the object was created."""
   createdAt: DateTime!
   """The Node ID of the Discussion object"""
@@ -57,8 +560,14 @@ type Discussion {
   url: URI!
 }
 
+"""A category for discussions in a repository."""
+type DiscussionCategory implements Node {
+  """The Node ID of the DiscussionCategory object"""
+  id: ID!
+}
+
 """A comment on a discussion."""
-type DiscussionComment {
+type DiscussionComment implements Node {
   """The actor who authored the comment."""
   author: Actor
   """The body as Markdown."""
@@ -69,6 +578,19 @@ type DiscussionComment {
   discussion: Discussion
   """The Node ID of the DiscussionComment object"""
   id: ID!
+  """The threaded replies to this comment."""
+  replies(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+  ): DiscussionCommentConnection!
   """Identifies the date and time when the object was last updated."""
   updatedAt: DateTime!
   """The URL for this discussion comment."""
@@ -107,6 +629,18 @@ enum DiscussionOrderField {
   UPDATED_AT
 }
 
+"""A poll for a discussion."""
+type DiscussionPoll implements Node {
+  """The Node ID of the DiscussionPoll object"""
+  id: ID!
+}
+
+"""An option for a discussion poll."""
+type DiscussionPollOption implements Node {
+  """The Node ID of the DiscussionPollOption object"""
+  id: ID!
+}
+
 """The possible states of a discussion."""
 enum DiscussionState {
   """A discussion that has been closed"""
@@ -115,26 +649,249 @@ enum DiscussionState {
   OPEN
 }
 
+"""A draft issue within a project."""
+type DraftIssue implements Node {
+  """The body of the draft issue."""
+  body: String!
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """The Node ID of the DraftIssue object"""
+  id: ID!
+  """The title of the draft issue"""
+  title: String!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
+"""
+An account to manage multiple organizations with consolidated policy and billing.
+"""
+type Enterprise implements Node {
+  """The Node ID of the Enterprise object"""
+  id: ID!
+}
+
+"""
+An invitation for a user to become an owner or billing manager of an enterprise.
+"""
+type EnterpriseAdministratorInvitation implements Node {
+  """The Node ID of the EnterpriseAdministratorInvitation object"""
+  id: ID!
+}
+
+"""
+An identity provider configured to provision identities for an enterprise.
+Visible to enterprise owners or enterprise owners' personal access tokens
+(classic) with read:enterprise or admin:enterprise scope.
+"""
+type EnterpriseIdentityProvider implements Node {
+  """The Node ID of the EnterpriseIdentityProvider object"""
+  id: ID!
+}
+
+"""
+An invitation for a user to become an unaffiliated member of an enterprise.
+"""
+type EnterpriseMemberInvitation implements Node {
+  """The Node ID of the EnterpriseMemberInvitation object"""
+  id: ID!
+}
+
+"""A subset of repository information queryable from an enterprise."""
+type EnterpriseRepositoryInfo implements Node {
+  """The Node ID of the EnterpriseRepositoryInfo object"""
+  id: ID!
+}
+
+"""An Enterprise Server installation."""
+type EnterpriseServerInstallation implements Node {
+  """The Node ID of the EnterpriseServerInstallation object"""
+  id: ID!
+}
+
+"""A user account on an Enterprise Server installation."""
+type EnterpriseServerUserAccount implements Node {
+  """The Node ID of the EnterpriseServerUserAccount object"""
+  id: ID!
+}
+
+"""
+An email belonging to a user account on an Enterprise Server installation.
+"""
+type EnterpriseServerUserAccountEmail implements Node {
+  """The Node ID of the EnterpriseServerUserAccountEmail object"""
+  id: ID!
+}
+
+"""A user accounts upload from an Enterprise Server installation."""
+type EnterpriseServerUserAccountsUpload implements Node {
+  """The Node ID of the EnterpriseServerUserAccountsUpload object"""
+  id: ID!
+}
+
+"""
+An account for a user who is an admin of an enterprise or a member of an enterprise through one or more organizations.
+"""
+type EnterpriseUserAccount implements Actor & Node {
+  """A URL pointing to the enterprise user account's public avatar."""
+  avatarUrl(
+    """The size of the resulting square image."""
+    size: Int
+  ): URI!
+  """The Node ID of the EnterpriseUserAccount object"""
+  id: ID!
+  """
+  An identifier for the enterprise user account, a login or email address
+  """
+  login: String!
+}
+
+"""An environment."""
+type Environment implements Node {
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the Environment object"""
+  id: ID!
+  """
+  Indicates whether or not this environment is currently pinned to the repository
+  """
+  isPinned: Boolean
+  """The name of the environment"""
+  name: String!
+  """
+  The position of the environment if it is pinned, null if it is not pinned
+  """
+  pinnedPosition: Int
+}
+
+"""
+An external identity provisioned by SAML SSO or SCIM. If SAML is configured on
+the organization, the external identity is visible to (1) organization owners,
+(2) organization owners' personal access tokens (classic) with read:org or
+admin:org scope, (3) GitHub App with an installation token with read or write
+access to members. If SAML is configured on the enterprise, the external
+identity is visible to (1) enterprise owners, (2) enterprise owners' personal
+access tokens (classic) with read:enterprise or admin:enterprise scope.
+"""
+type ExternalIdentity implements Node {
+  """The Node ID of the ExternalIdentity object"""
+  id: ID!
+}
+
+"""A Gist."""
+type Gist implements Node {
+  """The Node ID of the Gist object"""
+  id: ID!
+}
+
+"""Represents a comment on an Gist."""
+type GistComment implements Node {
+  """The Node ID of the GistComment object"""
+  id: ID!
+}
+
+"""A Git object ID."""
+scalar GitObjectID
+
+"""A string containing HTML code."""
+scalar HTML
+
+"""Represents a 'head_ref_deleted' event on a given pull request."""
+type HeadRefDeletedEvent implements Node {
+  """The Node ID of the HeadRefDeletedEvent object"""
+  id: ID!
+}
+
+"""Represents a 'head_ref_force_pushed' event on a given pull request."""
+type HeadRefForcePushedEvent implements Node {
+  """The Node ID of the HeadRefForcePushedEvent object"""
+  id: ID!
+}
+
+"""Represents a 'head_ref_restored' event on a given pull request."""
+type HeadRefRestoredEvent implements Node {
+  """The Node ID of the HeadRefRestoredEvent object"""
+  id: ID!
+}
+
+"""
+An IP address or range of addresses that is allowed to access an owner's resources.
+"""
+type IpAllowListEntry implements Node {
+  """The Node ID of the IpAllowListEntry object"""
+  id: ID!
+}
+
 """
 An Issue is a place to discuss ideas, enhancements, tasks, and bugs for a project.
 """
-type Issue {
+type Issue implements Node & ProjectV2Owner {
+  """Reason that the conversation was locked."""
+  activeLockReason: LockReason
   """The actor who authored the comment."""
   author: Actor
+  """Author's association with the subject of the comment."""
+  authorAssociation: CommentAuthorAssociation!
   """Identifies the body of the issue."""
   body: String!
+  """The body rendered to HTML."""
+  bodyHTML: HTML!
+  """Identifies the body of the issue rendered to text."""
+  bodyText: String!
+  """
+  Indicates if the object is closed (definition of closed may depend on type)
+  """
+  closed: Boolean!
   """Identifies the date and time when the object was closed."""
   closedAt: DateTime
   """Identifies the date and time when the object was created."""
   createdAt: DateTime!
+  """Check if this comment was created via an email reply."""
+  createdViaEmail: Boolean!
+  """Identifies the primary key from the database as a BigInt."""
+  fullDatabaseId: BigInt
   """The Node ID of the Issue object"""
   id: ID!
+  """
+  Indicates whether or not this issue is currently pinned to the repository issues list
+  """
+  isPinned: Boolean
+  """A list of labels associated with the object."""
+  labels(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for labels returned from the connection."""
+    orderBy: LabelOrder = {field: CREATED_AT, direction: ASC}
+  ): LabelConnection
+  """The moment the editor made the last edit"""
+  lastEditedAt: DateTime
+  """`true` if the object is locked"""
+  locked: Boolean!
+  """Identifies the milestone associated with the issue."""
+  milestone: Milestone
   """Identifies the issue number."""
   number: Int!
+  """Identifies when the comment was published at."""
+  publishedAt: DateTime
   """The repository associated with this node."""
   repository: Repository!
   """Identifies the state of the issue."""
   state: IssueState!
+  """Identifies the reason for the issue state."""
+  stateReason(
+    """Whether or not to return state reason for duplicates"""
+    enableDuplicate: Boolean = false
+  ): IssueStateReason
+  """Summary of the state of an issue's sub-issues"""
+  subIssuesSummary: SubIssuesSummary!
   """Identifies the issue title."""
   title: String!
   """Identifies the date and time when the object was last updated."""
@@ -144,13 +901,15 @@ type Issue {
 }
 
 """Represents a comment on an Issue."""
-type IssueComment {
+type IssueComment implements Node {
   """The actor who authored the comment."""
   author: Actor
   """The body as Markdown."""
   body: String!
   """Identifies the date and time when the object was created."""
   createdAt: DateTime!
+  """Identifies the primary key from the database as a BigInt."""
+  fullDatabaseId: BigInt
   """The Node ID of the IssueComment object"""
   id: ID!
   """The repository associated with this node."""
@@ -250,10 +1009,25 @@ enum IssueState {
   OPEN
 }
 
+"""The possible state reasons of an issue."""
+enum IssueStateReason {
+  """An issue that has been closed as completed"""
+  COMPLETED
+  """
+  An issue that has been closed as a duplicate. To retrieve this value, set
+  `(enableDuplicate: true)` when querying the stateReason field.
+  """
+  DUPLICATE
+  """An issue that has been closed as not planned"""
+  NOT_PLANNED
+  """An issue that has been reopened"""
+  REOPENED
+}
+
 """
 A label for categorizing Issues, Pull Requests, Milestones, or Discussions with a given Repository.
 """
-type Label {
+type Label implements Node {
   """Identifies the label color."""
   color: String!
   """Identifies the date and time when the label was created."""
@@ -264,8 +1038,52 @@ type Label {
   id: ID!
   """Indicates whether or not this is a default label."""
   isDefault: Boolean!
+  """A list of issues associated with this label."""
+  issues(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Filtering options for issues returned from the connection."""
+    filterBy: IssueFilters
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """A list of label names to filter the pull requests by."""
+    labels: [String!]
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for issues returned from the connection."""
+    orderBy: IssueOrder
+    """A list of states to filter the issues by."""
+    states: [IssueState!]
+  ): IssueConnection!
   """Identifies the label name."""
   name: String!
+  """A list of pull requests associated with this label."""
+  pullRequests(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """The base ref name to filter the pull requests by."""
+    baseRefName: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """The head ref name to filter the pull requests by."""
+    headRefName: String
+    """A list of label names to filter the pull requests by."""
+    labels: [String!]
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for pull requests returned from the connection."""
+    orderBy: IssueOrder
+    """A list of states to filter the pull requests by."""
+    states: [PullRequestState!]
+  ): PullRequestConnection!
   """Identifies the date and time when the label was last updated."""
   updatedAt: DateTime
   """The HTTP URL for this label."""
@@ -296,10 +1114,221 @@ enum LabelOrderField {
   NAME
 }
 
+"""Represents a 'labeled' event on a given issue or pull request."""
+type LabeledEvent implements Node {
+  """The Node ID of the LabeledEvent object"""
+  id: ID!
+}
+
 """Represents a given language found in repositories."""
-type Language {
+type Language implements Node {
+  """The Node ID of the Language object"""
+  id: ID!
   """The name of the current language."""
   name: String!
+}
+
+"""A repository's open source license"""
+type License implements Node {
+  """The Node ID of the License object"""
+  id: ID!
+}
+
+"""A branch linked to an issue."""
+type LinkedBranch implements Node {
+  """The Node ID of the LinkedBranch object"""
+  id: ID!
+}
+
+"""The possible reasons that an issue or pull request was locked."""
+enum LockReason {
+  """
+  The issue or pull request was locked because the conversation was off-topic.
+  """
+  OFF_TOPIC
+  """
+  The issue or pull request was locked because the conversation was resolved.
+  """
+  RESOLVED
+  """
+  The issue or pull request was locked because the conversation was spam.
+  """
+  SPAM
+  """
+  The issue or pull request was locked because the conversation was too heated.
+  """
+  TOO_HEATED
+}
+
+"""Represents a 'locked' event on a given issue or pull request."""
+type LockedEvent implements Node {
+  """The Node ID of the LockedEvent object"""
+  id: ID!
+}
+
+"""A placeholder user for attribution of imported data on GitHub."""
+type Mannequin implements Actor & Node {
+  """A URL pointing to the GitHub App's public avatar."""
+  avatarUrl(
+    """The size of the resulting square image."""
+    size: Int
+  ): URI!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the Mannequin object"""
+  id: ID!
+  """The username of the actor."""
+  login: String!
+}
+
+"""
+Represents a 'marked_as_duplicate' event on a given issue or pull request.
+"""
+type MarkedAsDuplicateEvent implements Node {
+  """The Node ID of the MarkedAsDuplicateEvent object"""
+  id: ID!
+}
+
+"""A public description of a Marketplace category."""
+type MarketplaceCategory implements Node {
+  """The Node ID of the MarketplaceCategory object"""
+  id: ID!
+}
+
+"""A listing in the GitHub integration marketplace."""
+type MarketplaceListing implements Node {
+  """The Node ID of the MarketplaceListing object"""
+  id: ID!
+}
+
+"""Represents a member feature request notification"""
+type MemberFeatureRequestNotification implements Node {
+  """The Node ID of the MemberFeatureRequestNotification object"""
+  id: ID!
+}
+
+"""Audit log entry for a members_can_delete_repos.clear event."""
+type MembersCanDeleteReposClearAuditEntry implements Node {
+  """The Node ID of the MembersCanDeleteReposClearAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a members_can_delete_repos.disable event."""
+type MembersCanDeleteReposDisableAuditEntry implements Node {
+  """The Node ID of the MembersCanDeleteReposDisableAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a members_can_delete_repos.enable event."""
+type MembersCanDeleteReposEnableAuditEntry implements Node {
+  """The Node ID of the MembersCanDeleteReposEnableAuditEntry object"""
+  id: ID!
+}
+
+"""Represents a 'mentioned' event on a given issue or pull request."""
+type MentionedEvent implements Node {
+  """The Node ID of the MentionedEvent object"""
+  id: ID!
+}
+
+"""
+The queue of pull request entries to be merged into a protected branch in a repository.
+"""
+type MergeQueue implements Node {
+  """The Node ID of the MergeQueue object"""
+  id: ID!
+}
+
+"""Entries in a MergeQueue"""
+type MergeQueueEntry implements Node {
+  """The Node ID of the MergeQueueEntry object"""
+  id: ID!
+}
+
+"""Represents a 'merged' event on a given pull request."""
+type MergedEvent implements Node {
+  """The Node ID of the MergedEvent object"""
+  id: ID!
+}
+
+"""A GitHub Enterprise Importer (GEI) migration source."""
+type MigrationSource implements Node {
+  """The Node ID of the MigrationSource object"""
+  id: ID!
+}
+
+"""Represents a Milestone object on a given repository."""
+type Milestone implements Node {
+  """
+  Indicates if the object is closed (definition of closed may depend on type)
+  """
+  closed: Boolean!
+  """Identifies the date and time when the object was closed."""
+  closedAt: DateTime
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """Identifies the description of the milestone."""
+  description: String
+  """Identifies the due date of the milestone."""
+  dueOn: DateTime
+  """The Node ID of the Milestone object"""
+  id: ID!
+  """Identifies the number of the milestone."""
+  number: Int!
+  """Identifies the percentage complete for the milestone"""
+  progressPercentage: Float!
+  """Identifies the state of the milestone."""
+  state: MilestoneState!
+  """Identifies the title of the milestone."""
+  title: String!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+  """The HTTP URL for this milestone"""
+  url: URI!
+}
+
+"""The possible states of a milestone."""
+enum MilestoneState {
+  """A milestone that has been closed."""
+  CLOSED
+  """A milestone that is still open."""
+  OPEN
+}
+
+"""Represents a 'milestoned' event on a given issue or pull request."""
+type MilestonedEvent implements Node {
+  """The Node ID of the MilestonedEvent object"""
+  id: ID!
+}
+
+"""
+Represents a 'moved_columns_in_project' event on a given issue or pull request.
+"""
+type MovedColumnsInProjectEvent implements Node {
+  """The Node ID of the MovedColumnsInProjectEvent object"""
+  id: ID!
+}
+
+"""An object with an ID."""
+interface Node {
+  """ID of the object."""
+  id: ID!
+}
+
+"""
+An OIDC identity provider configured to provision identities for an enterprise.
+Visible to enterprise owners or enterprise owners' personal access tokens
+(classic) with read:enterprise or admin:enterprise scope.
+"""
+type OIDCProvider implements Node {
+  """The Node ID of the OIDCProvider object"""
+  id: ID!
+}
+
+"""Audit log entry for a oauth_application.create event."""
+type OauthApplicationCreateAuditEntry implements Node {
+  """The Node ID of the OauthApplicationCreateAuditEntry object"""
+  id: ID!
 }
 
 """
@@ -312,6 +1341,267 @@ enum OrderDirection {
   DESC
 }
 
+"""Audit log entry for a org.add_billing_manager"""
+type OrgAddBillingManagerAuditEntry implements Node {
+  """The Node ID of the OrgAddBillingManagerAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.add_member"""
+type OrgAddMemberAuditEntry implements Node {
+  """The Node ID of the OrgAddMemberAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.block_user"""
+type OrgBlockUserAuditEntry implements Node {
+  """The Node ID of the OrgBlockUserAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.config.disable_collaborators_only event."""
+type OrgConfigDisableCollaboratorsOnlyAuditEntry implements Node {
+  """The Node ID of the OrgConfigDisableCollaboratorsOnlyAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.config.enable_collaborators_only event."""
+type OrgConfigEnableCollaboratorsOnlyAuditEntry implements Node {
+  """The Node ID of the OrgConfigEnableCollaboratorsOnlyAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.create event."""
+type OrgCreateAuditEntry implements Node {
+  """The Node ID of the OrgCreateAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.disable_oauth_app_restrictions event."""
+type OrgDisableOauthAppRestrictionsAuditEntry implements Node {
+  """The Node ID of the OrgDisableOauthAppRestrictionsAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.disable_saml event."""
+type OrgDisableSamlAuditEntry implements Node {
+  """The Node ID of the OrgDisableSamlAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.disable_two_factor_requirement event."""
+type OrgDisableTwoFactorRequirementAuditEntry implements Node {
+  """The Node ID of the OrgDisableTwoFactorRequirementAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.enable_oauth_app_restrictions event."""
+type OrgEnableOauthAppRestrictionsAuditEntry implements Node {
+  """The Node ID of the OrgEnableOauthAppRestrictionsAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.enable_saml event."""
+type OrgEnableSamlAuditEntry implements Node {
+  """The Node ID of the OrgEnableSamlAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.enable_two_factor_requirement event."""
+type OrgEnableTwoFactorRequirementAuditEntry implements Node {
+  """The Node ID of the OrgEnableTwoFactorRequirementAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.invite_member event."""
+type OrgInviteMemberAuditEntry implements Node {
+  """The Node ID of the OrgInviteMemberAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.invite_to_business event."""
+type OrgInviteToBusinessAuditEntry implements Node {
+  """The Node ID of the OrgInviteToBusinessAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.oauth_app_access_approved event."""
+type OrgOauthAppAccessApprovedAuditEntry implements Node {
+  """The Node ID of the OrgOauthAppAccessApprovedAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.oauth_app_access_blocked event."""
+type OrgOauthAppAccessBlockedAuditEntry implements Node {
+  """The Node ID of the OrgOauthAppAccessBlockedAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.oauth_app_access_denied event."""
+type OrgOauthAppAccessDeniedAuditEntry implements Node {
+  """The Node ID of the OrgOauthAppAccessDeniedAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.oauth_app_access_requested event."""
+type OrgOauthAppAccessRequestedAuditEntry implements Node {
+  """The Node ID of the OrgOauthAppAccessRequestedAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.oauth_app_access_unblocked event."""
+type OrgOauthAppAccessUnblockedAuditEntry implements Node {
+  """The Node ID of the OrgOauthAppAccessUnblockedAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.remove_billing_manager event."""
+type OrgRemoveBillingManagerAuditEntry implements Node {
+  """The Node ID of the OrgRemoveBillingManagerAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.remove_member event."""
+type OrgRemoveMemberAuditEntry implements Node {
+  """The Node ID of the OrgRemoveMemberAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.remove_outside_collaborator event."""
+type OrgRemoveOutsideCollaboratorAuditEntry implements Node {
+  """The Node ID of the OrgRemoveOutsideCollaboratorAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.restore_member event."""
+type OrgRestoreMemberAuditEntry implements Node {
+  """The Node ID of the OrgRestoreMemberAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.unblock_user"""
+type OrgUnblockUserAuditEntry implements Node {
+  """The Node ID of the OrgUnblockUserAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a org.update_default_repository_permission"""
+type OrgUpdateDefaultRepositoryPermissionAuditEntry implements Node {
+  """
+  The Node ID of the OrgUpdateDefaultRepositoryPermissionAuditEntry object
+  """
+  id: ID!
+}
+
+"""Audit log entry for a org.update_member event."""
+type OrgUpdateMemberAuditEntry implements Node {
+  """The Node ID of the OrgUpdateMemberAuditEntry object"""
+  id: ID!
+}
+
+"""
+Audit log entry for a org.update_member_repository_creation_permission event.
+"""
+type OrgUpdateMemberRepositoryCreationPermissionAuditEntry implements Node {
+  """
+  The Node ID of the OrgUpdateMemberRepositoryCreationPermissionAuditEntry object
+  """
+  id: ID!
+}
+
+"""
+Audit log entry for a org.update_member_repository_invitation_permission event.
+"""
+type OrgUpdateMemberRepositoryInvitationPermissionAuditEntry implements Node {
+  """
+  The Node ID of the OrgUpdateMemberRepositoryInvitationPermissionAuditEntry object
+  """
+  id: ID!
+}
+
+"""
+An account on GitHub, with one or more owners, that has repositories, members and teams.
+"""
+type Organization implements Actor & Node & ProjectV2Owner {
+  """A URL pointing to the organization's public avatar."""
+  avatarUrl(
+    """The size of the resulting square image."""
+    size: Int
+  ): URI!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the Organization object"""
+  id: ID!
+  """The organization's login name."""
+  login: String!
+  """Discussion comments this user has authored."""
+  repositoryDiscussionComments(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """
+    Filter discussion comments to only those that were marked as the answer
+    """
+    onlyAnswers: Boolean = false
+    """Filter discussion comments to only those in a specific repository."""
+    repositoryId: ID
+  ): DiscussionCommentConnection!
+}
+
+"""
+An Identity Provider configured to provision SAML and SCIM identities for
+Organizations. Visible to (1) organization owners, (2) organization owners'
+personal access tokens (classic) with read:org or admin:org scope, (3) GitHub
+App with an installation token with read or write access to members.
+"""
+type OrganizationIdentityProvider implements Node {
+  """The Node ID of the OrganizationIdentityProvider object"""
+  id: ID!
+}
+
+"""An Invitation for a user to an organization."""
+type OrganizationInvitation implements Node {
+  """The Node ID of the OrganizationInvitation object"""
+  id: ID!
+}
+
+"""A GitHub Enterprise Importer (GEI) organization migration."""
+type OrganizationMigration implements Node {
+  """The Node ID of the OrganizationMigration object"""
+  id: ID!
+}
+
+"""Information for an uploaded package."""
+type Package implements Node {
+  """The Node ID of the Package object"""
+  id: ID!
+}
+
+"""A file in a package version."""
+type PackageFile implements Node {
+  """The Node ID of the PackageFile object"""
+  id: ID!
+}
+
+"""A version tag contains the mapping between a tag name and a version."""
+type PackageTag implements Node {
+  """The Node ID of the PackageTag object"""
+  id: ID!
+}
+
+"""Information about a specific package version."""
+type PackageVersion implements Node {
+  """The Node ID of the PackageVersion object"""
+  id: ID!
+}
+
 """Information about pagination in a connection."""
 type PageInfo {
   """When paginating forwards, the cursor to continue."""
@@ -320,8 +1610,500 @@ type PageInfo {
   hasNextPage: Boolean!
 }
 
+"""Represents a 'parent_issue_added' event on a given issue."""
+type ParentIssueAddedEvent implements Node {
+  """The Node ID of the ParentIssueAddedEvent object"""
+  id: ID!
+}
+
+"""Represents a 'parent_issue_removed' event on a given issue."""
+type ParentIssueRemovedEvent implements Node {
+  """The Node ID of the ParentIssueRemovedEvent object"""
+  id: ID!
+}
+
+"""
+A Pinned Discussion is a discussion pinned to a repository's index page.
+"""
+type PinnedDiscussion implements Node {
+  """The Node ID of the PinnedDiscussion object"""
+  id: ID!
+}
+
+"""Represents a pinned environment on a given repository"""
+type PinnedEnvironment implements Node {
+  """The Node ID of the PinnedEnvironment object"""
+  id: ID!
+}
+
+"""Represents a 'pinned' event on a given issue or pull request."""
+type PinnedEvent implements Node {
+  """The Node ID of the PinnedEvent object"""
+  id: ID!
+}
+
+"""A Pinned Issue is a issue pinned to a repository's index page."""
+type PinnedIssue implements Node {
+  """The Node ID of the PinnedIssue object"""
+  id: ID!
+}
+
+"""Audit log entry for a private_repository_forking.disable event."""
+type PrivateRepositoryForkingDisableAuditEntry implements Node {
+  """The Node ID of the PrivateRepositoryForkingDisableAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a private_repository_forking.enable event."""
+type PrivateRepositoryForkingEnableAuditEntry implements Node {
+  """The Node ID of the PrivateRepositoryForkingEnableAuditEntry object"""
+  id: ID!
+}
+
+"""
+Projects manage issues, pull requests and notes within a project owner.
+"""
+type Project implements Node {
+  """The Node ID of the Project object"""
+  id: ID!
+}
+
+"""A card in a project."""
+type ProjectCard implements Node {
+  """The Node ID of the ProjectCard object"""
+  id: ID!
+}
+
+"""A column inside a project."""
+type ProjectColumn implements Node {
+  """The Node ID of the ProjectColumn object"""
+  id: ID!
+}
+
+"""
+New projects that manage issues, pull requests and drafts using tables and boards.
+"""
+type ProjectV2 implements Node {
+  """The Node ID of the ProjectV2 object"""
+  id: ID!
+  """List of items in the project"""
+  items(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for project v2 items returned from the connection"""
+    orderBy: ProjectV2ItemOrder = {field: POSITION, direction: ASC}
+  ): ProjectV2ItemConnection!
+  """The project's number."""
+  number: Int!
+  """The project's owner. Currently limited to organizations and users."""
+  owner: ProjectV2Owner!
+}
+
+"""A field inside a project."""
+type ProjectV2Field implements Node {
+  """The field's type."""
+  dataType: ProjectV2FieldType!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the ProjectV2Field object"""
+  id: ID!
+  """The project field's name."""
+  name: String!
+}
+
+"""Configurations for project fields."""
+union ProjectV2FieldConfiguration = ProjectV2Field | ProjectV2IterationField | ProjectV2SingleSelectField
+
+"""The type of a project field."""
+enum ProjectV2FieldType {
+  """Assignees"""
+  ASSIGNEES
+  """Date"""
+  DATE
+  """Iteration"""
+  ITERATION
+  """Labels"""
+  LABELS
+  """Linked Pull Requests"""
+  LINKED_PULL_REQUESTS
+  """Milestone"""
+  MILESTONE
+  """Number"""
+  NUMBER
+  """Parent issue"""
+  PARENT_ISSUE
+  """Repository"""
+  REPOSITORY
+  """Reviewers"""
+  REVIEWERS
+  """Single Select"""
+  SINGLE_SELECT
+  """Sub-issues progress"""
+  SUB_ISSUES_PROGRESS
+  """Text"""
+  TEXT
+  """Title"""
+  TITLE
+  """Tracked by"""
+  TRACKED_BY
+  """Tracks"""
+  TRACKS
+}
+
+"""An item within a Project."""
+type ProjectV2Item implements Node {
+  """The content of the referenced draft issue, issue, or pull request"""
+  content: ProjectV2ItemContent
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  """The actor who created the item."""
+  creator: Actor
+  """
+  The field value of the first project field which matches the 'name' argument that is set on the item.
+  """
+  fieldValueByName(
+    """The name of the field to return the field value of"""
+    name: String!
+  ): ProjectV2ItemFieldValue
+  """The field values that are set on the item."""
+  fieldValues(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """
+    Ordering options for project v2 item field values returned from the connection
+    """
+    orderBy: ProjectV2ItemFieldValueOrder = {field: POSITION, direction: ASC}
+  ): ProjectV2ItemFieldValueConnection!
+  """Identifies the primary key from the database as a BigInt."""
+  fullDatabaseId: BigInt
+  """The Node ID of the ProjectV2Item object"""
+  id: ID!
+  """Whether the item is archived."""
+  isArchived: Boolean!
+  """The project that contains this item."""
+  project: ProjectV2!
+  """The type of the item."""
+  type: ProjectV2ItemType!
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
+"""The connection type for ProjectV2Item."""
+type ProjectV2ItemConnection {
+  """A list of nodes."""
+  nodes: [ProjectV2Item]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""Types that can be inside Project Items."""
+union ProjectV2ItemContent = DraftIssue | Issue | PullRequest
+
+"""The value of a date field in a Project item."""
+type ProjectV2ItemFieldDateValue implements Node {
+  """Date value for the field"""
+  date: Date
+  """The project field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The Node ID of the ProjectV2ItemFieldDateValue object"""
+  id: ID!
+}
+
+"""The value of an iteration field in a Project item."""
+type ProjectV2ItemFieldIterationValue implements Node {
+  """The duration of the iteration in days."""
+  duration: Int!
+  """The project field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The Node ID of the ProjectV2ItemFieldIterationValue object"""
+  id: ID!
+  """The ID of the iteration."""
+  iterationId: String!
+  """The start date of the iteration."""
+  startDate: Date!
+  """The title of the iteration."""
+  title: String!
+}
+
+"""The value of the labels field in a Project item."""
+type ProjectV2ItemFieldLabelValue {
+  """The field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """Labels value of a field"""
+  labels(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+  ): LabelConnection
+}
+
+"""The value of a milestone field in a Project item."""
+type ProjectV2ItemFieldMilestoneValue {
+  """The field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """Milestone value of a field"""
+  milestone: Milestone
+}
+
+"""The value of a number field in a Project item."""
+type ProjectV2ItemFieldNumberValue implements Node {
+  """The project field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The Node ID of the ProjectV2ItemFieldNumberValue object"""
+  id: ID!
+  """Number as a float(8)"""
+  number: Float
+}
+
+"""The value of a pull request field in a Project item."""
+type ProjectV2ItemFieldPullRequestValue {
+  """The field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The pull requests for this field"""
+  pullRequests(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for pull requests."""
+    orderBy: PullRequestOrder = {field: CREATED_AT, direction: ASC}
+  ): PullRequestConnection
+}
+
+"""The value of a repository field in a Project item."""
+type ProjectV2ItemFieldRepositoryValue {
+  """The field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The repository for this field."""
+  repository: Repository
+}
+
+"""The value of a reviewers field in a Project item."""
+type ProjectV2ItemFieldReviewerValue {
+  """The field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The reviewers for this field."""
+  reviewers(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+  ): RequestedReviewerConnection
+}
+
+"""The value of a single select field in a Project item."""
+type ProjectV2ItemFieldSingleSelectValue implements Node {
+  """The color applied to the selected single-select option."""
+  color: ProjectV2SingleSelectFieldOptionColor!
+  """
+  A plain-text description of the selected single-select option, such as what the option means.
+  """
+  description: String
+  """The project field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The Node ID of the ProjectV2ItemFieldSingleSelectValue object"""
+  id: ID!
+  """The name of the selected single select option."""
+  name: String
+  """The id of the selected single select option."""
+  optionId: String
+}
+
+"""The value of a text field in a Project item."""
+type ProjectV2ItemFieldTextValue implements Node {
+  """The project field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The Node ID of the ProjectV2ItemFieldTextValue object"""
+  id: ID!
+  """Text value of a field"""
+  text: String
+}
+
+"""The value of a user field in a Project item."""
+type ProjectV2ItemFieldUserValue {
+  """The field that contains this value."""
+  field: ProjectV2FieldConfiguration!
+  """The users for this field"""
+  users(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+  ): UserConnection
+}
+
+"""Project field values"""
+union ProjectV2ItemFieldValue = ProjectV2ItemFieldDateValue | ProjectV2ItemFieldIterationValue | ProjectV2ItemFieldLabelValue | ProjectV2ItemFieldMilestoneValue | ProjectV2ItemFieldNumberValue | ProjectV2ItemFieldPullRequestValue | ProjectV2ItemFieldRepositoryValue | ProjectV2ItemFieldReviewerValue | ProjectV2ItemFieldSingleSelectValue | ProjectV2ItemFieldTextValue | ProjectV2ItemFieldUserValue
+
+"""The connection type for ProjectV2ItemFieldValue."""
+type ProjectV2ItemFieldValueConnection {
+  """A list of nodes."""
+  nodes: [ProjectV2ItemFieldValue]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""Ordering options for project v2 item field value connections"""
+input ProjectV2ItemFieldValueOrder {
+  """The ordering direction."""
+  direction: OrderDirection!
+  """The field to order the project v2 item field values by."""
+  field: ProjectV2ItemFieldValueOrderField!
+}
+
+"""
+Properties by which project v2 item field value connections can be ordered.
+"""
+enum ProjectV2ItemFieldValueOrderField {
+  """
+  Order project v2 item field values by the their position in the project
+  """
+  POSITION
+}
+
+"""Ordering options for project v2 item connections"""
+input ProjectV2ItemOrder {
+  """The ordering direction."""
+  direction: OrderDirection!
+  """The field to order the project v2 items by."""
+  field: ProjectV2ItemOrderField!
+}
+
+"""Properties by which project v2 item connections can be ordered."""
+enum ProjectV2ItemOrderField {
+  """Order project v2 items by the their position in the project"""
+  POSITION
+}
+
+"""The type of a project item."""
+enum ProjectV2ItemType {
+  """Draft Issue"""
+  DRAFT_ISSUE
+  """Issue"""
+  ISSUE
+  """Pull Request"""
+  PULL_REQUEST
+  """Redacted Item"""
+  REDACTED
+}
+
+"""An iteration field inside a project."""
+type ProjectV2IterationField implements Node {
+  """The field's type."""
+  dataType: ProjectV2FieldType!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the ProjectV2IterationField object"""
+  id: ID!
+  """The project field's name."""
+  name: String!
+}
+
+"""Represents an owner of a project."""
+interface ProjectV2Owner {
+  """The Node ID of the ProjectV2Owner object"""
+  id: ID!
+}
+
+"""A single select field inside a project."""
+type ProjectV2SingleSelectField implements Node {
+  """The field's type."""
+  dataType: ProjectV2FieldType!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the ProjectV2SingleSelectField object"""
+  id: ID!
+  """The project field's name."""
+  name: String!
+}
+
+"""The display color of a single-select field option."""
+enum ProjectV2SingleSelectFieldOptionColor {
+  """BLUE"""
+  BLUE
+  """GRAY"""
+  GRAY
+  """GREEN"""
+  GREEN
+  """ORANGE"""
+  ORANGE
+  """PINK"""
+  PINK
+  """PURPLE"""
+  PURPLE
+  """RED"""
+  RED
+  """YELLOW"""
+  YELLOW
+}
+
+"""A status update within a project."""
+type ProjectV2StatusUpdate implements Node {
+  """The Node ID of the ProjectV2StatusUpdate object"""
+  id: ID!
+}
+
+"""A view within a ProjectV2."""
+type ProjectV2View implements Node {
+  """The Node ID of the ProjectV2View object"""
+  id: ID!
+}
+
+"""A workflow inside a project."""
+type ProjectV2Workflow implements Node {
+  """The Node ID of the ProjectV2Workflow object"""
+  id: ID!
+}
+
+"""A user's public key."""
+type PublicKey implements Node {
+  """The Node ID of the PublicKey object"""
+  id: ID!
+}
+
 """A repository pull request."""
-type PullRequest {
+type PullRequest implements Node & ProjectV2Owner {
   """The actor who authored the comment."""
   author: Actor
   """The body as Markdown."""
@@ -330,6 +2112,21 @@ type PullRequest {
   createdAt: DateTime!
   """The Node ID of the PullRequest object"""
   id: ID!
+  """A list of labels associated with the object."""
+  labels(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for labels returned from the connection."""
+    orderBy: LabelOrder = {field: CREATED_AT, direction: ASC}
+  ): LabelConnection
   """The date and time that the pull request was merged."""
   mergedAt: DateTime
   """Identifies the pull request number."""
@@ -346,12 +2143,58 @@ type PullRequest {
   url: URI!
 }
 
+"""Represents a Git commit part of a pull request."""
+type PullRequestCommit implements Node {
+  """The Node ID of the PullRequestCommit object"""
+  id: ID!
+}
+
+"""Represents a commit comment thread part of a pull request."""
+type PullRequestCommitCommentThread implements Node {
+  """The Node ID of the PullRequestCommitCommentThread object"""
+  id: ID!
+}
+
 """The connection type for PullRequest."""
 type PullRequestConnection {
   """A list of nodes."""
   nodes: [PullRequest]
   """Information to aid in pagination."""
   pageInfo: PageInfo!
+}
+
+"""Ways in which lists of issues can be ordered upon return."""
+input PullRequestOrder {
+  """The direction in which to order pull requests by the specified field."""
+  direction: OrderDirection!
+  """The field in which to order pull requests by."""
+  field: PullRequestOrderField!
+}
+
+"""Properties by which pull_requests connections can be ordered."""
+enum PullRequestOrderField {
+  """Order pull_requests by creation time"""
+  CREATED_AT
+  """Order pull_requests by update time"""
+  UPDATED_AT
+}
+
+"""A review object for a given pull request."""
+type PullRequestReview implements Node {
+  """The Node ID of the PullRequestReview object"""
+  id: ID!
+}
+
+"""A review comment associated with a given repository pull request."""
+type PullRequestReviewComment implements Node {
+  """The Node ID of the PullRequestReviewComment object"""
+  id: ID!
+}
+
+"""A threaded list of comments for a given pull request."""
+type PullRequestReviewThread implements Node {
+  """The Node ID of the PullRequestReviewThread object"""
+  id: ID!
 }
 
 """The possible states of a pull request."""
@@ -364,8 +2207,48 @@ enum PullRequestState {
   OPEN
 }
 
+"""A threaded list of comments for a given pull request."""
+type PullRequestThread implements Node {
+  """The Node ID of the PullRequestThread object"""
+  id: ID!
+}
+
+"""A Git push."""
+type Push implements Node {
+  """The Node ID of the Push object"""
+  id: ID!
+  """The SHA after the push"""
+  nextSha: GitObjectID
+  """The permalink for this push."""
+  permalink: URI!
+  """The SHA before the push"""
+  previousSha: GitObjectID
+  """The actor who pushed"""
+  pusher: Actor!
+}
+
+"""
+A team, user, or app who has the ability to push to a protected branch.
+"""
+type PushAllowance implements Node {
+  """The Node ID of the PushAllowance object"""
+  id: ID!
+}
+
 """The query root of GitHub's GraphQL interface."""
-type Query {
+type Query implements Node {
+  """ID of the object."""
+  id: ID!
+  """Fetches an object given its ID."""
+  node(
+    """ID of the object."""
+    id: ID!
+  ): Node
+  """Lookup a organization by login."""
+  organization(
+    """The organization's login."""
+    login: String!
+  ): Organization
   """Lookup a given repository by the owner and repository name."""
   repository(
     """
@@ -384,10 +2267,268 @@ type Query {
   ): User
 }
 
+"""An emoji reaction to a particular piece of content."""
+type Reaction implements Node {
+  """The Node ID of the Reaction object"""
+  id: ID!
+}
+
+"""Represents a 'ready_for_review' event on a given pull request."""
+type ReadyForReviewEvent implements Node {
+  """The Node ID of the ReadyForReviewEvent object"""
+  id: ID!
+}
+
+"""Represents a Git reference."""
+type Ref implements Node {
+  """The Node ID of the Ref object"""
+  id: ID!
+  """The ref name."""
+  name: String!
+  """The ref's prefix, such as `refs/heads/` or `refs/tags/`."""
+  prefix: String!
+}
+
+"""Represents a 'referenced' event on a given `ReferencedSubject`."""
+type ReferencedEvent implements Node {
+  """The Node ID of the ReferencedEvent object"""
+  id: ID!
+}
+
+"""A release contains the content for a release."""
+type Release implements Node {
+  """The Node ID of the Release object"""
+  id: ID!
+}
+
+"""A release asset contains the content for a release asset."""
+type ReleaseAsset implements Node {
+  """The Node ID of the ReleaseAsset object"""
+  id: ID!
+}
+
+"""Represents a 'removed_from_merge_queue' event on a given pull request."""
+type RemovedFromMergeQueueEvent implements Node {
+  """The Node ID of the RemovedFromMergeQueueEvent object"""
+  id: ID!
+}
+
+"""
+Represents a 'removed_from_project' event on a given issue or pull request.
+"""
+type RemovedFromProjectEvent implements Node {
+  """The Node ID of the RemovedFromProjectEvent object"""
+  id: ID!
+}
+
+"""Represents a 'renamed' event on a given issue or pull request"""
+type RenamedTitleEvent implements Node {
+  """The Node ID of the RenamedTitleEvent object"""
+  id: ID!
+}
+
+"""Represents a 'reopened' event on any `Closable`."""
+type ReopenedEvent implements Node {
+  """The Node ID of the ReopenedEvent object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.access event."""
+type RepoAccessAuditEntry implements Node {
+  """The Node ID of the RepoAccessAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.add_member event."""
+type RepoAddMemberAuditEntry implements Node {
+  """The Node ID of the RepoAddMemberAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.add_topic event."""
+type RepoAddTopicAuditEntry implements Node {
+  """The Node ID of the RepoAddTopicAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.archived event."""
+type RepoArchivedAuditEntry implements Node {
+  """The Node ID of the RepoArchivedAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.change_merge_setting event."""
+type RepoChangeMergeSettingAuditEntry implements Node {
+  """The Node ID of the RepoChangeMergeSettingAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.disable_anonymous_git_access event."""
+type RepoConfigDisableAnonymousGitAccessAuditEntry implements Node {
+  """
+  The Node ID of the RepoConfigDisableAnonymousGitAccessAuditEntry object
+  """
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.disable_collaborators_only event."""
+type RepoConfigDisableCollaboratorsOnlyAuditEntry implements Node {
+  """The Node ID of the RepoConfigDisableCollaboratorsOnlyAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.disable_contributors_only event."""
+type RepoConfigDisableContributorsOnlyAuditEntry implements Node {
+  """The Node ID of the RepoConfigDisableContributorsOnlyAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.disable_sockpuppet_disallowed event."""
+type RepoConfigDisableSockpuppetDisallowedAuditEntry implements Node {
+  """
+  The Node ID of the RepoConfigDisableSockpuppetDisallowedAuditEntry object
+  """
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.enable_anonymous_git_access event."""
+type RepoConfigEnableAnonymousGitAccessAuditEntry implements Node {
+  """The Node ID of the RepoConfigEnableAnonymousGitAccessAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.enable_collaborators_only event."""
+type RepoConfigEnableCollaboratorsOnlyAuditEntry implements Node {
+  """The Node ID of the RepoConfigEnableCollaboratorsOnlyAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.enable_contributors_only event."""
+type RepoConfigEnableContributorsOnlyAuditEntry implements Node {
+  """The Node ID of the RepoConfigEnableContributorsOnlyAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.enable_sockpuppet_disallowed event."""
+type RepoConfigEnableSockpuppetDisallowedAuditEntry implements Node {
+  """
+  The Node ID of the RepoConfigEnableSockpuppetDisallowedAuditEntry object
+  """
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.lock_anonymous_git_access event."""
+type RepoConfigLockAnonymousGitAccessAuditEntry implements Node {
+  """The Node ID of the RepoConfigLockAnonymousGitAccessAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.config.unlock_anonymous_git_access event."""
+type RepoConfigUnlockAnonymousGitAccessAuditEntry implements Node {
+  """The Node ID of the RepoConfigUnlockAnonymousGitAccessAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.create event."""
+type RepoCreateAuditEntry implements Node {
+  """The Node ID of the RepoCreateAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.destroy event."""
+type RepoDestroyAuditEntry implements Node {
+  """The Node ID of the RepoDestroyAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.remove_member event."""
+type RepoRemoveMemberAuditEntry implements Node {
+  """The Node ID of the RepoRemoveMemberAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repo.remove_topic event."""
+type RepoRemoveTopicAuditEntry implements Node {
+  """The Node ID of the RepoRemoveTopicAuditEntry object"""
+  id: ID!
+}
+
 """A repository contains the content for a project."""
-type Repository {
+type Repository implements Node {
+  """A list of commit comments associated with the repository."""
+  commitComments(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+  ): CommitCommentConnection!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """Returns a single discussion from the current repository by number."""
+  discussion(
+    """The number for the discussion to be returned."""
+    number: Int!
+  ): Discussion
+  """A list of discussions that have been opened in the repository."""
+  discussions(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """Only show answered or unanswered discussions"""
+    answered: Boolean = null
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Only include discussions that belong to the category with this ID."""
+    categoryId: ID = null
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for discussions returned from the connection."""
+    orderBy: DiscussionOrder = {field: UPDATED_AT, direction: DESC}
+    """A list of states to filter the discussions by."""
+    states: [DiscussionState!] = []
+  ): DiscussionConnection!
   """The Node ID of the Repository object"""
   id: ID!
+  """Returns a single issue from the current repository by number."""
+  issue(
+    """The number for the issue to be returned."""
+    number: Int!
+  ): Issue
+  """A list of issues that have been opened in the repository."""
+  issues(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+    """Filtering options for issues returned from the connection."""
+    filterBy: IssueFilters
+    """Returns the first _n_ elements from the list."""
+    first: Int
+    """A list of label names to filter the pull requests by."""
+    labels: [String!]
+    """Returns the last _n_ elements from the list."""
+    last: Int
+    """Ordering options for issues returned from the connection."""
+    orderBy: IssueOrder
+    """A list of states to filter the issues by."""
+    states: [IssueState!]
+  ): IssueConnection!
+  """Returns a single label by name"""
+  label(
+    """Label name"""
+    name: String!
+  ): Label
   """A list of labels associated with the repository."""
   labels(
     """Returns the elements in the list that come after the specified cursor."""
@@ -409,15 +2550,340 @@ type Repository {
   nameWithOwner: String!
   """The primary language of the repository's code."""
   primaryLanguage: Language
+  """Returns a single pull request from the current repository by number."""
+  pullRequest(
+    """The number for the pull request to be returned."""
+    number: Int!
+  ): PullRequest
+  """The HTTP URL for this repository"""
+  url: URI!
+}
+
+"""An invitation for a user to be added to a repository."""
+type RepositoryInvitation implements Node {
+  """The Node ID of the RepositoryInvitation object"""
+  id: ID!
+}
+
+"""A GitHub Enterprise Importer (GEI) repository migration."""
+type RepositoryMigration implements Node {
+  """The Node ID of the RepositoryMigration object"""
+  id: ID!
+}
+
+"""A repository rule."""
+type RepositoryRule implements Node {
+  """The Node ID of the RepositoryRule object"""
+  id: ID!
+}
+
+"""A repository ruleset."""
+type RepositoryRuleset implements Node {
+  """The Node ID of the RepositoryRuleset object"""
+  id: ID!
+}
+
+"""
+A team or app that has the ability to bypass a rules defined on a ruleset
+"""
+type RepositoryRulesetBypassActor implements Node {
+  """The Node ID of the RepositoryRulesetBypassActor object"""
+  id: ID!
+}
+
+"""A repository-topic connects a repository to a topic."""
+type RepositoryTopic implements Node {
+  """The Node ID of the RepositoryTopic object"""
+  id: ID!
+}
+
+"""Audit log entry for a repository_visibility_change.disable event."""
+type RepositoryVisibilityChangeDisableAuditEntry implements Node {
+  """The Node ID of the RepositoryVisibilityChangeDisableAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a repository_visibility_change.enable event."""
+type RepositoryVisibilityChangeEnableAuditEntry implements Node {
+  """The Node ID of the RepositoryVisibilityChangeEnableAuditEntry object"""
+  id: ID!
+}
+
+"""
+A Dependabot alert for a repository with a dependency affected by a security vulnerability.
+"""
+type RepositoryVulnerabilityAlert implements Node {
+  """The Node ID of the RepositoryVulnerabilityAlert object"""
+  id: ID!
+}
+
+"""Types that can be requested reviewers."""
+union RequestedReviewer = Bot | Mannequin | Team | User
+
+"""The connection type for RequestedReviewer."""
+type RequestedReviewerConnection {
+  """A list of nodes."""
+  nodes: [RequestedReviewer]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""
+A user, team, or app who has the ability to dismiss a review on a protected branch.
+"""
+type ReviewDismissalAllowance implements Node {
+  """The Node ID of the ReviewDismissalAllowance object"""
+  id: ID!
+}
+
+"""
+Represents a 'review_dismissed' event on a given issue or pull request.
+"""
+type ReviewDismissedEvent implements Node {
+  """The Node ID of the ReviewDismissedEvent object"""
+  id: ID!
+}
+
+"""A request for a user to review a pull request."""
+type ReviewRequest implements Node {
+  """The Node ID of the ReviewRequest object"""
+  id: ID!
+}
+
+"""Represents an 'review_request_removed' event on a given pull request."""
+type ReviewRequestRemovedEvent implements Node {
+  """The Node ID of the ReviewRequestRemovedEvent object"""
+  id: ID!
+}
+
+"""Represents an 'review_requested' event on a given pull request."""
+type ReviewRequestedEvent implements Node {
+  """The Node ID of the ReviewRequestedEvent object"""
+  id: ID!
+}
+
+"""A Saved Reply is text a user can use to reply quickly."""
+type SavedReply implements Node {
+  """The Node ID of the SavedReply object"""
+  id: ID!
+}
+
+"""A GitHub Security Advisory"""
+type SecurityAdvisory implements Node {
+  """The Node ID of the SecurityAdvisory object"""
+  id: ID!
+}
+
+"""An event related to sponsorship activity."""
+type SponsorsActivity implements Node {
+  """The Node ID of the SponsorsActivity object"""
+  id: ID!
+}
+
+"""A GitHub Sponsors listing."""
+type SponsorsListing implements Node {
+  """The Node ID of the SponsorsListing object"""
+  id: ID!
+}
+
+"""A record that is promoted on a GitHub Sponsors profile."""
+type SponsorsListingFeaturedItem implements Node {
+  """The Node ID of the SponsorsListingFeaturedItem object"""
+  id: ID!
+}
+
+"""A GitHub Sponsors tier associated with a GitHub Sponsors listing."""
+type SponsorsTier implements Node {
+  """The Node ID of the SponsorsTier object"""
+  id: ID!
+}
+
+"""A sponsorship relationship between a sponsor and a maintainer"""
+type Sponsorship implements Node {
+  """The Node ID of the Sponsorship object"""
+  id: ID!
+}
+
+"""
+An update sent to sponsors of a user or organization on GitHub Sponsors.
+"""
+type SponsorshipNewsletter implements Node {
+  """The Node ID of the SponsorshipNewsletter object"""
+  id: ID!
+}
+
+"""Represents a commit status."""
+type Status implements Node {
+  """The Node ID of the Status object"""
+  id: ID!
+}
+
+"""Represents the rollup for both the check runs and status for a commit."""
+type StatusCheckRollup implements Node {
+  """The Node ID of the StatusCheckRollup object"""
+  id: ID!
+}
+
+"""Represents an individual commit status context"""
+type StatusContext implements Node {
+  """The Node ID of the StatusContext object"""
+  id: ID!
+}
+
+"""Represents a 'sub_issue_added' event on a given issue."""
+type SubIssueAddedEvent implements Node {
+  """The Node ID of the SubIssueAddedEvent object"""
+  id: ID!
+}
+
+"""Represents a 'sub_issue_removed' event on a given issue."""
+type SubIssueRemovedEvent implements Node {
+  """The Node ID of the SubIssueRemovedEvent object"""
+  id: ID!
+}
+
+"""Summary of the state of an issue's sub-issues"""
+type SubIssuesSummary {
+  """Count of completed sub-issues"""
+  completed: Int!
+  """Percent of sub-issues which are completed"""
+  percentCompleted: Int!
+  """Count of total number of sub-issues"""
+  total: Int!
+}
+
+"""Represents a 'subscribed' event on a given `Subscribable`."""
+type SubscribedEvent implements Node {
+  """The Node ID of the SubscribedEvent object"""
+  id: ID!
+}
+
+"""Represents a Git tag."""
+type Tag implements Node {
+  """The Node ID of the Tag object"""
+  id: ID!
+}
+
+"""A team of users in an organization."""
+type Team implements Node {
+  """The Node ID of the Team object"""
+  id: ID!
+  """The name of the team."""
+  name: String!
+  """The slug corresponding to the team."""
+  slug: String!
+}
+
+"""Audit log entry for a team.add_member event."""
+type TeamAddMemberAuditEntry implements Node {
+  """The Node ID of the TeamAddMemberAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a team.add_repository event."""
+type TeamAddRepositoryAuditEntry implements Node {
+  """The Node ID of the TeamAddRepositoryAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a team.change_parent_team event."""
+type TeamChangeParentTeamAuditEntry implements Node {
+  """The Node ID of the TeamChangeParentTeamAuditEntry object"""
+  id: ID!
+}
+
+"""A team discussion."""
+type TeamDiscussion implements Node {
+  """The Node ID of the TeamDiscussion object"""
+  id: ID!
+}
+
+"""A comment on a team discussion."""
+type TeamDiscussionComment implements Node {
+  """The Node ID of the TeamDiscussionComment object"""
+  id: ID!
+}
+
+"""Audit log entry for a team.remove_member event."""
+type TeamRemoveMemberAuditEntry implements Node {
+  """The Node ID of the TeamRemoveMemberAuditEntry object"""
+  id: ID!
+}
+
+"""Audit log entry for a team.remove_repository event."""
+type TeamRemoveRepositoryAuditEntry implements Node {
+  """The Node ID of the TeamRemoveRepositoryAuditEntry object"""
+  id: ID!
+}
+
+"""A topic aggregates entities that are related to a subject."""
+type Topic implements Node {
+  """The Node ID of the Topic object"""
+  id: ID!
+}
+
+"""Represents a 'transferred' event on a given issue or pull request."""
+type TransferredEvent implements Node {
+  """The Node ID of the TransferredEvent object"""
+  id: ID!
+}
+
+"""Represents a Git tree."""
+type Tree implements Node {
+  """The Node ID of the Tree object"""
+  id: ID!
 }
 
 """An RFC 3986, RFC 3987, and RFC 6570 (level 4) compliant URI string."""
 scalar URI
 
+"""Represents an 'unassigned' event on any assignable object."""
+type UnassignedEvent implements Node {
+  """The Node ID of the UnassignedEvent object"""
+  id: ID!
+}
+
+"""Represents an 'unlabeled' event on a given issue or pull request."""
+type UnlabeledEvent implements Node {
+  """The Node ID of the UnlabeledEvent object"""
+  id: ID!
+}
+
+"""Represents an 'unlocked' event on a given issue or pull request."""
+type UnlockedEvent implements Node {
+  """The Node ID of the UnlockedEvent object"""
+  id: ID!
+}
+
+"""
+Represents an 'unmarked_as_duplicate' event on a given issue or pull request.
+"""
+type UnmarkedAsDuplicateEvent implements Node {
+  """The Node ID of the UnmarkedAsDuplicateEvent object"""
+  id: ID!
+}
+
+"""Represents an 'unpinned' event on a given issue or pull request."""
+type UnpinnedEvent implements Node {
+  """The Node ID of the UnpinnedEvent object"""
+  id: ID!
+}
+
+"""Represents an 'unsubscribed' event on a given `Subscribable`."""
+type UnsubscribedEvent implements Node {
+  """The Node ID of the UnsubscribedEvent object"""
+  id: ID!
+}
+
 """
 A user is an individual's account on GitHub that owns repositories and can make new content.
 """
-type User {
+type User implements Actor & Node & ProjectV2Owner {
+  """A URL pointing to the user's public avatar."""
+  avatarUrl(
+    """The size of the resulting square image."""
+    size: Int
+  ): URI!
   """A list of commit comments made by this user."""
   commitComments(
     """Returns the elements in the list that come after the specified cursor."""
@@ -431,6 +2897,10 @@ type User {
     """Returns the last _n_ elements from the list."""
     last: Int
   ): CommitCommentConnection!
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The Node ID of the User object"""
+  id: ID!
   """A list of issue comments made by this user."""
   issueComments(
     """Returns the elements in the list that come after the specified cursor."""
@@ -467,6 +2937,10 @@ type User {
     """A list of states to filter the issues by."""
     states: [IssueState!]
   ): IssueConnection!
+  """The username used to login."""
+  login: String!
+  """The user's public profile name."""
+  name: String
   """A list of pull requests associated with this user."""
   pullRequests(
     """Returns the elements in the list that come after the specified cursor."""
@@ -533,4 +3007,102 @@ type User {
     """A list of states to filter the discussions by."""
     states: [DiscussionState!] = []
   ): DiscussionConnection!
+  """The HTTP URL for this user"""
+  url: URI!
+}
+
+"""Represents a 'user_blocked' event on a given user."""
+type UserBlockedEvent implements Node {
+  """The Node ID of the UserBlockedEvent object"""
+  id: ID!
+}
+
+"""A list of users."""
+type UserConnection {
+  """A list of nodes."""
+  nodes: [User]
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+}
+
+"""An edit on user content"""
+type UserContentEdit implements Node {
+  """The Node ID of the UserContentEdit object"""
+  id: ID!
+}
+
+"""A user-curated list of repositories"""
+type UserList implements Node {
+  """The Node ID of the UserList object"""
+  id: ID!
+}
+
+"""A repository owned by an Enterprise Managed user."""
+type UserNamespaceRepository implements Node {
+  """The Node ID of the UserNamespaceRepository object"""
+  id: ID!
+}
+
+"""The user's description of what they're currently doing."""
+type UserStatus implements Node {
+  """The Node ID of the UserStatus object"""
+  id: ID!
+}
+
+"""
+A domain that can be verified or approved for an organization or an enterprise.
+"""
+type VerifiableDomain implements Node {
+  """The Node ID of the VerifiableDomain object"""
+  id: ID!
+}
+
+"""A workflow contains meta information about an Actions workflow file."""
+type Workflow implements Node {
+  """The Node ID of the Workflow object"""
+  id: ID!
+}
+
+"""A workflow run."""
+type WorkflowRun implements Node {
+  """Identifies the primary key from the database."""
+  databaseId: Int
+  """The event that triggered the workflow run"""
+  event: String!
+  """The workflow file"""
+  file: WorkflowRunFile
+  """The Node ID of the WorkflowRun object"""
+  id: ID!
+  """
+  A number that uniquely identifies this workflow run in its parent workflow.
+  """
+  runNumber: Int!
+  """The HTTP URL for this workflow run"""
+  url: URI!
+}
+
+"""An executed workflow file for a workflow run."""
+type WorkflowRunFile implements Node {
+  """The Node ID of the WorkflowRunFile object"""
+  id: ID!
+  """The path of the workflow file relative to its repository."""
+  path: String!
+  """
+  The direct link to the file in the repository which stores the workflow file.
+  """
+  repositoryFileUrl: URI!
+  """The repository name and owner which stores the workflow file."""
+  repositoryName: URI!
+  """The HTTP path for this workflow run file"""
+  resourcePath: URI!
+  """The HTTP URL for this workflow run file"""
+  url: URI!
+  """
+  If the viewer has permissions to push to the repository which stores the workflow.
+  """
+  viewerCanPushRepository: Boolean!
+  """
+  If the viewer has permissions to read the repository which stores the workflow.
+  """
+  viewerCanReadRepository: Boolean!
 }

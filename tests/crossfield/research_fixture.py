@@ -12,8 +12,46 @@ import json
 import os
 from pathlib import Path
 
+import actions_fixture
+import actions_operations_fixture
+import activity_fixture
+import agent_tasks_fixture
+import artifact_provenance_fixture
+import checks_fixture
+import code_scanning_fixture
+import codespaces_fixture
+import commit_evaluations_fixture
 import connected_fixture as baseline
+import content_fixture
+import copilot_reports_fixture
+import copilot_spaces_fixture
+import dependencies_fixture
+import deployments_fixture
+import gists_fixture
+import git_fixture
 import httpx
+import issue_detail_fixture
+import organization_bypass_fixture
+import organization_identity_fixture
+import organization_metadata_fixture
+import packages_fixture
+import pages_fixture
+import projects_fixture
+import pull_request_detail_fixture
+import reactions_fixture
+import reference_fixture
+import releases_fixture
+import repository_activity_fixture
+import repository_contents_fixture
+import repository_detail_fixture
+import retrieval_fixture
+import search_fixture
+import secret_scanning_fixture
+import security_operations_fixture
+import statistics_fixture
+import team_identity_fixture
+import traffic_fixture
+import user_identity_fixture
 from graphql import parse, value_from_ast_untyped
 
 from vgi_github.generated_worker import main
@@ -22,6 +60,7 @@ from vgi_github.generated_worker import main
 def repository(name, identity, language):
     return {
         "id": identity,
+        "databaseId": int(identity[1:]),
         "name": name.split("/")[1],
         "nameWithOwner": name,
         "url": f"https://github.example/{name}",
@@ -39,7 +78,7 @@ def event(identity, created, repo, *, title=None, body=None, number=1):
     value = {
         "id": identity,
         "number": number,
-        "author": {"login": "researcher"},
+        "author": {"__typename": "User", "login": "researcher"},
         "createdAt": created,
         "updatedAt": created,
         "publishedAt": created,
@@ -71,6 +110,22 @@ PULLS = [
 def issue(identity, created, repo, title, closed=None):
     row = event(identity, created, repo, title=title, number=int(identity[1:]))
     row.update({"state": "CLOSED" if closed else "OPEN", "closedAt": closed})
+    row.update(
+        fullDatabaseId=str(int(identity[1:])),
+        stateReason="COMPLETED" if closed else None,
+        bodyHTML="<p>Independent issue evidence</p>",
+        bodyText=row["body"],
+        closed=bool(closed),
+        locked=False,
+        activeLockReason=None,
+        authorAssociation="CONTRIBUTOR",
+        createdViaEmail=False,
+        lastEditedAt=None,
+        publishedAt=created,
+        isPinned=None,
+        milestone=None,
+        subIssuesSummary={"total": 0, "completed": 0, "percentCompleted": 0},
+    )
     return row
 
 
@@ -126,6 +181,7 @@ DISCUSSION_COMMENTS = [
 
 def commit_comment(identity, created, repo, commit):
     row = event(identity, created, repo)
+    row.update(databaseId=int(identity[2:]), position=None, authorAssociation="CONTRIBUTOR")
     row["commit"] = (
         {
             "oid": commit,
@@ -162,8 +218,56 @@ for login, identity in [
 ]:
     baseline.USERS[login] = baseline.user(login, identity)
 
+for row in PULLS:
+    baseline.register_pull_details(row, 701, int(row["repository"]["id"][1:]))
+
 
 def respond(request):
+    for fixture in (
+        content_fixture,
+        user_identity_fixture,
+        releases_fixture,
+        actions_fixture,
+        actions_operations_fixture,
+        checks_fixture,
+        deployments_fixture,
+        git_fixture,
+        projects_fixture,
+        packages_fixture,
+        code_scanning_fixture,
+        dependencies_fixture,
+        secret_scanning_fixture,
+        pull_request_detail_fixture,
+        issue_detail_fixture,
+        reactions_fixture,
+        reference_fixture,
+        security_operations_fixture,
+        agent_tasks_fixture,
+        gists_fixture,
+        codespaces_fixture,
+        copilot_reports_fixture,
+        copilot_spaces_fixture,
+        activity_fixture,
+        artifact_provenance_fixture,
+        organization_identity_fixture,
+        search_fixture,
+        repository_detail_fixture,
+        team_identity_fixture,
+        pages_fixture,
+        organization_bypass_fixture,
+        repository_contents_fixture,
+        repository_activity_fixture,
+        organization_metadata_fixture,
+        commit_evaluations_fixture,
+        statistics_fixture,
+        traffic_fixture,
+    ):
+        result = fixture.respond(request)
+        if result is not None:
+            return result
+    retrieved = retrieval_fixture.respond(request)
+    if retrieved is not None:
+        return retrieved
     if request.method != "POST" or request.url.path != "/graphql":
         return baseline.respond(request)
     body = json.loads(request.content)
@@ -193,9 +297,9 @@ def respond(request):
             log.write(json.dumps({"path": "/graphql", "query": connection.name.value}) + "\n")
     rows = [] if login == "idle-researcher" else copy.deepcopy(EVENTS[connection.name.value])
     for index, row in enumerate(rows):
-        row["author"] = {"login": login}
+        row["author"] = {"__typename": "User", "login": login}
         if login == "foreign-researcher" and index == 1:
-            row["author"] = {"login": "other-author"}
+            row["author"] = {"__typename": "User", "login": "other-author"}
         if login == "deleted-researcher" and index == 1:
             row["author"] = None
     offset = int(conn_args.get("after") or "0")

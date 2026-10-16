@@ -1,3 +1,3 @@
-SELECT authored_pr_created_day, authored_pr_created_eastern_day, authored_pr_count
+SELECT pull_request_created_day, pull_request_created_eastern_day, pull_request_count
 FROM engineering.semantic.github(user=>'researcher')
-GROUP BY authored_pr_created_day, authored_pr_created_eastern_day;
+GROUP BY pull_request_created_day, pull_request_created_eastern_day;

@@ -1,0 +1,5046 @@
+{
+  "entities": [
+    {
+      "name": "team_identity_summary_source",
+      "description": "Schema-derived teams/list source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "GitHub organization login.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "summary_team_created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_team_updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_team_members_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_team_repos_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_team_ldap_dn",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "notification_setting",
+          "path": [
+            "notification_setting"
+          ]
+        },
+        {
+          "name": "permission",
+          "path": [
+            "permission"
+          ]
+        },
+        {
+          "name": "members_url",
+          "path": [
+            "members_url"
+          ]
+        },
+        {
+          "name": "repositories_url",
+          "path": [
+            "repositories_url"
+          ]
+        },
+        {
+          "name": "owning_organization_id",
+          "path": [
+            "organization_id"
+          ]
+        },
+        {
+          "name": "enterprise_id",
+          "path": [
+            "enterprise_id"
+          ]
+        },
+        {
+          "name": "parent",
+          "path": [
+            "parent"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "url": true,
+            "members_url": true,
+            "name": true,
+            "description": true,
+            "permission": true,
+            "privacy": true,
+            "notification_setting": true,
+            "html_url": true,
+            "repositories_url": true,
+            "slug": true,
+            "ldap_dn": true,
+            "type": true,
+            "organization_id": true,
+            "enterprise_id": true
+          }
+        },
+        {
+          "name": "parent_team_id",
+          "path": [
+            "parent",
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "source_argument": "summary_team_created_at"
+        },
+        {
+          "name": "updated_at",
+          "source_argument": "summary_team_updated_at"
+        },
+        {
+          "name": "members_count",
+          "source_argument": "summary_team_members_count"
+        },
+        {
+          "name": "repos_count",
+          "source_argument": "summary_team_repos_count"
+        },
+        {
+          "name": "ldap_dn",
+          "source_argument": "summary_team_ldap_dn"
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_identity_repository_source",
+      "description": "Schema-derived teams/list source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "summary_team_created_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_team_updated_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_team_members_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_team_repos_count",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_team_ldap_dn",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable full-team metadata on this summary route.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "notification_setting",
+          "path": [
+            "notification_setting"
+          ]
+        },
+        {
+          "name": "permission",
+          "path": [
+            "permission"
+          ]
+        },
+        {
+          "name": "members_url",
+          "path": [
+            "members_url"
+          ]
+        },
+        {
+          "name": "repositories_url",
+          "path": [
+            "repositories_url"
+          ]
+        },
+        {
+          "name": "owning_organization_id",
+          "path": [
+            "organization_id"
+          ]
+        },
+        {
+          "name": "enterprise_id",
+          "path": [
+            "enterprise_id"
+          ]
+        },
+        {
+          "name": "parent",
+          "path": [
+            "parent"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "url": true,
+            "members_url": true,
+            "name": true,
+            "description": true,
+            "permission": true,
+            "privacy": true,
+            "notification_setting": true,
+            "html_url": true,
+            "repositories_url": true,
+            "slug": true,
+            "ldap_dn": true,
+            "type": true,
+            "organization_id": true,
+            "enterprise_id": true
+          }
+        },
+        {
+          "name": "parent_team_id",
+          "path": [
+            "parent",
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "source_argument": "summary_team_created_at"
+        },
+        {
+          "name": "updated_at",
+          "source_argument": "summary_team_updated_at"
+        },
+        {
+          "name": "members_count",
+          "source_argument": "summary_team_members_count"
+        },
+        {
+          "name": "repos_count",
+          "source_argument": "summary_team_repos_count"
+        },
+        {
+          "name": "ldap_dn",
+          "source_argument": "summary_team_ldap_dn"
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-teams",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_identity_lookup_source",
+      "description": "Schema-derived teams/list source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Slug of one team; requires organization.",
+          "example": "core"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "notification_setting",
+          "path": [
+            "notification_setting"
+          ]
+        },
+        {
+          "name": "permission",
+          "path": [
+            "permission"
+          ]
+        },
+        {
+          "name": "members_url",
+          "path": [
+            "members_url"
+          ]
+        },
+        {
+          "name": "repositories_url",
+          "path": [
+            "repositories_url"
+          ]
+        },
+        {
+          "name": "owning_organization_id",
+          "path": [
+            "organization_id"
+          ]
+        },
+        {
+          "name": "enterprise_id",
+          "path": [
+            "enterprise_id"
+          ]
+        },
+        {
+          "name": "parent",
+          "path": [
+            "parent"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "url": true,
+            "members_url": true,
+            "name": true,
+            "description": true,
+            "permission": true,
+            "privacy": true,
+            "notification_setting": true,
+            "html_url": true,
+            "repositories_url": true,
+            "slug": true,
+            "ldap_dn": true,
+            "type": true,
+            "organization_id": true,
+            "enterprise_id": true
+          }
+        },
+        {
+          "name": "parent_team_id",
+          "path": [
+            "parent",
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "members_count",
+          "path": [
+            "members_count"
+          ]
+        },
+        {
+          "name": "repos_count",
+          "path": [
+            "repos_count"
+          ]
+        },
+        {
+          "name": "ldap_dn",
+          "path": [
+            "ldap_dn"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/get-by-name",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          },
+          "team_slug": {
+            "argument": "team_slug"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "team_identity_numeric_source",
+      "description": "Pinned teams/get-legacy read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "team_numeric_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+          "minimum": 1,
+          "example": 3201
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "organization",
+            "login"
+          ]
+        },
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "notification_setting",
+          "path": [
+            "notification_setting"
+          ]
+        },
+        {
+          "name": "permission",
+          "path": [
+            "permission"
+          ]
+        },
+        {
+          "name": "members_url",
+          "path": [
+            "members_url"
+          ]
+        },
+        {
+          "name": "repositories_url",
+          "path": [
+            "repositories_url"
+          ]
+        },
+        {
+          "name": "owning_organization_id",
+          "path": [
+            "organization_id"
+          ]
+        },
+        {
+          "name": "enterprise_id",
+          "path": [
+            "enterprise_id"
+          ]
+        },
+        {
+          "name": "parent",
+          "path": [
+            "parent"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "url": true,
+            "members_url": true,
+            "name": true,
+            "description": true,
+            "permission": true,
+            "privacy": true,
+            "notification_setting": true,
+            "html_url": true,
+            "repositories_url": true,
+            "slug": true,
+            "ldap_dn": true,
+            "type": true,
+            "organization_id": true,
+            "enterprise_id": true
+          }
+        },
+        {
+          "name": "parent_team_id",
+          "path": [
+            "parent",
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "members_count",
+          "path": [
+            "members_count"
+          ]
+        },
+        {
+          "name": "repos_count",
+          "path": [
+            "repos_count"
+          ]
+        },
+        {
+          "name": "ldap_dn",
+          "path": [
+            "ldap_dn"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/get-legacy",
+        "path_bindings": {
+          "team_id": {
+            "argument": "team_numeric_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "team_id",
+            "argument": "team_numeric_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "team_identity_authenticated_source",
+      "description": "Pinned teams/list-for-authenticated-user read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "authenticated_user",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "enum": [
+            true
+          ],
+          "example": true,
+          "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "organization",
+            "login"
+          ]
+        },
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "notification_setting",
+          "path": [
+            "notification_setting"
+          ]
+        },
+        {
+          "name": "permission",
+          "path": [
+            "permission"
+          ]
+        },
+        {
+          "name": "members_url",
+          "path": [
+            "members_url"
+          ]
+        },
+        {
+          "name": "repositories_url",
+          "path": [
+            "repositories_url"
+          ]
+        },
+        {
+          "name": "owning_organization_id",
+          "path": [
+            "organization_id"
+          ]
+        },
+        {
+          "name": "enterprise_id",
+          "path": [
+            "enterprise_id"
+          ]
+        },
+        {
+          "name": "parent",
+          "path": [
+            "parent"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "url": true,
+            "members_url": true,
+            "name": true,
+            "description": true,
+            "permission": true,
+            "privacy": true,
+            "notification_setting": true,
+            "html_url": true,
+            "repositories_url": true,
+            "slug": true,
+            "ldap_dn": true,
+            "type": true,
+            "organization_id": true,
+            "enterprise_id": true
+          }
+        },
+        {
+          "name": "parent_team_id",
+          "path": [
+            "parent",
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "members_count",
+          "path": [
+            "members_count"
+          ]
+        },
+        {
+          "name": "repos_count",
+          "path": [
+            "repos_count"
+          ]
+        },
+        {
+          "name": "ldap_dn",
+          "path": [
+            "ldap_dn"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_children_named_source",
+      "description": "Pinned teams/list-child-in-org read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "parent_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Select immediate child teams of this team slug; requires organization. This does not recursively enumerate descendants.",
+          "min_length": 1,
+          "example": "platform"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-child-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          },
+          "team_slug": {
+            "argument": "parent_team_slug"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_children_numeric_source",
+      "description": "Pinned teams/list-child-legacy read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "parent_team_numeric_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Select immediate child teams of this stable parent team ID through the pinned legacy route.",
+          "minimum": 1,
+          "example": 3201
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-child-legacy",
+        "path_bindings": {
+          "team_id": {
+            "argument": "parent_team_numeric_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_identity_named_context_source",
+      "description": "Pinned teams/get-by-name read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Slug of one team; requires organization.",
+          "example": "core"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "organization",
+            "login"
+          ]
+        },
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "notification_setting",
+          "path": [
+            "notification_setting"
+          ]
+        },
+        {
+          "name": "permission",
+          "path": [
+            "permission"
+          ]
+        },
+        {
+          "name": "members_url",
+          "path": [
+            "members_url"
+          ]
+        },
+        {
+          "name": "repositories_url",
+          "path": [
+            "repositories_url"
+          ]
+        },
+        {
+          "name": "owning_organization_id",
+          "path": [
+            "organization_id"
+          ]
+        },
+        {
+          "name": "enterprise_id",
+          "path": [
+            "enterprise_id"
+          ]
+        },
+        {
+          "name": "parent",
+          "path": [
+            "parent"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "url": true,
+            "members_url": true,
+            "name": true,
+            "description": true,
+            "permission": true,
+            "privacy": true,
+            "notification_setting": true,
+            "html_url": true,
+            "repositories_url": true,
+            "slug": true,
+            "ldap_dn": true,
+            "type": true,
+            "organization_id": true,
+            "enterprise_id": true
+          }
+        },
+        {
+          "name": "parent_team_id",
+          "path": [
+            "parent",
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "members_count",
+          "path": [
+            "members_count"
+          ]
+        },
+        {
+          "name": "repos_count",
+          "path": [
+            "repos_count"
+          ]
+        },
+        {
+          "name": "ldap_dn",
+          "path": [
+            "ldap_dn"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/get-by-name",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          },
+          "team_slug": {
+            "argument": "team_slug"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "team_members_named_identity_source",
+      "description": "Pinned teams/list-members-in-org read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "team_member_role",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Effective team member role filter; omission uses all roles. Child-team members can be inherited.",
+          "enum": [
+            "member",
+            "maintainer",
+            "all"
+          ],
+          "example": "maintainer",
+          "default": null
+        },
+        {
+          "name": "listed_team_membership_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Member-list endpoints enumerate active effective members.",
+          "enum": [
+            "active"
+          ],
+          "example": "active"
+        },
+        {
+          "name": "unknown_team_membership_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Membership-object URL is unavailable on a member-list response.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_member_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "member_role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "membership_inherited",
+          "path": [
+            "inherited"
+          ]
+        },
+        {
+          "name": "membership_state",
+          "source_argument": "listed_team_membership_state"
+        },
+        {
+          "name": "membership_url",
+          "source_argument": "unknown_team_membership_url"
+        }
+      ],
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-members-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_team_organization_login"
+          },
+          "team_slug": {
+            "argument": "selected_team_slug"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "role": {
+            "argument": "team_member_role"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_members_numeric_identity_source",
+      "description": "Pinned teams/list-members-legacy read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "team_member_role",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Effective team member role filter; omission uses all roles. Child-team members can be inherited.",
+          "enum": [
+            "member",
+            "maintainer",
+            "all"
+          ],
+          "example": "maintainer",
+          "default": null
+        },
+        {
+          "name": "listed_team_membership_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Member-list endpoints enumerate active effective members.",
+          "enum": [
+            "active"
+          ],
+          "example": "active"
+        },
+        {
+          "name": "unknown_team_membership_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Membership-object URL is unavailable on a member-list response.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_member_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "member_role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "membership_inherited",
+          "path": [
+            "inherited"
+          ]
+        },
+        {
+          "name": "membership_state",
+          "source_argument": "listed_team_membership_state"
+        },
+        {
+          "name": "membership_url",
+          "source_argument": "unknown_team_membership_url"
+        }
+      ],
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-members-legacy",
+        "path_bindings": {
+          "team_id": {
+            "argument": "selected_team_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "role": {
+            "argument": "team_member_role"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_member_identity_context_source",
+      "description": "Pinned users/get-by-username read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "team_member_user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Account login for an exact team membership or membership-check observation.",
+          "min_length": 1,
+          "example": "membership-alice"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-by-username",
+        "path_bindings": {
+          "username": {
+            "argument": "team_member_user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "team_membership_named_object_source",
+      "description": "Pinned teams/get-membership-for-user-in-org read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "selected_team_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved team member account identity.",
+          "minimum": 1,
+          "example": 3001
+        },
+        {
+          "name": "selected_team_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Resolved team member login.",
+          "min_length": 1,
+          "example": "membership-alice"
+        },
+        {
+          "name": "unknown_membership_inherited",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Membership-object endpoints do not report direct versus inherited membership.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "user_id",
+          "source_argument": "selected_team_user_id"
+        },
+        {
+          "name": "team_member_login",
+          "source_argument": "selected_team_user_login"
+        },
+        {
+          "name": "member_role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "membership_state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "membership_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "membership_inherited",
+          "source_argument": "unknown_membership_inherited"
+        }
+      ],
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/get-membership-for-user-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_team_organization_login"
+          },
+          "team_slug": {
+            "argument": "selected_team_slug"
+          },
+          "username": {
+            "argument": "selected_team_user_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "team_membership_numeric_object_source",
+      "description": "Pinned teams/get-membership-for-user-legacy read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "selected_team_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved team member account identity.",
+          "minimum": 1,
+          "example": 3001
+        },
+        {
+          "name": "selected_team_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Resolved team member login.",
+          "min_length": 1,
+          "example": "membership-alice"
+        },
+        {
+          "name": "unknown_membership_inherited",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Membership-object endpoints do not report direct versus inherited membership.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "user_id",
+          "source_argument": "selected_team_user_id"
+        },
+        {
+          "name": "team_member_login",
+          "source_argument": "selected_team_user_login"
+        },
+        {
+          "name": "member_role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "membership_state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "membership_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "membership_inherited",
+          "source_argument": "unknown_membership_inherited"
+        }
+      ],
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/get-membership-for-user-legacy",
+        "path_bindings": {
+          "team_id": {
+            "argument": "selected_team_id"
+          },
+          "username": {
+            "argument": "selected_team_user_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "team_membership_check_source",
+      "description": "Pinned teams/get-member-legacy read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "selected_team_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved team member account identity.",
+          "minimum": 1,
+          "example": 3001
+        },
+        {
+          "name": "selected_team_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Resolved team member login.",
+          "min_length": 1,
+          "example": "membership-alice"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "user_id",
+          "source_argument": "selected_team_user_id"
+        },
+        {
+          "name": "team_member_login",
+          "source_argument": "selected_team_user_login"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/get-member-legacy",
+        "path_bindings": {
+          "team_id": {
+            "argument": "selected_team_id"
+          },
+          "username": {
+            "argument": "selected_team_user_login"
+          }
+        },
+        "query_bindings": {},
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    },
+    {
+      "name": "team_invitations_named_source",
+      "description": "Pinned teams/list-pending-invitations-in-org read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "selected_invitation_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit lifecycle population established by the invitation retrieval endpoint.",
+          "enum": [
+            "pending",
+            "failed"
+          ],
+          "example": "pending"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "invitation_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "email",
+          "path": [
+            "email"
+          ]
+        },
+        {
+          "name": "role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "failed_at",
+          "path": [
+            "failed_at"
+          ]
+        },
+        {
+          "name": "failed_reason",
+          "path": [
+            "failed_reason"
+          ]
+        },
+        {
+          "name": "team_count",
+          "path": [
+            "team_count"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "invitation_teams_url",
+          "path": [
+            "invitation_teams_url"
+          ]
+        },
+        {
+          "name": "invitation_source",
+          "path": [
+            "invitation_source"
+          ]
+        },
+        {
+          "name": "inviter",
+          "path": [
+            "inviter"
+          ],
+          "selection": {
+            "name": true,
+            "email": true,
+            "login": true,
+            "id": true,
+            "node_id": true,
+            "avatar_url": true,
+            "gravatar_id": true,
+            "url": true,
+            "html_url": true,
+            "followers_url": true,
+            "following_url": true,
+            "gists_url": true,
+            "starred_url": true,
+            "subscriptions_url": true,
+            "organizations_url": true,
+            "repos_url": true,
+            "events_url": true,
+            "received_events_url": true,
+            "type": true,
+            "site_admin": true,
+            "starred_at": true,
+            "user_view_type": true
+          }
+        },
+        {
+          "name": "invitation_state",
+          "source_argument": "selected_invitation_state"
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "invitation_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-pending-invitations-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_team_organization_login"
+          },
+          "team_slug": {
+            "argument": "selected_team_slug"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_invitations_numeric_source",
+      "description": "Pinned teams/list-pending-invitations-legacy read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "selected_invitation_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit lifecycle population established by the invitation retrieval endpoint.",
+          "enum": [
+            "pending",
+            "failed"
+          ],
+          "example": "pending"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "invitation_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "email",
+          "path": [
+            "email"
+          ]
+        },
+        {
+          "name": "role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "failed_at",
+          "path": [
+            "failed_at"
+          ]
+        },
+        {
+          "name": "failed_reason",
+          "path": [
+            "failed_reason"
+          ]
+        },
+        {
+          "name": "team_count",
+          "path": [
+            "team_count"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "invitation_teams_url",
+          "path": [
+            "invitation_teams_url"
+          ]
+        },
+        {
+          "name": "invitation_source",
+          "path": [
+            "invitation_source"
+          ]
+        },
+        {
+          "name": "inviter",
+          "path": [
+            "inviter"
+          ],
+          "selection": {
+            "name": true,
+            "email": true,
+            "login": true,
+            "id": true,
+            "node_id": true,
+            "avatar_url": true,
+            "gravatar_id": true,
+            "url": true,
+            "html_url": true,
+            "followers_url": true,
+            "following_url": true,
+            "gists_url": true,
+            "starred_url": true,
+            "subscriptions_url": true,
+            "organizations_url": true,
+            "repos_url": true,
+            "events_url": true,
+            "received_events_url": true,
+            "type": true,
+            "site_admin": true,
+            "starred_at": true,
+            "user_view_type": true
+          }
+        },
+        {
+          "name": "invitation_state",
+          "source_argument": "selected_invitation_state"
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "invitation_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-pending-invitations-legacy",
+        "path_bindings": {
+          "team_id": {
+            "argument": "selected_team_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_repository_access_named_source",
+      "description": "Pinned teams/list-repos-in-org read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ],
+          "selection": {
+            "admin": true,
+            "pull": true,
+            "triage": true,
+            "push": true,
+            "maintain": true
+          }
+        },
+        {
+          "name": "role_name",
+          "path": [
+            "role_name"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id",
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-repos-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_team_organization_login"
+          },
+          "team_slug": {
+            "argument": "selected_team_slug"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_repository_permission_named_source",
+      "description": "Pinned teams/check-permissions-for-repo-in-org read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ],
+          "selection": {
+            "admin": true,
+            "pull": true,
+            "triage": true,
+            "push": true,
+            "maintain": true
+          }
+        },
+        {
+          "name": "role_name",
+          "path": [
+            "role_name"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id",
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/check-permissions-for-repo-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_team_organization_login"
+          },
+          "team_slug": {
+            "argument": "selected_team_slug"
+          },
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "accept": "application/vnd.github.v3.repository+json"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "team_repository_check_named_source",
+      "description": "Pinned teams/check-permissions-for-repo-in-org read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "team_id",
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/check-permissions-for-repo-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_team_organization_login"
+          },
+          "team_slug": {
+            "argument": "selected_team_slug"
+          },
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    },
+    {
+      "name": "team_repository_access_numeric_source",
+      "description": "Pinned teams/list-repos-legacy read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ],
+          "selection": {
+            "admin": true,
+            "pull": true,
+            "triage": true,
+            "push": true,
+            "maintain": true
+          }
+        },
+        {
+          "name": "role_name",
+          "path": [
+            "role_name"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id",
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/list-repos-legacy",
+        "path_bindings": {
+          "team_id": {
+            "argument": "selected_team_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_repository_permission_numeric_source",
+      "description": "Numeric-selected team identity resolves organization and slug before the pinned modern permission-object endpoint, whose documentation explicitly names the repository media type. The legacy endpoint omits that media-type value in the pinned description; legacy204/404 checks remain separate explicit observations.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ],
+          "selection": {
+            "admin": true,
+            "pull": true,
+            "triage": true,
+            "push": true,
+            "maintain": true
+          }
+        },
+        {
+          "name": "role_name",
+          "path": [
+            "role_name"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id",
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/check-permissions-for-repo-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_team_organization_login"
+          },
+          "team_slug": {
+            "argument": "selected_team_slug"
+          },
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "accept": "application/vnd.github.v3.repository+json"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "team_repository_check_numeric_source",
+      "description": "Pinned teams/check-permissions-for-repo-legacy read. Legacy operations retain upstream deprecation; exact missing records and HTTP failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_team_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected team identity.",
+          "minimum": 1,
+          "example": 3201
+        },
+        {
+          "name": "selected_team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team slug.",
+          "min_length": 1,
+          "example": "platform"
+        },
+        {
+          "name": "selected_team_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Selected team organization identity.",
+          "minimum": 1,
+          "example": 3101
+        },
+        {
+          "name": "selected_team_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected team organization login.",
+          "min_length": 1,
+          "example": "membership-fixture-alpha"
+        },
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "source_argument": "selected_team_id"
+        },
+        {
+          "name": "team_slug",
+          "source_argument": "selected_team_slug"
+        },
+        {
+          "name": "organization_id",
+          "source_argument": "selected_team_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_team_organization_login"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "team_id",
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/check-permissions-for-repo-legacy",
+        "path_bindings": {
+          "team_id": {
+            "argument": "selected_team_id"
+          },
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    },
+    {
+      "name": "team_repository_reverse_source",
+      "description": "Pinned repository team access discovery with typed permission flags.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ],
+          "selection": {
+            "admin": true,
+            "pull": true,
+            "triage": true,
+            "push": true,
+            "maintain": true
+          }
+        },
+        {
+          "name": "role_name",
+          "path": [
+            "permission"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-teams",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "organization_invitations",
+      "description": "Canonical current organization invitations selected by team or explicit pending/failed organization population; accepted and canceled invitation history is not enumerated. Pending organization invitations selected through one team. Identity is organization/invitation, so retrieving the same invitation via another team does not create a distinct business entity. Invitee login and email may be NULL; invitation role is an organization invitation role, not a team membership role.",
+      "grain": [
+        "organization_id",
+        "invitation_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "invitation_id",
+          "login",
+          "email",
+          "role",
+          "created_at",
+          "failed_at",
+          "failed_reason",
+          "team_count",
+          "node_id",
+          "invitation_teams_url",
+          "invitation_source",
+          "inviter",
+          "invitation_state"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "invitation_id",
+          "login",
+          "email",
+          "role",
+          "invitation_source",
+          "invitation_state"
+        ],
+        "sql_names": {
+          "organization_id": "organization_invitations_organization_id",
+          "organization_login": "organization_invitations_organization_login",
+          "invitation_id": "organization_invitations_invitation_id",
+          "login": "organization_invitations_login",
+          "email": "organization_invitations_email",
+          "role": "organization_invitations_role",
+          "invitation_source": "organization_invitations_invitation_source",
+          "invitation_state": "organization_invitations_invitation_state"
+        },
+        "metrics": [
+          {
+            "name": "organization_invitation_count",
+            "kind": "count",
+            "comment": "Selected organization_invitations rows at their declared qualified grain."
+          },
+          {
+            "name": "pending_organization_invitation_count",
+            "kind": "count",
+            "where": {
+              "field": "invitation_state",
+              "op": "eq",
+              "value": "pending"
+            },
+            "comment": "Current selected pending organization invitations."
+          },
+          {
+            "name": "failed_organization_invitation_count",
+            "kind": "count",
+            "where": {
+              "field": "invitation_state",
+              "op": "eq",
+              "value": "failed"
+            },
+            "comment": "Current selected failed organization invitations."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "failed",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "organization_invitation_population",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Organization invitation lifecycle population: pending or failed. Accepted and canceled invitations are not an enumerated historical population.",
+              "enum": [
+                "pending",
+                "failed"
+              ],
+              "example": "pending"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_failed_invitations_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "selected_invitation_state": {
+                    "literal": "failed"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "invitation_id",
+              "source_stage": "records",
+              "source_column": "invitation_id"
+            },
+            {
+              "name": "login",
+              "source_stage": "records",
+              "source_column": "login"
+            },
+            {
+              "name": "email",
+              "source_stage": "records",
+              "source_column": "email"
+            },
+            {
+              "name": "role",
+              "source_stage": "records",
+              "source_column": "role"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "failed_at",
+              "source_stage": "records",
+              "source_column": "failed_at"
+            },
+            {
+              "name": "failed_reason",
+              "source_stage": "records",
+              "source_column": "failed_reason"
+            },
+            {
+              "name": "team_count",
+              "source_stage": "records",
+              "source_column": "team_count"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "invitation_teams_url",
+              "source_stage": "records",
+              "source_column": "invitation_teams_url"
+            },
+            {
+              "name": "invitation_source",
+              "source_stage": "records",
+              "source_column": "invitation_source"
+            },
+            {
+              "name": "inviter",
+              "source_stage": "records",
+              "source_column": "inviter"
+            },
+            {
+              "name": "invitation_state",
+              "source_stage": "records",
+              "source_column": "invitation_state"
+            }
+          ],
+          "select": [
+            "organization_invitation_population"
+          ],
+          "population": "All advertised pages of current failed organization invitations; not historical accepted or canceled invitations.",
+          "select_values": {
+            "organization_invitation_population": [
+              "failed"
+            ]
+          }
+        },
+        {
+          "name": "pending",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "organization_invitation_population",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Organization invitation lifecycle population: pending or failed. Accepted and canceled invitations are not an enumerated historical population.",
+              "enum": [
+                "pending",
+                "failed"
+              ],
+              "example": "pending"
+            },
+            {
+              "name": "organization_invitation_role",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional pending organization-invitation role filter; this is not a team role.",
+              "enum": [
+                "all",
+                "admin",
+                "direct_member",
+                "billing_manager",
+                "hiring_manager"
+              ],
+              "example": "direct_member",
+              "default": null
+            },
+            {
+              "name": "organization_invitation_source",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional pending invitation source filter.",
+              "enum": [
+                "all",
+                "member",
+                "scim"
+              ],
+              "example": "member",
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_pending_invitations_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "selected_invitation_state": {
+                    "literal": "pending"
+                  },
+                  "organization_invitation_role": {
+                    "parameter": "organization_invitation_role"
+                  },
+                  "organization_invitation_source": {
+                    "parameter": "organization_invitation_source"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "invitation_id",
+              "source_stage": "records",
+              "source_column": "invitation_id"
+            },
+            {
+              "name": "login",
+              "source_stage": "records",
+              "source_column": "login"
+            },
+            {
+              "name": "email",
+              "source_stage": "records",
+              "source_column": "email"
+            },
+            {
+              "name": "role",
+              "source_stage": "records",
+              "source_column": "role"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "failed_at",
+              "source_stage": "records",
+              "source_column": "failed_at"
+            },
+            {
+              "name": "failed_reason",
+              "source_stage": "records",
+              "source_column": "failed_reason"
+            },
+            {
+              "name": "team_count",
+              "source_stage": "records",
+              "source_column": "team_count"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "invitation_teams_url",
+              "source_stage": "records",
+              "source_column": "invitation_teams_url"
+            },
+            {
+              "name": "invitation_source",
+              "source_stage": "records",
+              "source_column": "invitation_source"
+            },
+            {
+              "name": "inviter",
+              "source_stage": "records",
+              "source_column": "inviter"
+            },
+            {
+              "name": "invitation_state",
+              "source_stage": "records",
+              "source_column": "invitation_state"
+            }
+          ],
+          "select": [
+            "organization_invitation_population"
+          ],
+          "population": "All advertised pages of current pending organization invitations; not historical accepted or canceled invitations.",
+          "select_values": {
+            "organization_invitation_population": [
+              "pending"
+            ]
+          }
+        },
+        {
+          "name": "teams",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            },
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201,
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "teams",
+                "scope": "selected_identity_team"
+              },
+              {
+                "name": "records",
+                "scope": "selected_team_invitations"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "invitation_id",
+              "source_stage": "records",
+              "source_column": "invitation_id"
+            },
+            {
+              "name": "login",
+              "source_stage": "records",
+              "source_column": "login"
+            },
+            {
+              "name": "email",
+              "source_stage": "records",
+              "source_column": "email"
+            },
+            {
+              "name": "role",
+              "source_stage": "records",
+              "source_column": "role"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "failed_at",
+              "source_stage": "records",
+              "source_column": "failed_at"
+            },
+            {
+              "name": "failed_reason",
+              "source_stage": "records",
+              "source_column": "failed_reason"
+            },
+            {
+              "name": "team_count",
+              "source_stage": "records",
+              "source_column": "team_count"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "invitation_teams_url",
+              "source_stage": "records",
+              "source_column": "invitation_teams_url"
+            },
+            {
+              "name": "invitation_source",
+              "source_stage": "records",
+              "source_column": "invitation_source"
+            },
+            {
+              "name": "inviter",
+              "source_stage": "records",
+              "source_column": "inviter"
+            },
+            {
+              "name": "invitation_state",
+              "source_stage": "records",
+              "source_column": "invitation_state"
+            }
+          ],
+          "select": [
+            "team_numeric_id",
+            "organization"
+          ],
+          "population": "All advertised pages of pending invitations associated with the exact selected team; not all organization invitations."
+        }
+      ]
+    },
+    {
+      "name": "team_repository_access",
+      "description": "Visible effective team/repository access relationships. Inherited access can be included by GitHub. Optional permission flags or role_name remain unknown when omitted; selected exact access objects fail on unconfirmed or inaccessible repositories.",
+      "grain": [
+        "team_id",
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "team_id",
+          "team_slug",
+          "organization_id",
+          "organization_login",
+          "repository_id",
+          "repository",
+          "permissions",
+          "role_name"
+        ],
+        "dimensions": [
+          "team_id",
+          "team_slug",
+          "organization_id",
+          "organization_login",
+          "repository_id",
+          "repository",
+          "role_name"
+        ],
+        "sql_names": {
+          "team_id": "team_repository_access_team_id",
+          "team_slug": "team_repository_access_team_slug",
+          "organization_id": "team_repository_access_organization_id",
+          "organization_login": "team_repository_access_organization_login",
+          "repository_id": "team_repository_access_repository_id",
+          "repository": "team_repository_access_repository",
+          "role_name": "team_repository_access_role_name"
+        },
+        "metrics": [
+          {
+            "name": "team_repository_access_count",
+            "kind": "count",
+            "comment": "Selected team_repository_access rows at their declared qualified grain."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            },
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201,
+              "default": null
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "team_repository_permission",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "description": "Select an exact typed team/repository permission object using the pinned repository media representation.",
+              "enum": [
+                true
+              ],
+              "example": true
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "teams",
+                "scope": "selected_identity_team"
+              },
+              {
+                "name": "records",
+                "scope": "selected_team_repository_permission"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "permissions",
+              "source_stage": "records",
+              "source_column": "permissions"
+            },
+            {
+              "name": "role_name",
+              "source_stage": "records",
+              "source_column": "role_name"
+            }
+          ],
+          "select": [
+            "team_repository_permission"
+          ],
+          "population": "One repository with team access established by the pinned repository media response; exact404 fails."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "discovery",
+                "entity": "team_repository_reverse_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "teams",
+                "entity": "team_identity_numeric_source",
+                "arguments": {
+                  "team_numeric_id": {
+                    "stage": "discovery",
+                    "column": "team_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "teams"
+          },
+          "columns": [
+            {
+              "name": "team_id",
+              "source_stage": "teams",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "teams",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "teams",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "teams",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "permissions",
+              "source_stage": "discovery",
+              "source_column": "permissions"
+            },
+            {
+              "name": "role_name",
+              "source_stage": "discovery",
+              "source_column": "role_name"
+            }
+          ],
+          "select": [
+            "repository"
+          ],
+          "population": "All advertised pages of visible teams with access to one repository; each team hydrates its canonical identity."
+        },
+        {
+          "name": "teams",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            },
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201,
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "teams",
+                "scope": "selected_identity_team"
+              },
+              {
+                "name": "records",
+                "scope": "selected_team_repository_access"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "permissions",
+              "source_stage": "records",
+              "source_column": "permissions"
+            },
+            {
+              "name": "role_name",
+              "source_stage": "records",
+              "source_column": "role_name"
+            }
+          ],
+          "select": [
+            "team_numeric_id",
+            "organization"
+          ],
+          "population": "All advertised pages of repositories accessible to the selected team, including inherited access when returned."
+        }
+      ]
+    },
+    {
+      "name": "team_membership_checks",
+      "description": "Explicit status observations at the requested team/member or team/repository grain; exact scope is retained and authorization failures other than the declared404 fail.",
+      "grain": [
+        "team_id",
+        "user_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "team_id",
+          "team_slug",
+          "organization_id",
+          "organization_login",
+          "user_id",
+          "team_member_login",
+          "status_code"
+        ],
+        "dimensions": [
+          "team_id",
+          "team_slug",
+          "organization_id",
+          "organization_login",
+          "user_id",
+          "team_member_login",
+          "status_code"
+        ],
+        "sql_names": {
+          "team_id": "team_membership_checks_team_id",
+          "team_slug": "team_membership_checks_team_slug",
+          "organization_id": "team_membership_checks_organization_id",
+          "organization_login": "team_membership_checks_organization_login",
+          "user_id": "team_membership_checks_user_id",
+          "team_member_login": "team_membership_checks_team_member_login",
+          "status_code": "team_membership_checks_status_code"
+        },
+        "metrics": [
+          {
+            "name": "team_membership_check_count",
+            "kind": "count",
+            "comment": "Selected team_membership_checks rows at their declared qualified grain."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "confirmed_team_membership_check_count": {
+              "expression": "COUNT(*) FILTER (WHERE team_membership_checks.status_code = 204)",
+              "type": "BIGINT"
+            },
+            "unconfirmed_team_membership_check_count": {
+              "expression": "COUNT(*) FILTER (WHERE team_membership_checks.status_code = 404)",
+              "type": "BIGINT"
+            }
+          },
+          "metric_semantics": {
+            "confirmed_team_membership_check_count": {
+              "dataset": "team_membership_checks",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Selected status observations; unconfirmed visibility does not establish absence of private access."
+            },
+            "unconfirmed_team_membership_check_count": {
+              "dataset": "team_membership_checks",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Selected status observations; unconfirmed visibility does not establish absence of private access."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            },
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201,
+              "default": null
+            },
+            {
+              "name": "team_member_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Account login for an exact team membership or membership-check observation.",
+              "min_length": 1,
+              "example": "membership-alice"
+            },
+            {
+              "name": "team_membership_check",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "description": "Select the pinned legacy 204/404 membership observation, rather than a membership-object record.",
+              "enum": [
+                true
+              ],
+              "example": true
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "teams",
+                "scope": "selected_identity_team"
+              },
+              {
+                "name": "members",
+                "entity": "team_member_identity_context_source",
+                "arguments": {
+                  "selected_team_id": {
+                    "stage": "teams",
+                    "column": "team_id"
+                  },
+                  "selected_team_slug": {
+                    "stage": "teams",
+                    "column": "team_slug"
+                  },
+                  "selected_team_organization_id": {
+                    "stage": "teams",
+                    "column": "organization_id"
+                  },
+                  "selected_team_organization_login": {
+                    "stage": "teams",
+                    "column": "organization_login"
+                  },
+                  "team_member_user": {
+                    "parameter": "team_member_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "team_membership_check_source",
+                "arguments": {
+                  "selected_team_id": {
+                    "stage": "members",
+                    "column": "team_id"
+                  },
+                  "selected_team_slug": {
+                    "stage": "members",
+                    "column": "team_slug"
+                  },
+                  "selected_team_organization_id": {
+                    "stage": "members",
+                    "column": "organization_id"
+                  },
+                  "selected_team_organization_login": {
+                    "stage": "members",
+                    "column": "organization_login"
+                  },
+                  "selected_team_user_id": {
+                    "stage": "members",
+                    "column": "user_id"
+                  },
+                  "selected_team_user_login": {
+                    "stage": "members",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "team_member_login",
+              "source_stage": "records",
+              "source_column": "team_member_login"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "select": [
+            "team_membership_check"
+          ],
+          "population": "One legacy active-membership status observation, preserving204/404; not an active or pending membership object."
+        }
+      ]
+    },
+    {
+      "name": "team_repository_permission_checks",
+      "description": "Explicit status observations at the requested team/member or team/repository grain; exact scope is retained and authorization failures other than the declared404 fail.",
+      "grain": [
+        "team_id",
+        "repository"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "team_id",
+          "team_slug",
+          "organization_id",
+          "organization_login",
+          "repository",
+          "status_code"
+        ],
+        "dimensions": [
+          "team_id",
+          "team_slug",
+          "organization_id",
+          "organization_login",
+          "repository",
+          "status_code"
+        ],
+        "sql_names": {
+          "team_id": "team_repository_permission_checks_team_id",
+          "team_slug": "team_repository_permission_checks_team_slug",
+          "organization_id": "team_repository_permission_checks_organization_id",
+          "organization_login": "team_repository_permission_checks_organization_login",
+          "repository": "team_repository_permission_checks_repository",
+          "status_code": "team_repository_permission_checks_status_code"
+        },
+        "metrics": [
+          {
+            "name": "team_repository_permission_check_count",
+            "kind": "count",
+            "comment": "Selected team_repository_permission_checks rows at their declared qualified grain."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "confirmed_team_repository_permission_check_count": {
+              "expression": "COUNT(*) FILTER (WHERE team_repository_permission_checks.status_code = 204)",
+              "type": "BIGINT"
+            },
+            "unconfirmed_team_repository_permission_check_count": {
+              "expression": "COUNT(*) FILTER (WHERE team_repository_permission_checks.status_code = 404)",
+              "type": "BIGINT"
+            }
+          },
+          "metric_semantics": {
+            "confirmed_team_repository_permission_check_count": {
+              "dataset": "team_repository_permission_checks",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Selected status observations; unconfirmed visibility does not establish absence of private access."
+            },
+            "unconfirmed_team_repository_permission_check_count": {
+              "dataset": "team_repository_permission_checks",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Selected status observations; unconfirmed visibility does not establish absence of private access."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            },
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201,
+              "default": null
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "team_repository_check",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "description": "Select a team/repository visibility check: 404 is unconfirmed access and can reflect insufficient caller permission.",
+              "enum": [
+                true
+              ],
+              "example": true
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "teams",
+                "scope": "selected_identity_team"
+              },
+              {
+                "name": "records",
+                "scope": "selected_team_repository_check"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "select": [
+            "team_repository_check"
+          ],
+          "population": "One team/repository visibility check.404 may reflect caller access and does not prove absence of a team permission relationship."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "organization_invitations_to_organizations",
+      "from": "organization_invitations",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "team_repository_access_to_teams",
+      "from": "team_repository_access",
+      "to": "teams",
+      "from_columns": [
+        "team_id"
+      ],
+      "to_columns": [
+        "team_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "numeric_identity",
+          "bindings": {
+            "team_numeric_id": "team_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "teams",
+          "bindings": {
+            "team_numeric_id": "team_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "team_repository_access_to_repositories",
+      "from": "team_repository_access",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "team_checks_to_teams",
+      "from": "team_membership_checks",
+      "to": "teams",
+      "from_columns": [
+        "team_id"
+      ],
+      "to_columns": [
+        "team_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "numeric_identity",
+          "bindings": {
+            "team_numeric_id": "team_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "team_checks_to_members",
+      "from": "team_membership_checks",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "team_member_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "team_repository_checks_to_teams",
+      "from": "team_repository_permission_checks",
+      "to": "teams",
+      "from_columns": [
+        "team_id"
+      ],
+      "to_columns": [
+        "team_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "numeric_identity",
+          "bindings": {
+            "team_numeric_id": "team_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "teams_to_parent_team",
+      "from": "teams",
+      "to": "teams",
+      "from_columns": [
+        "parent_team_id"
+      ],
+      "to_columns": [
+        "team_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "numeric_identity",
+          "bindings": {
+            "team_numeric_id": "parent_team_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "children_numeric",
+          "bindings": {
+            "parent_team_numeric_id": "team_id"
+          }
+        }
+      ]
+    }
+  ],
+  "scopes": {
+    "selected_identity_team": {
+      "exclusive_parameters": [
+        "organization",
+        "team_numeric_id"
+      ],
+      "requires_parameters": {
+        "organization": [
+          "team_slug"
+        ],
+        "team_slug": [
+          "organization"
+        ]
+      },
+      "comment": "Choose one organization/slug pair or stable numeric team ID.",
+      "select": {
+        "parameter": "team_numeric_id",
+        "if_present": {
+          "entity": "team_identity_numeric_source",
+          "arguments": {
+            "team_numeric_id": {
+              "parameter": "team_numeric_id"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "team_identity_named_context_source",
+          "arguments": {
+            "organization": {
+              "parameter": "organization"
+            },
+            "team_slug": {
+              "parameter": "team_slug"
+            }
+          }
+        }
+      }
+    },
+    "selected_team_membership_object": {
+      "comment": "Use the caller-selected numeric or organization/slug membership-object route.",
+      "select": {
+        "parameter": "team_numeric_id",
+        "if_present": {
+          "entity": "team_membership_numeric_object_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "members",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "members",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "members",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "members",
+              "column": "organization_login"
+            },
+            "selected_team_user_id": {
+              "stage": "members",
+              "column": "user_id"
+            },
+            "selected_team_user_login": {
+              "stage": "members",
+              "column": "user_login"
+            },
+            "unknown_membership_inherited": {
+              "literal": null
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "team_membership_named_object_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "members",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "members",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "members",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "members",
+              "column": "organization_login"
+            },
+            "selected_team_user_id": {
+              "stage": "members",
+              "column": "user_id"
+            },
+            "selected_team_user_login": {
+              "stage": "members",
+              "column": "user_login"
+            },
+            "unknown_membership_inherited": {
+              "literal": null
+            }
+          }
+        }
+      }
+    },
+    "selected_team_invitations": {
+      "comment": "Preserve the selected team retrieval addressing without changing business grain.",
+      "select": {
+        "parameter": "team_numeric_id",
+        "if_present": {
+          "entity": "team_invitations_numeric_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "teams",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "teams",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "teams",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "teams",
+              "column": "organization_login"
+            },
+            "selected_invitation_state": {
+              "literal": "pending"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "team_invitations_named_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "teams",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "teams",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "teams",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "teams",
+              "column": "organization_login"
+            },
+            "selected_invitation_state": {
+              "literal": "pending"
+            }
+          }
+        }
+      }
+    },
+    "selected_team_repository_access": {
+      "comment": "Preserve the selected team retrieval addressing without changing business grain.",
+      "select": {
+        "parameter": "team_numeric_id",
+        "if_present": {
+          "entity": "team_repository_access_numeric_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "teams",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "teams",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "teams",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "teams",
+              "column": "organization_login"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "team_repository_access_named_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "teams",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "teams",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "teams",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "teams",
+              "column": "organization_login"
+            }
+          }
+        }
+      }
+    },
+    "selected_team_repository_permission": {
+      "comment": "Preserve the selected team retrieval addressing without changing business grain.",
+      "select": {
+        "parameter": "team_numeric_id",
+        "if_present": {
+          "entity": "team_repository_permission_numeric_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "teams",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "teams",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "teams",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "teams",
+              "column": "organization_login"
+            },
+            "repository": {
+              "parameter": "repository"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "team_repository_permission_named_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "teams",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "teams",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "teams",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "teams",
+              "column": "organization_login"
+            },
+            "repository": {
+              "parameter": "repository"
+            }
+          }
+        }
+      }
+    },
+    "selected_team_repository_check": {
+      "comment": "Preserve the selected team retrieval addressing without changing business grain.",
+      "select": {
+        "parameter": "team_numeric_id",
+        "if_present": {
+          "entity": "team_repository_check_numeric_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "teams",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "teams",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "teams",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "teams",
+              "column": "organization_login"
+            },
+            "repository": {
+              "parameter": "repository"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "team_repository_check_named_source",
+          "arguments": {
+            "selected_team_id": {
+              "stage": "teams",
+              "column": "team_id"
+            },
+            "selected_team_slug": {
+              "stage": "teams",
+              "column": "team_slug"
+            },
+            "selected_team_organization_id": {
+              "stage": "teams",
+              "column": "organization_id"
+            },
+            "selected_team_organization_login": {
+              "stage": "teams",
+              "column": "organization_login"
+            },
+            "repository": {
+              "parameter": "repository"
+            }
+          }
+        }
+      }
+    }
+  }
+}

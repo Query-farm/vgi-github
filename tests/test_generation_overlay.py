@@ -124,14 +124,13 @@ def test_pilot_domains_keep_public_identity_and_cross_domain_bindings():
     validate_semantics(contract, overlay)
     assert overlay["model"]["name"] == "github"
     assert overlay["model"]["id"] == "queryfarm.github.generated_pilot"
-    assert len(contract["entities"]) == 19
-    assert len(contract["functions"]) == 15
-    assert len(contract["relationships"]) == 13
+    assert len(contract["entities"]) == 472
+    assert len(contract["functions"]) == 206
+    assert len(contract["relationships"]) == 298
     assert any(
-        relation["from"] == "authored_issues" and relation["to"] == "users"
-        for relation in contract["relationships"]
+        relation["from"] == "issues" and relation["to"] == "users" for relation in contract["relationships"]
     )
-    assert "authored_issues.user_id" in contract["shared_dimensions"]["github.user.id.v1"]
+    assert "issues.author_id" in contract["shared_dimensions"]["github.user.id.v1"]
 
 
 @pytest.fixture

@@ -1,0 +1,1239 @@
+{
+  "entities": [
+    {
+      "name": "repository_code_frequency_source",
+      "description": "repos/get-code-frequency-stats pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "week_epoch",
+          "source_index": 0
+        },
+        {
+          "name": "additions",
+          "source_index": 1
+        },
+        {
+          "name": "deletions",
+          "source_index": 2
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "week_epoch"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-code-frequency-stats",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "none"
+        },
+        "item_length": 3,
+        "empty_response_statuses": [
+          "204"
+        ]
+      }
+    },
+    {
+      "name": "repository_commit_activity_source",
+      "description": "repos/get-commit-activity-stats pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "week_epoch",
+          "path": [
+            "week"
+          ]
+        },
+        {
+          "name": "commit_count",
+          "path": [
+            "total"
+          ]
+        },
+        {
+          "name": "daily_commits",
+          "path": [
+            "days"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "week_epoch"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-commit-activity-stats",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "none"
+        },
+        "empty_response_statuses": [
+          "204"
+        ]
+      }
+    },
+    {
+      "name": "repository_contributor_statistics_source",
+      "description": "repos/get-contributors-stats pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "response_position",
+          "source_ordinal": true
+        },
+        {
+          "name": "author_id",
+          "path": [
+            "author",
+            "id"
+          ]
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "author",
+            "login"
+          ]
+        },
+        {
+          "name": "author_type",
+          "path": [
+            "author",
+            "type"
+          ]
+        },
+        {
+          "name": "author",
+          "path": [
+            "author"
+          ]
+        },
+        {
+          "name": "total_commits",
+          "path": [
+            "total"
+          ]
+        },
+        {
+          "name": "weeks",
+          "path": [
+            "weeks"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "response_position"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-contributors-stats",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "none"
+        },
+        "empty_response_statuses": [
+          "204"
+        ]
+      }
+    },
+    {
+      "name": "repository_participation_statistics_source",
+      "description": "repos/get-participation-stats pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "all_commits",
+          "path": [
+            "all"
+          ]
+        },
+        {
+          "name": "owner_commits",
+          "path": [
+            "owner"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-participation-stats",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "repository_commit_punch_card_source",
+      "description": "repos/get-punch-card-stats pinned typed repository observation source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "day_of_week",
+          "source_index": 0
+        },
+        {
+          "name": "hour_of_day",
+          "source_index": 1
+        },
+        {
+          "name": "commit_count",
+          "source_index": 2
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "day_of_week",
+        "hour_of_day"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-punch-card-stats",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "none"
+        },
+        "item_length": 3,
+        "empty_response_statuses": [
+          "204"
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "repository_code_frequency",
+      "description": "Weekly upstream additions/deletions tuples. The signed deletion value is preserved as reported. Available only for repositories with fewer than 10,000 commits; 422 fails. A 202 pending computation fails rather than becoming an empty population; explicit bodyless 204 is empty. Week values remain Unix seconds without an invented calendar conversion.",
+      "grain": [
+        "repository_id",
+        "week_epoch"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "week_epoch",
+              "source_stage": "records",
+              "source_column": "week_epoch"
+            },
+            {
+              "name": "additions",
+              "source_stage": "records",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "records",
+              "source_column": "deletions"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_code_frequency_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Weekly upstream additions/deletions tuples. The signed deletion value is preserved as reported. Available only for repositories with fewer than 10,000 commits; 422 fails. A 202 pending computation fails rather than becoming an empty population; explicit bodyless 204 is empty. Week values remain Unix seconds without an invented calendar conversion."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "week_epoch",
+          "additions",
+          "deletions"
+        ],
+        "dimensions": [
+          "repository",
+          "week_epoch"
+        ],
+        "sql_names": {
+          "repository": "repository_code_frequency_repository",
+          "week_epoch": "repository_code_frequency_week_epoch"
+        },
+        "metrics": [
+          {
+            "name": "repository_code_frequency_week_count",
+            "kind": "count",
+            "comment": "Returned repository code frequency observations; not an independent count of Git commits or users."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_code_frequency_additions": {
+              "expression": "COALESCE(SUM(repository_code_frequency.additions), 0)"
+            },
+            "repository_code_frequency_signed_deletions": {
+              "expression": "COALESCE(SUM(repository_code_frequency.deletions), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_code_frequency_additions": {
+              "dataset": "repository_code_frequency",
+              "additivity": "additive",
+              "comment": "Reported additions in distinct selected weekly tuples.",
+              "missing": "zero"
+            },
+            "repository_code_frequency_signed_deletions": {
+              "dataset": "repository_code_frequency",
+              "additivity": "additive",
+              "comment": "Signed upstream deletion values, with no sign inversion.",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "repository_commit_activity",
+      "description": "Last-year weekly commit activity from GitHub statistics. Each typed daily_commits array retains upstream Sunday-first order. Week is the upstream Unix timestamp. A 202 pending computation fails rather than claiming zero commits; explicit bodyless 204 is empty.",
+      "grain": [
+        "repository_id",
+        "week_epoch"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "week_epoch",
+              "source_stage": "records",
+              "source_column": "week_epoch"
+            },
+            {
+              "name": "commit_count",
+              "source_stage": "records",
+              "source_column": "commit_count"
+            },
+            {
+              "name": "daily_commits",
+              "source_stage": "records",
+              "source_column": "daily_commits"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_commit_activity_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Last-year weekly commit activity from GitHub statistics. Each typed daily_commits array retains upstream Sunday-first order. Week is the upstream Unix timestamp. A 202 pending computation fails rather than claiming zero commits; explicit bodyless 204 is empty."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "week_epoch",
+          "commit_count",
+          "daily_commits"
+        ],
+        "dimensions": [
+          "repository",
+          "week_epoch"
+        ],
+        "sql_names": {
+          "repository": "repository_commit_activity_repository",
+          "week_epoch": "repository_commit_activity_week_epoch"
+        },
+        "metrics": [
+          {
+            "name": "repository_commit_activity_week_count",
+            "kind": "count",
+            "comment": "Returned repository commit activity observations; not an independent count of Git commits or users."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_commit_activity_commit_count": {
+              "expression": "COALESCE(SUM(repository_commit_activity.commit_count), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_commit_activity_commit_count": {
+              "dataset": "repository_commit_activity",
+              "additivity": "additive",
+              "comment": "Upstream commit totals for distinct returned weeks.",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "repository_contributor_statistics",
+      "description": "Contributor statistics snapshot, including nullable/unlinked authors. Grain is repository plus one-based position in this retrieval because the pinned contract permits author=NULL; position is not a durable contributor identity across refreshes. Typed weeks retain w (Unix week), a (additions), d (deletions), c (commits). Repositories with at least 10,000 commits report zero additions/deletions by API policy, which must not be interpreted as observed zero changes. A 202 pending computation fails; explicit bodyless 204 is empty.",
+      "grain": [
+        "repository_id",
+        "response_position"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "response_position",
+              "source_stage": "records",
+              "source_column": "response_position"
+            },
+            {
+              "name": "author_id",
+              "source_stage": "records",
+              "source_column": "author_id"
+            },
+            {
+              "name": "author_login",
+              "source_stage": "records",
+              "source_column": "author_login"
+            },
+            {
+              "name": "author_type",
+              "source_stage": "records",
+              "source_column": "author_type"
+            },
+            {
+              "name": "author",
+              "source_stage": "records",
+              "source_column": "author"
+            },
+            {
+              "name": "total_commits",
+              "source_stage": "records",
+              "source_column": "total_commits"
+            },
+            {
+              "name": "weeks",
+              "source_stage": "records",
+              "source_column": "weeks"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_contributor_statistics_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Contributor statistics snapshot, including nullable/unlinked authors. Grain is repository plus one-based position in this retrieval because the pinned contract permits author=NULL; position is not a durable contributor identity across refreshes. Typed weeks retain w (Unix week), a (additions), d (deletions), c (commits). Repositories with at least 10,000 commits report zero additions/deletions by API policy, which must not be interpreted as observed zero changes. A 202 pending computation fails; explicit bodyless 204 is empty."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "response_position",
+          "author_id",
+          "author_login",
+          "author_type",
+          "author",
+          "total_commits",
+          "weeks"
+        ],
+        "dimensions": [
+          "repository",
+          "author_login"
+        ],
+        "sql_names": {
+          "repository": "repository_contributor_statistics_repository",
+          "author_login": "repository_contributor_statistics_author_login"
+        },
+        "metrics": [
+          {
+            "name": "repository_contributor_statistics_observation_count",
+            "kind": "count",
+            "comment": "Returned repository contributor statistics observations; not an independent count of Git commits or users."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_contributor_statistics_commit_count": {
+              "expression": "COALESCE(SUM(repository_contributor_statistics.total_commits), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_contributor_statistics_commit_count": {
+              "dataset": "repository_contributor_statistics",
+              "additivity": "additive",
+              "comment": "Reported contributor commit totals within the selected repository snapshots; not distinct global commits.",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "repository_participation_statistics",
+      "description": "Current last-52-week participation snapshot. Typed arrays run oldest to most recent week. The latest week spans seven days ago at UTC midnight to today at UTC midnight; no timestamp is invented without a response observation anchor. all_commits includes owner_commits, so the two series must not be added. This is an observation, not a count of participating people.",
+      "grain": [
+        "repository_id"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "all_commits",
+              "source_stage": "records",
+              "source_column": "all_commits"
+            },
+            {
+              "name": "owner_commits",
+              "source_stage": "records",
+              "source_column": "owner_commits"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_participation_statistics_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Current last-52-week participation snapshot. Typed arrays run oldest to most recent week. The latest week spans seven days ago at UTC midnight to today at UTC midnight; no timestamp is invented without a response observation anchor. all_commits includes owner_commits, so the two series must not be added. This is an observation, not a count of participating people."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "all_commits",
+          "owner_commits"
+        ],
+        "dimensions": [
+          "repository"
+        ],
+        "sql_names": {
+          "repository": "repository_participation_statistics_repository"
+        },
+        "metrics": [
+          {
+            "name": "repository_participation_observation_count",
+            "kind": "count",
+            "comment": "Returned repository participation statistics observations; not an independent count of Git commits or users."
+          }
+        ]
+      }
+    },
+    {
+      "name": "repository_commit_punch_card",
+      "description": "Commit frequency grouped by day number (0 Sunday through 6 Saturday) and hour (0 through 23). Times use each individual commit time zone, not one global UTC calendar. Exact three-integer tuples are required. Explicit bodyless 204 is empty.",
+      "grain": [
+        "repository_id",
+        "day_of_week",
+        "hour_of_day"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "day_of_week",
+              "source_stage": "records",
+              "source_column": "day_of_week"
+            },
+            {
+              "name": "hour_of_day",
+              "source_stage": "records",
+              "source_column": "hour_of_day"
+            },
+            {
+              "name": "commit_count",
+              "source_stage": "records",
+              "source_column": "commit_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_commit_punch_card_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Commit frequency grouped by day number (0 Sunday through 6 Saturday) and hour (0 through 23). Times use each individual commit time zone, not one global UTC calendar. Exact three-integer tuples are required. Explicit bodyless 204 is empty."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "day_of_week",
+          "hour_of_day",
+          "commit_count"
+        ],
+        "dimensions": [
+          "repository",
+          "day_of_week",
+          "hour_of_day"
+        ],
+        "sql_names": {
+          "repository": "repository_commit_punch_card_repository",
+          "day_of_week": "repository_commit_punch_card_day_of_week",
+          "hour_of_day": "repository_commit_punch_card_hour_of_day"
+        },
+        "metrics": [
+          {
+            "name": "repository_commit_punch_card_bucket_count",
+            "kind": "count",
+            "comment": "Returned repository commit punch card observations; not an independent count of Git commits or users."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_commit_punch_card_commit_count": {
+              "expression": "COALESCE(SUM(repository_commit_punch_card.commit_count), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_commit_punch_card_commit_count": {
+              "dataset": "repository_commit_punch_card",
+              "additivity": "additive",
+              "comment": "Reported commits summed over disjoint day/hour buckets in the selected repositories.",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "repository_code_frequency_to_repositories",
+      "from": "repository_code_frequency",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_commit_activity_to_repositories",
+      "from": "repository_commit_activity",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_contributor_statistics_to_repositories",
+      "from": "repository_contributor_statistics",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_contributor_statistics_to_users",
+      "from": "repository_contributor_statistics",
+      "to": "users",
+      "from_columns": [
+        "author_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "author_login"
+          },
+          "when": {
+            "author_type": "User"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_participation_statistics_to_repositories",
+      "from": "repository_participation_statistics",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_commit_punch_card_to_repositories",
+      "from": "repository_commit_punch_card",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    }
+  ]
+}

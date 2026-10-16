@@ -1,0 +1,224 @@
+# Independent history/current status populations, comments, rules and bypass observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Two historical build transitions count separately; latest population retains one.
+query IIII
+SELECT commit_statuses_count,commit_statuses_success_count,commit_statuses_failure_count,commit_statuses_pending_count FROM engineering.semantic.github(organization=>'commit-evaluation-fixture',commit_ref=>'main');
+----
+4	1	1	1
+
+query IIII
+SELECT commit_statuses_count,commit_statuses_success_count,commit_statuses_failure_count,commit_statuses_pending_count FROM engineering.semantic.github(organization=>'commit-evaluation-fixture',commit_ref=>'main',commit_status_population=>'latest');
+----
+3	1	1	0
+
+# A commit with no contexts still has a pending aggregate observation.
+query III
+SELECT commit_status_summaries_count,commit_status_summaries_pending_count,commit_status_reported_context_count FROM engineering.semantic.github(organization=>'commit-evaluation-fixture',commit_ref=>'main');
+----
+3	1	3
+
+query II
+SELECT commit_statuses_count,commit_status_summaries_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/empty',commit_ref=>'main');
+----
+0	1
+
+query IIT
+SELECT repository_id,status_id,state FROM engineering.detail.commit_statuses(organization=>'commit-evaluation-fixture',commit_ref=>'main',commit_status_population=>'latest') ORDER BY status_id;
+----
+81001	82002	failure
+81001	82003	success
+81002	82004	future-state
+
+statement ok
+CREATE TEMP TABLE latest_status_rows AS SELECT * FROM engineering.detail.commit_statuses(repository=>'commit-evaluation-fixture/alpha',commit_ref=>'main',commit_status_population=>'latest');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIII
+SELECT count(*),count(created_at),count(created_at_raw),count(creator_id) FROM latest_status_rows;
+----
+2	2	0	0
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE history_status_rows AS SELECT * FROM engineering.detail.commit_statuses(repository=>'commit-evaluation-fixture/alpha',commit_ref=>'main');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIII
+SELECT count(*),count(created_at),count(created_at_raw),count(creator_id) FROM history_status_rows;
+----
+3	0	3	2
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT commit_comment_count FROM engineering.semantic.github(organization=>'commit-evaluation-fixture');
+----
+3
+
+query I
+SELECT commit_comment_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha',commit_comment_sha=>'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+----
+2
+
+query IIT
+SELECT comment_id,author_id,path FROM engineering.detail.commit_comments(repository=>'commit-evaluation-fixture/alpha') ORDER BY comment_id;
+----
+83001	88101	src/main.py
+83002	NULL	src/main.py
+
+query I
+SELECT commit_comment_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha',commit_comment_id=>83002);
+----
+1
+
+query IIIII
+SELECT rule_suite_count,rule_suite_pass_count,rule_suite_fail_count,rule_suite_bypass_count,rule_evaluation_count FROM engineering.semantic.github(organization=>'commit-evaluation-fixture');
+----
+3	1	1	1	3
+
+query II
+SELECT rule_suite_count,rule_evaluation_count FROM engineering.semantic.github(repositories=>[{'repository':'commit-evaluation-fixture/alpha'},{'repository':'commit-evaluation-fixture/beta'},{'repository':'commit-evaluation-fixture/empty'}]);
+----
+3	3
+
+query III
+SELECT rule_suite_count,rule_suite_fail_count,rule_evaluation_count FROM engineering.semantic.github(organization=>'commit-evaluation-fixture',rule_suite_id=>84002);
+----
+1	1	1
+
+query III
+SELECT rule_suite_count,rule_suite_pass_count,rule_evaluation_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha',rule_suite_id=>84001);
+----
+1	1	2
+
+query II
+SELECT rule_suite_count,rule_suite_bypass_count FROM engineering.semantic.github(organization=>'commit-evaluation-fixture',rule_evaluation_repository=>'beta');
+----
+1	1
+
+query IIT
+SELECT rule_suite_id,actor_id,evaluation_result FROM engineering.detail.rule_suites(organization=>'commit-evaluation-fixture') ORDER BY rule_suite_id;
+----
+84001	88101	NULL
+84002	NULL	NULL
+84003	88101	NULL
+
+query IIIII
+SELECT push_bypass_request_count,push_bypass_approved_count,push_bypass_pending_count,push_bypass_denied_count,push_bypass_response_count FROM engineering.semantic.github(organization=>'commit-evaluation-fixture');
+----
+3	1	1	1	3
+
+query III
+SELECT push_bypass_request_count,push_bypass_approved_count,push_bypass_response_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha',bypass_request_number=>1);
+----
+1	1	2
+
+query II
+SELECT push_bypass_request_count,push_bypass_denied_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/beta',bypass_request_status=>'denied');
+----
+1	1
+
+statement ok
+CREATE TEMP TABLE bypass_detail_rows AS SELECT * FROM engineering.detail.push_bypass_requests(repository=>'commit-evaluation-fixture/alpha',bypass_request_number=>1);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIII
+SELECT requester_id,responses[1].reviewer.actor_id,length(responses),data[1].total_violations FROM bypass_detail_rows;
+----
+88101	88102	2	2
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT rule_suite_count,push_bypass_request_count,commit_comment_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT commit_statuses_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha');
+----
+commit_ref
+
+statement error
+SELECT commit_statuses_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha',commit_ref=>'main',commit_status_population=>'recent');
+----
+commit_status_population
+
+statement error
+SELECT rule_suite_count FROM engineering.semantic.github(rule_suite_id=>84001);
+----
+<REGEX>:(?s).*(repository|Specify exactly one).*
+
+statement error
+SELECT rule_suite_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha',organization=>'commit-evaluation-fixture',rule_suite_id=>84001);
+----
+<REGEX>:(?s).*(repository|organization|arguments do not apply).*
+
+statement error
+SELECT rule_suite_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha',rule_evaluation_time_period=>'year');
+----
+rule_evaluation_time_period
+
+statement error
+SELECT push_bypass_request_count FROM engineering.semantic.github(repository=>'commit-evaluation-fixture/alpha',bypass_request_number=>1,bypass_request_status=>'approved');
+----
+<REGEX>:(?s).*(bypass_request_status|arguments do not apply).*
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

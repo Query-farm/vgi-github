@@ -1,0 +1,159 @@
+# Copilot Spaces business identities, owner traversal and actor-qualified memberships.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIII
+SELECT copilot_space_count,copilot_inline_resource_count,copilot_space_resource_count,copilot_space_collaborator_count FROM engineering.semantic.github(organization=>'copilot-space-fixture');
+----
+2	2	2	2
+
+query IIII
+SELECT copilot_space_count,copilot_inline_resource_count,copilot_space_resource_count,copilot_space_collaborator_count FROM engineering.semantic.github(user=>'copilot-space-alice');
+----
+1	1	1	1
+
+query TIII
+SELECT copilot_spaces_name,copilot_space_count,copilot_space_resource_count,copilot_space_collaborator_count FROM engineering.semantic.github(organization=>'copilot-space-fixture') GROUP BY copilot_spaces_name ORDER BY copilot_spaces_name;
+----
+Empty	1	0	0
+Engineering	1	2	2
+
+query IIT
+SELECT space_id,space_number,space_owner_kind FROM engineering.detail.copilot_spaces(user=>'copilot-space-alice',copilot_space_number=>1);
+----
+61003	1	user
+
+statement ok
+CREATE TEMP TABLE copilot_spaces_shape_1 AS SELECT * FROM engineering.detail.copilot_spaces(organization=>'copilot-space-fixture',copilot_space_number=>1);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query III
+SELECT space_id,owner.variant_1.id,owner.variant_2.id FROM copilot_spaces_shape_1;
+----
+61001	61000	61000
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE copilot_spaces_shape_2 AS SELECT * FROM engineering.detail.copilot_spaces(organization=>'copilot-space-fixture',copilot_space_number=>1);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IT
+SELECT resources_attributes[1].metadata.repository_id,resources_attributes[2].metadata.text FROM copilot_spaces_shape_2;
+----
+64001	Independent fixture text
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT copilot_space_resource_count,copilot_repository_resource_count,copilot_text_resource_count FROM engineering.semantic.github(organization=>'copilot-space-fixture');
+----
+2	1	1
+
+query III
+SELECT copilot_space_resource_count,copilot_repository_resource_count,copilot_text_resource_count FROM engineering.semantic.github(organization=>'copilot-space-fixture',copilot_space_number=>1,copilot_space_resource_id=>63001);
+----
+1	1	0
+
+query IIT
+SELECT space_id,resource_id,resource_type FROM engineering.detail.copilot_space_resources(user=>'copilot-space-alice',copilot_space_number=>1,copilot_space_resource_id=>63003);
+----
+61003	63003	github_file
+
+query III
+SELECT copilot_space_collaborator_count,copilot_user_collaborator_count,copilot_team_collaborator_count FROM engineering.semantic.github(organization=>'copilot-space-fixture');
+----
+2	1	1
+
+query TIT
+SELECT actor_type,collaborator_id,role FROM engineering.detail.copilot_space_collaborators(organization=>'copilot-space-fixture',copilot_space_number=>1) ORDER BY actor_type;
+----
+Team	68101	reader
+User	68101	writer
+
+query TIT
+SELECT actor_type,collaborator_id,role FROM engineering.detail.copilot_space_collaborators(user=>'copilot-space-alice',copilot_space_number=>1);
+----
+User	68102	admin
+
+query III
+SELECT copilot_space_count,copilot_space_resource_count,copilot_space_collaborator_count FROM engineering.semantic.github(organization=>'copilot-space-fixture',copilot_space_number=>2);
+----
+1	0	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT copilot_space_count FROM engineering.semantic.github();
+----
+<REGEX>:(?s).*(organization|user|select a retrieval population).*
+
+statement error
+SELECT copilot_space_count FROM engineering.semantic.github(organization=>'copilot-space-fixture',user=>'copilot-space-alice');
+----
+<REGEX>:(?s).*(organization|user|Specify exactly one).*
+
+statement error
+SELECT copilot_space_count FROM engineering.semantic.github(copilot_space_number=>1);
+----
+<REGEX>:(?s).*(organization|user|Specify exactly one).*
+
+statement error
+SELECT copilot_space_resource_count FROM engineering.semantic.github(organization=>'copilot-space-fixture',copilot_space_resource_id=>63001);
+----
+copilot_space_number
+
+statement error
+SELECT copilot_space_collaborator_count FROM engineering.semantic.github(user=>'copilot-space-alice',copilot_space_number=>0);
+----
+copilot_space_number
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

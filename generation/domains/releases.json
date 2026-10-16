@@ -1,0 +1,3473 @@
+{
+  "entities": [
+    {
+      "name": "releases_source",
+      "description": "repos/list-releases schema-derived metadata source. Whole binary content is not fetched.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "release_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "release_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "tag_name",
+          "path": [
+            "tag_name"
+          ]
+        },
+        {
+          "name": "target_commitish",
+          "path": [
+            "target_commitish"
+          ],
+          "description": "Target branch or commitish reported by GitHub; not necessarily a resolved commit SHA."
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "draft",
+          "path": [
+            "draft"
+          ]
+        },
+        {
+          "name": "prerelease",
+          "path": [
+            "prerelease"
+          ]
+        },
+        {
+          "name": "immutable",
+          "path": [
+            "immutable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ],
+          "description": "GitHub release created_at instant; for release ordering GitHub associates this with the target commit, so it is not a publication instant."
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ],
+          "description": "Publication instant; NULL for unpublished drafts."
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "tarball_url",
+          "path": [
+            "tarball_url"
+          ]
+        },
+        {
+          "name": "zipball_url",
+          "path": [
+            "zipball_url"
+          ]
+        },
+        {
+          "name": "discussion_url",
+          "path": [
+            "discussion_url"
+          ]
+        },
+        {
+          "name": "publisher_id",
+          "path": [
+            "author",
+            "id"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "publisher_login",
+          "path": [
+            "author",
+            "login"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "publisher_type",
+          "path": [
+            "author",
+            "type"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ],
+          "description": "GitHub API URL for this release."
+        },
+        {
+          "name": "assets_url",
+          "path": [
+            "assets_url"
+          ],
+          "description": "API endpoint for the complete paginated asset population; embedded assets are not treated as complete."
+        },
+        {
+          "name": "upload_url",
+          "path": [
+            "upload_url"
+          ],
+          "description": "Upload URI template reported by GitHub; observational metadata only."
+        },
+        {
+          "name": "body_html",
+          "path": [
+            "body_html"
+          ],
+          "description": "Rendered HTML release notes when returned by the selected media representation; otherwise NULL."
+        },
+        {
+          "name": "body_text",
+          "path": [
+            "body_text"
+          ],
+          "description": "Plain-text release notes when returned by the selected media representation; otherwise NULL."
+        },
+        {
+          "name": "mentions_count",
+          "path": [
+            "mentions_count"
+          ],
+          "description": "Current mention counter when reported; missing is NULL, not zero."
+        },
+        {
+          "name": "publisher",
+          "path": [
+            "author"
+          ],
+          "description": "Typed publisher account snapshot from this release response, distinct from each asset uploader."
+        },
+        {
+          "name": "reaction_summary",
+          "path": [
+            "reactions"
+          ],
+          "description": "Typed current reaction rollup when reported, including each reaction kind; missing is NULL."
+        },
+        {
+          "name": "reaction_total_count",
+          "path": [
+            "reactions",
+            "total_count"
+          ],
+          "description": "Current reaction counter when reported; not a count of reactions created during the release publication period."
+        }
+      ],
+      "grain": [
+        "repository",
+        "release_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-releases",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "release_lookup",
+      "description": "repos/get-release schema-derived metadata source. Whole binary content is not fetched.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "release_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "release_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "release_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "tag_name",
+          "path": [
+            "tag_name"
+          ]
+        },
+        {
+          "name": "target_commitish",
+          "path": [
+            "target_commitish"
+          ],
+          "description": "Target branch or commitish reported by GitHub; not necessarily a resolved commit SHA."
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "draft",
+          "path": [
+            "draft"
+          ]
+        },
+        {
+          "name": "prerelease",
+          "path": [
+            "prerelease"
+          ]
+        },
+        {
+          "name": "immutable",
+          "path": [
+            "immutable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ],
+          "description": "GitHub release created_at instant; for release ordering GitHub associates this with the target commit, so it is not a publication instant."
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ],
+          "description": "Publication instant; NULL for unpublished drafts."
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "tarball_url",
+          "path": [
+            "tarball_url"
+          ]
+        },
+        {
+          "name": "zipball_url",
+          "path": [
+            "zipball_url"
+          ]
+        },
+        {
+          "name": "discussion_url",
+          "path": [
+            "discussion_url"
+          ]
+        },
+        {
+          "name": "publisher_id",
+          "path": [
+            "author",
+            "id"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "publisher_login",
+          "path": [
+            "author",
+            "login"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "publisher_type",
+          "path": [
+            "author",
+            "type"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ],
+          "description": "GitHub API URL for this release."
+        },
+        {
+          "name": "assets_url",
+          "path": [
+            "assets_url"
+          ],
+          "description": "API endpoint for the complete paginated asset population; embedded assets are not treated as complete."
+        },
+        {
+          "name": "upload_url",
+          "path": [
+            "upload_url"
+          ],
+          "description": "Upload URI template reported by GitHub; observational metadata only."
+        },
+        {
+          "name": "body_html",
+          "path": [
+            "body_html"
+          ],
+          "description": "Rendered HTML release notes when returned by the selected media representation; otherwise NULL."
+        },
+        {
+          "name": "body_text",
+          "path": [
+            "body_text"
+          ],
+          "description": "Plain-text release notes when returned by the selected media representation; otherwise NULL."
+        },
+        {
+          "name": "mentions_count",
+          "path": [
+            "mentions_count"
+          ],
+          "description": "Current mention counter when reported; missing is NULL, not zero."
+        },
+        {
+          "name": "publisher",
+          "path": [
+            "author"
+          ],
+          "description": "Typed publisher account snapshot from this release response, distinct from each asset uploader."
+        },
+        {
+          "name": "reaction_summary",
+          "path": [
+            "reactions"
+          ],
+          "description": "Typed current reaction rollup when reported, including each reaction kind; missing is NULL."
+        },
+        {
+          "name": "reaction_total_count",
+          "path": [
+            "reactions",
+            "total_count"
+          ],
+          "description": "Current reaction counter when reported; not a count of reactions created during the release publication period."
+        }
+      ],
+      "grain": [
+        "repository",
+        "release_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-release",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "release_id": {
+            "argument": "release_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "release_id",
+            "argument": "release_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "latest_release_lookup",
+      "description": "repos/get-latest-release schema-derived metadata source. Whole binary content is not fetched.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "release_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "release_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "tag_name",
+          "path": [
+            "tag_name"
+          ]
+        },
+        {
+          "name": "target_commitish",
+          "path": [
+            "target_commitish"
+          ],
+          "description": "Target branch or commitish reported by GitHub; not necessarily a resolved commit SHA."
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "draft",
+          "path": [
+            "draft"
+          ]
+        },
+        {
+          "name": "prerelease",
+          "path": [
+            "prerelease"
+          ]
+        },
+        {
+          "name": "immutable",
+          "path": [
+            "immutable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ],
+          "description": "GitHub release created_at instant; for release ordering GitHub associates this with the target commit, so it is not a publication instant."
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ],
+          "description": "Publication instant; NULL for unpublished drafts."
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "tarball_url",
+          "path": [
+            "tarball_url"
+          ]
+        },
+        {
+          "name": "zipball_url",
+          "path": [
+            "zipball_url"
+          ]
+        },
+        {
+          "name": "discussion_url",
+          "path": [
+            "discussion_url"
+          ]
+        },
+        {
+          "name": "publisher_id",
+          "path": [
+            "author",
+            "id"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "publisher_login",
+          "path": [
+            "author",
+            "login"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "publisher_type",
+          "path": [
+            "author",
+            "type"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ],
+          "description": "GitHub API URL for this release."
+        },
+        {
+          "name": "assets_url",
+          "path": [
+            "assets_url"
+          ],
+          "description": "API endpoint for the complete paginated asset population; embedded assets are not treated as complete."
+        },
+        {
+          "name": "upload_url",
+          "path": [
+            "upload_url"
+          ],
+          "description": "Upload URI template reported by GitHub; observational metadata only."
+        },
+        {
+          "name": "body_html",
+          "path": [
+            "body_html"
+          ],
+          "description": "Rendered HTML release notes when returned by the selected media representation; otherwise NULL."
+        },
+        {
+          "name": "body_text",
+          "path": [
+            "body_text"
+          ],
+          "description": "Plain-text release notes when returned by the selected media representation; otherwise NULL."
+        },
+        {
+          "name": "mentions_count",
+          "path": [
+            "mentions_count"
+          ],
+          "description": "Current mention counter when reported; missing is NULL, not zero."
+        },
+        {
+          "name": "publisher",
+          "path": [
+            "author"
+          ],
+          "description": "Typed publisher account snapshot from this release response, distinct from each asset uploader."
+        },
+        {
+          "name": "reaction_summary",
+          "path": [
+            "reactions"
+          ],
+          "description": "Typed current reaction rollup when reported, including each reaction kind; missing is NULL."
+        },
+        {
+          "name": "reaction_total_count",
+          "path": [
+            "reactions",
+            "total_count"
+          ],
+          "description": "Current reaction counter when reported; not a count of reactions created during the release publication period."
+        }
+      ],
+      "grain": [
+        "repository",
+        "release_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-latest-release",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "release_tag_lookup",
+      "description": "repos/get-release-by-tag schema-derived metadata source. Whole binary content is not fetched.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "release_tag",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Exact release tag; requires repository. Mutually exclusive with release_id and release_selection.",
+          "example": "v1.0.0"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "release_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "release_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "tag_name",
+          "path": [
+            "tag_name"
+          ]
+        },
+        {
+          "name": "target_commitish",
+          "path": [
+            "target_commitish"
+          ],
+          "description": "Target branch or commitish reported by GitHub; not necessarily a resolved commit SHA."
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "draft",
+          "path": [
+            "draft"
+          ]
+        },
+        {
+          "name": "prerelease",
+          "path": [
+            "prerelease"
+          ]
+        },
+        {
+          "name": "immutable",
+          "path": [
+            "immutable"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ],
+          "description": "GitHub release created_at instant; for release ordering GitHub associates this with the target commit, so it is not a publication instant."
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ],
+          "description": "Publication instant; NULL for unpublished drafts."
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "tarball_url",
+          "path": [
+            "tarball_url"
+          ]
+        },
+        {
+          "name": "zipball_url",
+          "path": [
+            "zipball_url"
+          ]
+        },
+        {
+          "name": "discussion_url",
+          "path": [
+            "discussion_url"
+          ]
+        },
+        {
+          "name": "publisher_id",
+          "path": [
+            "author",
+            "id"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "publisher_login",
+          "path": [
+            "author",
+            "login"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "publisher_type",
+          "path": [
+            "author",
+            "type"
+          ],
+          "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ],
+          "description": "GitHub API URL for this release."
+        },
+        {
+          "name": "assets_url",
+          "path": [
+            "assets_url"
+          ],
+          "description": "API endpoint for the complete paginated asset population; embedded assets are not treated as complete."
+        },
+        {
+          "name": "upload_url",
+          "path": [
+            "upload_url"
+          ],
+          "description": "Upload URI template reported by GitHub; observational metadata only."
+        },
+        {
+          "name": "body_html",
+          "path": [
+            "body_html"
+          ],
+          "description": "Rendered HTML release notes when returned by the selected media representation; otherwise NULL."
+        },
+        {
+          "name": "body_text",
+          "path": [
+            "body_text"
+          ],
+          "description": "Plain-text release notes when returned by the selected media representation; otherwise NULL."
+        },
+        {
+          "name": "mentions_count",
+          "path": [
+            "mentions_count"
+          ],
+          "description": "Current mention counter when reported; missing is NULL, not zero."
+        },
+        {
+          "name": "publisher",
+          "path": [
+            "author"
+          ],
+          "description": "Typed publisher account snapshot from this release response, distinct from each asset uploader."
+        },
+        {
+          "name": "reaction_summary",
+          "path": [
+            "reactions"
+          ],
+          "description": "Typed current reaction rollup when reported, including each reaction kind; missing is NULL."
+        },
+        {
+          "name": "reaction_total_count",
+          "path": [
+            "reactions",
+            "total_count"
+          ],
+          "description": "Current reaction counter when reported; not a count of reactions created during the release publication period."
+        }
+      ],
+      "grain": [
+        "repository",
+        "release_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-release-by-tag",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "tag": {
+            "argument": "release_tag"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "tag_name",
+            "argument": "release_tag",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "release_assets_source",
+      "description": "repos/list-release-assets schema-derived metadata source. Whole binary content is not fetched.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "release_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "release_id",
+          "source_argument": "release_id",
+          "description": "Parent release identity supplied by a release-assets listing. NULL for direct asset lookup because that API response has no parent release ID."
+        },
+        {
+          "name": "release_asset_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "release_asset_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "label",
+          "path": [
+            "label"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "content_type",
+          "path": [
+            "content_type"
+          ]
+        },
+        {
+          "name": "digest",
+          "path": [
+            "digest"
+          ]
+        },
+        {
+          "name": "download_count",
+          "path": [
+            "download_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "browser_download_url",
+          "path": [
+            "browser_download_url"
+          ]
+        },
+        {
+          "name": "size_bytes",
+          "path": [
+            "size"
+          ],
+          "description": "Current asset byte size; separate from download count and Actions artifact storage."
+        },
+        {
+          "name": "uploader_id",
+          "path": [
+            "uploader",
+            "id"
+          ],
+          "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+        },
+        {
+          "name": "uploader_login",
+          "path": [
+            "uploader",
+            "login"
+          ],
+          "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+        },
+        {
+          "name": "uploader_type",
+          "path": [
+            "uploader",
+            "type"
+          ],
+          "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+        },
+        {
+          "name": "uploader",
+          "path": [
+            "uploader"
+          ],
+          "description": "Nullable typed uploader account snapshot from this asset response, distinct from its release publisher."
+        }
+      ],
+      "grain": [
+        "repository",
+        "release_asset_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-release-assets",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "release_id": {
+            "argument": "release_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "release_asset_lookup",
+      "description": "repos/get-release-asset schema-derived metadata source. Whole binary content is not fetched.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "release_asset_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Stable release asset ID within repository; requires repository. The direct asset response does not identify its parent release.",
+          "example": 1
+        },
+        {
+          "name": "release_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "minimum": 1,
+          "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+          "example": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "release_id",
+          "source_argument": "release_id",
+          "description": "Parent release identity supplied by a release-assets listing. NULL for direct asset lookup because that API response has no parent release ID."
+        },
+        {
+          "name": "release_asset_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "release_asset_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "label",
+          "path": [
+            "label"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "content_type",
+          "path": [
+            "content_type"
+          ]
+        },
+        {
+          "name": "digest",
+          "path": [
+            "digest"
+          ]
+        },
+        {
+          "name": "download_count",
+          "path": [
+            "download_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "browser_download_url",
+          "path": [
+            "browser_download_url"
+          ]
+        },
+        {
+          "name": "size_bytes",
+          "path": [
+            "size"
+          ],
+          "description": "Current asset byte size; separate from download count and Actions artifact storage."
+        },
+        {
+          "name": "uploader_id",
+          "path": [
+            "uploader",
+            "id"
+          ],
+          "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+        },
+        {
+          "name": "uploader_login",
+          "path": [
+            "uploader",
+            "login"
+          ],
+          "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+        },
+        {
+          "name": "uploader_type",
+          "path": [
+            "uploader",
+            "type"
+          ],
+          "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+        },
+        {
+          "name": "uploader",
+          "path": [
+            "uploader"
+          ],
+          "description": "Nullable typed uploader account snapshot from this asset response, distinct from its release publisher."
+        }
+      ],
+      "grain": [
+        "repository",
+        "release_asset_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-release-asset",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "asset_id": {
+            "argument": "release_asset_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "release_asset_id",
+            "argument": "release_asset_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "releases",
+      "description": "Canonical GitHub releases selected through repository populations, exact release ID, exact tag, or GitHub latest-release lookup. The release author is the publisher role; publication time and draft/prerelease state remain explicit. Existing REST responses retain typed publisher and reaction snapshots, optional rendered notes and reported mention/reaction counters. Absent optional fields stay NULL. Embedded assets are deliberately excluded; release_assets traverses the complete asset endpoint.",
+      "grain": [
+        "repository_id",
+        "release_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "release_id",
+          "release_node_id",
+          "tag_name",
+          "target_commitish",
+          "name",
+          "body",
+          "draft",
+          "prerelease",
+          "immutable",
+          "created_at",
+          "published_at",
+          "updated_at",
+          "html_url",
+          "tarball_url",
+          "zipball_url",
+          "discussion_url",
+          "publisher_id",
+          "publisher_login",
+          "publisher_type",
+          "release_published_day",
+          "url",
+          "assets_url",
+          "upload_url",
+          "body_html",
+          "body_text",
+          "mentions_count",
+          "publisher",
+          "reaction_summary",
+          "reaction_total_count"
+        ],
+        "dimensions": [
+          "repository",
+          "release_id",
+          "tag_name",
+          "target_commitish",
+          "name",
+          "draft",
+          "prerelease",
+          "immutable",
+          "publisher_id",
+          "publisher_login",
+          "publisher_type",
+          "created_at",
+          "published_at",
+          "release_published_day"
+        ],
+        "metrics": [
+          {
+            "name": "release_count",
+            "kind": "count",
+            "comment": "Selected release records, including visible drafts and prereleases; one observation per stable repository/release identity."
+          },
+          {
+            "name": "published_release_count",
+            "kind": "count",
+            "where": {
+              "field": "published_at",
+              "op": "is_not_null"
+            },
+            "comment": "Selected release records with a publication instant, including prereleases."
+          },
+          {
+            "name": "release_publication_day_count",
+            "kind": "count_distinct",
+            "field": "release_published_day",
+            "comment": "Distinct UTC dates with publication among selected releases; NULL draft publication dates are excluded and counts are non-additive across repositories."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "release_published_day",
+            "kind": "date",
+            "source": "published_at",
+            "timezone": "UTC",
+            "comment": "UTC release publication date, NULL for unpublished drafts."
+          }
+        ],
+        "sql_names": {
+          "repository": "releases_repository",
+          "release_id": "releases_release_id",
+          "tag_name": "releases_tag_name",
+          "target_commitish": "releases_target_commitish",
+          "name": "releases_name",
+          "draft": "releases_draft",
+          "prerelease": "releases_prerelease",
+          "immutable": "releases_immutable",
+          "publisher_id": "releases_publisher_id",
+          "publisher_login": "releases_publisher_login",
+          "publisher_type": "releases_publisher_type",
+          "created_at": "releases_created_at",
+          "published_at": "releases_published_at",
+          "release_published_day": "releases_release_published_day"
+        },
+        "crossfield": {
+          "metrics": {
+            "draft_release_count": {
+              "expression": "COUNT(*) FILTER (WHERE releases.draft = TRUE)"
+            },
+            "prerelease_count": {
+              "expression": "COUNT(*) FILTER (WHERE releases.prerelease = TRUE)"
+            },
+            "release_reported_mention_count": {
+              "expression": "SUM(releases.mentions_count)"
+            },
+            "release_reported_reaction_count": {
+              "expression": "SUM(releases.reaction_total_count)"
+            }
+          },
+          "metric_semantics": {
+            "draft_release_count": {
+              "comment": "Visible releases marked draft. Draft visibility depends on caller permissions.",
+              "additivity": "additive",
+              "dataset": "releases"
+            },
+            "prerelease_count": {
+              "comment": "Selected releases marked prerelease, independently of draft status.",
+              "additivity": "additive",
+              "dataset": "releases"
+            },
+            "release_reported_mention_count": {
+              "dataset": "releases",
+              "additivity": "additive",
+              "comment": "Sum of current mention counters reported for selected releases. Missing observations remain NULL; not mentions during a publication date range."
+            },
+            "release_reported_reaction_count": {
+              "dataset": "releases",
+              "additivity": "additive",
+              "comment": "Sum of current reaction counters reported for selected releases. Missing observations remain NULL; not reaction creation events during a publication date range."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+              "example": 1
+            }
+          ],
+          "select": [
+            "release_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "releases",
+              "source_column": "release_id"
+            },
+            {
+              "name": "release_node_id",
+              "source_stage": "releases",
+              "source_column": "release_node_id"
+            },
+            {
+              "name": "tag_name",
+              "source_stage": "releases",
+              "source_column": "tag_name"
+            },
+            {
+              "name": "target_commitish",
+              "source_stage": "releases",
+              "source_column": "target_commitish",
+              "description": "Target branch or commitish reported by GitHub; not necessarily a resolved commit SHA."
+            },
+            {
+              "name": "name",
+              "source_stage": "releases",
+              "source_column": "name"
+            },
+            {
+              "name": "body",
+              "source_stage": "releases",
+              "source_column": "body"
+            },
+            {
+              "name": "draft",
+              "source_stage": "releases",
+              "source_column": "draft"
+            },
+            {
+              "name": "prerelease",
+              "source_stage": "releases",
+              "source_column": "prerelease"
+            },
+            {
+              "name": "immutable",
+              "source_stage": "releases",
+              "source_column": "immutable"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "releases",
+              "source_column": "created_at",
+              "description": "GitHub release created_at instant; for release ordering GitHub associates this with the target commit, so it is not a publication instant."
+            },
+            {
+              "name": "published_at",
+              "source_stage": "releases",
+              "source_column": "published_at",
+              "description": "Publication instant; NULL for unpublished drafts."
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "releases",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "releases",
+              "source_column": "html_url"
+            },
+            {
+              "name": "tarball_url",
+              "source_stage": "releases",
+              "source_column": "tarball_url"
+            },
+            {
+              "name": "zipball_url",
+              "source_stage": "releases",
+              "source_column": "zipball_url"
+            },
+            {
+              "name": "discussion_url",
+              "source_stage": "releases",
+              "source_column": "discussion_url"
+            },
+            {
+              "name": "publisher_id",
+              "source_stage": "releases",
+              "source_column": "publisher_id",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "publisher_login",
+              "source_stage": "releases",
+              "source_column": "publisher_login",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "publisher_type",
+              "source_stage": "releases",
+              "source_column": "publisher_type",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "url",
+              "source_stage": "releases",
+              "source_column": "url",
+              "description": "GitHub API URL for this release."
+            },
+            {
+              "name": "assets_url",
+              "source_stage": "releases",
+              "source_column": "assets_url",
+              "description": "API endpoint for the complete paginated asset population; embedded assets are not treated as complete."
+            },
+            {
+              "name": "upload_url",
+              "source_stage": "releases",
+              "source_column": "upload_url",
+              "description": "Upload URI template reported by GitHub; observational metadata only."
+            },
+            {
+              "name": "body_html",
+              "source_stage": "releases",
+              "source_column": "body_html",
+              "description": "Rendered HTML release notes when returned by the selected media representation; otherwise NULL."
+            },
+            {
+              "name": "body_text",
+              "source_stage": "releases",
+              "source_column": "body_text",
+              "description": "Plain-text release notes when returned by the selected media representation; otherwise NULL."
+            },
+            {
+              "name": "mentions_count",
+              "source_stage": "releases",
+              "source_column": "mentions_count",
+              "description": "Current mention counter when reported; missing is NULL, not zero."
+            },
+            {
+              "name": "publisher",
+              "source_stage": "releases",
+              "source_column": "publisher",
+              "description": "Typed publisher account snapshot from this release response, distinct from each asset uploader."
+            },
+            {
+              "name": "reaction_summary",
+              "source_stage": "releases",
+              "source_column": "reaction_summary",
+              "description": "Typed current reaction rollup when reported, including each reaction kind; missing is NULL."
+            },
+            {
+              "name": "reaction_total_count",
+              "source_stage": "releases",
+              "source_column": "reaction_total_count",
+              "description": "Current reaction counter when reported; not a count of reactions created during the release publication period."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "release_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "parameter": "release_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "releases"
+          },
+          "population": "One identified release visible to current credentials."
+        },
+        {
+          "name": "tags",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_tag",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Exact release tag; requires repository. Mutually exclusive with release_id and release_selection.",
+              "example": "v1.0.0"
+            }
+          ],
+          "select": [
+            "release_tag"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "releases",
+              "source_column": "release_id"
+            },
+            {
+              "name": "release_node_id",
+              "source_stage": "releases",
+              "source_column": "release_node_id"
+            },
+            {
+              "name": "tag_name",
+              "source_stage": "releases",
+              "source_column": "tag_name"
+            },
+            {
+              "name": "target_commitish",
+              "source_stage": "releases",
+              "source_column": "target_commitish",
+              "description": "Target branch or commitish reported by GitHub; not necessarily a resolved commit SHA."
+            },
+            {
+              "name": "name",
+              "source_stage": "releases",
+              "source_column": "name"
+            },
+            {
+              "name": "body",
+              "source_stage": "releases",
+              "source_column": "body"
+            },
+            {
+              "name": "draft",
+              "source_stage": "releases",
+              "source_column": "draft"
+            },
+            {
+              "name": "prerelease",
+              "source_stage": "releases",
+              "source_column": "prerelease"
+            },
+            {
+              "name": "immutable",
+              "source_stage": "releases",
+              "source_column": "immutable"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "releases",
+              "source_column": "created_at",
+              "description": "GitHub release created_at instant; for release ordering GitHub associates this with the target commit, so it is not a publication instant."
+            },
+            {
+              "name": "published_at",
+              "source_stage": "releases",
+              "source_column": "published_at",
+              "description": "Publication instant; NULL for unpublished drafts."
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "releases",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "releases",
+              "source_column": "html_url"
+            },
+            {
+              "name": "tarball_url",
+              "source_stage": "releases",
+              "source_column": "tarball_url"
+            },
+            {
+              "name": "zipball_url",
+              "source_stage": "releases",
+              "source_column": "zipball_url"
+            },
+            {
+              "name": "discussion_url",
+              "source_stage": "releases",
+              "source_column": "discussion_url"
+            },
+            {
+              "name": "publisher_id",
+              "source_stage": "releases",
+              "source_column": "publisher_id",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "publisher_login",
+              "source_stage": "releases",
+              "source_column": "publisher_login",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "publisher_type",
+              "source_stage": "releases",
+              "source_column": "publisher_type",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "url",
+              "source_stage": "releases",
+              "source_column": "url",
+              "description": "GitHub API URL for this release."
+            },
+            {
+              "name": "assets_url",
+              "source_stage": "releases",
+              "source_column": "assets_url",
+              "description": "API endpoint for the complete paginated asset population; embedded assets are not treated as complete."
+            },
+            {
+              "name": "upload_url",
+              "source_stage": "releases",
+              "source_column": "upload_url",
+              "description": "Upload URI template reported by GitHub; observational metadata only."
+            },
+            {
+              "name": "body_html",
+              "source_stage": "releases",
+              "source_column": "body_html",
+              "description": "Rendered HTML release notes when returned by the selected media representation; otherwise NULL."
+            },
+            {
+              "name": "body_text",
+              "source_stage": "releases",
+              "source_column": "body_text",
+              "description": "Plain-text release notes when returned by the selected media representation; otherwise NULL."
+            },
+            {
+              "name": "mentions_count",
+              "source_stage": "releases",
+              "source_column": "mentions_count",
+              "description": "Current mention counter when reported; missing is NULL, not zero."
+            },
+            {
+              "name": "publisher",
+              "source_stage": "releases",
+              "source_column": "publisher",
+              "description": "Typed publisher account snapshot from this release response, distinct from each asset uploader."
+            },
+            {
+              "name": "reaction_summary",
+              "source_stage": "releases",
+              "source_column": "reaction_summary",
+              "description": "Typed current reaction rollup when reported, including each reaction kind; missing is NULL."
+            },
+            {
+              "name": "reaction_total_count",
+              "source_stage": "releases",
+              "source_column": "reaction_total_count",
+              "description": "Current reaction counter when reported; not a count of reactions created during the release publication period."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "release_tag_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_tag": {
+                    "parameter": "release_tag"
+                  }
+                }
+              }
+            ],
+            "output_stage": "releases"
+          },
+          "population": "The release associated with an exact tag visible to current credentials."
+        },
+        {
+          "name": "latest",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_selection",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "latest"
+              ],
+              "description": "Use latest for GitHub's latest published non-prerelease release; requires repository. Mutually exclusive with release_id and release_tag.",
+              "example": "latest"
+            }
+          ],
+          "select": [
+            "release_selection"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "releases",
+              "source_column": "release_id"
+            },
+            {
+              "name": "release_node_id",
+              "source_stage": "releases",
+              "source_column": "release_node_id"
+            },
+            {
+              "name": "tag_name",
+              "source_stage": "releases",
+              "source_column": "tag_name"
+            },
+            {
+              "name": "target_commitish",
+              "source_stage": "releases",
+              "source_column": "target_commitish",
+              "description": "Target branch or commitish reported by GitHub; not necessarily a resolved commit SHA."
+            },
+            {
+              "name": "name",
+              "source_stage": "releases",
+              "source_column": "name"
+            },
+            {
+              "name": "body",
+              "source_stage": "releases",
+              "source_column": "body"
+            },
+            {
+              "name": "draft",
+              "source_stage": "releases",
+              "source_column": "draft"
+            },
+            {
+              "name": "prerelease",
+              "source_stage": "releases",
+              "source_column": "prerelease"
+            },
+            {
+              "name": "immutable",
+              "source_stage": "releases",
+              "source_column": "immutable"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "releases",
+              "source_column": "created_at",
+              "description": "GitHub release created_at instant; for release ordering GitHub associates this with the target commit, so it is not a publication instant."
+            },
+            {
+              "name": "published_at",
+              "source_stage": "releases",
+              "source_column": "published_at",
+              "description": "Publication instant; NULL for unpublished drafts."
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "releases",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "releases",
+              "source_column": "html_url"
+            },
+            {
+              "name": "tarball_url",
+              "source_stage": "releases",
+              "source_column": "tarball_url"
+            },
+            {
+              "name": "zipball_url",
+              "source_stage": "releases",
+              "source_column": "zipball_url"
+            },
+            {
+              "name": "discussion_url",
+              "source_stage": "releases",
+              "source_column": "discussion_url"
+            },
+            {
+              "name": "publisher_id",
+              "source_stage": "releases",
+              "source_column": "publisher_id",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "publisher_login",
+              "source_stage": "releases",
+              "source_column": "publisher_login",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "publisher_type",
+              "source_stage": "releases",
+              "source_column": "publisher_type",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "url",
+              "source_stage": "releases",
+              "source_column": "url",
+              "description": "GitHub API URL for this release."
+            },
+            {
+              "name": "assets_url",
+              "source_stage": "releases",
+              "source_column": "assets_url",
+              "description": "API endpoint for the complete paginated asset population; embedded assets are not treated as complete."
+            },
+            {
+              "name": "upload_url",
+              "source_stage": "releases",
+              "source_column": "upload_url",
+              "description": "Upload URI template reported by GitHub; observational metadata only."
+            },
+            {
+              "name": "body_html",
+              "source_stage": "releases",
+              "source_column": "body_html",
+              "description": "Rendered HTML release notes when returned by the selected media representation; otherwise NULL."
+            },
+            {
+              "name": "body_text",
+              "source_stage": "releases",
+              "source_column": "body_text",
+              "description": "Plain-text release notes when returned by the selected media representation; otherwise NULL."
+            },
+            {
+              "name": "mentions_count",
+              "source_stage": "releases",
+              "source_column": "mentions_count",
+              "description": "Current mention counter when reported; missing is NULL, not zero."
+            },
+            {
+              "name": "publisher",
+              "source_stage": "releases",
+              "source_column": "publisher",
+              "description": "Typed publisher account snapshot from this release response, distinct from each asset uploader."
+            },
+            {
+              "name": "reaction_summary",
+              "source_stage": "releases",
+              "source_column": "reaction_summary",
+              "description": "Typed current reaction rollup when reported, including each reaction kind; missing is NULL."
+            },
+            {
+              "name": "reaction_total_count",
+              "source_stage": "releases",
+              "source_column": "reaction_total_count",
+              "description": "Current reaction counter when reported; not a count of reactions created during the release publication period."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "latest_release_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "releases"
+          },
+          "population": "GitHub latest-release endpoint: the latest published non-prerelease release, using GitHub's selection semantics; never inferred from the first list row."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "releases",
+              "source_column": "release_id"
+            },
+            {
+              "name": "release_node_id",
+              "source_stage": "releases",
+              "source_column": "release_node_id"
+            },
+            {
+              "name": "tag_name",
+              "source_stage": "releases",
+              "source_column": "tag_name"
+            },
+            {
+              "name": "target_commitish",
+              "source_stage": "releases",
+              "source_column": "target_commitish",
+              "description": "Target branch or commitish reported by GitHub; not necessarily a resolved commit SHA."
+            },
+            {
+              "name": "name",
+              "source_stage": "releases",
+              "source_column": "name"
+            },
+            {
+              "name": "body",
+              "source_stage": "releases",
+              "source_column": "body"
+            },
+            {
+              "name": "draft",
+              "source_stage": "releases",
+              "source_column": "draft"
+            },
+            {
+              "name": "prerelease",
+              "source_stage": "releases",
+              "source_column": "prerelease"
+            },
+            {
+              "name": "immutable",
+              "source_stage": "releases",
+              "source_column": "immutable"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "releases",
+              "source_column": "created_at",
+              "description": "GitHub release created_at instant; for release ordering GitHub associates this with the target commit, so it is not a publication instant."
+            },
+            {
+              "name": "published_at",
+              "source_stage": "releases",
+              "source_column": "published_at",
+              "description": "Publication instant; NULL for unpublished drafts."
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "releases",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "releases",
+              "source_column": "html_url"
+            },
+            {
+              "name": "tarball_url",
+              "source_stage": "releases",
+              "source_column": "tarball_url"
+            },
+            {
+              "name": "zipball_url",
+              "source_stage": "releases",
+              "source_column": "zipball_url"
+            },
+            {
+              "name": "discussion_url",
+              "source_stage": "releases",
+              "source_column": "discussion_url"
+            },
+            {
+              "name": "publisher_id",
+              "source_stage": "releases",
+              "source_column": "publisher_id",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "publisher_login",
+              "source_stage": "releases",
+              "source_column": "publisher_login",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "publisher_type",
+              "source_stage": "releases",
+              "source_column": "publisher_type",
+              "description": "GitHub release author/publisher account; distinct from commit authors and asset uploaders."
+            },
+            {
+              "name": "url",
+              "source_stage": "releases",
+              "source_column": "url",
+              "description": "GitHub API URL for this release."
+            },
+            {
+              "name": "assets_url",
+              "source_stage": "releases",
+              "source_column": "assets_url",
+              "description": "API endpoint for the complete paginated asset population; embedded assets are not treated as complete."
+            },
+            {
+              "name": "upload_url",
+              "source_stage": "releases",
+              "source_column": "upload_url",
+              "description": "Upload URI template reported by GitHub; observational metadata only."
+            },
+            {
+              "name": "body_html",
+              "source_stage": "releases",
+              "source_column": "body_html",
+              "description": "Rendered HTML release notes when returned by the selected media representation; otherwise NULL."
+            },
+            {
+              "name": "body_text",
+              "source_stage": "releases",
+              "source_column": "body_text",
+              "description": "Plain-text release notes when returned by the selected media representation; otherwise NULL."
+            },
+            {
+              "name": "mentions_count",
+              "source_stage": "releases",
+              "source_column": "mentions_count",
+              "description": "Current mention counter when reported; missing is NULL, not zero."
+            },
+            {
+              "name": "publisher",
+              "source_stage": "releases",
+              "source_column": "publisher",
+              "description": "Typed publisher account snapshot from this release response, distinct from each asset uploader."
+            },
+            {
+              "name": "reaction_summary",
+              "source_stage": "releases",
+              "source_column": "reaction_summary",
+              "description": "Typed current reaction rollup when reported, including each reaction kind; missing is NULL."
+            },
+            {
+              "name": "reaction_total_count",
+              "source_stage": "releases",
+              "source_column": "reaction_total_count",
+              "description": "Current reaction counter when reported; not a count of reactions created during the release publication period."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "releases",
+                "entity": "releases_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "releases"
+          },
+          "population": "All releases visible to current credentials in the repository population, including visible drafts and prereleases; all pages are consumed."
+        }
+      ]
+    },
+    {
+      "name": "release_assets",
+      "description": "Canonical GitHub release assets, distinct from Actions artifacts. Lists traverse every asset page for each selected release. Direct asset lookup preserves the same asset identity and metadata but leaves release_id unknown because that API response omits its parent. Publisher and uploader are separate actor roles. Parent release identity remains available in detail and release-to-assets retrieval remains declared. Analytical enrichment through the parent release, including its publisher, is not approved; assets retain their direct repository and uploader relationships, including known repository context when release_id is unknown. The nullable uploader snapshot is retained as a typed account record without an additional account lookup.",
+      "grain": [
+        "repository_id",
+        "release_asset_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "release_id",
+          "release_asset_id",
+          "release_asset_node_id",
+          "name",
+          "label",
+          "state",
+          "content_type",
+          "digest",
+          "download_count",
+          "created_at",
+          "updated_at",
+          "url",
+          "browser_download_url",
+          "size_bytes",
+          "uploader_id",
+          "uploader_login",
+          "uploader_type",
+          "release_asset_created_day",
+          "uploader"
+        ],
+        "dimensions": [
+          "repository",
+          "release_id",
+          "release_asset_id",
+          "name",
+          "state",
+          "content_type",
+          "uploader_id",
+          "uploader_login",
+          "uploader_type",
+          "created_at",
+          "release_asset_created_day"
+        ],
+        "metrics": [
+          {
+            "name": "release_asset_count",
+            "kind": "count",
+            "comment": "Current release asset metadata records at repository/asset identity; not Actions artifacts and not historical uploads."
+          },
+          {
+            "name": "uploaded_release_asset_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "uploaded"
+            },
+            "comment": "Current assets whose upload state is uploaded; open assets are retained in release_asset_count."
+          },
+          {
+            "name": "median_release_asset_size_bytes",
+            "kind": "median",
+            "field": "size_bytes",
+            "comment": "Exact median current byte size across selected assets, including zero-byte open uploads."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "release_asset_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC asset creation date; independent of parent release publication."
+          }
+        ],
+        "sql_names": {
+          "repository": "release_assets_repository",
+          "release_id": "release_assets_release_id",
+          "release_asset_id": "release_assets_release_asset_id",
+          "name": "release_assets_name",
+          "state": "release_assets_state",
+          "content_type": "release_assets_content_type",
+          "uploader_id": "release_assets_uploader_id",
+          "uploader_login": "release_assets_uploader_login",
+          "uploader_type": "release_assets_uploader_type",
+          "created_at": "release_assets_created_at",
+          "release_asset_created_day": "release_assets_release_asset_created_day"
+        },
+        "crossfield": {
+          "metrics": {
+            "release_asset_size_bytes": {
+              "expression": "SUM(release_assets.size_bytes)"
+            },
+            "release_asset_download_count": {
+              "expression": "SUM(release_assets.download_count)"
+            }
+          },
+          "metric_semantics": {
+            "release_asset_size_bytes": {
+              "comment": "Sum of current byte sizes over distinct selected assets; not cumulative transfer volume.",
+              "additivity": "additive",
+              "dataset": "release_assets",
+              "unit": "bytes"
+            },
+            "release_asset_download_count": {
+              "comment": "Sum of lifetime download counters observed now for distinct selected assets; not downloads during the query date range.",
+              "additivity": "additive",
+              "dataset": "release_assets"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "release_asset_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_asset_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Stable release asset ID within repository; requires repository. The direct asset response does not identify its parent release.",
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "assets",
+              "source_column": "release_id",
+              "description": "Parent release identity supplied by a release-assets listing. NULL for direct asset lookup because that API response has no parent release ID."
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "release_asset_node_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "assets",
+              "source_column": "name"
+            },
+            {
+              "name": "label",
+              "source_stage": "assets",
+              "source_column": "label"
+            },
+            {
+              "name": "state",
+              "source_stage": "assets",
+              "source_column": "state"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "assets",
+              "source_column": "content_type"
+            },
+            {
+              "name": "digest",
+              "source_stage": "assets",
+              "source_column": "digest"
+            },
+            {
+              "name": "download_count",
+              "source_stage": "assets",
+              "source_column": "download_count"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "assets",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "assets",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "assets",
+              "source_column": "url"
+            },
+            {
+              "name": "browser_download_url",
+              "source_stage": "assets",
+              "source_column": "browser_download_url"
+            },
+            {
+              "name": "size_bytes",
+              "source_stage": "assets",
+              "source_column": "size_bytes",
+              "description": "Current asset byte size; separate from download count and Actions artifact storage."
+            },
+            {
+              "name": "uploader_id",
+              "source_stage": "assets",
+              "source_column": "uploader_id",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_login",
+              "source_stage": "assets",
+              "source_column": "uploader_login",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_type",
+              "source_stage": "assets",
+              "source_column": "uploader_type",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader",
+              "source_stage": "assets",
+              "source_column": "uploader",
+              "description": "Nullable typed uploader account snapshot from this asset response, distinct from its release publisher."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_asset_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_asset_id": {
+                    "parameter": "release_asset_id"
+                  },
+                  "release_id": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "assets"
+          },
+          "population": "One release asset metadata record by stable asset ID. Its release_id remains NULL because this response does not identify its parent release."
+        },
+        {
+          "name": "releases",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+              "example": 1
+            }
+          ],
+          "select": [
+            "release_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "assets",
+              "source_column": "release_id",
+              "description": "Parent release identity supplied by a release-assets listing. NULL for direct asset lookup because that API response has no parent release ID."
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "release_asset_node_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "assets",
+              "source_column": "name"
+            },
+            {
+              "name": "label",
+              "source_stage": "assets",
+              "source_column": "label"
+            },
+            {
+              "name": "state",
+              "source_stage": "assets",
+              "source_column": "state"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "assets",
+              "source_column": "content_type"
+            },
+            {
+              "name": "digest",
+              "source_stage": "assets",
+              "source_column": "digest"
+            },
+            {
+              "name": "download_count",
+              "source_stage": "assets",
+              "source_column": "download_count"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "assets",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "assets",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "assets",
+              "source_column": "url"
+            },
+            {
+              "name": "browser_download_url",
+              "source_stage": "assets",
+              "source_column": "browser_download_url"
+            },
+            {
+              "name": "size_bytes",
+              "source_stage": "assets",
+              "source_column": "size_bytes",
+              "description": "Current asset byte size; separate from download count and Actions artifact storage."
+            },
+            {
+              "name": "uploader_id",
+              "source_stage": "assets",
+              "source_column": "uploader_id",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_login",
+              "source_stage": "assets",
+              "source_column": "uploader_login",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_type",
+              "source_stage": "assets",
+              "source_column": "uploader_type",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader",
+              "source_stage": "assets",
+              "source_column": "uploader",
+              "description": "Nullable typed uploader account snapshot from this asset response, distinct from its release publisher."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "release_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "parameter": "release_id"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_assets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "releases",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "stage": "releases",
+                    "column": "release_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "assets"
+          },
+          "population": "One identified release visible to current credentials. Every selected release is followed through its independently paginated asset list; embedded release.assets is not treated as complete."
+        },
+        {
+          "name": "tags",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_tag",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Exact release tag; requires repository. Mutually exclusive with release_id and release_selection.",
+              "example": "v1.0.0"
+            }
+          ],
+          "select": [
+            "release_tag"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "assets",
+              "source_column": "release_id",
+              "description": "Parent release identity supplied by a release-assets listing. NULL for direct asset lookup because that API response has no parent release ID."
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "release_asset_node_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "assets",
+              "source_column": "name"
+            },
+            {
+              "name": "label",
+              "source_stage": "assets",
+              "source_column": "label"
+            },
+            {
+              "name": "state",
+              "source_stage": "assets",
+              "source_column": "state"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "assets",
+              "source_column": "content_type"
+            },
+            {
+              "name": "digest",
+              "source_stage": "assets",
+              "source_column": "digest"
+            },
+            {
+              "name": "download_count",
+              "source_stage": "assets",
+              "source_column": "download_count"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "assets",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "assets",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "assets",
+              "source_column": "url"
+            },
+            {
+              "name": "browser_download_url",
+              "source_stage": "assets",
+              "source_column": "browser_download_url"
+            },
+            {
+              "name": "size_bytes",
+              "source_stage": "assets",
+              "source_column": "size_bytes",
+              "description": "Current asset byte size; separate from download count and Actions artifact storage."
+            },
+            {
+              "name": "uploader_id",
+              "source_stage": "assets",
+              "source_column": "uploader_id",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_login",
+              "source_stage": "assets",
+              "source_column": "uploader_login",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_type",
+              "source_stage": "assets",
+              "source_column": "uploader_type",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader",
+              "source_stage": "assets",
+              "source_column": "uploader",
+              "description": "Nullable typed uploader account snapshot from this asset response, distinct from its release publisher."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "release_tag_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_tag": {
+                    "parameter": "release_tag"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_assets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "releases",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "stage": "releases",
+                    "column": "release_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "assets"
+          },
+          "population": "The release associated with an exact tag visible to current credentials. Every selected release is followed through its independently paginated asset list; embedded release.assets is not treated as complete."
+        },
+        {
+          "name": "latest",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_selection",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "latest"
+              ],
+              "description": "Use latest for GitHub's latest published non-prerelease release; requires repository. Mutually exclusive with release_id and release_tag.",
+              "example": "latest"
+            }
+          ],
+          "select": [
+            "release_selection"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "assets",
+              "source_column": "release_id",
+              "description": "Parent release identity supplied by a release-assets listing. NULL for direct asset lookup because that API response has no parent release ID."
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "release_asset_node_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "assets",
+              "source_column": "name"
+            },
+            {
+              "name": "label",
+              "source_stage": "assets",
+              "source_column": "label"
+            },
+            {
+              "name": "state",
+              "source_stage": "assets",
+              "source_column": "state"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "assets",
+              "source_column": "content_type"
+            },
+            {
+              "name": "digest",
+              "source_stage": "assets",
+              "source_column": "digest"
+            },
+            {
+              "name": "download_count",
+              "source_stage": "assets",
+              "source_column": "download_count"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "assets",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "assets",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "assets",
+              "source_column": "url"
+            },
+            {
+              "name": "browser_download_url",
+              "source_stage": "assets",
+              "source_column": "browser_download_url"
+            },
+            {
+              "name": "size_bytes",
+              "source_stage": "assets",
+              "source_column": "size_bytes",
+              "description": "Current asset byte size; separate from download count and Actions artifact storage."
+            },
+            {
+              "name": "uploader_id",
+              "source_stage": "assets",
+              "source_column": "uploader_id",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_login",
+              "source_stage": "assets",
+              "source_column": "uploader_login",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_type",
+              "source_stage": "assets",
+              "source_column": "uploader_type",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader",
+              "source_stage": "assets",
+              "source_column": "uploader",
+              "description": "Nullable typed uploader account snapshot from this asset response, distinct from its release publisher."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "latest_release_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_assets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "releases",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "stage": "releases",
+                    "column": "release_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "assets"
+          },
+          "population": "GitHub latest-release endpoint: the latest published non-prerelease release, using GitHub's selection semantics; never inferred from the first list row. Every selected release is followed through its independently paginated asset list; embedded release.assets is not treated as complete."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_id",
+              "source_stage": "assets",
+              "source_column": "release_id",
+              "description": "Parent release identity supplied by a release-assets listing. NULL for direct asset lookup because that API response has no parent release ID."
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "release_asset_node_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "assets",
+              "source_column": "name"
+            },
+            {
+              "name": "label",
+              "source_stage": "assets",
+              "source_column": "label"
+            },
+            {
+              "name": "state",
+              "source_stage": "assets",
+              "source_column": "state"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "assets",
+              "source_column": "content_type"
+            },
+            {
+              "name": "digest",
+              "source_stage": "assets",
+              "source_column": "digest"
+            },
+            {
+              "name": "download_count",
+              "source_stage": "assets",
+              "source_column": "download_count"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "assets",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "assets",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "assets",
+              "source_column": "url"
+            },
+            {
+              "name": "browser_download_url",
+              "source_stage": "assets",
+              "source_column": "browser_download_url"
+            },
+            {
+              "name": "size_bytes",
+              "source_stage": "assets",
+              "source_column": "size_bytes",
+              "description": "Current asset byte size; separate from download count and Actions artifact storage."
+            },
+            {
+              "name": "uploader_id",
+              "source_stage": "assets",
+              "source_column": "uploader_id",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_login",
+              "source_stage": "assets",
+              "source_column": "uploader_login",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader_type",
+              "source_stage": "assets",
+              "source_column": "uploader_type",
+              "description": "Asset uploader account; may be NULL and is distinct from the release publisher."
+            },
+            {
+              "name": "uploader",
+              "source_stage": "assets",
+              "source_column": "uploader",
+              "description": "Nullable typed uploader account snapshot from this asset response, distinct from its release publisher."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "releases",
+                "entity": "releases_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_assets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "releases",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "stage": "releases",
+                    "column": "release_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "assets"
+          },
+          "population": "All releases visible to current credentials in the repository population, including visible drafts and prereleases; all pages are consumed. Every selected release is followed through its independently paginated asset list; embedded release.assets is not treated as complete."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "releases_to_repositories",
+      "from": "releases",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "release_assets_to_repositories",
+      "from": "release_assets",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "release_assets_to_releases",
+      "from": "release_assets",
+      "to": "releases",
+      "from_columns": [
+        "repository_id",
+        "release_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "release_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "release_id": "release_id"
+          },
+          "when_not_null": [
+            "release_id"
+          ]
+        },
+        {
+          "direction": "reverse",
+          "route": "releases",
+          "bindings": {
+            "repository": "repository",
+            "release_id": "release_id"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "releases_to_publishers",
+      "from": "releases",
+      "to": "users",
+      "from_columns": [
+        "publisher_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "publisher_login"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "release_assets_to_uploaders",
+      "from": "release_assets",
+      "to": "users",
+      "from_columns": [
+        "uploader_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "uploader_login"
+          }
+        }
+      ],
+      "optional": true
+    }
+  ]
+}

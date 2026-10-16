@@ -1,0 +1,5414 @@
+{
+  "entities": [
+    {
+      "name": "package_organization_owner_source",
+      "description": "Resolve the canonical account identity for package API access; response owner objects may be absent.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_owner_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/get",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "package_user_owner_source",
+      "description": "Resolve the canonical account identity for package API access; response owner objects may be absent.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_owner_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-by-username",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      }
+    },
+    {
+      "name": "package_authenticated_owner_source",
+      "description": "Resolve the canonical account identity for package API access; response owner objects may be absent.",
+      "arguments": [
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_owner_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-authenticated",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      }
+    },
+    {
+      "name": "package_organization_list_source",
+      "description": "packages/list-packages-for-organization schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/list-packages-for-organization",
+        "path_bindings": {
+          "org": {
+            "argument": "package_owner_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "package_type": {
+            "argument": "package_type"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_type",
+            "argument": "package_type",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_organization_lookup_source",
+      "description": "packages/get-package-for-organization schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-package-for-organization",
+        "path_bindings": {
+          "org": {
+            "argument": "package_owner_login"
+          },
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_type",
+            "argument": "package_type",
+            "comparison": "equal"
+          },
+          {
+            "column": "package_name",
+            "argument": "package_name",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_organization_conflicts_source",
+      "description": "packages/list-docker-migration-conflicting-packages-for-organization schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/list-docker-migration-conflicting-packages-for-organization",
+        "path_bindings": {
+          "org": {
+            "argument": "package_owner_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_organization_versions_source",
+      "description": "packages/get-all-package-versions-for-package-owned-by-org schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "listing_state",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "source_argument": "package_id"
+        },
+        {
+          "name": "package_name",
+          "source_argument": "package_name"
+        },
+        {
+          "name": "package_type",
+          "source_argument": "package_type"
+        },
+        {
+          "name": "package_version_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "version_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "package_html_url",
+          "path": [
+            "package_html_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "deleted_at",
+          "path": [
+            "deleted_at"
+          ]
+        },
+        {
+          "name": "metadata_package_type",
+          "path": [
+            "metadata",
+            "package_type"
+          ]
+        },
+        {
+          "name": "container_tags",
+          "path": [
+            "metadata",
+            "container",
+            "tags"
+          ]
+        },
+        {
+          "name": "docker_tags",
+          "path": [
+            "metadata",
+            "docker",
+            "tag"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id",
+        "package_version_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-all-package-versions-for-package-owned-by-org",
+        "path_bindings": {
+          "org": {
+            "argument": "package_owner_login"
+          },
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "listing_state"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "metadata_package_type",
+            "argument": "package_type",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_organization_version_source",
+      "description": "packages/get-package-version-for-organization schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_version_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "description": "Stable package version ID within the selected account, registry and package.",
+          "minimum": 1
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "source_argument": "package_id"
+        },
+        {
+          "name": "package_name",
+          "source_argument": "package_name"
+        },
+        {
+          "name": "package_type",
+          "source_argument": "package_type"
+        },
+        {
+          "name": "package_version_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "version_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "package_html_url",
+          "path": [
+            "package_html_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "deleted_at",
+          "path": [
+            "deleted_at"
+          ]
+        },
+        {
+          "name": "metadata_package_type",
+          "path": [
+            "metadata",
+            "package_type"
+          ]
+        },
+        {
+          "name": "container_tags",
+          "path": [
+            "metadata",
+            "container",
+            "tags"
+          ]
+        },
+        {
+          "name": "docker_tags",
+          "path": [
+            "metadata",
+            "docker",
+            "tag"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id",
+        "package_version_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-package-version-for-organization",
+        "path_bindings": {
+          "org": {
+            "argument": "package_owner_login"
+          },
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          },
+          "package_version_id": {
+            "argument": "package_version_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "metadata_package_type",
+            "argument": "package_type",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_version_id",
+            "argument": "package_version_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_user_list_source",
+      "description": "packages/list-packages-for-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/list-packages-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "package_owner_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "package_type": {
+            "argument": "package_type"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_type",
+            "argument": "package_type",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_user_lookup_source",
+      "description": "packages/get-package-for-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-package-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "package_owner_login"
+          },
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_type",
+            "argument": "package_type",
+            "comparison": "equal"
+          },
+          {
+            "column": "package_name",
+            "argument": "package_name",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_user_conflicts_source",
+      "description": "packages/list-docker-migration-conflicting-packages-for-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/list-docker-migration-conflicting-packages-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "package_owner_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_user_versions_source",
+      "description": "packages/get-all-package-versions-for-package-owned-by-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "source_argument": "package_id"
+        },
+        {
+          "name": "package_name",
+          "source_argument": "package_name"
+        },
+        {
+          "name": "package_type",
+          "source_argument": "package_type"
+        },
+        {
+          "name": "package_version_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "version_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "package_html_url",
+          "path": [
+            "package_html_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "deleted_at",
+          "path": [
+            "deleted_at"
+          ]
+        },
+        {
+          "name": "metadata_package_type",
+          "path": [
+            "metadata",
+            "package_type"
+          ]
+        },
+        {
+          "name": "container_tags",
+          "path": [
+            "metadata",
+            "container",
+            "tags"
+          ]
+        },
+        {
+          "name": "docker_tags",
+          "path": [
+            "metadata",
+            "docker",
+            "tag"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id",
+        "package_version_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-all-package-versions-for-package-owned-by-user",
+        "path_bindings": {
+          "username": {
+            "argument": "package_owner_login"
+          },
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "metadata_package_type",
+            "argument": "package_type",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_user_version_source",
+      "description": "packages/get-package-version-for-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_version_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "description": "Stable package version ID within the selected account, registry and package.",
+          "minimum": 1
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "source_argument": "package_id"
+        },
+        {
+          "name": "package_name",
+          "source_argument": "package_name"
+        },
+        {
+          "name": "package_type",
+          "source_argument": "package_type"
+        },
+        {
+          "name": "package_version_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "version_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "package_html_url",
+          "path": [
+            "package_html_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "deleted_at",
+          "path": [
+            "deleted_at"
+          ]
+        },
+        {
+          "name": "metadata_package_type",
+          "path": [
+            "metadata",
+            "package_type"
+          ]
+        },
+        {
+          "name": "container_tags",
+          "path": [
+            "metadata",
+            "container",
+            "tags"
+          ]
+        },
+        {
+          "name": "docker_tags",
+          "path": [
+            "metadata",
+            "docker",
+            "tag"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id",
+        "package_version_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-package-version-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "package_owner_login"
+          },
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          },
+          "package_version_id": {
+            "argument": "package_version_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "metadata_package_type",
+            "argument": "package_type",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_version_id",
+            "argument": "package_version_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_authenticated_list_source",
+      "description": "packages/list-packages-for-authenticated-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/list-packages-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "package_type": {
+            "argument": "package_type"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_type",
+            "argument": "package_type",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_authenticated_lookup_source",
+      "description": "packages/get-package-for-authenticated-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-package-for-authenticated-user",
+        "path_bindings": {
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_type",
+            "argument": "package_type",
+            "comparison": "equal"
+          },
+          {
+            "column": "package_name",
+            "argument": "package_name",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_authenticated_conflicts_source",
+      "description": "packages/list-docker-migration-conflicting-packages-for-authenticated-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "package_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "package_type",
+          "path": [
+            "package_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "reported_version_count",
+          "path": [
+            "version_count"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "package_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/list-docker-migration-conflicting-packages-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_owner_id",
+            "argument": "package_owner_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_authenticated_versions_source",
+      "description": "packages/get-all-package-versions-for-package-owned-by-authenticated-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "listing_state",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "source_argument": "package_id"
+        },
+        {
+          "name": "package_name",
+          "source_argument": "package_name"
+        },
+        {
+          "name": "package_type",
+          "source_argument": "package_type"
+        },
+        {
+          "name": "package_version_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "version_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "package_html_url",
+          "path": [
+            "package_html_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "deleted_at",
+          "path": [
+            "deleted_at"
+          ]
+        },
+        {
+          "name": "metadata_package_type",
+          "path": [
+            "metadata",
+            "package_type"
+          ]
+        },
+        {
+          "name": "container_tags",
+          "path": [
+            "metadata",
+            "container",
+            "tags"
+          ]
+        },
+        {
+          "name": "docker_tags",
+          "path": [
+            "metadata",
+            "docker",
+            "tag"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id",
+        "package_version_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-all-package-versions-for-package-owned-by-authenticated-user",
+        "path_bindings": {
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "listing_state"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "metadata_package_type",
+            "argument": "package_type",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "package_authenticated_version_source",
+      "description": "packages/get-package-version-for-authenticated-user schema-derived source. Named-user object/version reads cover public packages; authenticated endpoints preserve private-account access.",
+      "arguments": [
+        {
+          "name": "package_owner_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_login",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "package_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "container",
+          "description": "Package registry type; part of the qualified package identity.",
+          "min_length": 1,
+          "enum": [
+            "npm",
+            "maven",
+            "rubygems",
+            "docker",
+            "nuget",
+            "container"
+          ]
+        },
+        {
+          "name": "package_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example-image",
+          "description": "Exact package name within the selected account and registry type.",
+          "min_length": 1
+        },
+        {
+          "name": "package_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "package_version_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "description": "Stable package version ID within the selected account, registry and package.",
+          "minimum": 1
+        },
+        {
+          "name": "package_access_mode",
+          "type": "VARCHAR",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "package_owner_id",
+          "source_argument": "package_owner_id"
+        },
+        {
+          "name": "package_owner_login",
+          "source_argument": "package_owner_login"
+        },
+        {
+          "name": "package_owner_kind",
+          "source_argument": "package_owner_kind"
+        },
+        {
+          "name": "package_id",
+          "source_argument": "package_id"
+        },
+        {
+          "name": "package_name",
+          "source_argument": "package_name"
+        },
+        {
+          "name": "package_type",
+          "source_argument": "package_type"
+        },
+        {
+          "name": "package_version_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "version_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "package_html_url",
+          "path": [
+            "package_html_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "deleted_at",
+          "path": [
+            "deleted_at"
+          ]
+        },
+        {
+          "name": "metadata_package_type",
+          "path": [
+            "metadata",
+            "package_type"
+          ]
+        },
+        {
+          "name": "container_tags",
+          "path": [
+            "metadata",
+            "container",
+            "tags"
+          ]
+        },
+        {
+          "name": "docker_tags",
+          "path": [
+            "metadata",
+            "docker",
+            "tag"
+          ]
+        },
+        {
+          "name": "package_access_mode",
+          "source_argument": "package_access_mode",
+          "description": "Population access path used for this observation: organization, named user or authenticated account. It does not change canonical package identity."
+        }
+      ],
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id",
+        "package_version_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "packages/get-package-version-for-authenticated-user",
+        "path_bindings": {
+          "package_type": {
+            "argument": "package_type"
+          },
+          "package_name": {
+            "argument": "package_name"
+          },
+          "package_version_id": {
+            "argument": "package_version_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "metadata_package_type",
+            "argument": "package_type",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "package_version_id",
+            "argument": "package_version_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "packages",
+      "description": "Canonical package metadata qualified by account kind, stable account ID, registry type and package ID. Names are lookup context, not global identities. Organization, named-user and authenticated-user APIs preserve their distinct visibility; named-user object reads are public-only. Nullable owner summaries are qualified through the selected account endpoint. Conflict listing is a separately declared population. GitHub's pinned package schemas provide no download counter. package_access_mode records the organization, named-user or authenticated population and controls retrieval metadata; it is not part of entity identity. Linked repository ID/name are conformed from package-local evidence, preserving NULL for unlinked packages. Exact repository retrieval remains declared. Analytical enrichment through independently scoped repository listings is not approved: an accessible package may reference a public repository outside the caller's affiliated repository listing.",
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "package_owner_id",
+          "package_owner_login",
+          "package_owner_kind",
+          "package_id",
+          "package_name",
+          "package_type",
+          "visibility",
+          "reported_version_count",
+          "created_at",
+          "updated_at",
+          "url",
+          "html_url",
+          "reported_owner_id",
+          "reported_owner_login",
+          "repository_id",
+          "package_repository",
+          "package_created_day",
+          "package_access_mode"
+        ],
+        "dimensions": [
+          "package_owner_kind",
+          "package_owner_id",
+          "package_owner_login",
+          "package_type",
+          "package_id",
+          "package_name",
+          "visibility",
+          "created_at",
+          "package_created_day",
+          "package_access_mode"
+        ],
+        "metrics": [
+          {
+            "name": "package_count",
+            "kind": "count",
+            "comment": "Selected canonical packages; registry and owner scopes remain explicit."
+          },
+          {
+            "name": "public_package_count",
+            "kind": "count",
+            "comment": "Selected packages with public visibility.",
+            "where": {
+              "field": "visibility",
+              "op": "eq",
+              "value": "public"
+            }
+          },
+          {
+            "name": "private_package_count",
+            "kind": "count",
+            "comment": "Selected packages with private visibility.",
+            "where": {
+              "field": "visibility",
+              "op": "eq",
+              "value": "private"
+            }
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "package_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC package creation date."
+          }
+        ],
+        "sql_names": {
+          "package_owner_kind": "packages_package_owner_kind",
+          "package_owner_id": "packages_package_owner_id",
+          "package_owner_login": "packages_package_owner_login",
+          "package_type": "packages_package_type",
+          "package_id": "packages_package_id",
+          "package_name": "packages_package_name",
+          "visibility": "packages_visibility",
+          "created_at": "packages_created_at",
+          "package_created_day": "packages_package_created_day",
+          "package_access_mode": "packages_access_mode"
+        },
+        "crossfield": {
+          "metrics": {
+            "reported_package_version_count": {
+              "expression": "SUM(packages.reported_version_count)"
+            }
+          },
+          "metric_semantics": {
+            "reported_package_version_count": {
+              "dataset": "packages",
+              "comment": "Sum of current API-reported package version counters, distinct from enumerated selected version records.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "conflicts",
+          "select": [
+            "package_population"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "package_population",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "docker_migration_conflicts",
+              "description": "Select Docker migration conflicts rather than the normal registry inventory.",
+              "min_length": 1,
+              "enum": [
+                "docker_migration_conflicts"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "package_owner_id",
+              "source_stage": "packages",
+              "source_column": "package_owner_id"
+            },
+            {
+              "name": "package_owner_login",
+              "source_stage": "packages",
+              "source_column": "package_owner_login"
+            },
+            {
+              "name": "package_owner_kind",
+              "source_stage": "packages",
+              "source_column": "package_owner_kind"
+            },
+            {
+              "name": "package_id",
+              "source_stage": "packages",
+              "source_column": "package_id"
+            },
+            {
+              "name": "package_name",
+              "source_stage": "packages",
+              "source_column": "package_name"
+            },
+            {
+              "name": "package_type",
+              "source_stage": "packages",
+              "source_column": "package_type"
+            },
+            {
+              "name": "visibility",
+              "source_stage": "packages",
+              "source_column": "visibility"
+            },
+            {
+              "name": "reported_version_count",
+              "source_stage": "packages",
+              "source_column": "reported_version_count"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "packages",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "packages",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "packages",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "packages",
+              "source_column": "html_url"
+            },
+            {
+              "name": "reported_owner_id",
+              "source_stage": "packages",
+              "source_column": "reported_owner_id"
+            },
+            {
+              "name": "reported_owner_login",
+              "source_stage": "packages",
+              "source_column": "reported_owner_login"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "packages",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "package_repository",
+              "source_stage": "packages",
+              "source_column": "package_repository"
+            },
+            {
+              "name": "package_access_mode",
+              "source_stage": "packages",
+              "source_column": "package_access_mode"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owner",
+                "scope": "package_owner"
+              },
+              {
+                "name": "packages",
+                "scope": "package_conflicts"
+              }
+            ],
+            "output_stage": "packages"
+          },
+          "population": "Docker migration conflicts only; this is not the entire package inventory."
+        },
+        {
+          "name": "lookup",
+          "select": [
+            "package_name"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "package_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "container",
+              "description": "Package registry type; part of the qualified package identity.",
+              "min_length": 1,
+              "enum": [
+                "npm",
+                "maven",
+                "rubygems",
+                "docker",
+                "nuget",
+                "container"
+              ]
+            },
+            {
+              "name": "package_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "example-image",
+              "description": "Exact package name within the selected account and registry type.",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "package_owner_id",
+              "source_stage": "packages",
+              "source_column": "package_owner_id"
+            },
+            {
+              "name": "package_owner_login",
+              "source_stage": "packages",
+              "source_column": "package_owner_login"
+            },
+            {
+              "name": "package_owner_kind",
+              "source_stage": "packages",
+              "source_column": "package_owner_kind"
+            },
+            {
+              "name": "package_id",
+              "source_stage": "packages",
+              "source_column": "package_id"
+            },
+            {
+              "name": "package_name",
+              "source_stage": "packages",
+              "source_column": "package_name"
+            },
+            {
+              "name": "package_type",
+              "source_stage": "packages",
+              "source_column": "package_type"
+            },
+            {
+              "name": "visibility",
+              "source_stage": "packages",
+              "source_column": "visibility"
+            },
+            {
+              "name": "reported_version_count",
+              "source_stage": "packages",
+              "source_column": "reported_version_count"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "packages",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "packages",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "packages",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "packages",
+              "source_column": "html_url"
+            },
+            {
+              "name": "reported_owner_id",
+              "source_stage": "packages",
+              "source_column": "reported_owner_id"
+            },
+            {
+              "name": "reported_owner_login",
+              "source_stage": "packages",
+              "source_column": "reported_owner_login"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "packages",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "package_repository",
+              "source_stage": "packages",
+              "source_column": "package_repository"
+            },
+            {
+              "name": "package_access_mode",
+              "source_stage": "packages",
+              "source_column": "package_access_mode"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owner",
+                "scope": "package_owner"
+              },
+              {
+                "name": "packages",
+                "scope": "package_lookup"
+              }
+            ],
+            "output_stage": "packages"
+          },
+          "population": "One exact package or package-version identity; named-user object reads are public-package metadata only."
+        },
+        {
+          "name": "owners",
+          "select": [
+            "package_type"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "package_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "container",
+              "description": "Package registry type; part of the qualified package identity.",
+              "min_length": 1,
+              "enum": [
+                "npm",
+                "maven",
+                "rubygems",
+                "docker",
+                "nuget",
+                "container"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "package_owner_id",
+              "source_stage": "packages",
+              "source_column": "package_owner_id"
+            },
+            {
+              "name": "package_owner_login",
+              "source_stage": "packages",
+              "source_column": "package_owner_login"
+            },
+            {
+              "name": "package_owner_kind",
+              "source_stage": "packages",
+              "source_column": "package_owner_kind"
+            },
+            {
+              "name": "package_id",
+              "source_stage": "packages",
+              "source_column": "package_id"
+            },
+            {
+              "name": "package_name",
+              "source_stage": "packages",
+              "source_column": "package_name"
+            },
+            {
+              "name": "package_type",
+              "source_stage": "packages",
+              "source_column": "package_type"
+            },
+            {
+              "name": "visibility",
+              "source_stage": "packages",
+              "source_column": "visibility"
+            },
+            {
+              "name": "reported_version_count",
+              "source_stage": "packages",
+              "source_column": "reported_version_count"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "packages",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "packages",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "packages",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "packages",
+              "source_column": "html_url"
+            },
+            {
+              "name": "reported_owner_id",
+              "source_stage": "packages",
+              "source_column": "reported_owner_id"
+            },
+            {
+              "name": "reported_owner_login",
+              "source_stage": "packages",
+              "source_column": "reported_owner_login"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "packages",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "package_repository",
+              "source_stage": "packages",
+              "source_column": "package_repository"
+            },
+            {
+              "name": "package_access_mode",
+              "source_stage": "packages",
+              "source_column": "package_access_mode"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owner",
+                "scope": "package_owner"
+              },
+              {
+                "name": "packages",
+                "scope": "package_list"
+              }
+            ],
+            "output_stage": "packages"
+          },
+          "population": "Enumerate the selected registry across one owner population. Default version listings select active versions; named-user version endpoints are public-only."
+        }
+      ]
+    },
+    {
+      "name": "package_versions",
+      "description": "Canonical package version metadata at qualified package identity plus version ID. Parent package traversal establishes the stable package ID; tag/name arrays do not define identity. Organization/authenticated lists support explicit deleted versions; named-user version reads are public-only and offer no state filter. deleted_at remains optional evidence rather than an invented state flag. No pinned download counter is available. package_access_mode records the organization, named-user or authenticated population and controls retrieval metadata; it is not part of entity identity.",
+      "grain": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id",
+        "package_version_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "package_owner_id",
+          "package_owner_login",
+          "package_owner_kind",
+          "package_id",
+          "package_name",
+          "package_type",
+          "package_version_id",
+          "version_name",
+          "url",
+          "package_html_url",
+          "html_url",
+          "license",
+          "description",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "metadata_package_type",
+          "container_tags",
+          "docker_tags",
+          "package_version_created_day",
+          "package_access_mode"
+        ],
+        "dimensions": [
+          "package_owner_kind",
+          "package_owner_id",
+          "package_owner_login",
+          "package_type",
+          "package_id",
+          "package_name",
+          "package_version_id",
+          "version_name",
+          "license",
+          "created_at",
+          "deleted_at",
+          "package_version_created_day",
+          "package_access_mode"
+        ],
+        "metrics": [
+          {
+            "name": "package_version_count",
+            "kind": "count",
+            "comment": "Enumerated selected package version records, including deleted versions only where explicitly requested or returned by lookup."
+          },
+          {
+            "name": "deleted_package_version_count",
+            "kind": "count",
+            "comment": "Returned versions carrying a deletion timestamp; absent timestamps are not proof of an active version.",
+            "where": {
+              "field": "deleted_at",
+              "op": "is_not_null"
+            }
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "package_version_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC version creation date."
+          }
+        ],
+        "sql_names": {
+          "package_owner_kind": "package_versions_package_owner_kind",
+          "package_owner_id": "package_versions_package_owner_id",
+          "package_owner_login": "package_versions_package_owner_login",
+          "package_type": "package_versions_package_type",
+          "package_id": "package_versions_package_id",
+          "package_name": "package_versions_package_name",
+          "package_version_id": "package_versions_package_version_id",
+          "version_name": "package_versions_version_name",
+          "license": "package_versions_license",
+          "created_at": "package_versions_created_at",
+          "deleted_at": "package_versions_deleted_at",
+          "package_version_created_day": "package_versions_package_version_created_day",
+          "package_access_mode": "package_versions_access_mode"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "package_version_id"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "package_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "container",
+              "description": "Package registry type; part of the qualified package identity.",
+              "min_length": 1,
+              "enum": [
+                "npm",
+                "maven",
+                "rubygems",
+                "docker",
+                "nuget",
+                "container"
+              ]
+            },
+            {
+              "name": "package_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "example-image",
+              "description": "Exact package name within the selected account and registry type.",
+              "min_length": 1
+            },
+            {
+              "name": "package_version_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "example": 1,
+              "description": "Stable package version ID within the selected account, registry and package.",
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "package_owner_id",
+              "source_stage": "versions",
+              "source_column": "package_owner_id"
+            },
+            {
+              "name": "package_owner_login",
+              "source_stage": "versions",
+              "source_column": "package_owner_login"
+            },
+            {
+              "name": "package_owner_kind",
+              "source_stage": "versions",
+              "source_column": "package_owner_kind"
+            },
+            {
+              "name": "package_id",
+              "source_stage": "versions",
+              "source_column": "package_id"
+            },
+            {
+              "name": "package_name",
+              "source_stage": "versions",
+              "source_column": "package_name"
+            },
+            {
+              "name": "package_type",
+              "source_stage": "versions",
+              "source_column": "package_type"
+            },
+            {
+              "name": "package_version_id",
+              "source_stage": "versions",
+              "source_column": "package_version_id"
+            },
+            {
+              "name": "version_name",
+              "source_stage": "versions",
+              "source_column": "version_name"
+            },
+            {
+              "name": "url",
+              "source_stage": "versions",
+              "source_column": "url"
+            },
+            {
+              "name": "package_html_url",
+              "source_stage": "versions",
+              "source_column": "package_html_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "versions",
+              "source_column": "html_url"
+            },
+            {
+              "name": "license",
+              "source_stage": "versions",
+              "source_column": "license"
+            },
+            {
+              "name": "description",
+              "source_stage": "versions",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "versions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "versions",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "deleted_at",
+              "source_stage": "versions",
+              "source_column": "deleted_at"
+            },
+            {
+              "name": "metadata_package_type",
+              "source_stage": "versions",
+              "source_column": "metadata_package_type"
+            },
+            {
+              "name": "container_tags",
+              "source_stage": "versions",
+              "source_column": "container_tags"
+            },
+            {
+              "name": "docker_tags",
+              "source_stage": "versions",
+              "source_column": "docker_tags"
+            },
+            {
+              "name": "package_access_mode",
+              "source_stage": "versions",
+              "source_column": "package_access_mode"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owner",
+                "scope": "package_owner"
+              },
+              {
+                "name": "packages",
+                "scope": "package_lookup"
+              },
+              {
+                "name": "versions",
+                "scope": "package_version_lookup"
+              }
+            ],
+            "output_stage": "versions"
+          },
+          "population": "One exact package or package-version identity; named-user object reads are public-package metadata only."
+        },
+        {
+          "name": "states",
+          "select": [
+            "package_version_state"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "package_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "container",
+              "description": "Package registry type; part of the qualified package identity.",
+              "min_length": 1,
+              "enum": [
+                "npm",
+                "maven",
+                "rubygems",
+                "docker",
+                "nuget",
+                "container"
+              ]
+            },
+            {
+              "name": "package_name",
+              "type": "VARCHAR",
+              "nullable": true,
+              "example": "example-image",
+              "description": "Exact package name within the selected account and registry type.",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "package_version_state",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "active",
+              "description": "Explicit active or deleted version listing; supported only for organizations and the authenticated account.",
+              "min_length": 1,
+              "enum": [
+                "active",
+                "deleted"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "package_owner_id",
+              "source_stage": "versions",
+              "source_column": "package_owner_id"
+            },
+            {
+              "name": "package_owner_login",
+              "source_stage": "versions",
+              "source_column": "package_owner_login"
+            },
+            {
+              "name": "package_owner_kind",
+              "source_stage": "versions",
+              "source_column": "package_owner_kind"
+            },
+            {
+              "name": "package_id",
+              "source_stage": "versions",
+              "source_column": "package_id"
+            },
+            {
+              "name": "package_name",
+              "source_stage": "versions",
+              "source_column": "package_name"
+            },
+            {
+              "name": "package_type",
+              "source_stage": "versions",
+              "source_column": "package_type"
+            },
+            {
+              "name": "package_version_id",
+              "source_stage": "versions",
+              "source_column": "package_version_id"
+            },
+            {
+              "name": "version_name",
+              "source_stage": "versions",
+              "source_column": "version_name"
+            },
+            {
+              "name": "url",
+              "source_stage": "versions",
+              "source_column": "url"
+            },
+            {
+              "name": "package_html_url",
+              "source_stage": "versions",
+              "source_column": "package_html_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "versions",
+              "source_column": "html_url"
+            },
+            {
+              "name": "license",
+              "source_stage": "versions",
+              "source_column": "license"
+            },
+            {
+              "name": "description",
+              "source_stage": "versions",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "versions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "versions",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "deleted_at",
+              "source_stage": "versions",
+              "source_column": "deleted_at"
+            },
+            {
+              "name": "metadata_package_type",
+              "source_stage": "versions",
+              "source_column": "metadata_package_type"
+            },
+            {
+              "name": "container_tags",
+              "source_stage": "versions",
+              "source_column": "container_tags"
+            },
+            {
+              "name": "docker_tags",
+              "source_stage": "versions",
+              "source_column": "docker_tags"
+            },
+            {
+              "name": "package_access_mode",
+              "source_stage": "versions",
+              "source_column": "package_access_mode"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owner",
+                "scope": "package_state_owner"
+              },
+              {
+                "name": "packages",
+                "scope": "package_state_parent"
+              },
+              {
+                "name": "versions",
+                "scope": "package_versions_state"
+              }
+            ],
+            "output_stage": "versions"
+          },
+          "population": "Explicit active or deleted versions for an organization or authenticated account. Named-user scope and exact version lookup are excluded because those endpoints do not support the state filter."
+        },
+        {
+          "name": "packages",
+          "select": [
+            "package_name"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "package_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "container",
+              "description": "Package registry type; part of the qualified package identity.",
+              "min_length": 1,
+              "enum": [
+                "npm",
+                "maven",
+                "rubygems",
+                "docker",
+                "nuget",
+                "container"
+              ]
+            },
+            {
+              "name": "package_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "example-image",
+              "description": "Exact package name within the selected account and registry type.",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "package_owner_id",
+              "source_stage": "versions",
+              "source_column": "package_owner_id"
+            },
+            {
+              "name": "package_owner_login",
+              "source_stage": "versions",
+              "source_column": "package_owner_login"
+            },
+            {
+              "name": "package_owner_kind",
+              "source_stage": "versions",
+              "source_column": "package_owner_kind"
+            },
+            {
+              "name": "package_id",
+              "source_stage": "versions",
+              "source_column": "package_id"
+            },
+            {
+              "name": "package_name",
+              "source_stage": "versions",
+              "source_column": "package_name"
+            },
+            {
+              "name": "package_type",
+              "source_stage": "versions",
+              "source_column": "package_type"
+            },
+            {
+              "name": "package_version_id",
+              "source_stage": "versions",
+              "source_column": "package_version_id"
+            },
+            {
+              "name": "version_name",
+              "source_stage": "versions",
+              "source_column": "version_name"
+            },
+            {
+              "name": "url",
+              "source_stage": "versions",
+              "source_column": "url"
+            },
+            {
+              "name": "package_html_url",
+              "source_stage": "versions",
+              "source_column": "package_html_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "versions",
+              "source_column": "html_url"
+            },
+            {
+              "name": "license",
+              "source_stage": "versions",
+              "source_column": "license"
+            },
+            {
+              "name": "description",
+              "source_stage": "versions",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "versions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "versions",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "deleted_at",
+              "source_stage": "versions",
+              "source_column": "deleted_at"
+            },
+            {
+              "name": "metadata_package_type",
+              "source_stage": "versions",
+              "source_column": "metadata_package_type"
+            },
+            {
+              "name": "container_tags",
+              "source_stage": "versions",
+              "source_column": "container_tags"
+            },
+            {
+              "name": "docker_tags",
+              "source_stage": "versions",
+              "source_column": "docker_tags"
+            },
+            {
+              "name": "package_access_mode",
+              "source_stage": "versions",
+              "source_column": "package_access_mode"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owner",
+                "scope": "package_owner"
+              },
+              {
+                "name": "packages",
+                "scope": "package_lookup"
+              },
+              {
+                "name": "versions",
+                "scope": "package_versions_default"
+              }
+            ],
+            "output_stage": "versions"
+          },
+          "population": "All default active versions of one exact package; named-user versions are public-only."
+        },
+        {
+          "name": "owners",
+          "select": [
+            "package_type"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "default": null,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "package_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "container",
+              "description": "Package registry type; part of the qualified package identity.",
+              "min_length": 1,
+              "enum": [
+                "npm",
+                "maven",
+                "rubygems",
+                "docker",
+                "nuget",
+                "container"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "package_owner_id",
+              "source_stage": "versions",
+              "source_column": "package_owner_id"
+            },
+            {
+              "name": "package_owner_login",
+              "source_stage": "versions",
+              "source_column": "package_owner_login"
+            },
+            {
+              "name": "package_owner_kind",
+              "source_stage": "versions",
+              "source_column": "package_owner_kind"
+            },
+            {
+              "name": "package_id",
+              "source_stage": "versions",
+              "source_column": "package_id"
+            },
+            {
+              "name": "package_name",
+              "source_stage": "versions",
+              "source_column": "package_name"
+            },
+            {
+              "name": "package_type",
+              "source_stage": "versions",
+              "source_column": "package_type"
+            },
+            {
+              "name": "package_version_id",
+              "source_stage": "versions",
+              "source_column": "package_version_id"
+            },
+            {
+              "name": "version_name",
+              "source_stage": "versions",
+              "source_column": "version_name"
+            },
+            {
+              "name": "url",
+              "source_stage": "versions",
+              "source_column": "url"
+            },
+            {
+              "name": "package_html_url",
+              "source_stage": "versions",
+              "source_column": "package_html_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "versions",
+              "source_column": "html_url"
+            },
+            {
+              "name": "license",
+              "source_stage": "versions",
+              "source_column": "license"
+            },
+            {
+              "name": "description",
+              "source_stage": "versions",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "versions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "versions",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "deleted_at",
+              "source_stage": "versions",
+              "source_column": "deleted_at"
+            },
+            {
+              "name": "metadata_package_type",
+              "source_stage": "versions",
+              "source_column": "metadata_package_type"
+            },
+            {
+              "name": "container_tags",
+              "source_stage": "versions",
+              "source_column": "container_tags"
+            },
+            {
+              "name": "docker_tags",
+              "source_stage": "versions",
+              "source_column": "docker_tags"
+            },
+            {
+              "name": "package_access_mode",
+              "source_stage": "versions",
+              "source_column": "package_access_mode"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owner",
+                "scope": "package_owner"
+              },
+              {
+                "name": "packages",
+                "scope": "package_list"
+              },
+              {
+                "name": "versions",
+                "scope": "package_versions_default"
+              }
+            ],
+            "output_stage": "versions"
+          },
+          "population": "Enumerate the selected registry across one owner population. Default version listings select active versions; named-user version endpoints are public-only."
+        }
+      ]
+    }
+  ],
+  "scopes": {
+    "package_owner": {
+      "exclusive_parameters": [
+        "organization",
+        "user",
+        "authenticated_user"
+      ],
+      "comment": "Choose exactly one explicit account access population; authenticated_user selects /user APIs.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "package_organization_owner_source",
+          "arguments": {
+            "package_owner_kind": {
+              "literal": "Organization"
+            },
+            "organization": {
+              "parameter": "organization"
+            },
+            "package_access_mode": {
+              "literal": "organization"
+            }
+          }
+        },
+        "if_absent": {
+          "parameter": "user",
+          "if_present": {
+            "entity": "package_user_owner_source",
+            "arguments": {
+              "package_owner_kind": {
+                "literal": "User"
+              },
+              "user": {
+                "parameter": "user"
+              },
+              "package_access_mode": {
+                "literal": "user"
+              }
+            }
+          },
+          "if_absent": {
+            "entity": "package_authenticated_owner_source",
+            "arguments": {
+              "package_owner_kind": {
+                "literal": "User"
+              },
+              "package_access_mode": {
+                "literal": "authenticated"
+              }
+            }
+          }
+        }
+      }
+    },
+    "package_state_owner": {
+      "exclusive_parameters": [
+        "organization",
+        "authenticated_user"
+      ],
+      "comment": "Choose exactly one explicit account access population; authenticated_user selects /user APIs.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "package_organization_owner_source",
+          "arguments": {
+            "package_owner_kind": {
+              "literal": "Organization"
+            },
+            "organization": {
+              "parameter": "organization"
+            },
+            "package_access_mode": {
+              "literal": "organization"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "package_authenticated_owner_source",
+          "arguments": {
+            "package_owner_kind": {
+              "literal": "User"
+            },
+            "package_access_mode": {
+              "literal": "authenticated"
+            }
+          }
+        }
+      }
+    },
+    "package_list": {
+      "comment": "Selected package access path preserves its account visibility and business population.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "package_organization_list_source",
+          "arguments": {
+            "package_owner_id": {
+              "stage": "owner",
+              "column": "package_owner_id"
+            },
+            "package_owner_login": {
+              "stage": "owner",
+              "column": "package_owner_login"
+            },
+            "package_owner_kind": {
+              "stage": "owner",
+              "column": "package_owner_kind"
+            },
+            "package_type": {
+              "parameter": "package_type"
+            },
+            "package_access_mode": {
+              "stage": "owner",
+              "column": "package_access_mode"
+            }
+          }
+        },
+        "if_absent": {
+          "parameter": "user",
+          "if_present": {
+            "entity": "package_user_list_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_type": {
+                "parameter": "package_type"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          },
+          "if_absent": {
+            "entity": "package_authenticated_list_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_type": {
+                "parameter": "package_type"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          }
+        }
+      }
+    },
+    "package_lookup": {
+      "comment": "Selected package access path preserves its account visibility and business population.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "package_organization_lookup_source",
+          "arguments": {
+            "package_owner_id": {
+              "stage": "owner",
+              "column": "package_owner_id"
+            },
+            "package_owner_login": {
+              "stage": "owner",
+              "column": "package_owner_login"
+            },
+            "package_owner_kind": {
+              "stage": "owner",
+              "column": "package_owner_kind"
+            },
+            "package_type": {
+              "parameter": "package_type"
+            },
+            "package_name": {
+              "parameter": "package_name"
+            },
+            "package_access_mode": {
+              "stage": "owner",
+              "column": "package_access_mode"
+            }
+          }
+        },
+        "if_absent": {
+          "parameter": "user",
+          "if_present": {
+            "entity": "package_user_lookup_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_type": {
+                "parameter": "package_type"
+              },
+              "package_name": {
+                "parameter": "package_name"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          },
+          "if_absent": {
+            "entity": "package_authenticated_lookup_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_type": {
+                "parameter": "package_type"
+              },
+              "package_name": {
+                "parameter": "package_name"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          }
+        }
+      }
+    },
+    "package_conflicts": {
+      "comment": "Selected package access path preserves its account visibility and business population.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "package_organization_conflicts_source",
+          "arguments": {
+            "package_owner_id": {
+              "stage": "owner",
+              "column": "package_owner_id"
+            },
+            "package_owner_login": {
+              "stage": "owner",
+              "column": "package_owner_login"
+            },
+            "package_owner_kind": {
+              "stage": "owner",
+              "column": "package_owner_kind"
+            },
+            "package_access_mode": {
+              "stage": "owner",
+              "column": "package_access_mode"
+            }
+          }
+        },
+        "if_absent": {
+          "parameter": "user",
+          "if_present": {
+            "entity": "package_user_conflicts_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          },
+          "if_absent": {
+            "entity": "package_authenticated_conflicts_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          }
+        }
+      }
+    },
+    "package_state_parent": {
+      "comment": "Explicit-state version retrieval can start at one package or enumerate the selected registry.",
+      "select": {
+        "parameter": "package_name",
+        "if_present": {
+          "parameter": "organization",
+          "if_present": {
+            "entity": "package_organization_lookup_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_type": {
+                "parameter": "package_type"
+              },
+              "package_name": {
+                "parameter": "package_name"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          },
+          "if_absent": {
+            "entity": "package_authenticated_lookup_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_type": {
+                "parameter": "package_type"
+              },
+              "package_name": {
+                "parameter": "package_name"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          }
+        },
+        "if_absent": {
+          "parameter": "organization",
+          "if_present": {
+            "entity": "package_organization_list_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_type": {
+                "parameter": "package_type"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          },
+          "if_absent": {
+            "entity": "package_authenticated_list_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "owner",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "owner",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "owner",
+                "column": "package_owner_kind"
+              },
+              "package_type": {
+                "parameter": "package_type"
+              },
+              "package_access_mode": {
+                "stage": "owner",
+                "column": "package_access_mode"
+              }
+            }
+          }
+        }
+      }
+    },
+    "package_versions_default": {
+      "comment": "Explicit-state lists preserve active/deleted selection. Named-user lists expose public versions and have no state selector in the pinned API.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "package_organization_versions_source",
+          "arguments": {
+            "package_owner_id": {
+              "stage": "packages",
+              "column": "package_owner_id"
+            },
+            "package_owner_login": {
+              "stage": "packages",
+              "column": "package_owner_login"
+            },
+            "package_owner_kind": {
+              "stage": "packages",
+              "column": "package_owner_kind"
+            },
+            "package_id": {
+              "stage": "packages",
+              "column": "package_id"
+            },
+            "package_name": {
+              "stage": "packages",
+              "column": "package_name"
+            },
+            "package_type": {
+              "stage": "packages",
+              "column": "package_type"
+            },
+            "listing_state": {
+              "literal": "active"
+            },
+            "package_access_mode": {
+              "stage": "packages",
+              "column": "package_access_mode"
+            }
+          }
+        },
+        "if_absent": {
+          "parameter": "user",
+          "if_present": {
+            "entity": "package_user_versions_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "packages",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "packages",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "packages",
+                "column": "package_owner_kind"
+              },
+              "package_id": {
+                "stage": "packages",
+                "column": "package_id"
+              },
+              "package_name": {
+                "stage": "packages",
+                "column": "package_name"
+              },
+              "package_type": {
+                "stage": "packages",
+                "column": "package_type"
+              },
+              "package_access_mode": {
+                "stage": "packages",
+                "column": "package_access_mode"
+              }
+            }
+          },
+          "if_absent": {
+            "entity": "package_authenticated_versions_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "packages",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "packages",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "packages",
+                "column": "package_owner_kind"
+              },
+              "package_id": {
+                "stage": "packages",
+                "column": "package_id"
+              },
+              "package_name": {
+                "stage": "packages",
+                "column": "package_name"
+              },
+              "package_type": {
+                "stage": "packages",
+                "column": "package_type"
+              },
+              "listing_state": {
+                "literal": "active"
+              },
+              "package_access_mode": {
+                "stage": "packages",
+                "column": "package_access_mode"
+              }
+            }
+          }
+        }
+      }
+    },
+    "package_versions_state": {
+      "comment": "Explicit-state lists preserve active/deleted selection. Named-user lists expose public versions and have no state selector in the pinned API.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "package_organization_versions_source",
+          "arguments": {
+            "package_owner_id": {
+              "stage": "packages",
+              "column": "package_owner_id"
+            },
+            "package_owner_login": {
+              "stage": "packages",
+              "column": "package_owner_login"
+            },
+            "package_owner_kind": {
+              "stage": "packages",
+              "column": "package_owner_kind"
+            },
+            "package_id": {
+              "stage": "packages",
+              "column": "package_id"
+            },
+            "package_name": {
+              "stage": "packages",
+              "column": "package_name"
+            },
+            "package_type": {
+              "stage": "packages",
+              "column": "package_type"
+            },
+            "listing_state": {
+              "parameter": "package_version_state"
+            },
+            "package_access_mode": {
+              "stage": "packages",
+              "column": "package_access_mode"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "package_authenticated_versions_source",
+          "arguments": {
+            "package_owner_id": {
+              "stage": "packages",
+              "column": "package_owner_id"
+            },
+            "package_owner_login": {
+              "stage": "packages",
+              "column": "package_owner_login"
+            },
+            "package_owner_kind": {
+              "stage": "packages",
+              "column": "package_owner_kind"
+            },
+            "package_id": {
+              "stage": "packages",
+              "column": "package_id"
+            },
+            "package_name": {
+              "stage": "packages",
+              "column": "package_name"
+            },
+            "package_type": {
+              "stage": "packages",
+              "column": "package_type"
+            },
+            "listing_state": {
+              "parameter": "package_version_state"
+            },
+            "package_access_mode": {
+              "stage": "packages",
+              "column": "package_access_mode"
+            }
+          }
+        }
+      }
+    },
+    "package_version_lookup": {
+      "comment": "Explicit-state lists preserve active/deleted selection. Named-user lists expose public versions and have no state selector in the pinned API.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "package_organization_version_source",
+          "arguments": {
+            "package_owner_id": {
+              "stage": "packages",
+              "column": "package_owner_id"
+            },
+            "package_owner_login": {
+              "stage": "packages",
+              "column": "package_owner_login"
+            },
+            "package_owner_kind": {
+              "stage": "packages",
+              "column": "package_owner_kind"
+            },
+            "package_id": {
+              "stage": "packages",
+              "column": "package_id"
+            },
+            "package_name": {
+              "stage": "packages",
+              "column": "package_name"
+            },
+            "package_type": {
+              "stage": "packages",
+              "column": "package_type"
+            },
+            "package_version_id": {
+              "parameter": "package_version_id"
+            },
+            "package_access_mode": {
+              "stage": "packages",
+              "column": "package_access_mode"
+            }
+          }
+        },
+        "if_absent": {
+          "parameter": "user",
+          "if_present": {
+            "entity": "package_user_version_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "packages",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "packages",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "packages",
+                "column": "package_owner_kind"
+              },
+              "package_id": {
+                "stage": "packages",
+                "column": "package_id"
+              },
+              "package_name": {
+                "stage": "packages",
+                "column": "package_name"
+              },
+              "package_type": {
+                "stage": "packages",
+                "column": "package_type"
+              },
+              "package_version_id": {
+                "parameter": "package_version_id"
+              },
+              "package_access_mode": {
+                "stage": "packages",
+                "column": "package_access_mode"
+              }
+            }
+          },
+          "if_absent": {
+            "entity": "package_authenticated_version_source",
+            "arguments": {
+              "package_owner_id": {
+                "stage": "packages",
+                "column": "package_owner_id"
+              },
+              "package_owner_login": {
+                "stage": "packages",
+                "column": "package_owner_login"
+              },
+              "package_owner_kind": {
+                "stage": "packages",
+                "column": "package_owner_kind"
+              },
+              "package_id": {
+                "stage": "packages",
+                "column": "package_id"
+              },
+              "package_name": {
+                "stage": "packages",
+                "column": "package_name"
+              },
+              "package_type": {
+                "stage": "packages",
+                "column": "package_type"
+              },
+              "package_version_id": {
+                "parameter": "package_version_id"
+              },
+              "package_access_mode": {
+                "stage": "packages",
+                "column": "package_access_mode"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "relationships": [
+    {
+      "name": "package_versions_to_packages",
+      "from": "package_versions",
+      "to": "packages",
+      "from_columns": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "to_columns": [
+        "package_owner_kind",
+        "package_owner_id",
+        "package_type",
+        "package_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "package_type": "package_type",
+            "package_name": "package_name",
+            "organization": "package_owner_login"
+          },
+          "when": {
+            "package_access_mode": "organization"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "packages",
+          "bindings": {
+            "package_type": "package_type",
+            "package_name": "package_name",
+            "organization": "package_owner_login"
+          },
+          "when": {
+            "package_access_mode": "organization"
+          }
+        },
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "package_type": "package_type",
+            "package_name": "package_name",
+            "user": "package_owner_login"
+          },
+          "when": {
+            "package_access_mode": "user"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "packages",
+          "bindings": {
+            "package_type": "package_type",
+            "package_name": "package_name",
+            "user": "package_owner_login"
+          },
+          "when": {
+            "package_access_mode": "user"
+          }
+        },
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "package_type": "package_type",
+            "package_name": "package_name",
+            "authenticated_user": {
+              "literal": true
+            }
+          },
+          "when": {
+            "package_access_mode": "authenticated"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "packages",
+          "bindings": {
+            "package_type": "package_type",
+            "package_name": "package_name",
+            "authenticated_user": {
+              "literal": true
+            }
+          },
+          "when": {
+            "package_access_mode": "authenticated"
+          }
+        }
+      ]
+    },
+    {
+      "name": "packages_to_repositories",
+      "from": "packages",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "optional": true,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "package_repository"
+          }
+        }
+      ],
+      "analytical": false
+    }
+  ],
+  "crossfield": {
+    "conformances": [
+      {
+        "id": "github.packages.repository_id.v1",
+        "domain": "github.repository",
+        "fields": [
+          "repositories.repository_id",
+          "packages.repository_id"
+        ],
+        "datatype": "Integer",
+        "null_policy": "equal"
+      },
+      {
+        "id": "github.packages.repository_full_name.v1",
+        "domain": "github.repository",
+        "fields": [
+          "repositories.repository",
+          "packages.package_repository"
+        ],
+        "datatype": "String",
+        "null_policy": "equal"
+      }
+    ]
+  }
+}

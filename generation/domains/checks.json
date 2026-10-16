@@ -1,0 +1,4102 @@
+{
+  "entities": [
+    {
+      "name": "check_suite_lookup",
+      "description": "checks/get-suite schema-derived source. ",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "check_suite_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "example": 5
+        }
+      ],
+      "columns": [
+        {
+          "name": "check_suite_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "check_suite_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "before",
+          "path": [
+            "before"
+          ]
+        },
+        {
+          "name": "after",
+          "path": [
+            "after"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "latest_check_runs_count",
+          "path": [
+            "latest_check_runs_count"
+          ]
+        },
+        {
+          "name": "check_runs_url",
+          "path": [
+            "check_runs_url"
+          ]
+        },
+        {
+          "name": "rerequestable",
+          "path": [
+            "rerequestable"
+          ]
+        },
+        {
+          "name": "runs_rerequestable",
+          "path": [
+            "runs_rerequestable"
+          ]
+        },
+        {
+          "name": "app_id",
+          "path": [
+            "app",
+            "id"
+          ]
+        },
+        {
+          "name": "app_slug",
+          "path": [
+            "app",
+            "slug"
+          ]
+        },
+        {
+          "name": "pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "selection": {
+            "id": true,
+            "number": true
+          },
+          "description": "PR associations reported by Checks; fork pushes may yield an empty array. These are associations, not proof of PR ownership or author activity."
+        }
+      ],
+      "grain": [
+        "check_suite_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "checks/get-suite",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "check_suite_id": {
+            "argument": "check_suite_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "check_suite_id",
+            "argument": "check_suite_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "check_suites_for_ref_source",
+      "description": "checks/list-suites-for-ref schema-derived source. ",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "git_ref",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "example": "main",
+          "description": "Commit SHA, branch or tag whose checks are selected; a branch or tag resolves at request time."
+        }
+      ],
+      "columns": [
+        {
+          "name": "check_suite_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "check_suite_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "before",
+          "path": [
+            "before"
+          ]
+        },
+        {
+          "name": "after",
+          "path": [
+            "after"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "latest_check_runs_count",
+          "path": [
+            "latest_check_runs_count"
+          ]
+        },
+        {
+          "name": "check_runs_url",
+          "path": [
+            "check_runs_url"
+          ]
+        },
+        {
+          "name": "rerequestable",
+          "path": [
+            "rerequestable"
+          ]
+        },
+        {
+          "name": "runs_rerequestable",
+          "path": [
+            "runs_rerequestable"
+          ]
+        },
+        {
+          "name": "app_id",
+          "path": [
+            "app",
+            "id"
+          ]
+        },
+        {
+          "name": "app_slug",
+          "path": [
+            "app",
+            "slug"
+          ]
+        },
+        {
+          "name": "pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "selection": {
+            "id": true,
+            "number": true
+          },
+          "description": "PR associations reported by Checks; fork pushes may yield an empty array. These are associations, not proof of PR ownership or author activity."
+        }
+      ],
+      "grain": [
+        "check_suite_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "checks/list-suites-for-ref",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "ref": {
+            "argument": "git_ref"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "check_suites"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "check_run_lookup",
+      "description": "checks/get schema-derived source. ",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "check_run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "example": 4
+        }
+      ],
+      "columns": [
+        {
+          "name": "check_run_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "check_run_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "external_id",
+          "path": [
+            "external_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "details_url",
+          "path": [
+            "details_url"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "started_at",
+          "path": [
+            "started_at"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "path": [
+            "completed_at"
+          ]
+        },
+        {
+          "name": "check_suite_id",
+          "path": [
+            "check_suite",
+            "id"
+          ]
+        },
+        {
+          "name": "app_id",
+          "path": [
+            "app",
+            "id"
+          ]
+        },
+        {
+          "name": "app_slug",
+          "path": [
+            "app",
+            "slug"
+          ]
+        },
+        {
+          "name": "output_title",
+          "path": [
+            "output",
+            "title"
+          ]
+        },
+        {
+          "name": "output_summary",
+          "path": [
+            "output",
+            "summary"
+          ]
+        },
+        {
+          "name": "output_text",
+          "path": [
+            "output",
+            "text"
+          ]
+        },
+        {
+          "name": "annotations_count",
+          "path": [
+            "output",
+            "annotations_count"
+          ]
+        },
+        {
+          "name": "annotations_url",
+          "path": [
+            "output",
+            "annotations_url"
+          ]
+        },
+        {
+          "name": "pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "selection": {
+            "id": true,
+            "number": true
+          },
+          "description": "PR associations reported by Checks; fork pushes may yield an empty array."
+        },
+        {
+          "name": "deployment_id",
+          "path": [
+            "deployment",
+            "id"
+          ]
+        },
+        {
+          "name": "deployment",
+          "path": [
+            "deployment"
+          ],
+          "selection": {
+            "url": true,
+            "id": true,
+            "node_id": true,
+            "task": true,
+            "original_environment": true,
+            "environment": true,
+            "description": true,
+            "created_at": true,
+            "updated_at": true,
+            "statuses_url": true,
+            "repository_url": true,
+            "transient_environment": true,
+            "production_environment": true,
+            "performed_via_github_app": {
+              "id": true,
+              "slug": true,
+              "node_id": true,
+              "name": true,
+              "description": true,
+              "external_url": true,
+              "html_url": true,
+              "created_at": true,
+              "updated_at": true,
+              "events": true,
+              "installations_count": true
+            }
+          }
+        }
+      ],
+      "grain": [
+        "check_run_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "checks/get",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "check_run_id": {
+            "argument": "check_run_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "check_run_id",
+            "argument": "check_run_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "check_runs_for_suite_source",
+      "description": "checks/list-for-suite schema-derived source. All visible reruns, with filter=all instead of the API latest default.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "check_suite_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "example": 5
+        }
+      ],
+      "columns": [
+        {
+          "name": "check_run_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "check_run_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "external_id",
+          "path": [
+            "external_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "details_url",
+          "path": [
+            "details_url"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "started_at",
+          "path": [
+            "started_at"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "path": [
+            "completed_at"
+          ]
+        },
+        {
+          "name": "check_suite_id",
+          "path": [
+            "check_suite",
+            "id"
+          ]
+        },
+        {
+          "name": "app_id",
+          "path": [
+            "app",
+            "id"
+          ]
+        },
+        {
+          "name": "app_slug",
+          "path": [
+            "app",
+            "slug"
+          ]
+        },
+        {
+          "name": "output_title",
+          "path": [
+            "output",
+            "title"
+          ]
+        },
+        {
+          "name": "output_summary",
+          "path": [
+            "output",
+            "summary"
+          ]
+        },
+        {
+          "name": "output_text",
+          "path": [
+            "output",
+            "text"
+          ]
+        },
+        {
+          "name": "annotations_count",
+          "path": [
+            "output",
+            "annotations_count"
+          ]
+        },
+        {
+          "name": "annotations_url",
+          "path": [
+            "output",
+            "annotations_url"
+          ]
+        },
+        {
+          "name": "pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "selection": {
+            "id": true,
+            "number": true
+          },
+          "description": "PR associations reported by Checks; fork pushes may yield an empty array."
+        },
+        {
+          "name": "deployment_id",
+          "path": [
+            "deployment",
+            "id"
+          ]
+        },
+        {
+          "name": "deployment",
+          "path": [
+            "deployment"
+          ],
+          "selection": {
+            "url": true,
+            "id": true,
+            "node_id": true,
+            "task": true,
+            "original_environment": true,
+            "environment": true,
+            "description": true,
+            "created_at": true,
+            "updated_at": true,
+            "statuses_url": true,
+            "repository_url": true,
+            "transient_environment": true,
+            "production_environment": true,
+            "performed_via_github_app": {
+              "id": true,
+              "slug": true,
+              "node_id": true,
+              "name": true,
+              "description": true,
+              "external_url": true,
+              "html_url": true,
+              "created_at": true,
+              "updated_at": true,
+              "events": true,
+              "installations_count": true
+            }
+          }
+        }
+      ],
+      "grain": [
+        "check_run_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "checks/list-for-suite",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "check_suite_id": {
+            "argument": "check_suite_id"
+          }
+        },
+        "query_bindings": {
+          "filter": {
+            "literal": "all"
+          }
+        },
+        "result_path": [
+          "check_runs"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "check_annotations_source",
+      "description": "checks/list-annotations schema-derived source. ",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "check_run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "example": 4
+        }
+      ],
+      "columns": [
+        {
+          "name": "annotation_position",
+          "source_ordinal": true,
+          "description": "One-based row position across all response pages in this run scan. A retrieval snapshot position, not a durable GitHub annotation ID."
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "start_line",
+          "path": [
+            "start_line"
+          ]
+        },
+        {
+          "name": "end_line",
+          "path": [
+            "end_line"
+          ]
+        },
+        {
+          "name": "start_column",
+          "path": [
+            "start_column"
+          ]
+        },
+        {
+          "name": "end_column",
+          "path": [
+            "end_column"
+          ]
+        },
+        {
+          "name": "annotation_level",
+          "path": [
+            "annotation_level"
+          ]
+        },
+        {
+          "name": "title",
+          "path": [
+            "title"
+          ]
+        },
+        {
+          "name": "message",
+          "path": [
+            "message"
+          ]
+        },
+        {
+          "name": "raw_details",
+          "path": [
+            "raw_details"
+          ]
+        },
+        {
+          "name": "blob_href",
+          "path": [
+            "blob_href"
+          ]
+        }
+      ],
+      "grain": [
+        "annotation_position"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "checks/list-annotations",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "check_run_id": {
+            "argument": "check_run_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "check_steps_source",
+      "description": "Independently paginated GraphQL CheckRun.steps. Parent node and connection must remain available; NULL cannot become an empty known-run population. CheckStep.number is its index in the parent run, not an Actions job ID.",
+      "arguments": [
+        {
+          "name": "check_run_node_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Exact GraphQL CheckRun node ID. Selects the explicit enriched route and requires the matching repository.",
+          "example": "CR_kwDOExample"
+        }
+      ],
+      "columns": [
+        {
+          "name": "step_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "external_id",
+          "path": [
+            "externalId"
+          ]
+        },
+        {
+          "name": "seconds_to_completion",
+          "path": [
+            "secondsToCompletion"
+          ]
+        },
+        {
+          "name": "started_at",
+          "path": [
+            "startedAt"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "path": [
+            "completedAt"
+          ]
+        }
+      ],
+      "grain": [
+        "step_number"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "node",
+          "steps"
+        ],
+        "field_types": {
+          "node": "CheckRun"
+        },
+        "field_arguments": {
+          "node": {
+            "id": {
+              "argument": "check_run_node_id"
+            }
+          },
+          "steps": {
+            "first": {
+              "literal": 100
+            },
+            "after": {
+              "cursor": true
+            }
+          }
+        },
+        "result_path": [
+          "nodes"
+        ],
+        "pagination": {
+          "kind": "cursor",
+          "page_info_path": [
+            "pageInfo"
+          ]
+        },
+        "nullable_path_policy": "error"
+      }
+    },
+    {
+      "name": "check_suite_graph_source",
+      "description": "Explicit GraphQL CheckSuite enrichment. Returned node and repository identities are validated before canonical REST hydration; inaccessible/deleted/mismatched nodes fail. Unselected connections remain separate coverage gaps.",
+      "arguments": [
+        {
+          "name": "check_suite_node_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Exact GraphQL CheckSuite node ID. Selects the explicit enriched route and requires the matching repository.",
+          "example": "CS_kwDOExample"
+        },
+        {
+          "name": "expected_repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Canonical repository identity required to match the returned GraphQL node repository.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "check_suite_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "check_suite_id",
+          "path": [
+            "databaseId"
+          ]
+        },
+        {
+          "name": "actual_repository_id",
+          "path": [
+            "repository",
+            "databaseId"
+          ]
+        },
+        {
+          "name": "actual_repository",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        },
+        {
+          "name": "creator_id",
+          "path": [
+            "creator",
+            "databaseId"
+          ]
+        },
+        {
+          "name": "creator_login",
+          "path": [
+            "creator",
+            "login"
+          ]
+        },
+        {
+          "name": "creator",
+          "path": [
+            "creator"
+          ],
+          "selection": {
+            "id": true,
+            "databaseId": true,
+            "login": true,
+            "url": true
+          }
+        },
+        {
+          "name": "branch",
+          "path": [
+            "branch"
+          ],
+          "selection": {
+            "id": true,
+            "name": true,
+            "prefix": true
+          }
+        },
+        {
+          "name": "push",
+          "path": [
+            "push"
+          ],
+          "selection": {
+            "id": true,
+            "previousSha": true,
+            "nextSha": true,
+            "permalink": true
+          }
+        },
+        {
+          "name": "pusher_login",
+          "path": [
+            "push",
+            "pusher",
+            "login"
+          ]
+        },
+        {
+          "name": "pusher_type",
+          "path": [
+            "push",
+            "pusher",
+            "__typename"
+          ]
+        },
+        {
+          "name": "workflow_run_id",
+          "path": [
+            "workflowRun",
+            "databaseId"
+          ]
+        },
+        {
+          "name": "workflow_run",
+          "path": [
+            "workflowRun"
+          ],
+          "selection": {
+            "id": true,
+            "databaseId": true,
+            "runNumber": true,
+            "event": true,
+            "url": true,
+            "file": {
+              "id": true,
+              "path": true,
+              "repositoryName": true,
+              "repositoryFileUrl": true,
+              "resourcePath": true,
+              "url": true,
+              "viewerCanPushRepository": true,
+              "viewerCanReadRepository": true
+            }
+          }
+        },
+        {
+          "name": "graph_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "resource_path",
+          "path": [
+            "resourcePath"
+          ]
+        }
+      ],
+      "grain": [
+        "check_suite_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "node"
+        ],
+        "field_types": {
+          "node": "CheckSuite"
+        },
+        "field_arguments": {
+          "node": {
+            "id": {
+              "argument": "check_suite_node_id"
+            }
+          }
+        },
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "required_non_null_fields": [
+          "check_suite_id",
+          "actual_repository_id",
+          "actual_repository"
+        ],
+        "row_assertions": [
+          {
+            "column": "check_suite_node_id",
+            "argument": "check_suite_node_id",
+            "comparison": "equal"
+          },
+          {
+            "column": "actual_repository_id",
+            "argument": "expected_repository_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "check_run_graph_source",
+      "description": "Explicit GraphQL CheckRun enrichment. Returned node and repository identities are validated before canonical REST hydration; inaccessible/deleted/mismatched nodes fail. Unselected connections remain separate coverage gaps.",
+      "arguments": [
+        {
+          "name": "check_run_node_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Exact GraphQL CheckRun node ID. Selects the explicit enriched route and requires the matching repository.",
+          "example": "CR_kwDOExample"
+        },
+        {
+          "name": "expected_repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Canonical repository identity required to match the returned GraphQL node repository.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "check_run_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "check_run_id",
+          "path": [
+            "databaseId"
+          ]
+        },
+        {
+          "name": "actual_repository_id",
+          "path": [
+            "repository",
+            "databaseId"
+          ]
+        },
+        {
+          "name": "actual_repository",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        },
+        {
+          "name": "graph_deployment_id",
+          "path": [
+            "deployment",
+            "databaseId"
+          ]
+        },
+        {
+          "name": "deployment_context",
+          "path": [
+            "deployment"
+          ],
+          "selection": {
+            "id": true,
+            "databaseId": true,
+            "commitOid": true,
+            "createdAt": true,
+            "updatedAt": true,
+            "description": true,
+            "environment": true,
+            "latestEnvironment": true,
+            "originalEnvironment": true,
+            "state": true,
+            "task": true
+          }
+        },
+        {
+          "name": "pending_deployment_request",
+          "path": [
+            "pendingDeploymentRequest"
+          ],
+          "selection": {
+            "currentUserCanApprove": true,
+            "waitTimer": true,
+            "waitTimerStartedAt": true,
+            "environment": {
+              "id": true,
+              "databaseId": true,
+              "name": true,
+              "isPinned": true,
+              "pinnedPosition": true
+            }
+          }
+        },
+        {
+          "name": "permalink",
+          "path": [
+            "permalink"
+          ]
+        },
+        {
+          "name": "resource_path",
+          "path": [
+            "resourcePath"
+          ]
+        }
+      ],
+      "grain": [
+        "check_run_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "node"
+        ],
+        "field_types": {
+          "node": "CheckRun"
+        },
+        "field_arguments": {
+          "node": {
+            "id": {
+              "argument": "check_run_node_id"
+            }
+          }
+        },
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "required_non_null_fields": [
+          "check_run_id",
+          "actual_repository_id",
+          "actual_repository"
+        ],
+        "row_assertions": [
+          {
+            "column": "check_run_node_id",
+            "argument": "check_run_node_id",
+            "comparison": "equal"
+          },
+          {
+            "column": "actual_repository_id",
+            "argument": "expected_repository_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "check_suites",
+      "description": "GitHub check suites with repository and commit identity, nullable producer metadata and explicit ref or ID retrieval. latest_check_runs_count is GitHub latest-run metadata and does not count all reruns. The explicit node-ID route adds typed GraphQL-only context; ordinary routes leave that context NULL as unrequested. Numeric IDs and repository membership are verified before REST hydration.",
+      "grain": [
+        "repository_id",
+        "check_suite_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "check_suite_id",
+          "check_suite_node_id",
+          "head_branch",
+          "head_sha",
+          "status",
+          "conclusion",
+          "url",
+          "before",
+          "after",
+          "created_at",
+          "updated_at",
+          "latest_check_runs_count",
+          "check_runs_url",
+          "rerequestable",
+          "runs_rerequestable",
+          "app_id",
+          "app_slug",
+          "pull_requests",
+          "creator_id",
+          "creator_login",
+          "creator",
+          "branch",
+          "push",
+          "pusher_login",
+          "pusher_type",
+          "workflow_run_id",
+          "workflow_run",
+          "graph_url",
+          "resource_path"
+        ],
+        "dimensions": [
+          "head_sha",
+          "head_branch",
+          "status",
+          "conclusion",
+          "app_id",
+          "app_slug"
+        ],
+        "sql_names": {
+          "head_sha": "check_suite_head_sha",
+          "head_branch": "check_suite_head_branch",
+          "status": "check_suite_status",
+          "conclusion": "check_suite_conclusion",
+          "app_id": "check_suite_app_id",
+          "app_slug": "check_suite_app_slug"
+        },
+        "metrics": [
+          {
+            "name": "check_suite_count",
+            "kind": "count",
+            "comment": "Visible check suites at the selected reference or suite ID; not Actions workflow runs."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "nodes",
+          "select": [
+            "check_suite_node_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_suite_node_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Exact GraphQL CheckSuite node ID. Selects the explicit enriched route and requires the matching repository.",
+              "example": "CS_kwDOExample"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "suites",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "check_suite_node_id",
+              "source_stage": "suites",
+              "source_column": "check_suite_node_id"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "suites",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "suites",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "status",
+              "source_stage": "suites",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "suites",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "url",
+              "source_stage": "suites",
+              "source_column": "url"
+            },
+            {
+              "name": "before",
+              "source_stage": "suites",
+              "source_column": "before"
+            },
+            {
+              "name": "after",
+              "source_stage": "suites",
+              "source_column": "after"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "suites",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "suites",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "latest_check_runs_count",
+              "source_stage": "suites",
+              "source_column": "latest_check_runs_count"
+            },
+            {
+              "name": "check_runs_url",
+              "source_stage": "suites",
+              "source_column": "check_runs_url"
+            },
+            {
+              "name": "rerequestable",
+              "source_stage": "suites",
+              "source_column": "rerequestable"
+            },
+            {
+              "name": "runs_rerequestable",
+              "source_stage": "suites",
+              "source_column": "runs_rerequestable"
+            },
+            {
+              "name": "app_id",
+              "source_stage": "suites",
+              "source_column": "app_id"
+            },
+            {
+              "name": "app_slug",
+              "source_stage": "suites",
+              "source_column": "app_slug"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "suites",
+              "source_column": "pull_requests"
+            },
+            {
+              "name": "creator_id",
+              "source_stage": "graph",
+              "source_column": "creator_id"
+            },
+            {
+              "name": "creator_login",
+              "source_stage": "graph",
+              "source_column": "creator_login"
+            },
+            {
+              "name": "creator",
+              "source_stage": "graph",
+              "source_column": "creator"
+            },
+            {
+              "name": "branch",
+              "source_stage": "graph",
+              "source_column": "branch"
+            },
+            {
+              "name": "push",
+              "source_stage": "graph",
+              "source_column": "push"
+            },
+            {
+              "name": "pusher_login",
+              "source_stage": "graph",
+              "source_column": "pusher_login"
+            },
+            {
+              "name": "pusher_type",
+              "source_stage": "graph",
+              "source_column": "pusher_type"
+            },
+            {
+              "name": "workflow_run_id",
+              "source_stage": "graph",
+              "source_column": "workflow_run_id"
+            },
+            {
+              "name": "workflow_run",
+              "source_stage": "graph",
+              "source_column": "workflow_run"
+            },
+            {
+              "name": "graph_url",
+              "source_stage": "graph",
+              "source_column": "graph_url"
+            },
+            {
+              "name": "resource_path",
+              "source_stage": "graph",
+              "source_column": "resource_path"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "graph",
+                "entity": "check_suite_graph_source",
+                "arguments": {
+                  "check_suite_node_id": {
+                    "parameter": "check_suite_node_id"
+                  },
+                  "expected_repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              },
+              {
+                "name": "suites",
+                "entity": "check_suite_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "graph",
+                    "column": "actual_repository"
+                  },
+                  "check_suite_id": {
+                    "stage": "graph",
+                    "column": "check_suite_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "suites"
+          },
+          "population": "One explicitly selected GraphQL node in the matching canonical repository, followed by its REST detail lookup. GraphQL-only fields are populated on this route; NULL on ordinary REST routes means not retrieved, not confirmed absence. Nested reviewer/user/status connections are not silently truncated into this record."
+        },
+        {
+          "name": "lookup",
+          "select": [
+            "check_suite_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_suite_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "example": 5
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "suites",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "check_suite_node_id",
+              "source_stage": "suites",
+              "source_column": "check_suite_node_id"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "suites",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "suites",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "status",
+              "source_stage": "suites",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "suites",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "url",
+              "source_stage": "suites",
+              "source_column": "url"
+            },
+            {
+              "name": "before",
+              "source_stage": "suites",
+              "source_column": "before"
+            },
+            {
+              "name": "after",
+              "source_stage": "suites",
+              "source_column": "after"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "suites",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "suites",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "latest_check_runs_count",
+              "source_stage": "suites",
+              "source_column": "latest_check_runs_count"
+            },
+            {
+              "name": "check_runs_url",
+              "source_stage": "suites",
+              "source_column": "check_runs_url"
+            },
+            {
+              "name": "rerequestable",
+              "source_stage": "suites",
+              "source_column": "rerequestable"
+            },
+            {
+              "name": "runs_rerequestable",
+              "source_stage": "suites",
+              "source_column": "runs_rerequestable"
+            },
+            {
+              "name": "app_id",
+              "source_stage": "suites",
+              "source_column": "app_id"
+            },
+            {
+              "name": "app_slug",
+              "source_stage": "suites",
+              "source_column": "app_slug"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "suites",
+              "source_column": "pull_requests"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "suites",
+                "entity": "check_suite_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_suite_id": {
+                    "parameter": "check_suite_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "suites"
+          },
+          "population": "One visible suite by repository and numeric suite ID."
+        },
+        {
+          "name": "references",
+          "select": [
+            "git_ref"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "git_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "example": "main",
+              "description": "Commit SHA, branch or tag whose checks are selected; a branch or tag resolves at request time."
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "suites",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "check_suite_node_id",
+              "source_stage": "suites",
+              "source_column": "check_suite_node_id"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "suites",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "suites",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "status",
+              "source_stage": "suites",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "suites",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "url",
+              "source_stage": "suites",
+              "source_column": "url"
+            },
+            {
+              "name": "before",
+              "source_stage": "suites",
+              "source_column": "before"
+            },
+            {
+              "name": "after",
+              "source_stage": "suites",
+              "source_column": "after"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "suites",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "suites",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "latest_check_runs_count",
+              "source_stage": "suites",
+              "source_column": "latest_check_runs_count"
+            },
+            {
+              "name": "check_runs_url",
+              "source_stage": "suites",
+              "source_column": "check_runs_url"
+            },
+            {
+              "name": "rerequestable",
+              "source_stage": "suites",
+              "source_column": "rerequestable"
+            },
+            {
+              "name": "runs_rerequestable",
+              "source_stage": "suites",
+              "source_column": "runs_rerequestable"
+            },
+            {
+              "name": "app_id",
+              "source_stage": "suites",
+              "source_column": "app_id"
+            },
+            {
+              "name": "app_slug",
+              "source_stage": "suites",
+              "source_column": "app_slug"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "suites",
+              "source_column": "pull_requests"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "suites",
+                "entity": "check_suites_for_ref_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "git_ref": {
+                    "parameter": "git_ref"
+                  }
+                }
+              }
+            ],
+            "output_stage": "suites"
+          },
+          "population": "All visible check suites for the selected commit SHA, branch or tag, following every Link page."
+        }
+      ],
+      "nullable_route_fields": [
+        "creator_id",
+        "creator_login",
+        "creator",
+        "branch",
+        "push",
+        "pusher_login",
+        "pusher_type",
+        "workflow_run_id",
+        "workflow_run",
+        "graph_url",
+        "resource_path"
+      ]
+    },
+    {
+      "name": "check_runs",
+      "description": "GitHub check runs are distinct from Actions jobs and workflow attempts. All reruns remain separate identities; runs with missing suites or apps remain visible. The explicit node-ID route adds typed GraphQL-only context; ordinary routes leave that context NULL as unrequested. Numeric IDs and repository membership are verified before REST hydration. Deployment ID and typed deployment metadata are available from ordinary REST responses; the node route adds deployment_context with GraphQL current state/commit context and pending approvals.",
+      "grain": [
+        "repository_id",
+        "check_run_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "check_run_id",
+          "check_run_node_id",
+          "name",
+          "head_sha",
+          "external_id",
+          "url",
+          "html_url",
+          "details_url",
+          "status",
+          "conclusion",
+          "started_at",
+          "completed_at",
+          "check_suite_id",
+          "app_id",
+          "app_slug",
+          "output_title",
+          "output_summary",
+          "output_text",
+          "annotations_count",
+          "annotations_url",
+          "pull_requests",
+          "deployment_id",
+          "deployment",
+          "pending_deployment_request",
+          "permalink",
+          "resource_path",
+          "deployment_context"
+        ],
+        "dimensions": [
+          "head_sha",
+          "name",
+          "status",
+          "conclusion",
+          "app_id",
+          "app_slug"
+        ],
+        "sql_names": {
+          "head_sha": "check_run_head_sha",
+          "name": "check_run_name",
+          "status": "check_run_status",
+          "conclusion": "check_run_conclusion",
+          "app_id": "check_run_app_id",
+          "app_slug": "check_run_app_slug"
+        },
+        "metrics": [
+          {
+            "name": "check_run_count",
+            "kind": "count",
+            "comment": "Visible check run identities including all reruns returned with filter=all."
+          },
+          {
+            "name": "successful_check_run_count",
+            "kind": "count",
+            "comment": "Runs whose current conclusion is success.",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "success"
+            }
+          },
+          {
+            "name": "failed_check_run_count",
+            "kind": "count",
+            "comment": "Runs whose current conclusion is failure; excludes cancellation, timeout and unfinished runs.",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "failure"
+            }
+          },
+          {
+            "name": "unfinished_check_run_count",
+            "kind": "count",
+            "comment": "Runs with no conclusion, including queued and in-progress runs.",
+            "where": {
+              "field": "conclusion",
+              "op": "is_null"
+            }
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "nodes",
+          "select": [
+            "check_run_node_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_run_node_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Exact GraphQL CheckRun node ID. Selects the explicit enriched route and requires the matching repository.",
+              "example": "CR_kwDOExample"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_run_node_id",
+              "source_stage": "runs",
+              "source_column": "check_run_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "runs",
+              "source_column": "name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "external_id",
+              "source_stage": "runs",
+              "source_column": "external_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "runs",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "runs",
+              "source_column": "html_url"
+            },
+            {
+              "name": "details_url",
+              "source_stage": "runs",
+              "source_column": "details_url"
+            },
+            {
+              "name": "status",
+              "source_stage": "runs",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "runs",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "runs",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "runs",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "app_id",
+              "source_stage": "runs",
+              "source_column": "app_id"
+            },
+            {
+              "name": "app_slug",
+              "source_stage": "runs",
+              "source_column": "app_slug"
+            },
+            {
+              "name": "output_title",
+              "source_stage": "runs",
+              "source_column": "output_title"
+            },
+            {
+              "name": "output_summary",
+              "source_stage": "runs",
+              "source_column": "output_summary"
+            },
+            {
+              "name": "output_text",
+              "source_stage": "runs",
+              "source_column": "output_text"
+            },
+            {
+              "name": "annotations_count",
+              "source_stage": "runs",
+              "source_column": "annotations_count"
+            },
+            {
+              "name": "annotations_url",
+              "source_stage": "runs",
+              "source_column": "annotations_url"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "runs",
+              "source_column": "pull_requests"
+            },
+            {
+              "name": "deployment_context",
+              "source_stage": "graph",
+              "source_column": "deployment_context"
+            },
+            {
+              "name": "pending_deployment_request",
+              "source_stage": "graph",
+              "source_column": "pending_deployment_request"
+            },
+            {
+              "name": "permalink",
+              "source_stage": "graph",
+              "source_column": "permalink"
+            },
+            {
+              "name": "resource_path",
+              "source_stage": "graph",
+              "source_column": "resource_path"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "runs",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment",
+              "source_stage": "runs",
+              "source_column": "deployment"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "graph",
+                "entity": "check_run_graph_source",
+                "arguments": {
+                  "check_run_node_id": {
+                    "parameter": "check_run_node_id"
+                  },
+                  "expected_repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_run_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "graph",
+                    "column": "actual_repository"
+                  },
+                  "check_run_id": {
+                    "stage": "graph",
+                    "column": "check_run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "runs"
+          },
+          "population": "One explicitly selected GraphQL node in the matching canonical repository, followed by its REST detail lookup. GraphQL-only fields are populated on this route; NULL on ordinary REST routes means not retrieved, not confirmed absence. Nested reviewer/user/status connections are not silently truncated into this record."
+        },
+        {
+          "name": "lookup",
+          "select": [
+            "check_run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "example": 4
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_run_node_id",
+              "source_stage": "runs",
+              "source_column": "check_run_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "runs",
+              "source_column": "name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "external_id",
+              "source_stage": "runs",
+              "source_column": "external_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "runs",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "runs",
+              "source_column": "html_url"
+            },
+            {
+              "name": "details_url",
+              "source_stage": "runs",
+              "source_column": "details_url"
+            },
+            {
+              "name": "status",
+              "source_stage": "runs",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "runs",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "runs",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "runs",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "app_id",
+              "source_stage": "runs",
+              "source_column": "app_id"
+            },
+            {
+              "name": "app_slug",
+              "source_stage": "runs",
+              "source_column": "app_slug"
+            },
+            {
+              "name": "output_title",
+              "source_stage": "runs",
+              "source_column": "output_title"
+            },
+            {
+              "name": "output_summary",
+              "source_stage": "runs",
+              "source_column": "output_summary"
+            },
+            {
+              "name": "output_text",
+              "source_stage": "runs",
+              "source_column": "output_text"
+            },
+            {
+              "name": "annotations_count",
+              "source_stage": "runs",
+              "source_column": "annotations_count"
+            },
+            {
+              "name": "annotations_url",
+              "source_stage": "runs",
+              "source_column": "annotations_url"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "runs",
+              "source_column": "pull_requests"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "runs",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment",
+              "source_stage": "runs",
+              "source_column": "deployment"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_run_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_run_id": {
+                    "parameter": "check_run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "runs"
+          },
+          "population": "One visible run by repository and numeric run ID; the nullable suite association does not discard orphaned runs."
+        },
+        {
+          "name": "suites",
+          "select": [
+            "check_suite_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_suite_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "example": 5
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_run_node_id",
+              "source_stage": "runs",
+              "source_column": "check_run_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "runs",
+              "source_column": "name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "external_id",
+              "source_stage": "runs",
+              "source_column": "external_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "runs",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "runs",
+              "source_column": "html_url"
+            },
+            {
+              "name": "details_url",
+              "source_stage": "runs",
+              "source_column": "details_url"
+            },
+            {
+              "name": "status",
+              "source_stage": "runs",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "runs",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "runs",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "runs",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "app_id",
+              "source_stage": "runs",
+              "source_column": "app_id"
+            },
+            {
+              "name": "app_slug",
+              "source_stage": "runs",
+              "source_column": "app_slug"
+            },
+            {
+              "name": "output_title",
+              "source_stage": "runs",
+              "source_column": "output_title"
+            },
+            {
+              "name": "output_summary",
+              "source_stage": "runs",
+              "source_column": "output_summary"
+            },
+            {
+              "name": "output_text",
+              "source_stage": "runs",
+              "source_column": "output_text"
+            },
+            {
+              "name": "annotations_count",
+              "source_stage": "runs",
+              "source_column": "annotations_count"
+            },
+            {
+              "name": "annotations_url",
+              "source_stage": "runs",
+              "source_column": "annotations_url"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "runs",
+              "source_column": "pull_requests"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "runs",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment",
+              "source_stage": "runs",
+              "source_column": "deployment"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_runs_for_suite_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_suite_id": {
+                    "parameter": "check_suite_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "runs"
+          },
+          "population": "All visible runs in the selected suite, including earlier same-name runs, with filter=all."
+        },
+        {
+          "name": "references",
+          "select": [
+            "git_ref"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "git_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "example": "main",
+              "description": "Commit SHA, branch or tag whose checks are selected; a branch or tag resolves at request time."
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_run_node_id",
+              "source_stage": "runs",
+              "source_column": "check_run_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "runs",
+              "source_column": "name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "external_id",
+              "source_stage": "runs",
+              "source_column": "external_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "runs",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "runs",
+              "source_column": "html_url"
+            },
+            {
+              "name": "details_url",
+              "source_stage": "runs",
+              "source_column": "details_url"
+            },
+            {
+              "name": "status",
+              "source_stage": "runs",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "runs",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "runs",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "runs",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "app_id",
+              "source_stage": "runs",
+              "source_column": "app_id"
+            },
+            {
+              "name": "app_slug",
+              "source_stage": "runs",
+              "source_column": "app_slug"
+            },
+            {
+              "name": "output_title",
+              "source_stage": "runs",
+              "source_column": "output_title"
+            },
+            {
+              "name": "output_summary",
+              "source_stage": "runs",
+              "source_column": "output_summary"
+            },
+            {
+              "name": "output_text",
+              "source_stage": "runs",
+              "source_column": "output_text"
+            },
+            {
+              "name": "annotations_count",
+              "source_stage": "runs",
+              "source_column": "annotations_count"
+            },
+            {
+              "name": "annotations_url",
+              "source_stage": "runs",
+              "source_column": "annotations_url"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "runs",
+              "source_column": "pull_requests"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "runs",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment",
+              "source_stage": "runs",
+              "source_column": "deployment"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "suites",
+                "entity": "check_suites_for_ref_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "git_ref": {
+                    "parameter": "git_ref"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_runs_for_suite_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_suite_id": {
+                    "stage": "suites",
+                    "column": "check_suite_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "runs"
+          },
+          "population": "All visible runs at the selected ref, following all suite pages and all run pages per suite with filter=all. This avoids the direct reference run endpoint's 1000-suite cap."
+        }
+      ],
+      "nullable_route_fields": [
+        "deployment_context",
+        "pending_deployment_request",
+        "permalink",
+        "resource_path"
+      ]
+    },
+    {
+      "name": "check_annotations",
+      "description": "Check-run annotations have no API object ID. Grain uses repository, run and one-based response position across all pages of that run scan. Positions are snapshot-local and must not be used for historical annotation identity or cross-snapshot deduplication.",
+      "grain": [
+        "repository_id",
+        "check_run_id",
+        "annotation_position"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "check_run_id",
+          "check_suite_id",
+          "head_sha",
+          "annotation_position",
+          "path",
+          "start_line",
+          "end_line",
+          "start_column",
+          "end_column",
+          "annotation_level",
+          "title",
+          "message",
+          "raw_details",
+          "blob_href"
+        ],
+        "dimensions": [
+          "head_sha",
+          "annotation_level",
+          "path"
+        ],
+        "sql_names": {
+          "head_sha": "check_annotation_head_sha",
+          "annotation_level": "check_annotation_annotation_level",
+          "path": "check_annotation_path"
+        },
+        "metrics": [
+          {
+            "name": "check_annotation_count",
+            "kind": "count",
+            "comment": "Annotation response rows, retaining duplicate content; snapshot positions are not durable annotation IDs."
+          },
+          {
+            "name": "failure_annotation_count",
+            "kind": "count",
+            "comment": "Annotation rows whose level is failure.",
+            "where": {
+              "field": "annotation_level",
+              "op": "eq",
+              "value": "failure"
+            }
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "runs",
+          "select": [
+            "check_run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "example": 4
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "annotation_position",
+              "source_stage": "annotations",
+              "source_column": "annotation_position"
+            },
+            {
+              "name": "path",
+              "source_stage": "annotations",
+              "source_column": "path"
+            },
+            {
+              "name": "start_line",
+              "source_stage": "annotations",
+              "source_column": "start_line"
+            },
+            {
+              "name": "end_line",
+              "source_stage": "annotations",
+              "source_column": "end_line"
+            },
+            {
+              "name": "start_column",
+              "source_stage": "annotations",
+              "source_column": "start_column"
+            },
+            {
+              "name": "end_column",
+              "source_stage": "annotations",
+              "source_column": "end_column"
+            },
+            {
+              "name": "annotation_level",
+              "source_stage": "annotations",
+              "source_column": "annotation_level"
+            },
+            {
+              "name": "title",
+              "source_stage": "annotations",
+              "source_column": "title"
+            },
+            {
+              "name": "message",
+              "source_stage": "annotations",
+              "source_column": "message"
+            },
+            {
+              "name": "raw_details",
+              "source_stage": "annotations",
+              "source_column": "raw_details"
+            },
+            {
+              "name": "blob_href",
+              "source_stage": "annotations",
+              "source_column": "blob_href"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_run_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_run_id": {
+                    "parameter": "check_run_id"
+                  }
+                }
+              },
+              {
+                "name": "annotations",
+                "entity": "check_annotations_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_run_id": {
+                    "stage": "runs",
+                    "column": "check_run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "annotations"
+          },
+          "population": "All annotation rows for the selected runs, retaining identical repeated annotations. Positions restart per run and span Link pages; they identify this retrieval snapshot only. One visible run by repository and numeric run ID; the nullable suite association does not discard orphaned runs."
+        },
+        {
+          "name": "suites",
+          "select": [
+            "check_suite_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_suite_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "example": 5
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "annotation_position",
+              "source_stage": "annotations",
+              "source_column": "annotation_position"
+            },
+            {
+              "name": "path",
+              "source_stage": "annotations",
+              "source_column": "path"
+            },
+            {
+              "name": "start_line",
+              "source_stage": "annotations",
+              "source_column": "start_line"
+            },
+            {
+              "name": "end_line",
+              "source_stage": "annotations",
+              "source_column": "end_line"
+            },
+            {
+              "name": "start_column",
+              "source_stage": "annotations",
+              "source_column": "start_column"
+            },
+            {
+              "name": "end_column",
+              "source_stage": "annotations",
+              "source_column": "end_column"
+            },
+            {
+              "name": "annotation_level",
+              "source_stage": "annotations",
+              "source_column": "annotation_level"
+            },
+            {
+              "name": "title",
+              "source_stage": "annotations",
+              "source_column": "title"
+            },
+            {
+              "name": "message",
+              "source_stage": "annotations",
+              "source_column": "message"
+            },
+            {
+              "name": "raw_details",
+              "source_stage": "annotations",
+              "source_column": "raw_details"
+            },
+            {
+              "name": "blob_href",
+              "source_stage": "annotations",
+              "source_column": "blob_href"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_runs_for_suite_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_suite_id": {
+                    "parameter": "check_suite_id"
+                  }
+                }
+              },
+              {
+                "name": "annotations",
+                "entity": "check_annotations_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_run_id": {
+                    "stage": "runs",
+                    "column": "check_run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "annotations"
+          },
+          "population": "All annotation rows for the selected runs, retaining identical repeated annotations. Positions restart per run and span Link pages; they identify this retrieval snapshot only. All visible runs in the selected suite, including earlier same-name runs, with filter=all."
+        },
+        {
+          "name": "references",
+          "select": [
+            "git_ref"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "git_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "example": "main",
+              "description": "Commit SHA, branch or tag whose checks are selected; a branch or tag resolves at request time."
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "annotation_position",
+              "source_stage": "annotations",
+              "source_column": "annotation_position"
+            },
+            {
+              "name": "path",
+              "source_stage": "annotations",
+              "source_column": "path"
+            },
+            {
+              "name": "start_line",
+              "source_stage": "annotations",
+              "source_column": "start_line"
+            },
+            {
+              "name": "end_line",
+              "source_stage": "annotations",
+              "source_column": "end_line"
+            },
+            {
+              "name": "start_column",
+              "source_stage": "annotations",
+              "source_column": "start_column"
+            },
+            {
+              "name": "end_column",
+              "source_stage": "annotations",
+              "source_column": "end_column"
+            },
+            {
+              "name": "annotation_level",
+              "source_stage": "annotations",
+              "source_column": "annotation_level"
+            },
+            {
+              "name": "title",
+              "source_stage": "annotations",
+              "source_column": "title"
+            },
+            {
+              "name": "message",
+              "source_stage": "annotations",
+              "source_column": "message"
+            },
+            {
+              "name": "raw_details",
+              "source_stage": "annotations",
+              "source_column": "raw_details"
+            },
+            {
+              "name": "blob_href",
+              "source_stage": "annotations",
+              "source_column": "blob_href"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "suites",
+                "entity": "check_suites_for_ref_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "git_ref": {
+                    "parameter": "git_ref"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_runs_for_suite_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_suite_id": {
+                    "stage": "suites",
+                    "column": "check_suite_id"
+                  }
+                }
+              },
+              {
+                "name": "annotations",
+                "entity": "check_annotations_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_run_id": {
+                    "stage": "runs",
+                    "column": "check_run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "annotations"
+          },
+          "population": "All visible runs at the selected ref, following all suite pages and all run pages per suite with filter=all. This avoids the direct reference run endpoint's 1000-suite cap. All annotation rows are retained; snapshot positions restart per run and span every annotation page."
+        }
+      ]
+    },
+    {
+      "name": "check_steps",
+      "description": "Canonical check-run steps at repository/run/step-number grain. All run/suite/reference paths preserve reruns and independently paginate each run connection. These records belong to GraphQL CheckRun; no identity equivalence with an Actions job or its nested REST steps is invented. Step numbers are parent-local indices, with external ID and reported seconds-to-completion retained.",
+      "grain": [
+        "repository_id",
+        "check_run_id",
+        "step_number"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "check_run_id",
+          "check_suite_id",
+          "head_sha",
+          "step_number",
+          "name",
+          "status",
+          "conclusion",
+          "external_id",
+          "seconds_to_completion",
+          "started_at",
+          "completed_at"
+        ],
+        "dimensions": [
+          "head_sha",
+          "step_number",
+          "name",
+          "status",
+          "conclusion",
+          "started_at",
+          "completed_at"
+        ],
+        "sql_names": {
+          "head_sha": "check_step_head_sha",
+          "step_number": "check_step_step_number",
+          "name": "check_step_name",
+          "status": "check_step_status",
+          "conclusion": "check_step_conclusion",
+          "started_at": "check_step_started_at",
+          "completed_at": "check_step_completed_at"
+        },
+        "metrics": [
+          {
+            "name": "check_step_count",
+            "kind": "count",
+            "comment": "Steps at the selected repository/run/number grain."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "failed_check_step_count": {
+              "expression": "COUNT(*) FILTER (WHERE check_steps.conclusion = 'FAILURE')"
+            },
+            "check_step_reported_seconds": {
+              "expression": "SUM(check_steps.seconds_to_completion)"
+            }
+          },
+          "metric_semantics": {
+            "failed_check_step_count": {
+              "dataset": "check_steps",
+              "additivity": "additive",
+              "comment": "Selected steps explicitly concluded FAILURE."
+            },
+            "check_step_reported_seconds": {
+              "dataset": "check_steps",
+              "additivity": "additive",
+              "comment": "Sum of upstream seconds-to-completion where reported; NULL timing remains unavailable and is not inferred from timestamps. Empty selected populations yield zero; an observed population with no reported values yields NULL. Mixed populations sum only reported values.",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "runs",
+          "select": [
+            "check_run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "example": 4
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "step_number",
+              "source_stage": "steps",
+              "source_column": "step_number"
+            },
+            {
+              "name": "name",
+              "source_stage": "steps",
+              "source_column": "name"
+            },
+            {
+              "name": "status",
+              "source_stage": "steps",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "steps",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "external_id",
+              "source_stage": "steps",
+              "source_column": "external_id"
+            },
+            {
+              "name": "seconds_to_completion",
+              "source_stage": "steps",
+              "source_column": "seconds_to_completion"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "steps",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "steps",
+              "source_column": "completed_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_run_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_run_id": {
+                    "parameter": "check_run_id"
+                  }
+                }
+              },
+              {
+                "name": "steps",
+                "entity": "check_steps_source",
+                "arguments": {
+                  "check_run_node_id": {
+                    "stage": "runs",
+                    "column": "check_run_node_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "steps"
+          },
+          "population": "Every available step of the selected check runs, following every GraphQL page. NULL discovered run or connection fails; an empty nodes array is a valid empty population. Suite/ref traversal retains earlier same-name runs with REST filter=all."
+        },
+        {
+          "name": "suites",
+          "select": [
+            "check_suite_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "check_suite_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "example": 5
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "step_number",
+              "source_stage": "steps",
+              "source_column": "step_number"
+            },
+            {
+              "name": "name",
+              "source_stage": "steps",
+              "source_column": "name"
+            },
+            {
+              "name": "status",
+              "source_stage": "steps",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "steps",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "external_id",
+              "source_stage": "steps",
+              "source_column": "external_id"
+            },
+            {
+              "name": "seconds_to_completion",
+              "source_stage": "steps",
+              "source_column": "seconds_to_completion"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "steps",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "steps",
+              "source_column": "completed_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_runs_for_suite_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_suite_id": {
+                    "parameter": "check_suite_id"
+                  }
+                }
+              },
+              {
+                "name": "steps",
+                "entity": "check_steps_source",
+                "arguments": {
+                  "check_run_node_id": {
+                    "stage": "runs",
+                    "column": "check_run_node_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "steps"
+          },
+          "population": "Every available step of the selected check runs, following every GraphQL page. NULL discovered run or connection fails; an empty nodes array is a valid empty population. Suite/ref traversal retains earlier same-name runs with REST filter=all."
+        },
+        {
+          "name": "references",
+          "select": [
+            "git_ref"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "git_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "example": "main",
+              "description": "Commit SHA, branch or tag whose checks are selected; a branch or tag resolves at request time."
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "check_run_id",
+              "source_stage": "runs",
+              "source_column": "check_run_id"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "runs",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "runs",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "step_number",
+              "source_stage": "steps",
+              "source_column": "step_number"
+            },
+            {
+              "name": "name",
+              "source_stage": "steps",
+              "source_column": "name"
+            },
+            {
+              "name": "status",
+              "source_stage": "steps",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "steps",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "external_id",
+              "source_stage": "steps",
+              "source_column": "external_id"
+            },
+            {
+              "name": "seconds_to_completion",
+              "source_stage": "steps",
+              "source_column": "seconds_to_completion"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "steps",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "steps",
+              "source_column": "completed_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "suites",
+                "entity": "check_suites_for_ref_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "git_ref": {
+                    "parameter": "git_ref"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "check_runs_for_suite_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "check_suite_id": {
+                    "stage": "suites",
+                    "column": "check_suite_id"
+                  }
+                }
+              },
+              {
+                "name": "steps",
+                "entity": "check_steps_source",
+                "arguments": {
+                  "check_run_node_id": {
+                    "stage": "runs",
+                    "column": "check_run_node_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "steps"
+          },
+          "population": "Every available step of the selected check runs, following every GraphQL page. NULL discovered run or connection fails; an empty nodes array is a valid empty population. Suite/ref traversal retains earlier same-name runs with REST filter=all."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "check_suites_to_repositories",
+      "from": "check_suites",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "check_runs_to_repositories",
+      "from": "check_runs",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "check_runs_to_suites",
+      "from": "check_runs",
+      "to": "check_suites",
+      "from_columns": [
+        "repository_id",
+        "check_suite_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "check_suite_id"
+      ],
+      "optional": true,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "check_suite_id": "check_suite_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "suites",
+          "bindings": {
+            "repository": "repository",
+            "check_suite_id": "check_suite_id"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "check_annotations_to_runs",
+      "from": "check_annotations",
+      "to": "check_runs",
+      "from_columns": [
+        "repository_id",
+        "check_run_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "check_run_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "check_run_id": "check_run_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "runs",
+          "bindings": {
+            "repository": "repository",
+            "check_run_id": "check_run_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "check_annotations_to_repositories",
+      "from": "check_annotations",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "check_steps_to_check_runs",
+      "from": "check_steps",
+      "to": "check_runs",
+      "from_columns": [
+        "repository_id",
+        "check_run_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "check_run_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "check_run_id": "check_run_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "runs",
+          "bindings": {
+            "repository": "repository",
+            "check_run_id": "check_run_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "check_suites_to_creators",
+      "from": "check_suites",
+      "to": "users",
+      "from_columns": [
+        "creator_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "creator_login"
+          },
+          "when_not_null": [
+            "creator_id",
+            "creator_login"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "check_suites_to_workflow_runs",
+      "from": "check_suites",
+      "to": "workflow_runs",
+      "from_columns": [
+        "workflow_run_id"
+      ],
+      "to_columns": [
+        "run_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "workflow_run_id"
+          },
+          "when_not_null": [
+            "workflow_run_id"
+          ]
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "check_suite_id": "check_suite_id"
+          },
+          "when_not_null": [
+            "check_suite_id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "check_runs_to_deployments",
+      "from": "check_runs",
+      "to": "deployments",
+      "from_columns": [
+        "repository_id",
+        "deployment_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "deployment_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "deployment_id": "deployment_id"
+          },
+          "when_not_null": [
+            "deployment_id"
+          ]
+        }
+      ]
+    }
+  ]
+}

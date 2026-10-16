@@ -1,0 +1,1345 @@
+{
+  "entities": [
+    {
+      "name": "pages_site_source",
+      "description": "repos/get-pages pinned typed read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before Pages retrieval.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "cname",
+          "path": [
+            "cname"
+          ]
+        },
+        {
+          "name": "protected_domain_state",
+          "path": [
+            "protected_domain_state"
+          ]
+        },
+        {
+          "name": "pending_domain_unverified_at",
+          "path": [
+            "pending_domain_unverified_at"
+          ]
+        },
+        {
+          "name": "custom_404",
+          "path": [
+            "custom_404"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "build_type",
+          "path": [
+            "build_type"
+          ]
+        },
+        {
+          "name": "source_configuration",
+          "path": [
+            "source"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "https_certificate",
+          "path": [
+            "https_certificate"
+          ]
+        },
+        {
+          "name": "https_enforced",
+          "path": [
+            "https_enforced"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-pages",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "pages_build_list_source",
+      "description": "repos/list-pages-builds pinned typed read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before Pages retrieval.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "build_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "error",
+          "path": [
+            "error"
+          ]
+        },
+        {
+          "name": "pusher_id",
+          "path": [
+            "pusher",
+            "id"
+          ]
+        },
+        {
+          "name": "pusher_login",
+          "path": [
+            "pusher",
+            "login"
+          ]
+        },
+        {
+          "name": "pusher_type",
+          "path": [
+            "pusher",
+            "type"
+          ]
+        },
+        {
+          "name": "pusher",
+          "path": [
+            "pusher"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "type": true,
+            "node_id": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "commit"
+          ]
+        },
+        {
+          "name": "reported_duration",
+          "path": [
+            "duration"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "build_url"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-pages-builds",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "pages_build_latest_source",
+      "description": "repos/get-latest-pages-build pinned typed read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before Pages retrieval.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "build_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "error",
+          "path": [
+            "error"
+          ]
+        },
+        {
+          "name": "pusher_id",
+          "path": [
+            "pusher",
+            "id"
+          ]
+        },
+        {
+          "name": "pusher_login",
+          "path": [
+            "pusher",
+            "login"
+          ]
+        },
+        {
+          "name": "pusher_type",
+          "path": [
+            "pusher",
+            "type"
+          ]
+        },
+        {
+          "name": "pusher",
+          "path": [
+            "pusher"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "type": true,
+            "node_id": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "commit"
+          ]
+        },
+        {
+          "name": "reported_duration",
+          "path": [
+            "duration"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "build_url"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-latest-pages-build",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "pages_build_lookup_source",
+      "description": "repos/get-pages-build pinned typed read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before Pages retrieval.",
+          "example": 1
+        },
+        {
+          "name": "pages_build_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "One GitHub Pages numeric build selector; requires one repository. The canonical response identity is the returned build URL because the pinned response has no numeric ID field.",
+          "example": 5472601
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "build_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "error",
+          "path": [
+            "error"
+          ]
+        },
+        {
+          "name": "pusher_id",
+          "path": [
+            "pusher",
+            "id"
+          ]
+        },
+        {
+          "name": "pusher_login",
+          "path": [
+            "pusher",
+            "login"
+          ]
+        },
+        {
+          "name": "pusher_type",
+          "path": [
+            "pusher",
+            "type"
+          ]
+        },
+        {
+          "name": "pusher",
+          "path": [
+            "pusher"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "type": true,
+            "node_id": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "commit"
+          ]
+        },
+        {
+          "name": "reported_duration",
+          "path": [
+            "duration"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "build_url"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-pages-build",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "build_id": {
+            "argument": "pages_build_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "pages_sites",
+      "description": "Canonical current GitHub Pages configuration, one site per stable repository identity. Typed source configuration and HTTPS certificate metadata remain native structures. Public visibility describes the site, not repository visibility.",
+      "grain": [
+        "repository_id"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "cname",
+              "source_stage": "records",
+              "source_column": "cname"
+            },
+            {
+              "name": "protected_domain_state",
+              "source_stage": "records",
+              "source_column": "protected_domain_state"
+            },
+            {
+              "name": "pending_domain_unverified_at",
+              "source_stage": "records",
+              "source_column": "pending_domain_unverified_at"
+            },
+            {
+              "name": "custom_404",
+              "source_stage": "records",
+              "source_column": "custom_404"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "build_type",
+              "source_stage": "records",
+              "source_column": "build_type"
+            },
+            {
+              "name": "source_configuration",
+              "source_stage": "records",
+              "source_column": "source_configuration"
+            },
+            {
+              "name": "public",
+              "source_stage": "records",
+              "source_column": "public"
+            },
+            {
+              "name": "https_certificate",
+              "source_stage": "records",
+              "source_column": "https_certificate"
+            },
+            {
+              "name": "https_enforced",
+              "source_stage": "records",
+              "source_column": "https_enforced"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "pages_site_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Each selected repository is hydrated before its Pages read. Missing, unconfigured or inaccessible Pages responses fail; 404 is not silently treated as a zero build/site population."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "url",
+          "status",
+          "cname",
+          "protected_domain_state",
+          "pending_domain_unverified_at",
+          "custom_404",
+          "html_url",
+          "build_type",
+          "source_configuration",
+          "public",
+          "https_certificate",
+          "https_enforced"
+        ],
+        "dimensions": [
+          "repository",
+          "status",
+          "build_type",
+          "public",
+          "https_enforced"
+        ],
+        "sql_names": {
+          "repository": "pages_sites_repository",
+          "status": "pages_sites_status",
+          "build_type": "pages_sites_build_type",
+          "public": "pages_sites_public",
+          "https_enforced": "pages_sites_https_enforced"
+        },
+        "metrics": [
+          {
+            "name": "pages_site_count",
+            "kind": "count",
+            "comment": "Configured Pages site snapshots retrieved successfully for the selected repositories; not a count of every repository hosting status."
+          }
+        ]
+      }
+    },
+    {
+      "name": "pages_builds",
+      "description": "Canonical GitHub Pages builds, unifying paginated history, latest and exact numeric selector routes. Stable grain is repository ID plus the API build URL; URLs are descriptive identities and never followed as arbitrary request targets. A supplied numeric build selector is not invented as a response field. Nullable pusher identity remains distinct from repository owner and commit author.",
+      "grain": [
+        "repository_id",
+        "build_url"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pages_build_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "One GitHub Pages numeric build selector; requires one repository. The canonical response identity is the returned build URL because the pinned response has no numeric ID field.",
+              "example": 5472601
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "build_url",
+              "source_stage": "records",
+              "source_column": "build_url"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "error",
+              "source_stage": "records",
+              "source_column": "error"
+            },
+            {
+              "name": "pusher_id",
+              "source_stage": "records",
+              "source_column": "pusher_id"
+            },
+            {
+              "name": "pusher_login",
+              "source_stage": "records",
+              "source_column": "pusher_login"
+            },
+            {
+              "name": "pusher_type",
+              "source_stage": "records",
+              "source_column": "pusher_type"
+            },
+            {
+              "name": "pusher",
+              "source_stage": "records",
+              "source_column": "pusher"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "records",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "reported_duration",
+              "source_stage": "records",
+              "source_column": "reported_duration"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pages_build_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "pages_build_id": {
+                    "parameter": "pages_build_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Each selected repository is hydrated before its Pages read. Missing, unconfigured or inaccessible Pages responses fail; 404 is not silently treated as a zero build/site population.",
+          "select": [
+            "pages_build_id"
+          ]
+        },
+        {
+          "name": "latest",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "pages_build_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "all",
+                "latest"
+              ],
+              "description": "Pages build population: all follows the retained paginated build listing; latest selects only the latest build for each repository. Omission means all.",
+              "example": "latest"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "build_url",
+              "source_stage": "records",
+              "source_column": "build_url"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "error",
+              "source_stage": "records",
+              "source_column": "error"
+            },
+            {
+              "name": "pusher_id",
+              "source_stage": "records",
+              "source_column": "pusher_id"
+            },
+            {
+              "name": "pusher_login",
+              "source_stage": "records",
+              "source_column": "pusher_login"
+            },
+            {
+              "name": "pusher_type",
+              "source_stage": "records",
+              "source_column": "pusher_type"
+            },
+            {
+              "name": "pusher",
+              "source_stage": "records",
+              "source_column": "pusher"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "records",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "reported_duration",
+              "source_stage": "records",
+              "source_column": "reported_duration"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "pages_build_latest_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Each selected repository is hydrated before its Pages read. Missing, unconfigured or inaccessible Pages responses fail; 404 is not silently treated as a zero build/site population.",
+          "select": [
+            "pages_build_population"
+          ],
+          "select_values": {
+            "pages_build_population": [
+              "latest"
+            ]
+          }
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "pages_build_population",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "all",
+                "latest"
+              ],
+              "description": "Pages build population: all follows the retained paginated build listing; latest selects only the latest build for each repository. Omission means all.",
+              "example": "latest"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "build_url",
+              "source_stage": "records",
+              "source_column": "build_url"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "error",
+              "source_stage": "records",
+              "source_column": "error"
+            },
+            {
+              "name": "pusher_id",
+              "source_stage": "records",
+              "source_column": "pusher_id"
+            },
+            {
+              "name": "pusher_login",
+              "source_stage": "records",
+              "source_column": "pusher_login"
+            },
+            {
+              "name": "pusher_type",
+              "source_stage": "records",
+              "source_column": "pusher_type"
+            },
+            {
+              "name": "pusher",
+              "source_stage": "records",
+              "source_column": "pusher"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "records",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "reported_duration",
+              "source_stage": "records",
+              "source_column": "reported_duration"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "pages_build_list_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Each selected repository is hydrated before its Pages read. Missing, unconfigured or inaccessible Pages responses fail; 404 is not silently treated as a zero build/site population."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "build_url",
+          "status",
+          "error",
+          "pusher_id",
+          "pusher_login",
+          "pusher_type",
+          "pusher",
+          "commit_sha",
+          "reported_duration",
+          "created_at",
+          "updated_at"
+        ],
+        "dimensions": [
+          "repository",
+          "build_url",
+          "status",
+          "pusher_login",
+          "created_at",
+          "updated_at"
+        ],
+        "sql_names": {
+          "repository": "pages_builds_repository",
+          "build_url": "pages_builds_build_url",
+          "status": "pages_builds_status",
+          "pusher_login": "pages_builds_pusher_login",
+          "created_at": "pages_builds_created_at",
+          "updated_at": "pages_builds_updated_at"
+        },
+        "metrics": [
+          {
+            "name": "pages_build_count",
+            "kind": "count",
+            "comment": "Distinct repository/build-URL records from the selected all/latest/exact-ID population; API retention bounds are preserved."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "successful_pages_build_count": {
+              "expression": "COUNT(*) FILTER (WHERE pages_builds.status = 'built')"
+            },
+            "failed_pages_build_count": {
+              "expression": "COUNT(*) FILTER (WHERE pages_builds.status = 'errored')"
+            },
+            "pages_build_reported_duration": {
+              "expression": "COALESCE(SUM(pages_builds.reported_duration), 0)"
+            }
+          },
+          "metric_semantics": {
+            "successful_pages_build_count": {
+              "dataset": "pages_builds",
+              "additivity": "additive",
+              "comment": "Selected build records explicitly marked built."
+            },
+            "failed_pages_build_count": {
+              "dataset": "pages_builds",
+              "additivity": "additive",
+              "comment": "Selected build records explicitly marked errored."
+            },
+            "pages_build_reported_duration": {
+              "dataset": "pages_builds",
+              "additivity": "additive",
+              "comment": "Sum of upstream reported duration values for distinct selected builds. The pinned schema does not specify a duration unit; no seconds/milliseconds conversion is inferred.",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "pages_sites_to_repositories",
+      "from": "pages_sites",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pages_builds_to_repositories",
+      "from": "pages_builds",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pages_builds_to_pages_sites",
+      "from": "pages_builds",
+      "to": "pages_sites",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "pages_builds_to_commits",
+      "from": "pages_builds",
+      "to": "commits",
+      "from_columns": [
+        "repository_id",
+        "commit_sha"
+      ],
+      "to_columns": [
+        "repository_id",
+        "commit_sha"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "commit_ref": "commit_sha"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "pages_builds_to_users",
+      "from": "pages_builds",
+      "to": "users",
+      "from_columns": [
+        "pusher_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "pusher_login"
+          },
+          "when": {
+            "pusher_type": "User"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    }
+  ]
+}

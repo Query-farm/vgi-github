@@ -1,0 +1,205 @@
+# Canonical task identity, complete task hydration, typed nested observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Reported counters and observed nested sessions are deliberately different.
+query IIIIII
+SELECT agent_task_count,completed_agent_task_count,failed_agent_task_count,reported_agent_session_count,observed_agent_session_count,agent_task_artifact_count FROM engineering.semantic.github(organization=>'agent-task-fixture');
+----
+3	1	1	4	3	3
+
+query TIII
+SELECT agent_tasks_repository,agent_task_count,observed_agent_session_count,agent_task_artifact_count FROM engineering.semantic.github(organization=>'agent-task-fixture') GROUP BY agent_tasks_repository ORDER BY agent_tasks_repository;
+----
+agent-task-fixture/alpha	2	2	2
+agent-task-fixture/beta	1	1	1
+
+query TTI
+SELECT task_id,state,session_count FROM engineering.detail.agent_tasks(repository=>'agent-task-fixture/beta');
+----
+task-c	waiting_for_user	1
+
+# The global population retains an orphan task and does not invent repository names.
+query III
+SELECT agent_task_count,queued_agent_task_count,observed_agent_session_count FROM engineering.semantic.github(authenticated_user=>true);
+----
+4	1	3
+
+statement ok
+CREATE TEMP TABLE agent_tasks_shape_1 AS SELECT * FROM engineering.detail.agent_tasks(authenticated_user=>true);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TII
+SELECT task_id,repository_id,repository IS NULL FROM agent_tasks_shape_1 ORDER BY task_id;
+----
+task-a	31001	true
+task-b	31001	true
+task-c	31002	true
+task-orphan	NULL	true
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE agent_tasks_shape_2 AS SELECT * FROM engineering.detail.agent_tasks(agent_task_id=>'task-orphan');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIIII
+SELECT task_id,repository_id IS NULL,creator_id IS NULL,sessions IS NULL,artifacts IS NULL FROM agent_tasks_shape_2;
+----
+task-orphan	true	true	true	true
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIII
+SELECT agent_task_count,archived_agent_task_count,reported_agent_session_count,observed_agent_session_count FROM engineering.semantic.github(organization=>'agent-task-fixture',agent_task_archived=>true);
+----
+1	1	1	1
+
+query III
+SELECT agent_task_count,archived_agent_task_count,agent_task_artifact_count FROM engineering.semantic.github(authenticated_user=>true,agent_task_archived=>true);
+----
+1	1	0
+
+query III
+SELECT agent_task_count,completed_agent_task_count,failed_agent_task_count FROM engineering.semantic.github(organization=>'agent-task-fixture',agent_task_states=>'failed,waiting_for_user');
+----
+2	0	1
+
+query III
+SELECT agent_task_count,completed_agent_task_count,failed_agent_task_count FROM engineering.semantic.github(repository=>'agent-task-fixture/alpha',agent_task_creator_ids=>[38101,38102]);
+----
+2	1	1
+
+query II
+SELECT agent_task_count,failed_agent_task_count FROM engineering.semantic.github(repository=>'agent-task-fixture/alpha',agent_task_creator_ids=>[38102]);
+----
+1	1
+
+statement ok
+CREATE TEMP TABLE agent_tasks_shape_3 AS SELECT * FROM engineering.detail.agent_tasks(agent_task_id=>'task-a');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIIR
+SELECT task_id,creator_id,sessions[1].user.id,sessions[1].usage.amount FROM agent_tasks_shape_3;
+----
+task-a	38101	38102	1.5
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE agent_tasks_shape_4 AS SELECT * FROM engineering.detail.agent_tasks(repository=>'agent-task-fixture/alpha',agent_task_id=>'task-a');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TITTT
+SELECT artifacts[1].type,artifacts[1].data.variant_1.id,artifacts[1].data.variant_1.global_id,artifacts[2].data.variant_2.head_ref,artifacts[2].data.variant_2.base_ref FROM agent_tasks_shape_4;
+----
+pull	39101	PR_39101	agent/patch	main
+
+statement ok
+SET crossfield_mode='strict';
+
+query TII
+SELECT agent_tasks_task_created_day,agent_task_count,completed_agent_task_count FROM engineering.semantic.github(organization=>'agent-task-fixture') GROUP BY agent_tasks_task_created_day ORDER BY agent_tasks_task_created_day;
+----
+2026-09-01	1	1
+2026-09-02	1	0
+2026-09-03	1	0
+
+query III
+SELECT agent_task_count,observed_agent_session_count,agent_task_artifact_count FROM engineering.semantic.github(repository=>'agent-task-fixture/empty');
+----
+0	0	0
+
+query I
+SELECT agent_task_count FROM engineering.semantic.github(repositories=>[]);
+----
+0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT agent_task_count FROM engineering.semantic.github(agent_task_id=>'task-a',agent_task_states=>'completed');
+----
+<REGEX>:(?s).*(agent_task_states|arguments do not apply).*
+
+statement error
+SELECT agent_task_count FROM engineering.semantic.github(authenticated_user=>true,agent_task_creator_ids=>[38101]);
+----
+<REGEX>:(?s).*(agent_task_creator_ids|arguments do not apply).*
+
+statement error
+SELECT agent_task_count FROM engineering.semantic.github(authenticated_user=>false);
+----
+authenticated_user
+
+statement error
+SELECT agent_task_count FROM engineering.semantic.github(repository=>'agent-task-fixture/alpha',agent_task_sort=>'random');
+----
+agent_task_sort
+
+statement error
+SELECT agent_task_count FROM engineering.semantic.github(repository=>'agent-task-fixture/alpha',agent_task_direction=>'sideways');
+----
+agent_task_direction
+
+statement error
+SELECT agent_task_count FROM engineering.semantic.github(authenticated_user=>true,repository=>'agent-task-fixture/alpha');
+----
+<REGEX>:(?s).*(repository|arguments do not apply).*
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

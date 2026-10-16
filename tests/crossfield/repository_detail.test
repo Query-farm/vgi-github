@@ -1,0 +1,250 @@
+# Independent repository discovery and business metadata observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT repository_count FROM engineering.semantic.github(public_repositories=>true);
+----
+2
+
+query ITT
+SELECT repository_id,repository_node_id,repository_language FROM engineering.detail.repositories(public_repositories=>true) ORDER BY repository_id;
+----
+71001	R71001	Python
+71002	R71002	Python
+
+query I
+SELECT repository_count FROM engineering.semantic.github(public_repositories=>true,public_repository_since_id=>71001);
+----
+1
+
+query I
+SELECT repository_count FROM engineering.semantic.github(authenticated_user=>true);
+----
+3
+
+query I
+SELECT repository_count FROM engineering.semantic.github(authenticated_user=>true,repository_visibility=>'private');
+----
+1
+
+query I
+SELECT repository_count FROM engineering.semantic.github(authenticated_user=>true,repository_access_type=>'public');
+----
+2
+
+query IT
+SELECT repository_id,repository FROM engineering.detail.repositories(forks_of=>'repository-detail-fixture/alpha') ORDER BY repository_id;
+----
+71011	repository-fork-fixture/fork-a
+71012	repository-fork-fixture/fork-b
+
+query I
+SELECT repository_fork_membership_count FROM engineering.semantic.github(organization=>'repository-detail-fixture');
+----
+2
+
+query II
+SELECT parent_repository_id,repository_id FROM engineering.detail.repository_fork_memberships(repository=>'repository-detail-fixture/alpha') ORDER BY repository_id;
+----
+71001	71011
+71001	71012
+
+query III
+SELECT repository_topic_membership_count,codeowners_error_count,repository_property_value_count FROM engineering.semantic.github(organization=>'repository-detail-fixture');
+----
+3	3	4
+
+query TII
+SELECT repository_name,codeowners_error_count,repository_topic_membership_count FROM engineering.semantic.github(organization=>'repository-detail-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+repository-detail-fixture/alpha	2	2
+repository-detail-fixture/beta	1	1
+
+query III
+SELECT repository_id,error_ordinal,line FROM engineering.detail.repository_codeowners_errors(organization=>'repository-detail-fixture',codeowners_ref=>'topic/a') ORDER BY repository_id,error_ordinal;
+----
+71001	1	7
+71001	2	7
+71002	1	2
+
+statement ok
+CREATE TEMP TABLE repository_property_shapes AS SELECT * FROM engineering.detail.repository_property_values(repository=>'repository-detail-fixture/alpha');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTI
+SELECT property_name,value.variant_1,array_to_string(value.variant_2,','),value IS NULL FROM repository_property_shapes ORDER BY property_name;
+----
+languages	NULL	python,sql	false
+owner	NULL	NULL	true
+tier	gold	NULL	false
+
+statement ok
+SET crossfield_mode='strict';
+
+query IR
+SELECT repository_community_profile_count,average_repository_community_health FROM engineering.semantic.github(organization=>'repository-detail-fixture');
+----
+3	50.0
+
+query II
+SELECT repository_hash_observation_count,sha256_repository_count FROM engineering.semantic.github(organization=>'repository-detail-fixture');
+----
+3	1
+
+query IT
+SELECT repository_id,hash_algorithm FROM engineering.detail.repository_hash_observations(organization=>'repository-detail-fixture') ORDER BY repository_id;
+----
+71001	sha1
+71002	sha256
+71003	sha1
+
+query II
+SELECT repository_contributor_observation_count,reported_contributor_commit_count FROM engineering.semantic.github(organization=>'repository-detail-fixture',contributor_anonymous=>'true');
+----
+4	17
+
+query II
+SELECT repository_contributor_observation_count,reported_contributor_commit_count FROM engineering.semantic.github(organization=>'repository-detail-fixture');
+----
+2	12
+
+query III
+SELECT contributor_ordinal,contributor_id,contributions FROM engineering.detail.repository_contributor_observations(repository=>'repository-detail-fixture/alpha',contributor_anonymous=>'1') ORDER BY contributor_ordinal;
+----
+1	78101	5
+2	NULL	3
+3	NULL	2
+
+query II
+SELECT repository_contributor_observation_count,reported_contributor_commit_count FROM engineering.semantic.github(repository=>'repository-detail-fixture/empty',contributor_anonymous=>'true');
+----
+0	0
+
+query ITTI
+SELECT repository_id,permission,role_name,user_id FROM engineering.detail.repository_collaborator_permissions(organization=>'repository-detail-fixture',user=>'repository-detail-alice') ORDER BY repository_id;
+----
+71001	write	maintain	78101
+71002	none	none	NULL
+71003	read	custom-reader	78101
+
+query III
+SELECT repository_collaborator_check_count,confirmed_repository_collaborator_count,unconfirmed_repository_collaborator_count FROM engineering.semantic.github(organization=>'repository-detail-fixture',user=>'repository-detail-alice');
+----
+3	2	1
+
+query II
+SELECT repository_invitation_count,expired_repository_invitation_count FROM engineering.semantic.github(organization=>'repository-detail-fixture');
+----
+3	1
+
+query II
+SELECT repository_invitation_count,expired_repository_invitation_count FROM engineering.semantic.github(authenticated_user=>true);
+----
+2	0
+
+query III
+SELECT invitation_id,invitee_id,inviter_id FROM engineering.detail.repository_invitations(organization=>'repository-detail-fixture') ORDER BY invitation_id;
+----
+79001	78101	78102
+79002	NULL	78101
+79003	78101	NULL
+
+query I
+SELECT attestation_envelope_count FROM engineering.semantic.github(organization=>'repository-detail-fixture',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',attestation_predicate_type=>'provenance');
+----
+3
+
+query III
+SELECT retrieval_scope_id,attestation_ordinal,reported_repository_id FROM engineering.detail.attestation_envelopes(organization=>'repository-detail-fixture',attestation_subject_digest=>'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') ORDER BY attestation_ordinal;
+----
+71000	1	71001
+71000	2	NULL
+71000	3	71002
+
+query III
+SELECT repository_topic_membership_count,repository_contributor_observation_count,repository_invitation_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(public_repositories=>false);
+----
+public_repositories
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(authenticated_user=>true,repository_access_type=>'public',repository_visibility=>'public');
+----
+arguments do not apply to the selected population
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(authenticated_user=>true,repository_access_type=>'all',repository_affiliation=>'owner');
+----
+arguments do not apply to the selected population
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(forks_of=>'repository-detail-fixture/alpha',repository=>'repository-detail-fixture/alpha');
+----
+<REGEX>:(?s).*(forks_of|arguments do not apply).*
+
+statement error
+SELECT repository_collaborator_check_count FROM engineering.semantic.github(repository=>'repository-detail-fixture/alpha');
+----
+user
+
+statement error
+SELECT attestation_envelope_count FROM engineering.semantic.github(repository=>'repository-detail-fixture/alpha');
+----
+attestation_subject_digest
+
+statement error
+SELECT repository_contributor_observation_count FROM engineering.semantic.github(repository=>'repository-detail-fixture/alpha',contributor_anonymous=>'no');
+----
+contributor_anonymous
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

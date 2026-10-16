@@ -1,0 +1,4479 @@
+{
+  "entities": [
+    {
+      "name": "pull_request_counts_source",
+      "description": "pulls/get pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "reported_commit_count",
+          "path": [
+            "commits"
+          ]
+        },
+        {
+          "name": "reported_changed_file_count",
+          "path": [
+            "changed_files"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "pull_request_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/get",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pull_number": {
+            "argument": "pull_request_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "pull_request_number",
+            "argument": "pull_request_number",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "review_comments_repository_source",
+      "description": "pulls/list-review-comments-for-repo pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "source_argument": "pull_request_number"
+        },
+        {
+          "name": "review_comment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "review_comment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "review_id",
+          "path": [
+            "pull_request_review_id"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "diff_hunk",
+          "path": [
+            "diff_hunk"
+          ]
+        },
+        {
+          "name": "position",
+          "path": [
+            "position"
+          ]
+        },
+        {
+          "name": "original_position",
+          "path": [
+            "original_position"
+          ]
+        },
+        {
+          "name": "commit_id",
+          "path": [
+            "commit_id"
+          ]
+        },
+        {
+          "name": "original_commit_id",
+          "path": [
+            "original_commit_id"
+          ]
+        },
+        {
+          "name": "in_reply_to_id",
+          "path": [
+            "in_reply_to_id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "pull_request_url",
+          "path": [
+            "pull_request_url"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        },
+        {
+          "name": "line",
+          "path": [
+            "line"
+          ]
+        },
+        {
+          "name": "original_line",
+          "path": [
+            "original_line"
+          ]
+        },
+        {
+          "name": "start_line",
+          "path": [
+            "start_line"
+          ]
+        },
+        {
+          "name": "original_start_line",
+          "path": [
+            "original_start_line"
+          ]
+        },
+        {
+          "name": "side",
+          "path": [
+            "side"
+          ]
+        },
+        {
+          "name": "start_side",
+          "path": [
+            "start_side"
+          ]
+        },
+        {
+          "name": "subject_type",
+          "path": [
+            "subject_type"
+          ]
+        },
+        {
+          "name": "comment_author_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "comment_author_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "review_comment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/list-review-comments-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "review_comments_lookup_source",
+      "description": "pulls/get-review-comment pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "review_comment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "description": "Stable review comment ID within the selected repository; does not require an invented pull request number.",
+          "minimum": 1
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": true
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "source_argument": "pull_request_number"
+        },
+        {
+          "name": "review_comment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "review_comment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "review_id",
+          "path": [
+            "pull_request_review_id"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "diff_hunk",
+          "path": [
+            "diff_hunk"
+          ]
+        },
+        {
+          "name": "position",
+          "path": [
+            "position"
+          ]
+        },
+        {
+          "name": "original_position",
+          "path": [
+            "original_position"
+          ]
+        },
+        {
+          "name": "commit_id",
+          "path": [
+            "commit_id"
+          ]
+        },
+        {
+          "name": "original_commit_id",
+          "path": [
+            "original_commit_id"
+          ]
+        },
+        {
+          "name": "in_reply_to_id",
+          "path": [
+            "in_reply_to_id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "pull_request_url",
+          "path": [
+            "pull_request_url"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        },
+        {
+          "name": "line",
+          "path": [
+            "line"
+          ]
+        },
+        {
+          "name": "original_line",
+          "path": [
+            "original_line"
+          ]
+        },
+        {
+          "name": "start_line",
+          "path": [
+            "start_line"
+          ]
+        },
+        {
+          "name": "original_start_line",
+          "path": [
+            "original_start_line"
+          ]
+        },
+        {
+          "name": "side",
+          "path": [
+            "side"
+          ]
+        },
+        {
+          "name": "start_side",
+          "path": [
+            "start_side"
+          ]
+        },
+        {
+          "name": "subject_type",
+          "path": [
+            "subject_type"
+          ]
+        },
+        {
+          "name": "comment_author_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "comment_author_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "review_comment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/get-review-comment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "comment_id": {
+            "argument": "review_comment_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "review_comment_id",
+            "argument": "review_comment_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "review_comments_pull_request_source",
+      "description": "pulls/list-review-comments pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "source_argument": "pull_request_number"
+        },
+        {
+          "name": "review_comment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "review_comment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "review_id",
+          "path": [
+            "pull_request_review_id"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "diff_hunk",
+          "path": [
+            "diff_hunk"
+          ]
+        },
+        {
+          "name": "position",
+          "path": [
+            "position"
+          ]
+        },
+        {
+          "name": "original_position",
+          "path": [
+            "original_position"
+          ]
+        },
+        {
+          "name": "commit_id",
+          "path": [
+            "commit_id"
+          ]
+        },
+        {
+          "name": "original_commit_id",
+          "path": [
+            "original_commit_id"
+          ]
+        },
+        {
+          "name": "in_reply_to_id",
+          "path": [
+            "in_reply_to_id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "pull_request_url",
+          "path": [
+            "pull_request_url"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        },
+        {
+          "name": "line",
+          "path": [
+            "line"
+          ]
+        },
+        {
+          "name": "original_line",
+          "path": [
+            "original_line"
+          ]
+        },
+        {
+          "name": "start_line",
+          "path": [
+            "start_line"
+          ]
+        },
+        {
+          "name": "original_start_line",
+          "path": [
+            "original_start_line"
+          ]
+        },
+        {
+          "name": "side",
+          "path": [
+            "side"
+          ]
+        },
+        {
+          "name": "start_side",
+          "path": [
+            "start_side"
+          ]
+        },
+        {
+          "name": "subject_type",
+          "path": [
+            "subject_type"
+          ]
+        },
+        {
+          "name": "comment_author_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "comment_author_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "review_comment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/list-review-comments",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pull_number": {
+            "argument": "pull_request_number"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "review_comments_review_source",
+      "description": "pulls/list-comments-for-review pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1
+        },
+        {
+          "name": "review_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "description": "Pull request review ID; requires repository and pull_request_number.",
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "source_argument": "pull_request_number"
+        },
+        {
+          "name": "review_comment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "review_comment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "review_id",
+          "path": [
+            "pull_request_review_id"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "diff_hunk",
+          "path": [
+            "diff_hunk"
+          ]
+        },
+        {
+          "name": "position",
+          "path": [
+            "position"
+          ]
+        },
+        {
+          "name": "original_position",
+          "path": [
+            "original_position"
+          ]
+        },
+        {
+          "name": "commit_id",
+          "path": [
+            "commit_id"
+          ]
+        },
+        {
+          "name": "original_commit_id",
+          "path": [
+            "original_commit_id"
+          ]
+        },
+        {
+          "name": "in_reply_to_id",
+          "path": [
+            "in_reply_to_id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "pull_request_url",
+          "path": [
+            "pull_request_url"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        },
+        {
+          "name": "line",
+          "path": [
+            "line"
+          ]
+        },
+        {
+          "name": "original_line",
+          "path": [
+            "original_line"
+          ]
+        },
+        {
+          "name": "start_line",
+          "path": [
+            "start_line"
+          ]
+        },
+        {
+          "name": "original_start_line",
+          "path": [
+            "original_start_line"
+          ]
+        },
+        {
+          "name": "side",
+          "path": [
+            "side"
+          ]
+        },
+        {
+          "name": "start_side",
+          "path": [
+            "start_side"
+          ]
+        },
+        {
+          "name": "subject_type",
+          "path": [
+            "subject_type"
+          ]
+        },
+        {
+          "name": "comment_author_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "comment_author_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "review_comment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/list-comments-for-review",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pull_number": {
+            "argument": "pull_request_number"
+          },
+          "review_id": {
+            "argument": "review_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "review_id",
+            "argument": "review_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pull_request_files_source",
+      "description": "pulls/list-files pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1
+        },
+        {
+          "name": "expected_count",
+          "type": "BIGINT",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "source_argument": "pull_request_number"
+        },
+        {
+          "name": "blob_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "filename",
+          "path": [
+            "filename"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "additions",
+          "path": [
+            "additions"
+          ]
+        },
+        {
+          "name": "deletions",
+          "path": [
+            "deletions"
+          ]
+        },
+        {
+          "name": "changes",
+          "path": [
+            "changes"
+          ]
+        },
+        {
+          "name": "blob_url",
+          "path": [
+            "blob_url"
+          ]
+        },
+        {
+          "name": "raw_url",
+          "path": [
+            "raw_url"
+          ]
+        },
+        {
+          "name": "contents_url",
+          "path": [
+            "contents_url"
+          ]
+        },
+        {
+          "name": "patch",
+          "path": [
+            "patch"
+          ]
+        },
+        {
+          "name": "previous_filename",
+          "path": [
+            "previous_filename"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "pull_request_number",
+        "filename"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/list-files",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pull_number": {
+            "argument": "pull_request_number"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "expected_count_argument": "expected_count"
+        }
+      }
+    },
+    {
+      "name": "pull_request_requested_reviewers_source",
+      "description": "pulls/list-requested-reviewers pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "source_argument": "pull_request_number"
+        },
+        {
+          "name": "requested_users",
+          "path": [
+            "users"
+          ],
+          "selection": {
+            "id": true,
+            "login": true,
+            "type": true
+          }
+        },
+        {
+          "name": "requested_teams",
+          "path": [
+            "teams"
+          ],
+          "selection": {
+            "id": true,
+            "name": true,
+            "slug": true,
+            "node_id": true,
+            "description": true,
+            "privacy": true,
+            "notification_setting": true,
+            "html_url": true
+          }
+        }
+      ],
+      "grain": [
+        "repository",
+        "pull_request_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/list-requested-reviewers",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pull_number": {
+            "argument": "pull_request_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "pull_request_merge_status_source",
+      "description": "pulls/check-if-merged pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "source_argument": "pull_request_number"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "repository",
+        "pull_request_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/check-if-merged",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pull_number": {
+            "argument": "pull_request_number"
+          }
+        },
+        "query_bindings": {},
+        "pagination": {
+          "kind": "none"
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    },
+    {
+      "name": "pull_request_merge_result_source",
+      "description": "pulls/get-merge-async-result pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1
+        },
+        {
+          "name": "merge_request_uuid",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "630b9d5e-3f2a-4f7e-8b0c-2d5f9a8c1e42",
+          "description": "Previously requested asynchronous merge UUID; retrieval never requests or performs a merge.",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pull_request_number",
+          "source_argument": "pull_request_number"
+        },
+        {
+          "name": "merge_request_uuid",
+          "source_argument": "merge_request_uuid"
+        },
+        {
+          "name": "merge_status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "message",
+          "path": [
+            "details",
+            "message"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "reported_uuid",
+          "path": [
+            "details",
+            "uuid"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "merge_method",
+          "path": [
+            "details",
+            "merge_method"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "merge_action",
+          "path": [
+            "details",
+            "merge_action"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "expected_head_sha",
+          "path": [
+            "details",
+            "expected_head_sha"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "bypass_rules",
+          "path": [
+            "details",
+            "bypass_rules"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "merge_commit_sha",
+          "path": [
+            "details",
+            "sha"
+          ],
+          "variant_paths": true
+        }
+      ],
+      "grain": [
+        "repository",
+        "pull_request_number",
+        "merge_request_uuid"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/get-merge-async-result",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pull_number": {
+            "argument": "pull_request_number"
+          },
+          "uuid": {
+            "argument": "merge_request_uuid"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_uuid",
+            "argument": "merge_request_uuid",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pull_request_stacks_source",
+      "description": "pull-request-stacks/list pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "stack_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "stack_id",
+          "path": [
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "stack_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "ghec",
+        "operation_id": "pull-request-stacks/list",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "pull_request": {
+            "argument": "pull_request_number"
+          },
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "pull_request_stack_lookup_source",
+      "description": "pull-request-stacks/get pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "stack_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "description": "Repository-local pull request stack number; stable stack identity remains stack_id.",
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "stack_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "stack_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "stack_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "base_ref",
+          "path": [
+            "base",
+            "ref"
+          ]
+        },
+        {
+          "name": "open",
+          "path": [
+            "open"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "selection": {
+            "number": true,
+            "node_id": true,
+            "title": true,
+            "state": true,
+            "draft": true,
+            "merged_at": true,
+            "html_url": true,
+            "user": {
+              "id": true,
+              "login": true
+            },
+            "head": {
+              "ref": true,
+              "sha": true,
+              "repo": {
+                "id": true,
+                "name": true,
+                "url": true
+              }
+            }
+          }
+        }
+      ],
+      "grain": [
+        "repository",
+        "stack_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "ghec",
+        "operation_id": "pull-request-stacks/get",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "stack_number": {
+            "argument": "stack_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "stack_number",
+            "argument": "stack_number",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pull_request_commits_source",
+      "description": "pulls/list-commits pinned read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pull_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+          "example": 1
+        },
+        {
+          "name": "expected_count",
+          "type": "BIGINT",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "sha"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "commit_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/list-commits",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pull_number": {
+            "argument": "pull_request_number"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "expected_count_argument": "expected_count"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "pull_request_review_comments",
+      "description": "One canonical review comment by repository ID and comment ID across repository lists, PR lists, review lists and direct lookup. Direct/repository responses supply a PR URL but no numeric PR key, so pull_request_number remains NULL there; no parent is invented from URL text. Review IDs and parent comment IDs can be absent. Direct repository and comment-author context are analytical; PR/review/reply parent associations retain navigation without competing analytical paths.",
+      "grain": [
+        "repository_id",
+        "review_comment_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "pull_request_number",
+          "review_comment_id",
+          "review_comment_node_id",
+          "review_id",
+          "body",
+          "path",
+          "diff_hunk",
+          "position",
+          "original_position",
+          "commit_id",
+          "original_commit_id",
+          "in_reply_to_id",
+          "created_at",
+          "updated_at",
+          "html_url",
+          "pull_request_url",
+          "author_association",
+          "line",
+          "original_line",
+          "start_line",
+          "original_start_line",
+          "side",
+          "start_side",
+          "subject_type",
+          "comment_author_id",
+          "comment_author_login",
+          "review_comment_created_day"
+        ],
+        "dimensions": [
+          "repository",
+          "pull_request_number",
+          "review_comment_id",
+          "review_id",
+          "path",
+          "subject_type",
+          "comment_author_id",
+          "comment_author_login",
+          "created_at",
+          "author_association",
+          "review_comment_created_day"
+        ],
+        "metrics": [
+          {
+            "name": "pull_request_review_comment_count",
+            "kind": "count",
+            "comment": "Visible diff review comments, separate from issue conversation comments."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "review_comment_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC date of the returned created_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "pull_request_review_comments_repository",
+          "pull_request_number": "pull_request_review_comments_pull_request_number",
+          "review_comment_id": "pull_request_review_comments_review_comment_id",
+          "review_id": "pull_request_review_comments_review_id",
+          "path": "pull_request_review_comments_path",
+          "subject_type": "pull_request_review_comments_subject_type",
+          "comment_author_id": "pull_request_review_comments_comment_author_id",
+          "comment_author_login": "pull_request_review_comments_comment_author_login",
+          "created_at": "pull_request_review_comments_created_at",
+          "author_association": "pull_request_review_comments_author_association",
+          "review_comment_created_day": "pull_request_review_comments_review_comment_created_day"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "review_comment_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "example": 1,
+              "description": "Stable review comment ID within the selected repository; does not require an invented pull request number.",
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "review_comment_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "review_comment_id",
+              "source_stage": "records",
+              "source_column": "review_comment_id"
+            },
+            {
+              "name": "review_comment_node_id",
+              "source_stage": "records",
+              "source_column": "review_comment_node_id"
+            },
+            {
+              "name": "review_id",
+              "source_stage": "records",
+              "source_column": "review_id"
+            },
+            {
+              "name": "body",
+              "source_stage": "records",
+              "source_column": "body"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "diff_hunk",
+              "source_stage": "records",
+              "source_column": "diff_hunk"
+            },
+            {
+              "name": "position",
+              "source_stage": "records",
+              "source_column": "position"
+            },
+            {
+              "name": "original_position",
+              "source_stage": "records",
+              "source_column": "original_position"
+            },
+            {
+              "name": "commit_id",
+              "source_stage": "records",
+              "source_column": "commit_id"
+            },
+            {
+              "name": "original_commit_id",
+              "source_stage": "records",
+              "source_column": "original_commit_id"
+            },
+            {
+              "name": "in_reply_to_id",
+              "source_stage": "records",
+              "source_column": "in_reply_to_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "pull_request_url",
+              "source_stage": "records",
+              "source_column": "pull_request_url"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "records",
+              "source_column": "author_association"
+            },
+            {
+              "name": "line",
+              "source_stage": "records",
+              "source_column": "line"
+            },
+            {
+              "name": "original_line",
+              "source_stage": "records",
+              "source_column": "original_line"
+            },
+            {
+              "name": "start_line",
+              "source_stage": "records",
+              "source_column": "start_line"
+            },
+            {
+              "name": "original_start_line",
+              "source_stage": "records",
+              "source_column": "original_start_line"
+            },
+            {
+              "name": "side",
+              "source_stage": "records",
+              "source_column": "side"
+            },
+            {
+              "name": "start_side",
+              "source_stage": "records",
+              "source_column": "start_side"
+            },
+            {
+              "name": "subject_type",
+              "source_stage": "records",
+              "source_column": "subject_type"
+            },
+            {
+              "name": "comment_author_id",
+              "source_stage": "records",
+              "source_column": "comment_author_id"
+            },
+            {
+              "name": "comment_author_login",
+              "source_stage": "records",
+              "source_column": "comment_author_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "review_comments_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "review_comment_id": {
+                    "parameter": "review_comment_id"
+                  },
+                  "pull_request_number": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        },
+        {
+          "name": "reviews",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            },
+            {
+              "name": "review_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "example": 1,
+              "description": "Pull request review ID; requires repository and pull_request_number.",
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "review_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "review_comment_id",
+              "source_stage": "records",
+              "source_column": "review_comment_id"
+            },
+            {
+              "name": "review_comment_node_id",
+              "source_stage": "records",
+              "source_column": "review_comment_node_id"
+            },
+            {
+              "name": "review_id",
+              "source_stage": "records",
+              "source_column": "review_id"
+            },
+            {
+              "name": "body",
+              "source_stage": "records",
+              "source_column": "body"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "diff_hunk",
+              "source_stage": "records",
+              "source_column": "diff_hunk"
+            },
+            {
+              "name": "position",
+              "source_stage": "records",
+              "source_column": "position"
+            },
+            {
+              "name": "original_position",
+              "source_stage": "records",
+              "source_column": "original_position"
+            },
+            {
+              "name": "commit_id",
+              "source_stage": "records",
+              "source_column": "commit_id"
+            },
+            {
+              "name": "original_commit_id",
+              "source_stage": "records",
+              "source_column": "original_commit_id"
+            },
+            {
+              "name": "in_reply_to_id",
+              "source_stage": "records",
+              "source_column": "in_reply_to_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "pull_request_url",
+              "source_stage": "records",
+              "source_column": "pull_request_url"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "records",
+              "source_column": "author_association"
+            },
+            {
+              "name": "line",
+              "source_stage": "records",
+              "source_column": "line"
+            },
+            {
+              "name": "original_line",
+              "source_stage": "records",
+              "source_column": "original_line"
+            },
+            {
+              "name": "start_line",
+              "source_stage": "records",
+              "source_column": "start_line"
+            },
+            {
+              "name": "original_start_line",
+              "source_stage": "records",
+              "source_column": "original_start_line"
+            },
+            {
+              "name": "side",
+              "source_stage": "records",
+              "source_column": "side"
+            },
+            {
+              "name": "start_side",
+              "source_stage": "records",
+              "source_column": "start_side"
+            },
+            {
+              "name": "subject_type",
+              "source_stage": "records",
+              "source_column": "subject_type"
+            },
+            {
+              "name": "comment_author_id",
+              "source_stage": "records",
+              "source_column": "comment_author_id"
+            },
+            {
+              "name": "comment_author_login",
+              "source_stage": "records",
+              "source_column": "comment_author_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "review_comments_review_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "parameter": "pull_request_number"
+                  },
+                  "review_id": {
+                    "parameter": "review_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        },
+        {
+          "name": "pull_requests",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            }
+          ],
+          "select": [
+            "pull_request_number"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "review_comment_id",
+              "source_stage": "records",
+              "source_column": "review_comment_id"
+            },
+            {
+              "name": "review_comment_node_id",
+              "source_stage": "records",
+              "source_column": "review_comment_node_id"
+            },
+            {
+              "name": "review_id",
+              "source_stage": "records",
+              "source_column": "review_id"
+            },
+            {
+              "name": "body",
+              "source_stage": "records",
+              "source_column": "body"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "diff_hunk",
+              "source_stage": "records",
+              "source_column": "diff_hunk"
+            },
+            {
+              "name": "position",
+              "source_stage": "records",
+              "source_column": "position"
+            },
+            {
+              "name": "original_position",
+              "source_stage": "records",
+              "source_column": "original_position"
+            },
+            {
+              "name": "commit_id",
+              "source_stage": "records",
+              "source_column": "commit_id"
+            },
+            {
+              "name": "original_commit_id",
+              "source_stage": "records",
+              "source_column": "original_commit_id"
+            },
+            {
+              "name": "in_reply_to_id",
+              "source_stage": "records",
+              "source_column": "in_reply_to_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "pull_request_url",
+              "source_stage": "records",
+              "source_column": "pull_request_url"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "records",
+              "source_column": "author_association"
+            },
+            {
+              "name": "line",
+              "source_stage": "records",
+              "source_column": "line"
+            },
+            {
+              "name": "original_line",
+              "source_stage": "records",
+              "source_column": "original_line"
+            },
+            {
+              "name": "start_line",
+              "source_stage": "records",
+              "source_column": "start_line"
+            },
+            {
+              "name": "original_start_line",
+              "source_stage": "records",
+              "source_column": "original_start_line"
+            },
+            {
+              "name": "side",
+              "source_stage": "records",
+              "source_column": "side"
+            },
+            {
+              "name": "start_side",
+              "source_stage": "records",
+              "source_column": "start_side"
+            },
+            {
+              "name": "subject_type",
+              "source_stage": "records",
+              "source_column": "subject_type"
+            },
+            {
+              "name": "comment_author_id",
+              "source_stage": "records",
+              "source_column": "comment_author_id"
+            },
+            {
+              "name": "comment_author_login",
+              "source_stage": "records",
+              "source_column": "comment_author_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "review_comments_pull_request_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "parameter": "pull_request_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "review_comment_id",
+              "source_stage": "records",
+              "source_column": "review_comment_id"
+            },
+            {
+              "name": "review_comment_node_id",
+              "source_stage": "records",
+              "source_column": "review_comment_node_id"
+            },
+            {
+              "name": "review_id",
+              "source_stage": "records",
+              "source_column": "review_id"
+            },
+            {
+              "name": "body",
+              "source_stage": "records",
+              "source_column": "body"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "diff_hunk",
+              "source_stage": "records",
+              "source_column": "diff_hunk"
+            },
+            {
+              "name": "position",
+              "source_stage": "records",
+              "source_column": "position"
+            },
+            {
+              "name": "original_position",
+              "source_stage": "records",
+              "source_column": "original_position"
+            },
+            {
+              "name": "commit_id",
+              "source_stage": "records",
+              "source_column": "commit_id"
+            },
+            {
+              "name": "original_commit_id",
+              "source_stage": "records",
+              "source_column": "original_commit_id"
+            },
+            {
+              "name": "in_reply_to_id",
+              "source_stage": "records",
+              "source_column": "in_reply_to_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "pull_request_url",
+              "source_stage": "records",
+              "source_column": "pull_request_url"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "records",
+              "source_column": "author_association"
+            },
+            {
+              "name": "line",
+              "source_stage": "records",
+              "source_column": "line"
+            },
+            {
+              "name": "original_line",
+              "source_stage": "records",
+              "source_column": "original_line"
+            },
+            {
+              "name": "start_line",
+              "source_stage": "records",
+              "source_column": "start_line"
+            },
+            {
+              "name": "original_start_line",
+              "source_stage": "records",
+              "source_column": "original_start_line"
+            },
+            {
+              "name": "side",
+              "source_stage": "records",
+              "source_column": "side"
+            },
+            {
+              "name": "start_side",
+              "source_stage": "records",
+              "source_column": "start_side"
+            },
+            {
+              "name": "subject_type",
+              "source_stage": "records",
+              "source_column": "subject_type"
+            },
+            {
+              "name": "comment_author_id",
+              "source_stage": "records",
+              "source_column": "comment_author_id"
+            },
+            {
+              "name": "comment_author_login",
+              "source_stage": "records",
+              "source_column": "comment_author_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "review_comments_repository_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        }
+      ]
+    },
+    {
+      "name": "pull_request_files",
+      "description": "Current net changed paths per pull request, distinct from commit-file changes. Filename is scoped by repository and PR; rename retains previous_filename and a missing binary/large-file patch stays NULL. All pages must match the hydrated changed_files count, so the API 3000-file cap or concurrent population changes fail qualification instead of returning complete-looking partial totals.",
+      "grain": [
+        "repository_id",
+        "pull_request_number",
+        "filename"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "pull_request_number",
+          "blob_sha",
+          "filename",
+          "status",
+          "additions",
+          "deletions",
+          "changes",
+          "blob_url",
+          "raw_url",
+          "contents_url",
+          "patch",
+          "previous_filename"
+        ],
+        "dimensions": [
+          "repository",
+          "pull_request_number",
+          "filename",
+          "status",
+          "previous_filename"
+        ],
+        "metrics": [
+          {
+            "name": "pull_request_file_count",
+            "kind": "count",
+            "comment": "Net changed file paths across selected pull requests."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "pull_request_files_repository",
+          "pull_request_number": "pull_request_files_pull_request_number",
+          "filename": "pull_request_files_filename",
+          "status": "pull_request_files_status",
+          "previous_filename": "pull_request_files_previous_filename"
+        },
+        "crossfield": {
+          "metrics": {
+            "pull_request_file_additions": {
+              "expression": "SUM(pull_request_files.additions)"
+            },
+            "pull_request_file_deletions": {
+              "expression": "SUM(pull_request_files.deletions)"
+            },
+            "pull_request_file_changes": {
+              "expression": "SUM(pull_request_files.changes)"
+            }
+          },
+          "metric_semantics": {
+            "pull_request_file_additions": {
+              "dataset": "pull_request_files",
+              "comment": "Added lines in current PR file diffs.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "pull_request_file_deletions": {
+              "dataset": "pull_request_files",
+              "comment": "Deleted lines in current PR file diffs.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "pull_request_file_changes": {
+              "dataset": "pull_request_files",
+              "comment": "Total reported changed lines, not distinct repository lines across PRs.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "pull_requests",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            }
+          ],
+          "select": [
+            "pull_request_number"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "blob_sha",
+              "source_stage": "records",
+              "source_column": "blob_sha"
+            },
+            {
+              "name": "filename",
+              "source_stage": "records",
+              "source_column": "filename"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "additions",
+              "source_stage": "records",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "records",
+              "source_column": "deletions"
+            },
+            {
+              "name": "changes",
+              "source_stage": "records",
+              "source_column": "changes"
+            },
+            {
+              "name": "blob_url",
+              "source_stage": "records",
+              "source_column": "blob_url"
+            },
+            {
+              "name": "raw_url",
+              "source_stage": "records",
+              "source_column": "raw_url"
+            },
+            {
+              "name": "contents_url",
+              "source_stage": "records",
+              "source_column": "contents_url"
+            },
+            {
+              "name": "patch",
+              "source_stage": "records",
+              "source_column": "patch"
+            },
+            {
+              "name": "previous_filename",
+              "source_stage": "records",
+              "source_column": "previous_filename"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "pull_requests",
+                "entity": "pull_request_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "parameter": "pull_request_number"
+                  }
+                }
+              },
+              {
+                "name": "pull_counts",
+                "entity": "pull_request_counts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "stage": "pull_requests",
+                    "column": "number"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_files_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "stage": "pull_requests",
+                    "column": "number"
+                  },
+                  "expected_count": {
+                    "stage": "pull_counts",
+                    "column": "reported_changed_file_count"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": true,
+              "default": null,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "blob_sha",
+              "source_stage": "records",
+              "source_column": "blob_sha"
+            },
+            {
+              "name": "filename",
+              "source_stage": "records",
+              "source_column": "filename"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "additions",
+              "source_stage": "records",
+              "source_column": "additions"
+            },
+            {
+              "name": "deletions",
+              "source_stage": "records",
+              "source_column": "deletions"
+            },
+            {
+              "name": "changes",
+              "source_stage": "records",
+              "source_column": "changes"
+            },
+            {
+              "name": "blob_url",
+              "source_stage": "records",
+              "source_column": "blob_url"
+            },
+            {
+              "name": "raw_url",
+              "source_stage": "records",
+              "source_column": "raw_url"
+            },
+            {
+              "name": "contents_url",
+              "source_stage": "records",
+              "source_column": "contents_url"
+            },
+            {
+              "name": "patch",
+              "source_stage": "records",
+              "source_column": "patch"
+            },
+            {
+              "name": "previous_filename",
+              "source_stage": "records",
+              "source_column": "previous_filename"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "pull_requests",
+                "scope": "pull_requests"
+              },
+              {
+                "name": "pull_counts",
+                "entity": "pull_request_counts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "stage": "pull_requests",
+                    "column": "number"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_files_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "stage": "pull_requests",
+                    "column": "number"
+                  },
+                  "expected_count": {
+                    "stage": "pull_counts",
+                    "column": "reported_changed_file_count"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        }
+      ]
+    },
+    {
+      "name": "pull_request_review_requests",
+      "description": "One current requested-reviewer population per pull request, with typed user and team memberships. Submitted reviewers disappear from this endpoint; these are outstanding requests, not review history or request event timestamps. Empty arrays preserve the selected PR with zero outstanding users and teams.",
+      "grain": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "pull_request_number",
+          "requested_users",
+          "requested_teams"
+        ],
+        "dimensions": [
+          "repository",
+          "pull_request_number"
+        ],
+        "metrics": [
+          {
+            "name": "review_request_population_count",
+            "kind": "count",
+            "comment": "Selected per-PR current reviewer-request populations, including empty lists."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "pull_request_review_requests_repository",
+          "pull_request_number": "pull_request_review_requests_pull_request_number"
+        },
+        "crossfield": {
+          "metrics": {
+            "requested_user_review_count": {
+              "expression": "SUM(length(pull_request_review_requests.requested_users))"
+            },
+            "requested_team_review_count": {
+              "expression": "SUM(length(pull_request_review_requests.requested_teams))"
+            }
+          },
+          "metric_semantics": {
+            "requested_user_review_count": {
+              "dataset": "pull_request_review_requests",
+              "comment": "Outstanding PR/user review-request memberships.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "requested_team_review_count": {
+              "dataset": "pull_request_review_requests",
+              "comment": "Outstanding PR/team review-request memberships; teams are not individual reviewer accounts.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "pull_requests",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            }
+          ],
+          "select": [
+            "pull_request_number"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "requested_users",
+              "source_stage": "records",
+              "source_column": "requested_users"
+            },
+            {
+              "name": "requested_teams",
+              "source_stage": "records",
+              "source_column": "requested_teams"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "pull_requests",
+                "entity": "pull_request_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "parameter": "pull_request_number"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_requested_reviewers_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "stage": "pull_requests",
+                    "column": "number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": true,
+              "default": null,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "requested_users",
+              "source_stage": "records",
+              "source_column": "requested_users"
+            },
+            {
+              "name": "requested_teams",
+              "source_stage": "records",
+              "source_column": "requested_teams"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "pull_requests",
+                "scope": "pull_requests"
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_requested_reviewers_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "stage": "pull_requests",
+                    "column": "number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        }
+      ]
+    },
+    {
+      "name": "pull_request_merge_statuses",
+      "description": "Merge-check observations after confirming the selected PR is visible. GitHub declares HTTP 204 as merged and 404 as not merged for this endpoint; other failures are not converted to false. This is a current predicate observation, not a merge event history or asynchronous queue outcome.",
+      "grain": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "pull_request_number",
+          "status_code"
+        ],
+        "dimensions": [
+          "repository",
+          "pull_request_number",
+          "status_code"
+        ],
+        "metrics": [
+          {
+            "name": "pull_request_merge_check_count",
+            "kind": "count",
+            "comment": "Visible-PR merge predicate observations."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "pull_request_merge_statuses_repository",
+          "pull_request_number": "pull_request_merge_statuses_pull_request_number",
+          "status_code": "pull_request_merge_statuses_status_code"
+        },
+        "crossfield": {
+          "metrics": {
+            "merged_pull_request_check_count": {
+              "expression": "COUNT(*) FILTER (WHERE pull_request_merge_statuses.status_code = 204)"
+            },
+            "unmerged_pull_request_check_count": {
+              "expression": "COUNT(*) FILTER (WHERE pull_request_merge_statuses.status_code = 404)"
+            }
+          },
+          "metric_semantics": {
+            "merged_pull_request_check_count": {
+              "dataset": "pull_request_merge_statuses",
+              "comment": "Merge-check observations with the declared merged HTTP response.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "unmerged_pull_request_check_count": {
+              "dataset": "pull_request_merge_statuses",
+              "comment": "Merge-check observations with the declared not-merged HTTP response.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "pull_requests",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            }
+          ],
+          "select": [
+            "pull_request_number"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "pull_requests",
+                "entity": "pull_request_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "parameter": "pull_request_number"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_merge_status_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "stage": "pull_requests",
+                    "column": "number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": true,
+              "default": null,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "pull_requests",
+                "scope": "pull_requests"
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_merge_status_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "stage": "pull_requests",
+                    "column": "number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        }
+      ]
+    },
+    {
+      "name": "pull_request_merge_results",
+      "description": "Status of an externally supplied asynchronous merge request UUID, retained by GitHub for only 24 hours after its most recent update. Retrieval never performs a merge. Enqueued is a final queue-request result and does not imply eventual merge; pending, failed and merged remain distinct. Nullable detail fields preserve the API variant rather than inventing merge SHAs.",
+      "grain": [
+        "repository_id",
+        "pull_request_number",
+        "merge_request_uuid"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "pull_request_number",
+          "merge_request_uuid",
+          "merge_status",
+          "message",
+          "reported_uuid",
+          "merge_method",
+          "merge_action",
+          "expected_head_sha",
+          "bypass_rules",
+          "merge_commit_sha"
+        ],
+        "dimensions": [
+          "repository",
+          "pull_request_number",
+          "merge_request_uuid",
+          "merge_status",
+          "merge_method",
+          "merge_action",
+          "merge_commit_sha"
+        ],
+        "metrics": [
+          {
+            "name": "pull_request_merge_result_count",
+            "kind": "count",
+            "comment": "Selected asynchronous request result records."
+          },
+          {
+            "name": "successful_async_merge_count",
+            "kind": "count",
+            "comment": "Asynchronous results explicitly reporting merged.",
+            "where": {
+              "field": "merge_status",
+              "op": "eq",
+              "value": "merged"
+            }
+          },
+          {
+            "name": "enqueued_async_merge_count",
+            "kind": "count",
+            "comment": "Asynchronous results finalized as enqueued; not successful merges.",
+            "where": {
+              "field": "merge_status",
+              "op": "eq",
+              "value": "enqueued"
+            }
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "pull_request_merge_results_repository",
+          "pull_request_number": "pull_request_merge_results_pull_request_number",
+          "merge_request_uuid": "pull_request_merge_results_merge_request_uuid",
+          "merge_status": "pull_request_merge_results_merge_status",
+          "merge_method": "pull_request_merge_results_merge_method",
+          "merge_action": "pull_request_merge_results_merge_action",
+          "merge_commit_sha": "pull_request_merge_results_merge_commit_sha"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            },
+            {
+              "name": "merge_request_uuid",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "630b9d5e-3f2a-4f7e-8b0c-2d5f9a8c1e42",
+              "description": "Previously requested asynchronous merge UUID; retrieval never requests or performs a merge.",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "merge_request_uuid"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "pull_request_number",
+              "source_stage": "records",
+              "source_column": "pull_request_number"
+            },
+            {
+              "name": "merge_request_uuid",
+              "source_stage": "records",
+              "source_column": "merge_request_uuid"
+            },
+            {
+              "name": "merge_status",
+              "source_stage": "records",
+              "source_column": "merge_status"
+            },
+            {
+              "name": "message",
+              "source_stage": "records",
+              "source_column": "message"
+            },
+            {
+              "name": "reported_uuid",
+              "source_stage": "records",
+              "source_column": "reported_uuid"
+            },
+            {
+              "name": "merge_method",
+              "source_stage": "records",
+              "source_column": "merge_method"
+            },
+            {
+              "name": "merge_action",
+              "source_stage": "records",
+              "source_column": "merge_action"
+            },
+            {
+              "name": "expected_head_sha",
+              "source_stage": "records",
+              "source_column": "expected_head_sha"
+            },
+            {
+              "name": "bypass_rules",
+              "source_stage": "records",
+              "source_column": "bypass_rules"
+            },
+            {
+              "name": "merge_commit_sha",
+              "source_stage": "records",
+              "source_column": "merge_commit_sha"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_merge_result_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "parameter": "pull_request_number"
+                  },
+                  "merge_request_uuid": {
+                    "parameter": "merge_request_uuid"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        }
+      ]
+    },
+    {
+      "name": "pull_request_stacks",
+      "description": "GHEC-documented pull request stacks at repository ID and stable stack ID, unified across list, stack-number lookup and containing-PR filter. Listing discovers stack numbers and hydrates full stack detail, preserving ordered PR members and head refs/SHAs. Stack openness means any member PR is open; no reviewer or merge eligibility inference is made.",
+      "grain": [
+        "repository_id",
+        "stack_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "stack_id",
+          "stack_number",
+          "stack_node_id",
+          "url",
+          "base_ref",
+          "open",
+          "created_at",
+          "pull_requests",
+          "pull_request_stack_created_day"
+        ],
+        "dimensions": [
+          "repository",
+          "stack_id",
+          "stack_number",
+          "base_ref",
+          "open",
+          "created_at",
+          "pull_request_stack_created_day"
+        ],
+        "metrics": [
+          {
+            "name": "pull_request_stack_count",
+            "kind": "count",
+            "comment": "Selected distinct stack resources."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "pull_request_stack_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC date of the returned created_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "pull_request_stacks_repository",
+          "stack_id": "pull_request_stacks_stack_id",
+          "stack_number": "pull_request_stacks_stack_number",
+          "base_ref": "pull_request_stacks_base_ref",
+          "open": "pull_request_stacks_open",
+          "created_at": "pull_request_stacks_created_at",
+          "pull_request_stack_created_day": "pull_request_stacks_pull_request_stack_created_day"
+        },
+        "crossfield": {
+          "metrics": {
+            "open_pull_request_stack_count": {
+              "expression": "COUNT(*) FILTER (WHERE pull_request_stacks.open = TRUE)"
+            },
+            "stack_pull_request_membership_count": {
+              "expression": "SUM(length(pull_request_stacks.pull_requests))"
+            }
+          },
+          "metric_semantics": {
+            "open_pull_request_stack_count": {
+              "dataset": "pull_request_stacks",
+              "comment": "Stacks explicitly containing an open PR.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "stack_pull_request_membership_count": {
+              "dataset": "pull_request_stacks",
+              "comment": "Ordered stack/PR memberships in selected stacks, not a count of all repository PRs.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "stack_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "example": 1,
+              "description": "Repository-local pull request stack number; stable stack identity remains stack_id.",
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "stack_number"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "stack_id",
+              "source_stage": "records",
+              "source_column": "stack_id"
+            },
+            {
+              "name": "stack_number",
+              "source_stage": "records",
+              "source_column": "stack_number"
+            },
+            {
+              "name": "stack_node_id",
+              "source_stage": "records",
+              "source_column": "stack_node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "base_ref",
+              "source_stage": "records",
+              "source_column": "base_ref"
+            },
+            {
+              "name": "open",
+              "source_stage": "records",
+              "source_column": "open"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "records",
+              "source_column": "pull_requests"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_stack_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "stack_number": {
+                    "parameter": "stack_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        },
+        {
+          "name": "pull_requests",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pull_request_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Optional one-PR scope; requires repository. NULL includes all open and closed PRs.",
+              "example": 1
+            }
+          ],
+          "select": [
+            "pull_request_number"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "stack_id",
+              "source_stage": "records",
+              "source_column": "stack_id"
+            },
+            {
+              "name": "stack_number",
+              "source_stage": "records",
+              "source_column": "stack_number"
+            },
+            {
+              "name": "stack_node_id",
+              "source_stage": "records",
+              "source_column": "stack_node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "base_ref",
+              "source_stage": "records",
+              "source_column": "base_ref"
+            },
+            {
+              "name": "open",
+              "source_stage": "records",
+              "source_column": "open"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "records",
+              "source_column": "pull_requests"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "discovered",
+                "entity": "pull_request_stacks_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "parameter": "pull_request_number"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_stack_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "stack_number": {
+                    "stage": "discovered",
+                    "column": "stack_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "stack_id",
+              "source_stage": "records",
+              "source_column": "stack_id"
+            },
+            {
+              "name": "stack_number",
+              "source_stage": "records",
+              "source_column": "stack_number"
+            },
+            {
+              "name": "stack_node_id",
+              "source_stage": "records",
+              "source_column": "stack_node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "base_ref",
+              "source_stage": "records",
+              "source_column": "base_ref"
+            },
+            {
+              "name": "open",
+              "source_stage": "records",
+              "source_column": "open"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "pull_requests",
+              "source_stage": "records",
+              "source_column": "pull_requests"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "discovered",
+                "entity": "pull_request_stacks_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pull_request_number": {
+                    "literal": null
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "pull_request_stack_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "stack_number": {
+                    "stage": "discovered",
+                    "column": "stack_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible selected records at declared identity; every advertised collection page is exhausted and inaccessible or incomplete populations fail."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "pull_request_review_comments_to_repositories",
+      "from": "pull_request_review_comments",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pull_request_review_comments_to_pull_requests",
+      "from": "pull_request_review_comments",
+      "to": "pull_requests",
+      "from_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "to_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "pull_requests",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "pull_request_files_to_repositories",
+      "from": "pull_request_files",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pull_request_files_to_pull_requests",
+      "from": "pull_request_files",
+      "to": "pull_requests",
+      "from_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "to_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "pull_requests",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "pull_request_review_requests_to_repositories",
+      "from": "pull_request_review_requests",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pull_request_review_requests_to_pull_requests",
+      "from": "pull_request_review_requests",
+      "to": "pull_requests",
+      "from_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "to_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "pull_requests",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "pull_request_merge_statuses_to_repositories",
+      "from": "pull_request_merge_statuses",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pull_request_merge_statuses_to_pull_requests",
+      "from": "pull_request_merge_statuses",
+      "to": "pull_requests",
+      "from_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "to_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "pull_requests",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "pull_request_merge_results_to_repositories",
+      "from": "pull_request_merge_results",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pull_request_merge_results_to_pull_requests",
+      "from": "pull_request_merge_results",
+      "to": "pull_requests",
+      "from_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "to_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "pull_request_stacks_to_repositories",
+      "from": "pull_request_stacks",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "review_comments_to_reviews",
+      "from": "pull_request_review_comments",
+      "to": "pull_request_reviews",
+      "from_columns": [
+        "repository_id",
+        "pull_request_number",
+        "review_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "pull_request_number",
+        "review_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number",
+            "review_id": "review_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "reviews",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "pull_request_number",
+            "review_id": "review_id"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "review_comments_to_parent_comments",
+      "from": "pull_request_review_comments",
+      "to": "pull_request_review_comments",
+      "from_columns": [
+        "repository_id",
+        "in_reply_to_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "review_comment_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "review_comment_id": "in_reply_to_id"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "review_comments_to_authors",
+      "from": "pull_request_review_comments",
+      "to": "users",
+      "from_columns": [
+        "comment_author_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "comment_author_login"
+          }
+        }
+      ],
+      "optional": true
+    }
+  ]
+}

@@ -1,0 +1,594 @@
+{
+  "entities": [
+    {
+      "name": "repository_changes_source",
+      "description": "repos/list-activities pinned typed repository source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        },
+        {
+          "name": "repository_activity_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Repository change history ref filter; full ref such as refs/heads/main.",
+          "example": "refs/heads/main",
+          "default": null
+        },
+        {
+          "name": "repository_activity_actor",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Repository change history actor login filter; distinct from repository owner.",
+          "example": "octocat",
+          "default": null
+        },
+        {
+          "name": "repository_activity_period",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Repository change history relative time window; omission preserves the API default.",
+          "example": "month",
+          "default": null,
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "quarter",
+            "year"
+          ]
+        },
+        {
+          "name": "repository_activity_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Repository change history operation type.",
+          "example": "push",
+          "default": null,
+          "enum": [
+            "push",
+            "force_push",
+            "branch_creation",
+            "branch_deletion",
+            "pr_merge",
+            "merge_queue_merge"
+          ]
+        },
+        {
+          "name": "repository_activity_direction",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Repository change history ordering.",
+          "example": "desc",
+          "default": null,
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        {
+          "name": "repository_activity_before",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Opaque repository activity cursor selecting results before a known cursor.",
+          "example": "opaque-before",
+          "default": null
+        },
+        {
+          "name": "repository_activity_after",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Opaque repository activity cursor selecting results after a known cursor.",
+          "example": "opaque-after",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "change_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "before_sha",
+          "path": [
+            "before"
+          ]
+        },
+        {
+          "name": "after_sha",
+          "path": [
+            "after"
+          ]
+        },
+        {
+          "name": "ref_name",
+          "path": [
+            "ref"
+          ]
+        },
+        {
+          "name": "occurred_at",
+          "path": [
+            "timestamp"
+          ]
+        },
+        {
+          "name": "activity_type",
+          "path": [
+            "activity_type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor_type",
+          "path": [
+            "actor",
+            "type"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "change_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-activities",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "repository_activity_ref"
+          },
+          "actor": {
+            "argument": "repository_activity_actor"
+          },
+          "time_period": {
+            "argument": "repository_activity_period"
+          },
+          "activity_type": {
+            "argument": "repository_activity_type"
+          },
+          "direction": {
+            "argument": "repository_activity_direction"
+          },
+          "before": {
+            "argument": "repository_activity_before"
+          },
+          "after": {
+            "argument": "repository_activity_after"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "repository_changes",
+      "description": "Detailed repository change records (pushes, force pushes, branch changes and merges), separate from the retained general Events API. Follow every advertised Link cursor in the selected filters; opaque initial before/after cursors intentionally select a subpopulation. Actor is the performer, not the commit author or repository owner. before_sha/after_sha are reported boundaries; zero or unavailable commit objects are not invented as retrieved commits.",
+      "grain": [
+        "repository_id",
+        "change_id"
+      ],
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository_activity_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Repository change history ref filter; full ref such as refs/heads/main.",
+              "example": "refs/heads/main",
+              "default": null
+            },
+            {
+              "name": "repository_activity_actor",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Repository change history actor login filter; distinct from repository owner.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "repository_activity_period",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Repository change history relative time window; omission preserves the API default.",
+              "example": "month",
+              "default": null,
+              "enum": [
+                "day",
+                "week",
+                "month",
+                "quarter",
+                "year"
+              ]
+            },
+            {
+              "name": "repository_activity_type",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Repository change history operation type.",
+              "example": "push",
+              "default": null,
+              "enum": [
+                "push",
+                "force_push",
+                "branch_creation",
+                "branch_deletion",
+                "pr_merge",
+                "merge_queue_merge"
+              ]
+            },
+            {
+              "name": "repository_activity_direction",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Repository change history ordering.",
+              "example": "desc",
+              "default": null,
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            {
+              "name": "repository_activity_before",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Opaque repository activity cursor selecting results before a known cursor.",
+              "example": "opaque-before",
+              "default": null
+            },
+            {
+              "name": "repository_activity_after",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Opaque repository activity cursor selecting results after a known cursor.",
+              "example": "opaque-after",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "change_id",
+              "source_stage": "records",
+              "source_column": "change_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "before_sha",
+              "source_stage": "records",
+              "source_column": "before_sha"
+            },
+            {
+              "name": "after_sha",
+              "source_stage": "records",
+              "source_column": "after_sha"
+            },
+            {
+              "name": "ref_name",
+              "source_stage": "records",
+              "source_column": "ref_name"
+            },
+            {
+              "name": "occurred_at",
+              "source_stage": "records",
+              "source_column": "occurred_at"
+            },
+            {
+              "name": "activity_type",
+              "source_stage": "records",
+              "source_column": "activity_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "records",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "records",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor_type",
+              "source_stage": "records",
+              "source_column": "actor_type"
+            },
+            {
+              "name": "actor",
+              "source_stage": "records",
+              "source_column": "actor"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_changes_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "repository_activity_ref": {
+                    "parameter": "repository_activity_ref"
+                  },
+                  "repository_activity_actor": {
+                    "parameter": "repository_activity_actor"
+                  },
+                  "repository_activity_period": {
+                    "parameter": "repository_activity_period"
+                  },
+                  "repository_activity_type": {
+                    "parameter": "repository_activity_type"
+                  },
+                  "repository_activity_direction": {
+                    "parameter": "repository_activity_direction"
+                  },
+                  "repository_activity_before": {
+                    "parameter": "repository_activity_before"
+                  },
+                  "repository_activity_after": {
+                    "parameter": "repository_activity_after"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Detailed repository change records (pushes, force pushes, branch changes and merges), separate from the retained general Events API. Follow every advertised Link cursor in the selected filters; opaque initial before/after cursors intentionally select a subpopulation. Actor is the performer, not the commit author or repository owner. before_sha/after_sha are reported boundaries; zero or unavailable commit objects are not invented as retrieved commits."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "change_id",
+          "node_id",
+          "before_sha",
+          "after_sha",
+          "ref_name",
+          "occurred_at",
+          "activity_type",
+          "actor_id",
+          "actor_login",
+          "actor_type",
+          "actor"
+        ],
+        "dimensions": [
+          "repository",
+          "activity_type",
+          "ref_name",
+          "occurred_at",
+          "actor_login"
+        ],
+        "sql_names": {
+          "repository": "repository_changes_repository",
+          "activity_type": "repository_changes_activity_type",
+          "ref_name": "repository_changes_ref_name",
+          "occurred_at": "repository_changes_occurred_at",
+          "actor_login": "repository_changes_actor_login"
+        },
+        "metrics": [
+          {
+            "name": "repository_change_count",
+            "kind": "count",
+            "comment": "Distinct repository-qualified change records in the selected filtered history."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_push_count": {
+              "expression": "COUNT(*) FILTER (WHERE repository_changes.activity_type = 'push')"
+            },
+            "repository_force_push_count": {
+              "expression": "COUNT(*) FILTER (WHERE repository_changes.activity_type = 'force_push')"
+            },
+            "repository_branch_deletion_count": {
+              "expression": "COUNT(*) FILTER (WHERE repository_changes.activity_type = 'branch_deletion')"
+            }
+          },
+          "metric_semantics": {
+            "repository_push_count": {
+              "dataset": "repository_changes",
+              "additivity": "additive",
+              "comment": "Selected ordinary push records."
+            },
+            "repository_force_push_count": {
+              "dataset": "repository_changes",
+              "additivity": "additive",
+              "comment": "Selected force-push records."
+            },
+            "repository_branch_deletion_count": {
+              "dataset": "repository_changes",
+              "additivity": "additive",
+              "comment": "Selected branch-deletion records."
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "repository_changes_to_repositories",
+      "from": "repository_changes",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_changes_to_users",
+      "from": "repository_changes",
+      "to": "users",
+      "from_columns": [
+        "actor_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "actor_login"
+          },
+          "when": {
+            "actor_type": "User"
+          }
+        }
+      ]
+    }
+  ]
+}

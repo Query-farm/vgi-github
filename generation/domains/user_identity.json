@@ -1,0 +1,2744 @@
+{
+  "entities": [
+    {
+      "name": "user_identity_by_id_source",
+      "description": "Pinned users/get-by-id read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "user_account_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable numeric account ID for the canonical personal User-only population. Organization and Bot accounts are outside that population.",
+          "example": 2601,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-by-id",
+        "path_bindings": {
+          "account_id": {
+            "argument": "user_account_id"
+          }
+        },
+        "query_bindings": {},
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "user_id",
+            "argument": "user_account_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "user_identity_authenticated_source",
+      "description": "Pinned users/get-authenticated read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "authenticated_user",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "enum": [
+            true
+          ],
+          "example": true,
+          "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "authenticated_user",
+          "source_argument": "authenticated_user",
+          "description": "Explicit authenticated-account selection carried to dependent account-scoped retrievals after resolving /user."
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-authenticated",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "user_identity_directory_source",
+      "description": "Pinned users/list read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "user_directory",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "description": "Explicitly enumerate the global public account directory, retaining only personal User accounts and hydrating canonical profiles.",
+          "example": true,
+          "enum": [
+            true
+          ]
+        },
+        {
+          "name": "user_since_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Optional exclusive numeric account-ID cursor for global directory retrieval; results cover only accounts after this ID.",
+          "example": 2600,
+          "minimum": 0,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "since": {
+            "argument": "user_since_id"
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_identity_discovered_profile_source",
+      "description": "Pinned users/get-by-username read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        },
+        {
+          "name": "expected_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID supplied by directory discovery; renamed login hydration must preserve this ID.",
+          "example": 2601,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-by-username",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "user_id",
+            "argument": "expected_user_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "user_followers_source",
+      "description": "Pinned users/list-followers-for-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "follow_subject_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the selected follow-list subject.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "follow_subject_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the selected follow-list subject.",
+          "example": "identity-alice",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "follower_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "follower_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "followed_id",
+          "source_argument": "follow_subject_id"
+        },
+        {
+          "name": "followed_login",
+          "source_argument": "follow_subject_login"
+        }
+      ],
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-followers-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "follow_subject_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_followers_authenticated_source",
+      "description": "Pinned users/list-followers-for-authenticated-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "follow_subject_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the selected follow-list subject.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "follow_subject_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the selected follow-list subject.",
+          "example": "identity-alice",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "follower_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "follower_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "followed_id",
+          "source_argument": "follow_subject_id"
+        },
+        {
+          "name": "followed_login",
+          "source_argument": "follow_subject_login"
+        }
+      ],
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-followers-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_following_source",
+      "description": "Pinned users/list-following-for-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "follow_subject_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the selected follow-list subject.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "follow_subject_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the selected follow-list subject.",
+          "example": "identity-alice",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "follower_id",
+          "source_argument": "follow_subject_id"
+        },
+        {
+          "name": "follower_login",
+          "source_argument": "follow_subject_login"
+        },
+        {
+          "name": "followed_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "followed_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-following-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "follow_subject_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_following_authenticated_source",
+      "description": "Pinned users/list-followed-by-authenticated-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "follow_subject_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the selected follow-list subject.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "follow_subject_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the selected follow-list subject.",
+          "example": "identity-alice",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "follower_id",
+          "source_argument": "follow_subject_id"
+        },
+        {
+          "name": "follower_login",
+          "source_argument": "follow_subject_login"
+        },
+        {
+          "name": "followed_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "followed_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-followed-by-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_follow_target_source",
+      "description": "Pinned users/get-by-username read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_follower_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the account performing the selected follow.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_follower_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the account performing the selected follow.",
+          "example": "identity-alice",
+          "min_length": 1
+        },
+        {
+          "name": "followed_user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Login of the account being followed, distinct from its followers.",
+          "example": "identity-bob",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "follower_id",
+          "source_argument": "selected_follower_id"
+        },
+        {
+          "name": "follower_login",
+          "source_argument": "selected_follower_login"
+        },
+        {
+          "name": "followed_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "followed_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-by-username",
+        "path_bindings": {
+          "username": {
+            "argument": "followed_user"
+          }
+        },
+        "query_bindings": {},
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "user_follow_check_source",
+      "description": "Pinned users/check-following-for-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_follower_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the account performing the selected follow.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_follower_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the account performing the selected follow.",
+          "example": "identity-alice",
+          "min_length": 1
+        },
+        {
+          "name": "selected_followed_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the selected followed account.",
+          "example": 2602,
+          "minimum": 1
+        },
+        {
+          "name": "selected_followed_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the selected followed account.",
+          "example": "identity-bob",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "follower_id",
+          "source_argument": "selected_follower_id"
+        },
+        {
+          "name": "follower_login",
+          "source_argument": "selected_follower_login"
+        },
+        {
+          "name": "followed_id",
+          "source_argument": "selected_followed_id"
+        },
+        {
+          "name": "followed_login",
+          "source_argument": "selected_followed_login"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/check-following-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "selected_follower_login"
+          },
+          "target_user": {
+            "argument": "selected_followed_login"
+          }
+        },
+        "query_bindings": {},
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    },
+    {
+      "name": "user_follow_check_authenticated_source",
+      "description": "Pinned users/check-person-is-followed-by-authenticated read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_follower_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the account performing the selected follow.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_follower_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the account performing the selected follow.",
+          "example": "identity-alice",
+          "min_length": 1
+        },
+        {
+          "name": "selected_followed_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable ID of the selected followed account.",
+          "example": 2602,
+          "minimum": 1
+        },
+        {
+          "name": "selected_followed_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical login of the selected followed account.",
+          "example": "identity-bob",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "follower_id",
+          "source_argument": "selected_follower_id"
+        },
+        {
+          "name": "follower_login",
+          "source_argument": "selected_follower_login"
+        },
+        {
+          "name": "followed_id",
+          "source_argument": "selected_followed_id"
+        },
+        {
+          "name": "followed_login",
+          "source_argument": "selected_followed_login"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/check-person-is-followed-by-authenticated",
+        "path_bindings": {
+          "username": {
+            "argument": "selected_followed_login"
+          }
+        },
+        "query_bindings": {},
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    },
+    {
+      "name": "user_emails_all_source",
+      "description": "Pinned users/list-emails-for-authenticated-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected account identity.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected account login.",
+          "example": "identity-alice",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_argument": "selected_user_id"
+        },
+        {
+          "name": "user_login",
+          "source_argument": "selected_user_login"
+        },
+        {
+          "name": "email",
+          "path": [
+            "email"
+          ]
+        },
+        {
+          "name": "is_primary",
+          "path": [
+            "primary"
+          ]
+        },
+        {
+          "name": "is_verified",
+          "path": [
+            "verified"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id",
+        "email"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-emails-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_emails_public_source",
+      "description": "Pinned users/list-public-emails-for-authenticated-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected account identity.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected account login.",
+          "example": "identity-alice",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_argument": "selected_user_id"
+        },
+        {
+          "name": "user_login",
+          "source_argument": "selected_user_login"
+        },
+        {
+          "name": "email",
+          "path": [
+            "email"
+          ]
+        },
+        {
+          "name": "is_primary",
+          "path": [
+            "primary"
+          ]
+        },
+        {
+          "name": "is_verified",
+          "path": [
+            "verified"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id",
+        "email"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-public-emails-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_social_accounts_source",
+      "description": "Pinned users/list-social-accounts-for-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected account identity.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected account login.",
+          "example": "identity-alice",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_argument": "selected_user_id"
+        },
+        {
+          "name": "user_login",
+          "source_argument": "selected_user_login"
+        },
+        {
+          "name": "provider",
+          "path": [
+            "provider"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id",
+        "provider",
+        "url"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-social-accounts-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "selected_user_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_social_accounts_authenticated_source",
+      "description": "Pinned users/list-social-accounts-for-authenticated-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected account identity.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected account login.",
+          "example": "identity-alice",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_argument": "selected_user_id"
+        },
+        {
+          "name": "user_login",
+          "source_argument": "selected_user_login"
+        },
+        {
+          "name": "provider",
+          "path": [
+            "provider"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        }
+      ],
+      "grain": [
+        "user_id",
+        "provider",
+        "url"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-social-accounts-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_context_source",
+      "description": "Pinned users/get-context-for-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected account identity.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected account login.",
+          "example": "identity-alice",
+          "min_length": 1
+        },
+        {
+          "name": "context_subject_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit observation subject type, or none for a context-free hovercard.",
+          "example": "repository"
+        },
+        {
+          "name": "context_subject_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit observation subject identifier, empty only for a context-free hovercard.",
+          "example": "123"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_argument": "selected_user_id"
+        },
+        {
+          "name": "user_login",
+          "source_argument": "selected_user_login"
+        },
+        {
+          "name": "subject_type",
+          "source_argument": "context_subject_type"
+        },
+        {
+          "name": "subject_id",
+          "source_argument": "context_subject_id",
+          "allow_empty_identity": true
+        },
+        {
+          "name": "contexts",
+          "path": [
+            "contexts"
+          ],
+          "selection": {
+            "message": true,
+            "octicon": true
+          }
+        }
+      ],
+      "grain": [
+        "user_id",
+        "subject_type",
+        "subject_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-context-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "selected_user_login"
+          }
+        },
+        "query_bindings": {},
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "user_context_subject_source",
+      "description": "Pinned users/get-context-for-user read; authorization errors and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected account identity.",
+          "example": 2601,
+          "minimum": 1
+        },
+        {
+          "name": "selected_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected account login.",
+          "example": "identity-alice",
+          "min_length": 1
+        },
+        {
+          "name": "context_subject_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit observation subject type, or none for a context-free hovercard.",
+          "example": "repository"
+        },
+        {
+          "name": "context_subject_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit observation subject identifier, empty only for a context-free hovercard.",
+          "example": "123"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "source_argument": "selected_user_id"
+        },
+        {
+          "name": "user_login",
+          "source_argument": "selected_user_login"
+        },
+        {
+          "name": "subject_type",
+          "source_argument": "context_subject_type"
+        },
+        {
+          "name": "subject_id",
+          "source_argument": "context_subject_id"
+        },
+        {
+          "name": "contexts",
+          "path": [
+            "contexts"
+          ],
+          "selection": {
+            "message": true,
+            "octicon": true
+          }
+        }
+      ],
+      "grain": [
+        "user_id",
+        "subject_type",
+        "subject_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-context-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "selected_user_login"
+          }
+        },
+        "query_bindings": {
+          "subject_type": {
+            "argument": "context_subject_type"
+          },
+          "subject_id": {
+            "argument": "context_subject_id"
+          }
+        },
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "user_follow_relationships",
+      "description": "Canonical directed follow edges with stable ordered follower and followed identities. Incoming and outgoing listings unify at the same pair grain. Follows are not organization/team memberships; count distinct actors only by their explicit role.",
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "follower_id",
+          "follower_login",
+          "followed_id",
+          "followed_login"
+        ],
+        "dimensions": [
+          "follower_id",
+          "follower_login",
+          "followed_id",
+          "followed_login"
+        ],
+        "metrics": [
+          {
+            "name": "user_follow_relationship_count",
+            "kind": "count",
+            "comment": "Selected user_follow_relationships rows at the declared entity grain."
+          },
+          {
+            "name": "distinct_follower_count",
+            "kind": "count_distinct",
+            "field": "follower_id",
+            "comment": "Distinct follower_id identities in the selected directed follow population; non-additive across groups."
+          },
+          {
+            "name": "distinct_followed_user_count",
+            "kind": "count_distinct",
+            "field": "followed_id",
+            "comment": "Distinct followed_id identities in the selected directed follow population; non-additive across groups."
+          }
+        ],
+        "sql_names": {
+          "follower_id": "user_follow_relationships_follower_id",
+          "follower_login": "user_follow_relationships_follower_login",
+          "followed_id": "user_follow_relationships_followed_id",
+          "followed_login": "user_follow_relationships_followed_login"
+        }
+      },
+      "routes": [
+        {
+          "name": "followers",
+          "arguments": [
+            {
+              "name": "followed_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Login of the account being followed, distinct from its followers.",
+              "example": "identity-bob",
+              "min_length": 1
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "followed_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_followers_source",
+                "arguments": {
+                  "follow_subject_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "follow_subject_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "follower_id",
+              "source_stage": "records",
+              "source_column": "follower_id"
+            },
+            {
+              "name": "follower_login",
+              "source_stage": "records",
+              "source_column": "follower_login"
+            },
+            {
+              "name": "followed_id",
+              "source_stage": "records",
+              "source_column": "followed_id"
+            },
+            {
+              "name": "followed_login",
+              "source_stage": "records",
+              "source_column": "followed_login"
+            }
+          ],
+          "select": [
+            "followed_user"
+          ],
+          "population": "All advertised pages of directed follow relationships; each follower/followed pair counts once. The selected account is the followed role for followers, or follower role for following."
+        },
+        {
+          "name": "authenticated_followers",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "follow_direction",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "For authenticated follow listings, choose followers of the authenticated account or accounts it is following.",
+              "example": "followers",
+              "enum": [
+                "followers",
+                "following"
+              ]
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_followers_authenticated_source",
+                "arguments": {
+                  "follow_subject_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "follow_subject_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "follower_id",
+              "source_stage": "records",
+              "source_column": "follower_id"
+            },
+            {
+              "name": "follower_login",
+              "source_stage": "records",
+              "source_column": "follower_login"
+            },
+            {
+              "name": "followed_id",
+              "source_stage": "records",
+              "source_column": "followed_id"
+            },
+            {
+              "name": "followed_login",
+              "source_stage": "records",
+              "source_column": "followed_login"
+            }
+          ],
+          "select": [
+            "authenticated_user",
+            "follow_direction"
+          ],
+          "population": "All advertised pages of directed follow relationships; each follower/followed pair counts once. The selected account is the followed role for followers, or follower role for following.",
+          "select_values": {
+            "follow_direction": [
+              "followers"
+            ]
+          }
+        },
+        {
+          "name": "following",
+          "arguments": [
+            {
+              "name": "follower_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Login of the account performing the follow, distinct from the followed account.",
+              "example": "identity-alice",
+              "min_length": 1
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "follower_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_following_source",
+                "arguments": {
+                  "follow_subject_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "follow_subject_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "follower_id",
+              "source_stage": "records",
+              "source_column": "follower_id"
+            },
+            {
+              "name": "follower_login",
+              "source_stage": "records",
+              "source_column": "follower_login"
+            },
+            {
+              "name": "followed_id",
+              "source_stage": "records",
+              "source_column": "followed_id"
+            },
+            {
+              "name": "followed_login",
+              "source_stage": "records",
+              "source_column": "followed_login"
+            }
+          ],
+          "select": [
+            "follower_user"
+          ],
+          "population": "All advertised pages of directed follow relationships; each follower/followed pair counts once. The selected account is the followed role for followers, or follower role for following."
+        },
+        {
+          "name": "authenticated_following",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "follow_direction",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "For authenticated follow listings, choose followers of the authenticated account or accounts it is following.",
+              "example": "followers",
+              "enum": [
+                "followers",
+                "following"
+              ]
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_following_authenticated_source",
+                "arguments": {
+                  "follow_subject_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "follow_subject_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "follower_id",
+              "source_stage": "records",
+              "source_column": "follower_id"
+            },
+            {
+              "name": "follower_login",
+              "source_stage": "records",
+              "source_column": "follower_login"
+            },
+            {
+              "name": "followed_id",
+              "source_stage": "records",
+              "source_column": "followed_id"
+            },
+            {
+              "name": "followed_login",
+              "source_stage": "records",
+              "source_column": "followed_login"
+            }
+          ],
+          "select": [
+            "authenticated_user",
+            "follow_direction"
+          ],
+          "population": "All advertised pages of directed follow relationships; each follower/followed pair counts once. The selected account is the followed role for followers, or follower role for following.",
+          "select_values": {
+            "follow_direction": [
+              "following"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "user_follow_checks",
+      "description": "Directed follow capability observations including negative results; 404 is never emitted as an actual following relationship.",
+      "grain": [
+        "follower_id",
+        "followed_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "follower_id",
+          "follower_login",
+          "followed_id",
+          "followed_login",
+          "status_code"
+        ],
+        "dimensions": [
+          "follower_id",
+          "follower_login",
+          "followed_id",
+          "followed_login",
+          "status_code"
+        ],
+        "metrics": [
+          {
+            "name": "user_follow_check_count",
+            "kind": "count",
+            "comment": "Selected user_follow_checks rows at the declared entity grain."
+          }
+        ],
+        "sql_names": {
+          "follower_id": "user_follow_checks_follower_id",
+          "follower_login": "user_follow_checks_follower_login",
+          "followed_id": "user_follow_checks_followed_id",
+          "followed_login": "user_follow_checks_followed_login",
+          "status_code": "user_follow_checks_status_code"
+        },
+        "crossfield": {
+          "metrics": {
+            "confirmed_user_follow_count": {
+              "expression": "COUNT(*) FILTER (WHERE user_follow_checks.status_code = 204)",
+              "type": "BIGINT"
+            },
+            "absent_user_follow_count": {
+              "expression": "COUNT(*) FILTER (WHERE user_follow_checks.status_code = 404)",
+              "type": "BIGINT"
+            }
+          },
+          "metric_semantics": {
+            "confirmed_user_follow_count": {
+              "dataset": "user_follow_checks",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Selected user_follow_checks observations satisfying the explicitly stated measure predicate."
+            },
+            "absent_user_follow_count": {
+              "dataset": "user_follow_checks",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Selected user_follow_checks observations satisfying the explicitly stated measure predicate."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "followed_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Login of the account being followed, distinct from its followers.",
+              "example": "identity-bob",
+              "min_length": 1
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "targets",
+                "entity": "user_follow_target_source",
+                "arguments": {
+                  "selected_follower_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "selected_follower_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  },
+                  "followed_user": {
+                    "parameter": "followed_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_follow_check_authenticated_source",
+                "arguments": {
+                  "selected_follower_id": {
+                    "stage": "targets",
+                    "column": "follower_id"
+                  },
+                  "selected_follower_login": {
+                    "stage": "targets",
+                    "column": "follower_login"
+                  },
+                  "selected_followed_id": {
+                    "stage": "targets",
+                    "column": "followed_id"
+                  },
+                  "selected_followed_login": {
+                    "stage": "targets",
+                    "column": "followed_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "follower_id",
+              "source_stage": "records",
+              "source_column": "follower_id"
+            },
+            {
+              "name": "follower_login",
+              "source_stage": "records",
+              "source_column": "follower_login"
+            },
+            {
+              "name": "followed_id",
+              "source_stage": "records",
+              "source_column": "followed_id"
+            },
+            {
+              "name": "followed_login",
+              "source_stage": "records",
+              "source_column": "followed_login"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "select": [
+            "authenticated_user"
+          ],
+          "population": "One directed follow-status observation. 204 confirms a follow; 404 is a negative observation. Other HTTP failures propagate."
+        },
+        {
+          "name": "accounts",
+          "arguments": [
+            {
+              "name": "follower_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Login of the account performing the follow, distinct from the followed account.",
+              "example": "identity-alice",
+              "min_length": 1
+            },
+            {
+              "name": "followed_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Login of the account being followed, distinct from its followers.",
+              "example": "identity-bob",
+              "min_length": 1
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "follower_user"
+                  }
+                }
+              },
+              {
+                "name": "targets",
+                "entity": "user_follow_target_source",
+                "arguments": {
+                  "selected_follower_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "selected_follower_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  },
+                  "followed_user": {
+                    "parameter": "followed_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_follow_check_source",
+                "arguments": {
+                  "selected_follower_id": {
+                    "stage": "targets",
+                    "column": "follower_id"
+                  },
+                  "selected_follower_login": {
+                    "stage": "targets",
+                    "column": "follower_login"
+                  },
+                  "selected_followed_id": {
+                    "stage": "targets",
+                    "column": "followed_id"
+                  },
+                  "selected_followed_login": {
+                    "stage": "targets",
+                    "column": "followed_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "follower_id",
+              "source_stage": "records",
+              "source_column": "follower_id"
+            },
+            {
+              "name": "follower_login",
+              "source_stage": "records",
+              "source_column": "follower_login"
+            },
+            {
+              "name": "followed_id",
+              "source_stage": "records",
+              "source_column": "followed_id"
+            },
+            {
+              "name": "followed_login",
+              "source_stage": "records",
+              "source_column": "followed_login"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "select": [
+            "follower_user",
+            "followed_user"
+          ],
+          "population": "One directed follow-status observation. 204 confirms a follow; 404 is a negative observation. Other HTTP failures propagate."
+        }
+      ]
+    },
+    {
+      "name": "user_emails",
+      "description": "Email address identities belong to the authenticated account; public and complete credential-visible email endpoints are retrieval populations of the same entity.",
+      "grain": [
+        "user_id",
+        "email"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "email",
+          "is_primary",
+          "is_verified",
+          "visibility"
+        ],
+        "dimensions": [
+          "user_id",
+          "user_login",
+          "email",
+          "is_primary",
+          "is_verified",
+          "visibility"
+        ],
+        "metrics": [
+          {
+            "name": "user_email_count",
+            "kind": "count",
+            "comment": "Selected user_emails rows at the declared entity grain."
+          }
+        ],
+        "sql_names": {
+          "user_id": "user_emails_user_id",
+          "user_login": "user_emails_user_login",
+          "email": "user_emails_email",
+          "is_primary": "user_emails_is_primary",
+          "is_verified": "user_emails_is_verified",
+          "visibility": "user_emails_visibility"
+        },
+        "crossfield": {
+          "metrics": {
+            "primary_user_email_count": {
+              "expression": "COUNT(*) FILTER (WHERE user_emails.is_primary)",
+              "type": "BIGINT"
+            },
+            "verified_user_email_count": {
+              "expression": "COUNT(*) FILTER (WHERE user_emails.is_verified)",
+              "type": "BIGINT"
+            }
+          },
+          "metric_semantics": {
+            "primary_user_email_count": {
+              "dataset": "user_emails",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Selected user_emails observations satisfying the explicitly stated measure predicate."
+            },
+            "verified_user_email_count": {
+              "dataset": "user_emails",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Selected user_emails observations satisfying the explicitly stated measure predicate."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "all",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "user_email_population",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Select all email addresses visible to the authenticated account, or only its public addresses.",
+              "example": "all",
+              "enum": [
+                "all",
+                "public"
+              ]
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_emails_all_source",
+                "arguments": {
+                  "selected_user_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "selected_user_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "email",
+              "source_stage": "records",
+              "source_column": "email"
+            },
+            {
+              "name": "is_primary",
+              "source_stage": "records",
+              "source_column": "is_primary"
+            },
+            {
+              "name": "is_verified",
+              "source_stage": "records",
+              "source_column": "is_verified"
+            },
+            {
+              "name": "visibility",
+              "source_stage": "records",
+              "source_column": "visibility"
+            }
+          ],
+          "select": [
+            "user_email_population"
+          ],
+          "population": "All advertised pages of the authenticated account's selected email population; primary and verified are independent properties.",
+          "select_values": {
+            "user_email_population": [
+              "all"
+            ]
+          }
+        },
+        {
+          "name": "public",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "user_email_population",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Select all email addresses visible to the authenticated account, or only its public addresses.",
+              "example": "all",
+              "enum": [
+                "all",
+                "public"
+              ]
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_emails_public_source",
+                "arguments": {
+                  "selected_user_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "selected_user_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "email",
+              "source_stage": "records",
+              "source_column": "email"
+            },
+            {
+              "name": "is_primary",
+              "source_stage": "records",
+              "source_column": "is_primary"
+            },
+            {
+              "name": "is_verified",
+              "source_stage": "records",
+              "source_column": "is_verified"
+            },
+            {
+              "name": "visibility",
+              "source_stage": "records",
+              "source_column": "visibility"
+            }
+          ],
+          "select": [
+            "user_email_population"
+          ],
+          "population": "All advertised pages of the authenticated account's selected email population; primary and verified are independent properties.",
+          "select_values": {
+            "user_email_population": [
+              "public"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "user_social_accounts",
+      "description": "External social account links, identified by stable GitHub account ID plus provider and URL. The API supplies no independent immutable social-link ID.",
+      "grain": [
+        "user_id",
+        "provider",
+        "url"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "provider",
+          "url"
+        ],
+        "dimensions": [
+          "user_id",
+          "user_login",
+          "provider",
+          "url"
+        ],
+        "metrics": [
+          {
+            "name": "user_social_account_count",
+            "kind": "count",
+            "comment": "Selected user_social_accounts rows at the declared entity grain."
+          }
+        ],
+        "sql_names": {
+          "user_id": "user_social_accounts_user_id",
+          "user_login": "user_social_accounts_user_login",
+          "provider": "user_social_accounts_provider",
+          "url": "user_social_accounts_url"
+        }
+      },
+      "routes": [
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_social_accounts_authenticated_source",
+                "arguments": {
+                  "selected_user_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "selected_user_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "provider",
+              "source_stage": "records",
+              "source_column": "provider"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            }
+          ],
+          "select": [
+            "authenticated_user"
+          ],
+          "population": "All advertised pages of social account links for the selected identity. Providers are not unique keys; one provider can have multiple URLs."
+        },
+        {
+          "name": "users",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_social_accounts_source",
+                "arguments": {
+                  "selected_user_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "selected_user_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "provider",
+              "source_stage": "records",
+              "source_column": "provider"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            }
+          ],
+          "select": [
+            "user"
+          ],
+          "population": "All advertised pages of social account links for the selected identity. Providers are not unique keys; one provider can have multiple URLs."
+        }
+      ]
+    },
+    {
+      "name": "user_context_observations",
+      "description": "Typed user hovercard context observations. Subject IDs stay opaque strings; none plus an empty subject ID identifies the explicit context-free scope. Messages are descriptions, not membership or permission assertions.",
+      "grain": [
+        "user_id",
+        "subject_type",
+        "subject_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "user_id",
+          "user_login",
+          "subject_type",
+          "subject_id",
+          "contexts"
+        ],
+        "dimensions": [
+          "user_id",
+          "user_login",
+          "subject_type",
+          "subject_id"
+        ],
+        "metrics": [
+          {
+            "name": "user_context_observation_count",
+            "kind": "count",
+            "comment": "Selected user_context_observations rows at the declared entity grain."
+          }
+        ],
+        "sql_names": {
+          "user_id": "user_context_observations_user_id",
+          "user_login": "user_context_observations_user_login",
+          "subject_type": "user_context_observations_subject_type",
+          "subject_id": "user_context_observations_subject_id"
+        }
+      },
+      "routes": [
+        {
+          "name": "subjects",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "user_context_subject_type",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Hovercard context subject type; requires user_context_subject_id. The subject is distinct from the user being described.",
+              "example": "repository",
+              "enum": [
+                "organization",
+                "repository",
+                "issue",
+                "pull_request"
+              ]
+            },
+            {
+              "name": "user_context_subject_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Opaque hovercard context subject ID; requires user_context_subject_type. This is not an issue/PR number.",
+              "example": "123",
+              "min_length": 1
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_context_subject_source",
+                "arguments": {
+                  "selected_user_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "selected_user_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  },
+                  "context_subject_type": {
+                    "parameter": "user_context_subject_type"
+                  },
+                  "context_subject_id": {
+                    "parameter": "user_context_subject_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "subject_type",
+              "source_stage": "records",
+              "source_column": "subject_type"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "records",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "contexts",
+              "source_stage": "records",
+              "source_column": "contexts"
+            }
+          ],
+          "select": [
+            "user_context_subject_type",
+            "user_context_subject_id"
+          ],
+          "population": "One typed hovercard observation for the selected account and optional explicit context subject. An empty contexts list remains a valid observation."
+        },
+        {
+          "name": "users",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subjects",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_context_source",
+                "arguments": {
+                  "selected_user_id": {
+                    "stage": "subjects",
+                    "column": "user_id"
+                  },
+                  "selected_user_login": {
+                    "stage": "subjects",
+                    "column": "user_login"
+                  },
+                  "context_subject_type": {
+                    "literal": "none"
+                  },
+                  "context_subject_id": {
+                    "literal": ""
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "subject_type",
+              "source_stage": "records",
+              "source_column": "subject_type"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "records",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "contexts",
+              "source_stage": "records",
+              "source_column": "contexts"
+            }
+          ],
+          "select": [
+            "user"
+          ],
+          "population": "One typed hovercard observation for the selected account and optional explicit context subject. An empty contexts list remains a valid observation."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "user_follow_relationships_to_followers",
+      "from": "user_follow_relationships",
+      "to": "users",
+      "from_columns": [
+        "follower_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "follower_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "following",
+          "bindings": {
+            "follower_user": "user_login"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "user_follow_relationships_to_followeds",
+      "from": "user_follow_relationships",
+      "to": "users",
+      "from_columns": [
+        "followed_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "followed_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "followers",
+          "bindings": {
+            "followed_user": "user_login"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "user_follow_checks_to_followers",
+      "from": "user_follow_checks",
+      "to": "users",
+      "from_columns": [
+        "follower_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "follower_login"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "user_follow_checks_to_followeds",
+      "from": "user_follow_checks",
+      "to": "users",
+      "from_columns": [
+        "followed_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "followed_login"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "user_emails_to_users",
+      "from": "user_emails",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "user_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "user_social_accounts_to_users",
+      "from": "user_social_accounts",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "user_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "users",
+          "bindings": {
+            "user": "user_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "user_context_observations_to_users",
+      "from": "user_context_observations",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "user_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "users",
+          "bindings": {
+            "user": "user_login"
+          }
+        }
+      ]
+    }
+  ]
+}

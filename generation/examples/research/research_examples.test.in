@@ -1,5 +1,5 @@
 # Published examples share their SQL with the guide and runnable research.sql.
-# Expected values below are authored from research_fixture.py's explicit records.
+# Expected values below are authored from the independent HTTP fixtures' explicit records.
 require crossfield
 
 require json
@@ -122,6 +122,92 @@ statement error
 EXECUTE github_activity_compare('researcher','2026-08-01','2026-09-01','2026-08-15','2026-10-01');
 ----
 Use ordered, non-overlapping, nonempty [start,end) UTC periods
+
+# Independent retrieval oracle: alpha has three issues including a deleted author,
+# two discussions, three conversation comments, six threaded discussion comments,
+# and two commit comments. Author selection keeps canonical Alice records only.
+statement ok
+{{sql:repository_activity}}
+
+query IIIIII
+EXECUTE github_repository_activity('example/alpha', NULL);
+----
+3	3	2	3	6	2
+
+query IIIIII
+EXECUTE github_repository_activity('example/alpha', 'alice');
+----
+2	1	1	1	2	1
+
+query IIIIII
+EXECUTE github_repository_activity('example/empty', NULL);
+----
+0	0	0	0	0	0
+
+statement ok
+{{sql:member_organizations}}
+
+query TI
+EXECUTE github_member_organizations('alice');
+----
+example	1
+public-org	1
+
+query TI
+EXECUTE github_member_organizations('bob');
+----
+
+statement ok
+{{sql:team_repositories}}
+
+query TI
+EXECUTE github_team_repositories('example', 'core');
+----
+example/alpha	1
+example/beta	1
+
+query TI
+EXECUTE github_team_repositories('example', 'empty');
+----
+
+# Release alpha has a draft, a prerelease, one stable release, and three assets.
+# Asset byte sizes are 0, 100 and 200; lifetime download counters are 0, 3 and 5.
+statement ok
+{{sql:release_inventory}}
+
+query IIIIIII
+EXECUTE github_release_inventory('release-fixture/alpha');
+----
+3	2	1	1	3	300	8
+
+query IIIIIII
+EXECUTE github_release_inventory('release-fixture/beta');
+----
+1	1	0	0	1	400	7
+
+# Three run identities include one success, one failure and one unfinished run.
+# Four jobs span attempts; two failed. Four retained artifacts total 75 bytes.
+statement ok
+{{sql:ci_outcomes}}
+
+query IIIIIII
+EXECUTE github_ci_outcomes('example/alpha');
+----
+3	1	1	4	2	4	75
+
+# Two suites contain three runs and four annotation occurrences, two failures.
+statement ok
+{{sql:check_results}}
+
+query IIIIIII
+EXECUTE github_check_results('example/alpha', 'main');
+----
+2	3	1	1	1	4	2
+
+query IIIIIII
+EXECUTE github_check_results('example/empty', 'main');
+----
+0	0	0	0	0	0	0
 
 statement ok
 SET crossfield_mode='off';

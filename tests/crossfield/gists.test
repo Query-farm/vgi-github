@@ -1,0 +1,258 @@
+# Gist population routes, parent traversal, typed files and immutable revisions.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT gist_count,public_gist_count,truncated_gist_count FROM engineering.semantic.github();
+----
+2	1	1
+
+query III
+SELECT gist_count,public_gist_count,truncated_gist_count FROM engineering.semantic.github(gist_population=>'public');
+----
+2	2	0
+
+query III
+SELECT gist_count,public_gist_count,truncated_gist_count FROM engineering.semantic.github(gist_population=>'starred');
+----
+1	0	1
+
+query I
+SELECT gist_count FROM engineering.semantic.github(user=>'gist-fixture-owner');
+----
+2
+
+statement ok
+CREATE TEMP TABLE gists_detail_1 AS SELECT * FROM engineering.detail.gists(parent_gist_id=>'gist-a');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TI
+SELECT gist_id,public FROM gists_detail_1;
+----
+gist-c	true
+
+statement ok
+SET crossfield_mode='strict';
+
+# One canonical gist's result is independent of the selected discovery path.
+statement ok
+CREATE TEMP TABLE gists_detail_2 AS SELECT * FROM engineering.detail.gists(gist_population=>'visible');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query T
+SELECT gist_id FROM gists_detail_2 ORDER BY gist_id;
+----
+gist-a
+gist-b
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT gist_count FROM engineering.semantic.github(gist_since=>'2027-01-01T00:00:00Z');
+----
+0
+
+# Typed dictionaries retain NULL entries, exact content and truncation.
+statement ok
+CREATE TEMP TABLE gists_detail_3 AS SELECT * FROM engineering.detail.gists(gist_id=>'gist-a');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query II
+SELECT typeof(files) LIKE 'MAP(VARCHAR,%',map_extract_value(files,'gone.txt') IS NULL FROM gists_detail_3;
+----
+true	true
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE gists_detail_4 AS SELECT * FROM engineering.detail.gist_files();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTI
+SELECT gist_id,filename,byte_size FROM gists_detail_4 ORDER BY gist_id,filename;
+----
+gist-a	gone.txt	NULL
+gist-a	main.py	5
+gist-b	README	4
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE gists_detail_5 AS SELECT * FROM engineering.detail.gist_files(gist_id=>'gist-b');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTI
+SELECT filename,content,truncated FROM gists_detail_5;
+----
+README	ab	true
+
+statement ok
+SET crossfield_mode='strict';
+
+# Known parent identity remains visible with no child files or comments.
+query TIIII
+SELECT gists_gist_id,gist_count,gist_comment_count,gist_revision_count,gist_file_entry_count FROM engineering.semantic.github(gist_population=>'public') GROUP BY gists_gist_id ORDER BY gists_gist_id;
+----
+gist-a	1	2	2	2
+gist-c	1	0	0	0
+
+query IIIII
+SELECT gist_comment_count,gist_revision_count,gist_file_entry_count,gist_revision_additions,gist_revision_deletions FROM engineering.semantic.github();
+----
+3	3	3	17	3
+
+query I
+SELECT gist_file_bytes FROM engineering.semantic.github();
+----
+9
+
+# An observed population with only unreported values remains unknown.
+query IIIIII
+SELECT gist_count,gist_revision_count,gist_revision_additions,gist_revision_deletions,gist_file_entry_count,gist_file_bytes FROM engineering.semantic.github(gist_id=>'gist-unknown');
+----
+1	1	NULL	NULL	2	NULL
+
+query TIIIIII
+SELECT gists_gist_id,gist_count,gist_revision_count,gist_revision_additions,gist_revision_deletions,gist_file_entry_count,gist_file_bytes FROM engineering.semantic.github(gist_id=>'gist-unknown') GROUP BY gists_gist_id;
+----
+gist-unknown	1	1	NULL	NULL	2	NULL
+
+# Empty selected child populations have zero totals, both scalar and at a known parent.
+query IIIII
+SELECT gist_revision_count,gist_revision_additions,gist_revision_deletions,gist_file_entry_count,gist_file_bytes FROM engineering.semantic.github(gist_id=>'gist-c');
+----
+0	0	0	0	0
+
+query TIIII
+SELECT gists_gist_id,gist_count,gist_revision_additions,gist_revision_deletions,gist_file_bytes FROM engineering.semantic.github(gist_population=>'public') GROUP BY gists_gist_id ORDER BY gists_gist_id;
+----
+gist-a	1	13	3	5
+gist-c	1	0	0	0
+
+statement ok
+CREATE TEMP TABLE gists_detail_6 AS SELECT * FROM engineering.detail.gist_comments();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TII
+SELECT gist_id,gist_comment_id,author_id FROM gists_detail_6 ORDER BY gist_id,gist_comment_id;
+----
+gist-a	1	5100
+gist-a	2	NULL
+gist-b	1	5100
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE gists_detail_7 AS SELECT * FROM engineering.detail.gist_comments(gist_id=>'gist-a',gist_comment_id=>2);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IT
+SELECT gist_comment_id,author_association FROM gists_detail_7;
+----
+2	NONE
+
+statement ok
+SET crossfield_mode='strict';
+
+# Revision narrowing follows complete commit discovery and hydrates only the requested SHA.
+query III
+SELECT gist_revision_count,gist_revision_additions,gist_revision_deletions FROM engineering.semantic.github(gist_id=>'gist-a',gist_revision=>'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+----
+1	3	1
+
+statement ok
+CREATE TEMP TABLE gists_detail_8 AS SELECT * FROM engineering.detail.gist_revisions(gist_id=>'gist-a',gist_revision=>'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query II
+SELECT map_extract_value(files,'main.py').size,committer_id FROM gists_detail_8;
+----
+2	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT gist_revision_count FROM engineering.semantic.github(gist_id=>'gist-a',gist_revision=>'dddddddddddddddddddddddddddddddddddddddd');
+----
+0
+
+# Endpoint status observations remain separate from existence claims and durable star events.
+query II
+SELECT gist_star_observation_count,starred_gist_observation_count FROM engineering.semantic.github(gist_id=>'gist-b');
+----
+1	1
+
+statement ok
+CREATE TEMP TABLE gists_detail_9 AS SELECT * FROM engineering.detail.gist_star_observations(gist_id=>'gist-missing');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIT
+SELECT caller_id,status_code,caller_login FROM gists_detail_9;
+----
+903	404	package-fixture-current
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT gist_count FROM engineering.semantic.github(gist_population=>'publci');
+----
+gist_population
+
+statement error
+SELECT gist_count FROM engineering.semantic.github(gist_id=>'gist-a',gist_population=>'public');
+----
+<REGEX>:(?s).*(gist_population|arguments do not apply).*

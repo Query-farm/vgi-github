@@ -1,0 +1,4863 @@
+{
+  "entities": [
+    {
+      "name": "search_code_hits_source",
+      "description": "Pinned REST code search hits; every page must be complete and the final received population must equal total_count.",
+      "arguments": [
+        {
+          "name": "search_query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+          "example": "crossfield",
+          "min_length": 1
+        },
+        {
+          "name": "search_code_sort",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional GitHub code search sort field; omission retains best-match ordering.",
+          "example": "indexed",
+          "enum": [
+            "indexed"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "search_order",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional REST search result order; omission preserves the API default.",
+          "example": "desc",
+          "enum": [
+            "desc",
+            "asc"
+          ],
+          "min_length": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "search_query",
+          "source_argument": "search_query"
+        },
+        {
+          "name": "result_position",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_total_count",
+          "source_document_path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "incomplete_results",
+          "source_document_path": [
+            "incomplete_results"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "repository_metadata",
+          "path": [
+            "repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            }
+          }
+        },
+        {
+          "name": "file_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "file_path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "blob_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_url",
+          "path": [
+            "git_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "score",
+          "path": [
+            "score"
+          ]
+        },
+        {
+          "name": "file_size",
+          "path": [
+            "file_size"
+          ]
+        },
+        {
+          "name": "language",
+          "path": [
+            "language"
+          ]
+        },
+        {
+          "name": "last_modified_at",
+          "path": [
+            "last_modified_at"
+          ]
+        },
+        {
+          "name": "line_numbers",
+          "path": [
+            "line_numbers"
+          ]
+        },
+        {
+          "name": "text_matches",
+          "path": [
+            "text_matches"
+          ]
+        }
+      ],
+      "grain": [
+        "search_query",
+        "repository_id",
+        "file_path",
+        "blob_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "search/code",
+        "path_bindings": {},
+        "query_bindings": {
+          "q": {
+            "argument": "search_query"
+          },
+          "sort": {
+            "argument": "search_code_sort"
+          },
+          "order": {
+            "argument": "search_order"
+          }
+        },
+        "result_path": [
+          "items"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        },
+        "response_assertions": [
+          {
+            "path": [
+              "incomplete_results"
+            ],
+            "comparison": "equal",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "search_commit_hits_source",
+      "description": "Pinned REST commits search hits; every page must be complete and the final received population must equal total_count.",
+      "arguments": [
+        {
+          "name": "search_query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+          "example": "crossfield",
+          "min_length": 1
+        },
+        {
+          "name": "search_commits_sort",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional GitHub commits search sort field; omission retains best-match ordering.",
+          "example": "author-date",
+          "enum": [
+            "author-date",
+            "committer-date"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "search_order",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional REST search result order; omission preserves the API default.",
+          "example": "desc",
+          "enum": [
+            "desc",
+            "asc"
+          ],
+          "min_length": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "search_query",
+          "source_argument": "search_query"
+        },
+        {
+          "name": "result_position",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_total_count",
+          "source_document_path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "incomplete_results",
+          "source_document_path": [
+            "incomplete_results"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "repository_metadata",
+          "path": [
+            "repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            }
+          }
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "commit_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "comments_url",
+          "path": [
+            "comments_url"
+          ]
+        },
+        {
+          "name": "commit",
+          "path": [
+            "commit"
+          ]
+        },
+        {
+          "name": "parents",
+          "path": [
+            "parents"
+          ]
+        },
+        {
+          "name": "score",
+          "path": [
+            "score"
+          ]
+        },
+        {
+          "name": "author_account",
+          "path": [
+            "author"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "login": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "committer_signature",
+          "path": [
+            "committer"
+          ]
+        },
+        {
+          "name": "text_matches",
+          "path": [
+            "text_matches"
+          ]
+        }
+      ],
+      "grain": [
+        "search_query",
+        "repository_id",
+        "commit_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "search/commits",
+        "path_bindings": {},
+        "query_bindings": {
+          "q": {
+            "argument": "search_query"
+          },
+          "sort": {
+            "argument": "search_commits_sort"
+          },
+          "order": {
+            "argument": "search_order"
+          }
+        },
+        "result_path": [
+          "items"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        },
+        "response_assertions": [
+          {
+            "path": [
+              "incomplete_results"
+            ],
+            "comparison": "equal",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "search_issue_hits_source",
+      "description": "Pinned REST issues search hits; every page must be complete and the final received population must equal total_count.",
+      "arguments": [
+        {
+          "name": "search_query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+          "example": "crossfield",
+          "min_length": 1
+        },
+        {
+          "name": "search_issues_sort",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional GitHub issues search sort field; omission retains best-match ordering.",
+          "example": "comments",
+          "enum": [
+            "comments",
+            "reactions",
+            "reactions-+1",
+            "reactions--1",
+            "reactions-smile",
+            "reactions-thinking_face",
+            "reactions-heart",
+            "reactions-tada",
+            "interactions",
+            "created",
+            "updated"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "search_order",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional REST search result order; omission preserves the API default.",
+          "example": "desc",
+          "enum": [
+            "desc",
+            "asc"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "issue_search_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional requested issue search mode. The actual performed mode and fallback reasons remain response metadata; omission preserves the API default.",
+          "example": "hybrid",
+          "enum": [
+            "semantic",
+            "hybrid"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "issue_advanced_search",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional raw GitHub advanced_search query value for issue search; preserved as the pinned string parameter.",
+          "example": "true",
+          "min_length": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "search_query",
+          "source_argument": "search_query"
+        },
+        {
+          "name": "result_position",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_total_count",
+          "source_document_path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "incomplete_results",
+          "source_document_path": [
+            "incomplete_results"
+          ]
+        },
+        {
+          "name": "issue_search_type",
+          "source_argument": "issue_search_type"
+        },
+        {
+          "name": "issue_advanced_search",
+          "source_argument": "issue_advanced_search"
+        },
+        {
+          "name": "performed_search_type",
+          "source_document_path": [
+            "search_type"
+          ]
+        },
+        {
+          "name": "lexical_fallback_reason",
+          "source_document_path": [
+            "lexical_fallback_reason"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repository_url"
+          ]
+        },
+        {
+          "name": "labels_url",
+          "path": [
+            "labels_url"
+          ]
+        },
+        {
+          "name": "comments_url",
+          "path": [
+            "comments_url"
+          ]
+        },
+        {
+          "name": "events_url",
+          "path": [
+            "events_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "issue_database_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "indexed_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "title",
+          "path": [
+            "title"
+          ]
+        },
+        {
+          "name": "locked",
+          "path": [
+            "locked"
+          ]
+        },
+        {
+          "name": "active_lock_reason",
+          "path": [
+            "active_lock_reason"
+          ]
+        },
+        {
+          "name": "assignees",
+          "path": [
+            "assignees"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "login": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "user",
+          "path": [
+            "user"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "login": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "labels",
+          "path": [
+            "labels"
+          ]
+        },
+        {
+          "name": "sub_issues_summary",
+          "path": [
+            "sub_issues_summary"
+          ]
+        },
+        {
+          "name": "issue_dependencies_summary",
+          "path": [
+            "issue_dependencies_summary"
+          ]
+        },
+        {
+          "name": "issue_field_values",
+          "path": [
+            "issue_field_values"
+          ],
+          "representation": "tagged"
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "state_reason",
+          "path": [
+            "state_reason"
+          ]
+        },
+        {
+          "name": "assignee",
+          "path": [
+            "assignee"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "login": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "milestone",
+          "path": [
+            "milestone"
+          ]
+        },
+        {
+          "name": "comments",
+          "path": [
+            "comments"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "closed_at",
+          "path": [
+            "closed_at"
+          ]
+        },
+        {
+          "name": "text_matches",
+          "path": [
+            "text_matches"
+          ]
+        },
+        {
+          "name": "pull_request",
+          "path": [
+            "pull_request"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "score",
+          "path": [
+            "score"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        },
+        {
+          "name": "draft",
+          "path": [
+            "draft"
+          ]
+        },
+        {
+          "name": "body_html",
+          "path": [
+            "body_html"
+          ]
+        },
+        {
+          "name": "body_text",
+          "path": [
+            "body_text"
+          ]
+        },
+        {
+          "name": "timeline_url",
+          "path": [
+            "timeline_url"
+          ]
+        },
+        {
+          "name": "issue_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "reactions",
+          "path": [
+            "reactions"
+          ]
+        }
+      ],
+      "grain": [
+        "search_query",
+        "node_id",
+        "performed_search_type"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "search/issues-and-pull-requests",
+        "path_bindings": {},
+        "query_bindings": {
+          "q": {
+            "argument": "search_query"
+          },
+          "sort": {
+            "argument": "search_issues_sort"
+          },
+          "order": {
+            "argument": "search_order"
+          },
+          "search_type": {
+            "argument": "issue_search_type"
+          },
+          "advanced_search": {
+            "argument": "issue_advanced_search"
+          }
+        },
+        "result_path": [
+          "items"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        },
+        "response_assertions": [
+          {
+            "path": [
+              "incomplete_results"
+            ],
+            "comparison": "equal",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "search_label_hits_source",
+      "description": "Pinned REST labels search hits; every page must be complete and the final received population must equal total_count.",
+      "arguments": [
+        {
+          "name": "search_query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+          "example": "crossfield",
+          "min_length": 1
+        },
+        {
+          "name": "search_labels_sort",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional GitHub labels search sort field; omission retains best-match ordering.",
+          "example": "created",
+          "enum": [
+            "created",
+            "updated"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "search_order",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional REST search result order; omission preserves the API default.",
+          "example": "desc",
+          "enum": [
+            "desc",
+            "asc"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository identity hydrated before the label search.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "search_query",
+          "source_argument": "search_query"
+        },
+        {
+          "name": "result_position",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_total_count",
+          "source_document_path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "incomplete_results",
+          "source_document_path": [
+            "incomplete_results"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "label_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "label_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "color",
+          "path": [
+            "color"
+          ]
+        },
+        {
+          "name": "is_default",
+          "path": [
+            "default"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "archived_at",
+          "path": [
+            "archived_at"
+          ]
+        },
+        {
+          "name": "archived_by",
+          "path": [
+            "archived_by"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "login": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "score",
+          "path": [
+            "score"
+          ]
+        },
+        {
+          "name": "text_matches",
+          "path": [
+            "text_matches"
+          ]
+        }
+      ],
+      "grain": [
+        "search_query",
+        "repository_id",
+        "label_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "search/labels",
+        "path_bindings": {},
+        "query_bindings": {
+          "q": {
+            "argument": "search_query"
+          },
+          "sort": {
+            "argument": "search_labels_sort"
+          },
+          "order": {
+            "argument": "search_order"
+          },
+          "repository_id": {
+            "argument": "repository_id"
+          }
+        },
+        "result_path": [
+          "items"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        },
+        "response_assertions": [
+          {
+            "path": [
+              "incomplete_results"
+            ],
+            "comparison": "equal",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "search_repository_hits_source",
+      "description": "Pinned REST repositories search hits; every page must be complete and the final received population must equal total_count.",
+      "arguments": [
+        {
+          "name": "search_query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+          "example": "crossfield",
+          "min_length": 1
+        },
+        {
+          "name": "search_repositories_sort",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional GitHub repositories search sort field; omission retains best-match ordering.",
+          "example": "stars",
+          "enum": [
+            "stars",
+            "forks",
+            "help-wanted-issues",
+            "updated"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "search_order",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional REST search result order; omission preserves the API default.",
+          "example": "desc",
+          "enum": [
+            "desc",
+            "asc"
+          ],
+          "min_length": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "search_query",
+          "source_argument": "search_query"
+        },
+        {
+          "name": "result_position",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_total_count",
+          "source_document_path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "incomplete_results",
+          "source_document_path": [
+            "incomplete_results"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "login": true,
+            "type": true,
+            "html_url": true
+          }
+        },
+        {
+          "name": "private",
+          "path": [
+            "private"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "fork",
+          "path": [
+            "fork"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "pushed_at",
+          "path": [
+            "pushed_at"
+          ]
+        },
+        {
+          "name": "homepage",
+          "path": [
+            "homepage"
+          ]
+        },
+        {
+          "name": "size",
+          "path": [
+            "size"
+          ]
+        },
+        {
+          "name": "stargazers_count",
+          "path": [
+            "stargazers_count"
+          ]
+        },
+        {
+          "name": "watchers_count",
+          "path": [
+            "watchers_count"
+          ]
+        },
+        {
+          "name": "language",
+          "path": [
+            "language"
+          ]
+        },
+        {
+          "name": "forks_count",
+          "path": [
+            "forks_count"
+          ]
+        },
+        {
+          "name": "open_issues_count",
+          "path": [
+            "open_issues_count"
+          ]
+        },
+        {
+          "name": "master_branch",
+          "path": [
+            "master_branch"
+          ]
+        },
+        {
+          "name": "default_branch",
+          "path": [
+            "default_branch"
+          ]
+        },
+        {
+          "name": "score",
+          "path": [
+            "score"
+          ]
+        },
+        {
+          "name": "forks_url",
+          "path": [
+            "forks_url"
+          ]
+        },
+        {
+          "name": "keys_url",
+          "path": [
+            "keys_url"
+          ]
+        },
+        {
+          "name": "collaborators_url",
+          "path": [
+            "collaborators_url"
+          ]
+        },
+        {
+          "name": "teams_url",
+          "path": [
+            "teams_url"
+          ]
+        },
+        {
+          "name": "hooks_url",
+          "path": [
+            "hooks_url"
+          ]
+        },
+        {
+          "name": "issue_events_url",
+          "path": [
+            "issue_events_url"
+          ]
+        },
+        {
+          "name": "events_url",
+          "path": [
+            "events_url"
+          ]
+        },
+        {
+          "name": "assignees_url",
+          "path": [
+            "assignees_url"
+          ]
+        },
+        {
+          "name": "branches_url",
+          "path": [
+            "branches_url"
+          ]
+        },
+        {
+          "name": "tags_url",
+          "path": [
+            "tags_url"
+          ]
+        },
+        {
+          "name": "blobs_url",
+          "path": [
+            "blobs_url"
+          ]
+        },
+        {
+          "name": "git_tags_url",
+          "path": [
+            "git_tags_url"
+          ]
+        },
+        {
+          "name": "git_refs_url",
+          "path": [
+            "git_refs_url"
+          ]
+        },
+        {
+          "name": "trees_url",
+          "path": [
+            "trees_url"
+          ]
+        },
+        {
+          "name": "statuses_url",
+          "path": [
+            "statuses_url"
+          ]
+        },
+        {
+          "name": "languages_url",
+          "path": [
+            "languages_url"
+          ]
+        },
+        {
+          "name": "stargazers_url",
+          "path": [
+            "stargazers_url"
+          ]
+        },
+        {
+          "name": "contributors_url",
+          "path": [
+            "contributors_url"
+          ]
+        },
+        {
+          "name": "subscribers_url",
+          "path": [
+            "subscribers_url"
+          ]
+        },
+        {
+          "name": "subscription_url",
+          "path": [
+            "subscription_url"
+          ]
+        },
+        {
+          "name": "commits_url",
+          "path": [
+            "commits_url"
+          ]
+        },
+        {
+          "name": "git_commits_url",
+          "path": [
+            "git_commits_url"
+          ]
+        },
+        {
+          "name": "comments_url",
+          "path": [
+            "comments_url"
+          ]
+        },
+        {
+          "name": "issue_comment_url",
+          "path": [
+            "issue_comment_url"
+          ]
+        },
+        {
+          "name": "contents_url",
+          "path": [
+            "contents_url"
+          ]
+        },
+        {
+          "name": "compare_url",
+          "path": [
+            "compare_url"
+          ]
+        },
+        {
+          "name": "merges_url",
+          "path": [
+            "merges_url"
+          ]
+        },
+        {
+          "name": "archive_url",
+          "path": [
+            "archive_url"
+          ]
+        },
+        {
+          "name": "downloads_url",
+          "path": [
+            "downloads_url"
+          ]
+        },
+        {
+          "name": "issues_url",
+          "path": [
+            "issues_url"
+          ]
+        },
+        {
+          "name": "pulls_url",
+          "path": [
+            "pulls_url"
+          ]
+        },
+        {
+          "name": "milestones_url",
+          "path": [
+            "milestones_url"
+          ]
+        },
+        {
+          "name": "notifications_url",
+          "path": [
+            "notifications_url"
+          ]
+        },
+        {
+          "name": "labels_url",
+          "path": [
+            "labels_url"
+          ]
+        },
+        {
+          "name": "releases_url",
+          "path": [
+            "releases_url"
+          ]
+        },
+        {
+          "name": "deployments_url",
+          "path": [
+            "deployments_url"
+          ]
+        },
+        {
+          "name": "git_url",
+          "path": [
+            "git_url"
+          ]
+        },
+        {
+          "name": "ssh_url",
+          "path": [
+            "ssh_url"
+          ]
+        },
+        {
+          "name": "clone_url",
+          "path": [
+            "clone_url"
+          ]
+        },
+        {
+          "name": "svn_url",
+          "path": [
+            "svn_url"
+          ]
+        },
+        {
+          "name": "forks",
+          "path": [
+            "forks"
+          ]
+        },
+        {
+          "name": "open_issues",
+          "path": [
+            "open_issues"
+          ]
+        },
+        {
+          "name": "watchers",
+          "path": [
+            "watchers"
+          ]
+        },
+        {
+          "name": "topics",
+          "path": [
+            "topics"
+          ]
+        },
+        {
+          "name": "mirror_url",
+          "path": [
+            "mirror_url"
+          ]
+        },
+        {
+          "name": "has_issues",
+          "path": [
+            "has_issues"
+          ]
+        },
+        {
+          "name": "has_projects",
+          "path": [
+            "has_projects"
+          ]
+        },
+        {
+          "name": "has_pages",
+          "path": [
+            "has_pages"
+          ]
+        },
+        {
+          "name": "has_wiki",
+          "path": [
+            "has_wiki"
+          ]
+        },
+        {
+          "name": "has_downloads",
+          "path": [
+            "has_downloads"
+          ]
+        },
+        {
+          "name": "has_discussions",
+          "path": [
+            "has_discussions"
+          ]
+        },
+        {
+          "name": "has_pull_requests",
+          "path": [
+            "has_pull_requests"
+          ]
+        },
+        {
+          "name": "pull_request_creation_policy",
+          "path": [
+            "pull_request_creation_policy"
+          ]
+        },
+        {
+          "name": "archived",
+          "path": [
+            "archived"
+          ]
+        },
+        {
+          "name": "disabled",
+          "path": [
+            "disabled"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ]
+        },
+        {
+          "name": "text_matches",
+          "path": [
+            "text_matches"
+          ]
+        },
+        {
+          "name": "allow_merge_commit",
+          "path": [
+            "allow_merge_commit"
+          ]
+        },
+        {
+          "name": "allow_squash_merge",
+          "path": [
+            "allow_squash_merge"
+          ]
+        },
+        {
+          "name": "allow_rebase_merge",
+          "path": [
+            "allow_rebase_merge"
+          ]
+        },
+        {
+          "name": "allow_auto_merge",
+          "path": [
+            "allow_auto_merge"
+          ]
+        },
+        {
+          "name": "delete_branch_on_merge",
+          "path": [
+            "delete_branch_on_merge"
+          ]
+        },
+        {
+          "name": "allow_forking",
+          "path": [
+            "allow_forking"
+          ]
+        },
+        {
+          "name": "is_template",
+          "path": [
+            "is_template"
+          ]
+        },
+        {
+          "name": "web_commit_signoff_required",
+          "path": [
+            "web_commit_signoff_required"
+          ]
+        }
+      ],
+      "grain": [
+        "search_query",
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "search/repos",
+        "path_bindings": {},
+        "query_bindings": {
+          "q": {
+            "argument": "search_query"
+          },
+          "sort": {
+            "argument": "search_repositories_sort"
+          },
+          "order": {
+            "argument": "search_order"
+          }
+        },
+        "result_path": [
+          "items"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        },
+        "response_assertions": [
+          {
+            "path": [
+              "incomplete_results"
+            ],
+            "comparison": "equal",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "search_topic_hits_source",
+      "description": "Pinned REST topics search hits; every page must be complete and the final received population must equal total_count.",
+      "arguments": [
+        {
+          "name": "search_query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+          "example": "crossfield",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "search_query",
+          "source_argument": "search_query"
+        },
+        {
+          "name": "result_position",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_total_count",
+          "source_document_path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "incomplete_results",
+          "source_document_path": [
+            "incomplete_results"
+          ]
+        },
+        {
+          "name": "topic_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        },
+        {
+          "name": "short_description",
+          "path": [
+            "short_description"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_by",
+          "path": [
+            "created_by"
+          ]
+        },
+        {
+          "name": "released",
+          "path": [
+            "released"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "featured",
+          "path": [
+            "featured"
+          ]
+        },
+        {
+          "name": "curated",
+          "path": [
+            "curated"
+          ]
+        },
+        {
+          "name": "score",
+          "path": [
+            "score"
+          ]
+        },
+        {
+          "name": "repository_count",
+          "path": [
+            "repository_count"
+          ]
+        },
+        {
+          "name": "logo_url",
+          "path": [
+            "logo_url"
+          ]
+        },
+        {
+          "name": "text_matches",
+          "path": [
+            "text_matches"
+          ]
+        },
+        {
+          "name": "related",
+          "path": [
+            "related"
+          ]
+        },
+        {
+          "name": "aliases",
+          "path": [
+            "aliases"
+          ]
+        }
+      ],
+      "grain": [
+        "search_query",
+        "topic_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "search/topics",
+        "path_bindings": {},
+        "query_bindings": {
+          "q": {
+            "argument": "search_query"
+          }
+        },
+        "result_path": [
+          "items"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        },
+        "response_assertions": [
+          {
+            "path": [
+              "incomplete_results"
+            ],
+            "comparison": "equal",
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "search_account_hits_source",
+      "description": "Pinned REST users search hits; every page must be complete and the final received population must equal total_count.",
+      "arguments": [
+        {
+          "name": "search_query",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+          "example": "crossfield",
+          "min_length": 1
+        },
+        {
+          "name": "search_users_sort",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional GitHub users search sort field; omission retains best-match ordering.",
+          "example": "followers",
+          "enum": [
+            "followers",
+            "repositories",
+            "joined"
+          ],
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "search_order",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional REST search result order; omission preserves the API default.",
+          "example": "desc",
+          "enum": [
+            "desc",
+            "asc"
+          ],
+          "min_length": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "search_query",
+          "source_argument": "search_query"
+        },
+        {
+          "name": "result_position",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_total_count",
+          "source_document_path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "incomplete_results",
+          "source_document_path": [
+            "incomplete_results"
+          ]
+        },
+        {
+          "name": "account_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "avatar_url",
+          "path": [
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "gravatar_id",
+          "path": [
+            "gravatar_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "followers_url",
+          "path": [
+            "followers_url"
+          ]
+        },
+        {
+          "name": "subscriptions_url",
+          "path": [
+            "subscriptions_url"
+          ]
+        },
+        {
+          "name": "organizations_url",
+          "path": [
+            "organizations_url"
+          ]
+        },
+        {
+          "name": "repos_url",
+          "path": [
+            "repos_url"
+          ]
+        },
+        {
+          "name": "received_events_url",
+          "path": [
+            "received_events_url"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "score",
+          "path": [
+            "score"
+          ]
+        },
+        {
+          "name": "following_url",
+          "path": [
+            "following_url"
+          ]
+        },
+        {
+          "name": "gists_url",
+          "path": [
+            "gists_url"
+          ]
+        },
+        {
+          "name": "starred_url",
+          "path": [
+            "starred_url"
+          ]
+        },
+        {
+          "name": "events_url",
+          "path": [
+            "events_url"
+          ]
+        },
+        {
+          "name": "public_repos",
+          "path": [
+            "public_repos"
+          ]
+        },
+        {
+          "name": "public_gists",
+          "path": [
+            "public_gists"
+          ]
+        },
+        {
+          "name": "followers",
+          "path": [
+            "followers"
+          ]
+        },
+        {
+          "name": "following",
+          "path": [
+            "following"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "bio",
+          "path": [
+            "bio"
+          ]
+        },
+        {
+          "name": "email",
+          "path": [
+            "email"
+          ]
+        },
+        {
+          "name": "location",
+          "path": [
+            "location"
+          ]
+        },
+        {
+          "name": "site_admin",
+          "path": [
+            "site_admin"
+          ]
+        },
+        {
+          "name": "hireable",
+          "path": [
+            "hireable"
+          ]
+        },
+        {
+          "name": "text_matches",
+          "path": [
+            "text_matches"
+          ]
+        },
+        {
+          "name": "blog",
+          "path": [
+            "blog"
+          ]
+        },
+        {
+          "name": "company",
+          "path": [
+            "company"
+          ]
+        },
+        {
+          "name": "suspended_at",
+          "path": [
+            "suspended_at"
+          ]
+        },
+        {
+          "name": "user_view_type",
+          "path": [
+            "user_view_type"
+          ]
+        }
+      ],
+      "grain": [
+        "search_query",
+        "account_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "search/users",
+        "path_bindings": {},
+        "query_bindings": {
+          "q": {
+            "argument": "search_query"
+          },
+          "sort": {
+            "argument": "search_users_sort"
+          },
+          "order": {
+            "argument": "search_order"
+          }
+        },
+        "result_path": [
+          "items"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        },
+        "response_assertions": [
+          {
+            "path": [
+              "incomplete_results"
+            ],
+            "comparison": "equal",
+            "value": false
+          }
+        ],
+        "authentication": "anonymous"
+      }
+    },
+    {
+      "name": "search_issue_subject_source",
+      "description": "Hydrate a REST search hit by its immutable node ID to distinguish Issue/PullRequest and resolve the current repository without URL parsing.",
+      "arguments": [
+        {
+          "name": "search_subject_node_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "GraphQL node identity returned by an issue/PR search hit.",
+          "example": "I_fixture",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "subject_kind",
+          "path": [
+            "__typename"
+          ]
+        },
+        {
+          "name": "number",
+          "path": [
+            "number"
+          ],
+          "on_types": [
+            "Issue",
+            "PullRequest"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository"
+          ],
+          "on_types": [
+            "Issue",
+            "PullRequest"
+          ],
+          "selection": {
+            "id": true,
+            "databaseId": true,
+            "nameWithOwner": true
+          }
+        }
+      ],
+      "grain": [
+        "node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "node"
+        ],
+        "field_arguments": {
+          "node": {
+            "id": {
+              "argument": "search_subject_node_id"
+            }
+          }
+        },
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "required_non_null_fields": [
+          "number",
+          "repository"
+        ],
+        "row_assertions": [
+          {
+            "column": "node_id",
+            "argument": "search_subject_node_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "search_code_hits",
+      "description": "Query-qualified code search hit observations. Grain combines the exact query with canonical returned identity; ordering and search-mode selectors define the invocation population. Result position is response order across pages, not durable identity. Total count and incomplete_results are exposed per returned hit and are not additive facts. A partial response, changed count, or 1000-result API cap prevents successful completion. Optional text-match fields remain typed when returned; this route does not request highlighted-media enrichment. Search covers only indexed files smaller than 384 KB on default branches and requires authentication; it is not a repository contents inventory.",
+      "grain": [
+        "search_query",
+        "repository_id",
+        "file_path",
+        "blob_sha"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "search_query",
+          "result_position",
+          "reported_total_count",
+          "incomplete_results",
+          "repository_id",
+          "repository",
+          "repository_metadata",
+          "file_name",
+          "file_path",
+          "blob_sha",
+          "url",
+          "git_url",
+          "html_url",
+          "score",
+          "file_size",
+          "language",
+          "last_modified_at",
+          "line_numbers",
+          "text_matches"
+        ],
+        "dimensions": [
+          "search_query",
+          "repository"
+        ],
+        "metrics": [
+          {
+            "name": "search_code_hit_count",
+            "kind": "count",
+            "comment": "Query-qualified code hits in one complete API response population, not a count of all GitHub code."
+          }
+        ],
+        "sql_names": {
+          "search_query": "search_code_hits_search_query",
+          "repository": "search_code_hits_repository"
+        },
+        "crossfield": {
+          "metrics": {
+            "search_code_hit_max_score": {
+              "expression": "MAX(search_code_hits.score)"
+            }
+          },
+          "metric_semantics": {
+            "search_code_hit_max_score": {
+              "dataset": "search_code_hits",
+              "additivity": "non_additive",
+              "comment": "Maximum upstream relevance score in this selected query population; scores are not additive and are not comparable across different query kinds or invocations."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "query",
+          "select": [
+            "search_query"
+          ],
+          "arguments": [
+            {
+              "name": "search_query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+              "example": "crossfield",
+              "min_length": 1
+            },
+            {
+              "name": "search_code_sort",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional GitHub code search sort field; omission retains best-match ordering.",
+              "example": "indexed",
+              "enum": [
+                "indexed"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "search_order",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional REST search result order; omission preserves the API default.",
+              "example": "desc",
+              "enum": [
+                "desc",
+                "asc"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "search_query",
+              "source_stage": "hits",
+              "source_column": "search_query"
+            },
+            {
+              "name": "result_position",
+              "source_stage": "hits",
+              "source_column": "result_position"
+            },
+            {
+              "name": "reported_total_count",
+              "source_stage": "hits",
+              "source_column": "reported_total_count"
+            },
+            {
+              "name": "incomplete_results",
+              "source_stage": "hits",
+              "source_column": "incomplete_results"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "hits",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "hits",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_metadata",
+              "source_stage": "hits",
+              "source_column": "repository_metadata"
+            },
+            {
+              "name": "file_name",
+              "source_stage": "hits",
+              "source_column": "file_name"
+            },
+            {
+              "name": "file_path",
+              "source_stage": "hits",
+              "source_column": "file_path"
+            },
+            {
+              "name": "blob_sha",
+              "source_stage": "hits",
+              "source_column": "blob_sha"
+            },
+            {
+              "name": "url",
+              "source_stage": "hits",
+              "source_column": "url"
+            },
+            {
+              "name": "git_url",
+              "source_stage": "hits",
+              "source_column": "git_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "hits",
+              "source_column": "html_url"
+            },
+            {
+              "name": "score",
+              "source_stage": "hits",
+              "source_column": "score"
+            },
+            {
+              "name": "file_size",
+              "source_stage": "hits",
+              "source_column": "file_size"
+            },
+            {
+              "name": "language",
+              "source_stage": "hits",
+              "source_column": "language"
+            },
+            {
+              "name": "last_modified_at",
+              "source_stage": "hits",
+              "source_column": "last_modified_at"
+            },
+            {
+              "name": "line_numbers",
+              "source_stage": "hits",
+              "source_column": "line_numbers"
+            },
+            {
+              "name": "text_matches",
+              "source_stage": "hits",
+              "source_column": "text_matches"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "hits",
+                "entity": "search_code_hits_source",
+                "arguments": {
+                  "search_query": {
+                    "parameter": "search_query"
+                  },
+                  "search_code_sort": {
+                    "parameter": "search_code_sort"
+                  },
+                  "search_order": {
+                    "parameter": "search_order"
+                  }
+                }
+              }
+            ],
+            "output_stage": "hits"
+          },
+          "population": "One exact GitHub query population under the supplied API sort/search-mode/repository selectors. Every advertised page must report complete results and a stable total_count matching all emitted hits."
+        }
+      ]
+    },
+    {
+      "name": "search_commit_hits",
+      "description": "Query-qualified commits search hit observations. Grain combines the exact query with canonical returned identity; ordering and search-mode selectors define the invocation population. Result position is response order across pages, not durable identity. Total count and incomplete_results are exposed per returned hit and are not additive facts. A partial response, changed count, or 1000-result API cap prevents successful completion. Optional text-match fields remain typed when returned; this route does not request highlighted-media enrichment. The API searches commits on default branches; commit signatures are distinct from nullable GitHub author-account identity.",
+      "grain": [
+        "search_query",
+        "repository_id",
+        "commit_sha"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "search_query",
+          "result_position",
+          "reported_total_count",
+          "incomplete_results",
+          "repository_id",
+          "repository",
+          "repository_metadata",
+          "commit_sha",
+          "commit_node_id",
+          "url",
+          "html_url",
+          "comments_url",
+          "commit",
+          "parents",
+          "score",
+          "author_account",
+          "committer_signature",
+          "text_matches"
+        ],
+        "dimensions": [
+          "search_query",
+          "repository"
+        ],
+        "metrics": [
+          {
+            "name": "search_commit_hit_count",
+            "kind": "count",
+            "comment": "Query-qualified commits hits in one complete API response population, not a count of all GitHub commits."
+          }
+        ],
+        "sql_names": {
+          "search_query": "search_commit_hits_search_query",
+          "repository": "search_commit_hits_repository"
+        },
+        "crossfield": {
+          "metrics": {
+            "search_commit_hit_max_score": {
+              "expression": "MAX(search_commit_hits.score)"
+            }
+          },
+          "metric_semantics": {
+            "search_commit_hit_max_score": {
+              "dataset": "search_commit_hits",
+              "additivity": "non_additive",
+              "comment": "Maximum upstream relevance score in this selected query population; scores are not additive and are not comparable across different query kinds or invocations."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "query",
+          "select": [
+            "search_query"
+          ],
+          "arguments": [
+            {
+              "name": "search_query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+              "example": "crossfield",
+              "min_length": 1
+            },
+            {
+              "name": "search_commits_sort",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional GitHub commits search sort field; omission retains best-match ordering.",
+              "example": "author-date",
+              "enum": [
+                "author-date",
+                "committer-date"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "search_order",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional REST search result order; omission preserves the API default.",
+              "example": "desc",
+              "enum": [
+                "desc",
+                "asc"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "search_query",
+              "source_stage": "hits",
+              "source_column": "search_query"
+            },
+            {
+              "name": "result_position",
+              "source_stage": "hits",
+              "source_column": "result_position"
+            },
+            {
+              "name": "reported_total_count",
+              "source_stage": "hits",
+              "source_column": "reported_total_count"
+            },
+            {
+              "name": "incomplete_results",
+              "source_stage": "hits",
+              "source_column": "incomplete_results"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "hits",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "hits",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_metadata",
+              "source_stage": "hits",
+              "source_column": "repository_metadata"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "hits",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "commit_node_id",
+              "source_stage": "hits",
+              "source_column": "commit_node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "hits",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "hits",
+              "source_column": "html_url"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "hits",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "commit",
+              "source_stage": "hits",
+              "source_column": "commit"
+            },
+            {
+              "name": "parents",
+              "source_stage": "hits",
+              "source_column": "parents"
+            },
+            {
+              "name": "score",
+              "source_stage": "hits",
+              "source_column": "score"
+            },
+            {
+              "name": "author_account",
+              "source_stage": "hits",
+              "source_column": "author_account"
+            },
+            {
+              "name": "committer_signature",
+              "source_stage": "hits",
+              "source_column": "committer_signature"
+            },
+            {
+              "name": "text_matches",
+              "source_stage": "hits",
+              "source_column": "text_matches"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "hits",
+                "entity": "search_commit_hits_source",
+                "arguments": {
+                  "search_query": {
+                    "parameter": "search_query"
+                  },
+                  "search_commits_sort": {
+                    "parameter": "search_commits_sort"
+                  },
+                  "search_order": {
+                    "parameter": "search_order"
+                  }
+                }
+              }
+            ],
+            "output_stage": "hits"
+          },
+          "population": "One exact GitHub query population under the supplied API sort/search-mode/repository selectors. Every advertised page must report complete results and a stable total_count matching all emitted hits."
+        }
+      ]
+    },
+    {
+      "name": "search_issue_hits",
+      "description": "Query-qualified issues search hit observations. Grain combines the exact query with canonical returned identity; ordering and search-mode selectors define the invocation population. Result position is response order across pages, not durable identity. Total count and incomplete_results are exposed per returned hit and are not additive facts. A partial response, changed count, or 1000-result API cap prevents successful completion. Optional text-match fields remain typed when returned; this route does not request highlighted-media enrichment. Typed node hydration distinguishes Issue and PullRequest and obtains current repository identity without parsing or following URLs. Requested mode, performed mode and lexical fallback reasons are distinct. Recursive app/comment details remain available through canonical detail entities rather than guessed search projections.",
+      "grain": [
+        "search_query",
+        "node_id",
+        "performed_search_type"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "search_query",
+          "result_position",
+          "reported_total_count",
+          "incomplete_results",
+          "issue_search_type",
+          "issue_advanced_search",
+          "performed_search_type",
+          "lexical_fallback_reason",
+          "url",
+          "repository_url",
+          "labels_url",
+          "comments_url",
+          "events_url",
+          "html_url",
+          "issue_database_id",
+          "node_id",
+          "indexed_number",
+          "title",
+          "locked",
+          "active_lock_reason",
+          "assignees",
+          "user",
+          "labels",
+          "sub_issues_summary",
+          "issue_dependencies_summary",
+          "issue_field_values",
+          "state",
+          "state_reason",
+          "assignee",
+          "milestone",
+          "comments",
+          "created_at",
+          "updated_at",
+          "closed_at",
+          "text_matches",
+          "pull_request",
+          "body",
+          "score",
+          "author_association",
+          "draft",
+          "body_html",
+          "body_text",
+          "timeline_url",
+          "issue_type",
+          "reactions",
+          "subject_kind",
+          "repository_id",
+          "repository",
+          "number",
+          "repository_node_id"
+        ],
+        "dimensions": [
+          "search_query",
+          "repository",
+          "subject_kind",
+          "state",
+          "performed_search_type"
+        ],
+        "metrics": [
+          {
+            "name": "search_issue_hit_count",
+            "kind": "count",
+            "comment": "Query-qualified issues hits in one complete API response population, not a count of all GitHub issues."
+          }
+        ],
+        "sql_names": {
+          "search_query": "search_issue_hits_search_query",
+          "repository": "search_issue_hits_repository",
+          "subject_kind": "search_issue_hits_subject_kind",
+          "state": "search_issue_hits_state",
+          "performed_search_type": "search_issue_hits_performed_search_type"
+        },
+        "crossfield": {
+          "metrics": {
+            "search_issue_hit_max_score": {
+              "expression": "MAX(search_issue_hits.score)"
+            }
+          },
+          "metric_semantics": {
+            "search_issue_hit_max_score": {
+              "dataset": "search_issue_hits",
+              "additivity": "non_additive",
+              "comment": "Maximum upstream relevance score in this selected query population; scores are not additive and are not comparable across different query kinds or invocations."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "query",
+          "select": [
+            "search_query"
+          ],
+          "arguments": [
+            {
+              "name": "search_query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+              "example": "crossfield",
+              "min_length": 1
+            },
+            {
+              "name": "search_issues_sort",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional GitHub issues search sort field; omission retains best-match ordering.",
+              "example": "comments",
+              "enum": [
+                "comments",
+                "reactions",
+                "reactions-+1",
+                "reactions--1",
+                "reactions-smile",
+                "reactions-thinking_face",
+                "reactions-heart",
+                "reactions-tada",
+                "interactions",
+                "created",
+                "updated"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "search_order",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional REST search result order; omission preserves the API default.",
+              "example": "desc",
+              "enum": [
+                "desc",
+                "asc"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "issue_search_type",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional requested issue search mode. The actual performed mode and fallback reasons remain response metadata; omission preserves the API default.",
+              "example": "hybrid",
+              "enum": [
+                "semantic",
+                "hybrid"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "issue_advanced_search",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional raw GitHub advanced_search query value for issue search; preserved as the pinned string parameter.",
+              "example": "true",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "search_query",
+              "source_stage": "hits",
+              "source_column": "search_query"
+            },
+            {
+              "name": "result_position",
+              "source_stage": "hits",
+              "source_column": "result_position"
+            },
+            {
+              "name": "reported_total_count",
+              "source_stage": "hits",
+              "source_column": "reported_total_count"
+            },
+            {
+              "name": "incomplete_results",
+              "source_stage": "hits",
+              "source_column": "incomplete_results"
+            },
+            {
+              "name": "issue_search_type",
+              "source_stage": "hits",
+              "source_column": "issue_search_type"
+            },
+            {
+              "name": "issue_advanced_search",
+              "source_stage": "hits",
+              "source_column": "issue_advanced_search"
+            },
+            {
+              "name": "performed_search_type",
+              "source_stage": "hits",
+              "source_column": "performed_search_type"
+            },
+            {
+              "name": "lexical_fallback_reason",
+              "source_stage": "hits",
+              "source_column": "lexical_fallback_reason"
+            },
+            {
+              "name": "url",
+              "source_stage": "hits",
+              "source_column": "url"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "hits",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "labels_url",
+              "source_stage": "hits",
+              "source_column": "labels_url"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "hits",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "events_url",
+              "source_stage": "hits",
+              "source_column": "events_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "hits",
+              "source_column": "html_url"
+            },
+            {
+              "name": "issue_database_id",
+              "source_stage": "hits",
+              "source_column": "issue_database_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "hits",
+              "source_column": "node_id"
+            },
+            {
+              "name": "indexed_number",
+              "source_stage": "hits",
+              "source_column": "indexed_number"
+            },
+            {
+              "name": "title",
+              "source_stage": "hits",
+              "source_column": "title"
+            },
+            {
+              "name": "locked",
+              "source_stage": "hits",
+              "source_column": "locked"
+            },
+            {
+              "name": "active_lock_reason",
+              "source_stage": "hits",
+              "source_column": "active_lock_reason"
+            },
+            {
+              "name": "assignees",
+              "source_stage": "hits",
+              "source_column": "assignees"
+            },
+            {
+              "name": "user",
+              "source_stage": "hits",
+              "source_column": "user"
+            },
+            {
+              "name": "labels",
+              "source_stage": "hits",
+              "source_column": "labels"
+            },
+            {
+              "name": "sub_issues_summary",
+              "source_stage": "hits",
+              "source_column": "sub_issues_summary"
+            },
+            {
+              "name": "issue_dependencies_summary",
+              "source_stage": "hits",
+              "source_column": "issue_dependencies_summary"
+            },
+            {
+              "name": "issue_field_values",
+              "source_stage": "hits",
+              "source_column": "issue_field_values"
+            },
+            {
+              "name": "state",
+              "source_stage": "hits",
+              "source_column": "state"
+            },
+            {
+              "name": "state_reason",
+              "source_stage": "hits",
+              "source_column": "state_reason"
+            },
+            {
+              "name": "assignee",
+              "source_stage": "hits",
+              "source_column": "assignee"
+            },
+            {
+              "name": "milestone",
+              "source_stage": "hits",
+              "source_column": "milestone"
+            },
+            {
+              "name": "comments",
+              "source_stage": "hits",
+              "source_column": "comments"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "hits",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "hits",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "closed_at",
+              "source_stage": "hits",
+              "source_column": "closed_at"
+            },
+            {
+              "name": "text_matches",
+              "source_stage": "hits",
+              "source_column": "text_matches"
+            },
+            {
+              "name": "pull_request",
+              "source_stage": "hits",
+              "source_column": "pull_request"
+            },
+            {
+              "name": "body",
+              "source_stage": "hits",
+              "source_column": "body"
+            },
+            {
+              "name": "score",
+              "source_stage": "hits",
+              "source_column": "score"
+            },
+            {
+              "name": "author_association",
+              "source_stage": "hits",
+              "source_column": "author_association"
+            },
+            {
+              "name": "draft",
+              "source_stage": "hits",
+              "source_column": "draft"
+            },
+            {
+              "name": "body_html",
+              "source_stage": "hits",
+              "source_column": "body_html"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "hits",
+              "source_column": "body_text"
+            },
+            {
+              "name": "timeline_url",
+              "source_stage": "hits",
+              "source_column": "timeline_url"
+            },
+            {
+              "name": "issue_type",
+              "source_stage": "hits",
+              "source_column": "issue_type"
+            },
+            {
+              "name": "reactions",
+              "source_stage": "hits",
+              "source_column": "reactions"
+            },
+            {
+              "name": "subject_kind",
+              "source_stage": "subject",
+              "source_column": "subject_kind"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "subject",
+              "source_column": "repository",
+              "source_path": [
+                "databaseId"
+              ]
+            },
+            {
+              "name": "repository",
+              "source_stage": "subject",
+              "source_column": "repository",
+              "source_path": [
+                "nameWithOwner"
+              ]
+            },
+            {
+              "name": "number",
+              "source_stage": "subject",
+              "source_column": "number"
+            },
+            {
+              "name": "repository_node_id",
+              "source_stage": "subject",
+              "source_column": "repository",
+              "source_path": [
+                "id"
+              ]
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "hits",
+                "entity": "search_issue_hits_source",
+                "arguments": {
+                  "search_query": {
+                    "parameter": "search_query"
+                  },
+                  "search_issues_sort": {
+                    "parameter": "search_issues_sort"
+                  },
+                  "search_order": {
+                    "parameter": "search_order"
+                  },
+                  "issue_search_type": {
+                    "parameter": "issue_search_type"
+                  },
+                  "issue_advanced_search": {
+                    "parameter": "issue_advanced_search"
+                  }
+                }
+              },
+              {
+                "name": "subject",
+                "entity": "search_issue_subject_source",
+                "arguments": {
+                  "search_subject_node_id": {
+                    "stage": "hits",
+                    "column": "node_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "subject"
+          },
+          "population": "One exact GitHub query population under the supplied API sort/search-mode/repository selectors. Every advertised page must report complete results and a stable total_count matching all emitted hits."
+        }
+      ]
+    },
+    {
+      "name": "search_label_hits",
+      "description": "Query-qualified labels search hit observations. Grain combines the exact query with canonical returned identity; ordering and search-mode selectors define the invocation population. Result position is response order across pages, not durable identity. Total count and incomplete_results are exposed per returned hit and are not additive facts. A partial response, changed count, or 1000-result API cap prevents successful completion. Optional text-match fields remain typed when returned; this route does not request highlighted-media enrichment.",
+      "grain": [
+        "search_query",
+        "repository_id",
+        "label_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "search_query",
+          "result_position",
+          "reported_total_count",
+          "incomplete_results",
+          "repository_id",
+          "label_id",
+          "label_node_id",
+          "url",
+          "name",
+          "color",
+          "is_default",
+          "description",
+          "archived_at",
+          "archived_by",
+          "score",
+          "text_matches",
+          "repository"
+        ],
+        "dimensions": [
+          "search_query",
+          "repository"
+        ],
+        "metrics": [
+          {
+            "name": "search_label_hit_count",
+            "kind": "count",
+            "comment": "Query-qualified labels hits in one complete API response population, not a count of all GitHub labels."
+          }
+        ],
+        "sql_names": {
+          "search_query": "search_label_hits_search_query",
+          "repository": "search_label_hits_repository"
+        },
+        "crossfield": {
+          "metrics": {
+            "search_label_hit_max_score": {
+              "expression": "MAX(search_label_hits.score)"
+            }
+          },
+          "metric_semantics": {
+            "search_label_hit_max_score": {
+              "dataset": "search_label_hits",
+              "additivity": "non_additive",
+              "comment": "Maximum upstream relevance score in this selected query population; scores are not additive and are not comparable across different query kinds or invocations."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "query",
+          "select": [
+            "search_query"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "search_query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+              "example": "crossfield",
+              "min_length": 1
+            },
+            {
+              "name": "search_labels_sort",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional GitHub labels search sort field; omission retains best-match ordering.",
+              "example": "created",
+              "enum": [
+                "created",
+                "updated"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "search_order",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional REST search result order; omission preserves the API default.",
+              "example": "desc",
+              "enum": [
+                "desc",
+                "asc"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "search_query",
+              "source_stage": "hits",
+              "source_column": "search_query"
+            },
+            {
+              "name": "result_position",
+              "source_stage": "hits",
+              "source_column": "result_position"
+            },
+            {
+              "name": "reported_total_count",
+              "source_stage": "hits",
+              "source_column": "reported_total_count"
+            },
+            {
+              "name": "incomplete_results",
+              "source_stage": "hits",
+              "source_column": "incomplete_results"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "hits",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "label_id",
+              "source_stage": "hits",
+              "source_column": "label_id"
+            },
+            {
+              "name": "label_node_id",
+              "source_stage": "hits",
+              "source_column": "label_node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "hits",
+              "source_column": "url"
+            },
+            {
+              "name": "name",
+              "source_stage": "hits",
+              "source_column": "name"
+            },
+            {
+              "name": "color",
+              "source_stage": "hits",
+              "source_column": "color"
+            },
+            {
+              "name": "is_default",
+              "source_stage": "hits",
+              "source_column": "is_default"
+            },
+            {
+              "name": "description",
+              "source_stage": "hits",
+              "source_column": "description"
+            },
+            {
+              "name": "archived_at",
+              "source_stage": "hits",
+              "source_column": "archived_at"
+            },
+            {
+              "name": "archived_by",
+              "source_stage": "hits",
+              "source_column": "archived_by"
+            },
+            {
+              "name": "score",
+              "source_stage": "hits",
+              "source_column": "score"
+            },
+            {
+              "name": "text_matches",
+              "source_stage": "hits",
+              "source_column": "text_matches"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "hits",
+                "entity": "search_label_hits_source",
+                "arguments": {
+                  "search_query": {
+                    "parameter": "search_query"
+                  },
+                  "search_labels_sort": {
+                    "parameter": "search_labels_sort"
+                  },
+                  "search_order": {
+                    "parameter": "search_order"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "hits"
+          },
+          "population": "One exact GitHub query population under the supplied API sort/search-mode/repository selectors. Every advertised page must report complete results and a stable total_count matching all emitted hits."
+        }
+      ]
+    },
+    {
+      "name": "search_repository_hits",
+      "description": "Query-qualified repositories search hit observations. Grain combines the exact query with canonical returned identity; ordering and search-mode selectors define the invocation population. Result position is response order across pages, not durable identity. Total count and incomplete_results are exposed per returned hit and are not additive facts. A partial response, changed count, or 1000-result API cap prevents successful completion. Optional text-match fields remain typed when returned; this route does not request highlighted-media enrichment.",
+      "grain": [
+        "search_query",
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "search_query",
+          "result_position",
+          "reported_total_count",
+          "incomplete_results",
+          "repository_id",
+          "node_id",
+          "name",
+          "repository",
+          "owner",
+          "private",
+          "html_url",
+          "description",
+          "fork",
+          "url",
+          "created_at",
+          "updated_at",
+          "pushed_at",
+          "homepage",
+          "size",
+          "stargazers_count",
+          "watchers_count",
+          "language",
+          "forks_count",
+          "open_issues_count",
+          "master_branch",
+          "default_branch",
+          "score",
+          "forks_url",
+          "keys_url",
+          "collaborators_url",
+          "teams_url",
+          "hooks_url",
+          "issue_events_url",
+          "events_url",
+          "assignees_url",
+          "branches_url",
+          "tags_url",
+          "blobs_url",
+          "git_tags_url",
+          "git_refs_url",
+          "trees_url",
+          "statuses_url",
+          "languages_url",
+          "stargazers_url",
+          "contributors_url",
+          "subscribers_url",
+          "subscription_url",
+          "commits_url",
+          "git_commits_url",
+          "comments_url",
+          "issue_comment_url",
+          "contents_url",
+          "compare_url",
+          "merges_url",
+          "archive_url",
+          "downloads_url",
+          "issues_url",
+          "pulls_url",
+          "milestones_url",
+          "notifications_url",
+          "labels_url",
+          "releases_url",
+          "deployments_url",
+          "git_url",
+          "ssh_url",
+          "clone_url",
+          "svn_url",
+          "forks",
+          "open_issues",
+          "watchers",
+          "topics",
+          "mirror_url",
+          "has_issues",
+          "has_projects",
+          "has_pages",
+          "has_wiki",
+          "has_downloads",
+          "has_discussions",
+          "has_pull_requests",
+          "pull_request_creation_policy",
+          "archived",
+          "disabled",
+          "visibility",
+          "license",
+          "permissions",
+          "text_matches",
+          "allow_merge_commit",
+          "allow_squash_merge",
+          "allow_rebase_merge",
+          "allow_auto_merge",
+          "delete_branch_on_merge",
+          "allow_forking",
+          "is_template",
+          "web_commit_signoff_required"
+        ],
+        "dimensions": [
+          "search_query",
+          "repository"
+        ],
+        "metrics": [
+          {
+            "name": "search_repository_hit_count",
+            "kind": "count",
+            "comment": "Query-qualified repositories hits in one complete API response population, not a count of all GitHub repositories."
+          }
+        ],
+        "sql_names": {
+          "search_query": "search_repository_hits_search_query",
+          "repository": "search_repository_hits_repository"
+        },
+        "crossfield": {
+          "metrics": {
+            "search_repository_hit_max_score": {
+              "expression": "MAX(search_repository_hits.score)"
+            }
+          },
+          "metric_semantics": {
+            "search_repository_hit_max_score": {
+              "dataset": "search_repository_hits",
+              "additivity": "non_additive",
+              "comment": "Maximum upstream relevance score in this selected query population; scores are not additive and are not comparable across different query kinds or invocations."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "query",
+          "select": [
+            "search_query"
+          ],
+          "arguments": [
+            {
+              "name": "search_query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+              "example": "crossfield",
+              "min_length": 1
+            },
+            {
+              "name": "search_repositories_sort",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional GitHub repositories search sort field; omission retains best-match ordering.",
+              "example": "stars",
+              "enum": [
+                "stars",
+                "forks",
+                "help-wanted-issues",
+                "updated"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "search_order",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional REST search result order; omission preserves the API default.",
+              "example": "desc",
+              "enum": [
+                "desc",
+                "asc"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "search_query",
+              "source_stage": "hits",
+              "source_column": "search_query"
+            },
+            {
+              "name": "result_position",
+              "source_stage": "hits",
+              "source_column": "result_position"
+            },
+            {
+              "name": "reported_total_count",
+              "source_stage": "hits",
+              "source_column": "reported_total_count"
+            },
+            {
+              "name": "incomplete_results",
+              "source_stage": "hits",
+              "source_column": "incomplete_results"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "hits",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "hits",
+              "source_column": "node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "hits",
+              "source_column": "name"
+            },
+            {
+              "name": "repository",
+              "source_stage": "hits",
+              "source_column": "repository"
+            },
+            {
+              "name": "owner",
+              "source_stage": "hits",
+              "source_column": "owner"
+            },
+            {
+              "name": "private",
+              "source_stage": "hits",
+              "source_column": "private"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "hits",
+              "source_column": "html_url"
+            },
+            {
+              "name": "description",
+              "source_stage": "hits",
+              "source_column": "description"
+            },
+            {
+              "name": "fork",
+              "source_stage": "hits",
+              "source_column": "fork"
+            },
+            {
+              "name": "url",
+              "source_stage": "hits",
+              "source_column": "url"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "hits",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "hits",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "pushed_at",
+              "source_stage": "hits",
+              "source_column": "pushed_at"
+            },
+            {
+              "name": "homepage",
+              "source_stage": "hits",
+              "source_column": "homepage"
+            },
+            {
+              "name": "size",
+              "source_stage": "hits",
+              "source_column": "size"
+            },
+            {
+              "name": "stargazers_count",
+              "source_stage": "hits",
+              "source_column": "stargazers_count"
+            },
+            {
+              "name": "watchers_count",
+              "source_stage": "hits",
+              "source_column": "watchers_count"
+            },
+            {
+              "name": "language",
+              "source_stage": "hits",
+              "source_column": "language"
+            },
+            {
+              "name": "forks_count",
+              "source_stage": "hits",
+              "source_column": "forks_count"
+            },
+            {
+              "name": "open_issues_count",
+              "source_stage": "hits",
+              "source_column": "open_issues_count"
+            },
+            {
+              "name": "master_branch",
+              "source_stage": "hits",
+              "source_column": "master_branch"
+            },
+            {
+              "name": "default_branch",
+              "source_stage": "hits",
+              "source_column": "default_branch"
+            },
+            {
+              "name": "score",
+              "source_stage": "hits",
+              "source_column": "score"
+            },
+            {
+              "name": "forks_url",
+              "source_stage": "hits",
+              "source_column": "forks_url"
+            },
+            {
+              "name": "keys_url",
+              "source_stage": "hits",
+              "source_column": "keys_url"
+            },
+            {
+              "name": "collaborators_url",
+              "source_stage": "hits",
+              "source_column": "collaborators_url"
+            },
+            {
+              "name": "teams_url",
+              "source_stage": "hits",
+              "source_column": "teams_url"
+            },
+            {
+              "name": "hooks_url",
+              "source_stage": "hits",
+              "source_column": "hooks_url"
+            },
+            {
+              "name": "issue_events_url",
+              "source_stage": "hits",
+              "source_column": "issue_events_url"
+            },
+            {
+              "name": "events_url",
+              "source_stage": "hits",
+              "source_column": "events_url"
+            },
+            {
+              "name": "assignees_url",
+              "source_stage": "hits",
+              "source_column": "assignees_url"
+            },
+            {
+              "name": "branches_url",
+              "source_stage": "hits",
+              "source_column": "branches_url"
+            },
+            {
+              "name": "tags_url",
+              "source_stage": "hits",
+              "source_column": "tags_url"
+            },
+            {
+              "name": "blobs_url",
+              "source_stage": "hits",
+              "source_column": "blobs_url"
+            },
+            {
+              "name": "git_tags_url",
+              "source_stage": "hits",
+              "source_column": "git_tags_url"
+            },
+            {
+              "name": "git_refs_url",
+              "source_stage": "hits",
+              "source_column": "git_refs_url"
+            },
+            {
+              "name": "trees_url",
+              "source_stage": "hits",
+              "source_column": "trees_url"
+            },
+            {
+              "name": "statuses_url",
+              "source_stage": "hits",
+              "source_column": "statuses_url"
+            },
+            {
+              "name": "languages_url",
+              "source_stage": "hits",
+              "source_column": "languages_url"
+            },
+            {
+              "name": "stargazers_url",
+              "source_stage": "hits",
+              "source_column": "stargazers_url"
+            },
+            {
+              "name": "contributors_url",
+              "source_stage": "hits",
+              "source_column": "contributors_url"
+            },
+            {
+              "name": "subscribers_url",
+              "source_stage": "hits",
+              "source_column": "subscribers_url"
+            },
+            {
+              "name": "subscription_url",
+              "source_stage": "hits",
+              "source_column": "subscription_url"
+            },
+            {
+              "name": "commits_url",
+              "source_stage": "hits",
+              "source_column": "commits_url"
+            },
+            {
+              "name": "git_commits_url",
+              "source_stage": "hits",
+              "source_column": "git_commits_url"
+            },
+            {
+              "name": "comments_url",
+              "source_stage": "hits",
+              "source_column": "comments_url"
+            },
+            {
+              "name": "issue_comment_url",
+              "source_stage": "hits",
+              "source_column": "issue_comment_url"
+            },
+            {
+              "name": "contents_url",
+              "source_stage": "hits",
+              "source_column": "contents_url"
+            },
+            {
+              "name": "compare_url",
+              "source_stage": "hits",
+              "source_column": "compare_url"
+            },
+            {
+              "name": "merges_url",
+              "source_stage": "hits",
+              "source_column": "merges_url"
+            },
+            {
+              "name": "archive_url",
+              "source_stage": "hits",
+              "source_column": "archive_url"
+            },
+            {
+              "name": "downloads_url",
+              "source_stage": "hits",
+              "source_column": "downloads_url"
+            },
+            {
+              "name": "issues_url",
+              "source_stage": "hits",
+              "source_column": "issues_url"
+            },
+            {
+              "name": "pulls_url",
+              "source_stage": "hits",
+              "source_column": "pulls_url"
+            },
+            {
+              "name": "milestones_url",
+              "source_stage": "hits",
+              "source_column": "milestones_url"
+            },
+            {
+              "name": "notifications_url",
+              "source_stage": "hits",
+              "source_column": "notifications_url"
+            },
+            {
+              "name": "labels_url",
+              "source_stage": "hits",
+              "source_column": "labels_url"
+            },
+            {
+              "name": "releases_url",
+              "source_stage": "hits",
+              "source_column": "releases_url"
+            },
+            {
+              "name": "deployments_url",
+              "source_stage": "hits",
+              "source_column": "deployments_url"
+            },
+            {
+              "name": "git_url",
+              "source_stage": "hits",
+              "source_column": "git_url"
+            },
+            {
+              "name": "ssh_url",
+              "source_stage": "hits",
+              "source_column": "ssh_url"
+            },
+            {
+              "name": "clone_url",
+              "source_stage": "hits",
+              "source_column": "clone_url"
+            },
+            {
+              "name": "svn_url",
+              "source_stage": "hits",
+              "source_column": "svn_url"
+            },
+            {
+              "name": "forks",
+              "source_stage": "hits",
+              "source_column": "forks"
+            },
+            {
+              "name": "open_issues",
+              "source_stage": "hits",
+              "source_column": "open_issues"
+            },
+            {
+              "name": "watchers",
+              "source_stage": "hits",
+              "source_column": "watchers"
+            },
+            {
+              "name": "topics",
+              "source_stage": "hits",
+              "source_column": "topics"
+            },
+            {
+              "name": "mirror_url",
+              "source_stage": "hits",
+              "source_column": "mirror_url"
+            },
+            {
+              "name": "has_issues",
+              "source_stage": "hits",
+              "source_column": "has_issues"
+            },
+            {
+              "name": "has_projects",
+              "source_stage": "hits",
+              "source_column": "has_projects"
+            },
+            {
+              "name": "has_pages",
+              "source_stage": "hits",
+              "source_column": "has_pages"
+            },
+            {
+              "name": "has_wiki",
+              "source_stage": "hits",
+              "source_column": "has_wiki"
+            },
+            {
+              "name": "has_downloads",
+              "source_stage": "hits",
+              "source_column": "has_downloads"
+            },
+            {
+              "name": "has_discussions",
+              "source_stage": "hits",
+              "source_column": "has_discussions"
+            },
+            {
+              "name": "has_pull_requests",
+              "source_stage": "hits",
+              "source_column": "has_pull_requests"
+            },
+            {
+              "name": "pull_request_creation_policy",
+              "source_stage": "hits",
+              "source_column": "pull_request_creation_policy"
+            },
+            {
+              "name": "archived",
+              "source_stage": "hits",
+              "source_column": "archived"
+            },
+            {
+              "name": "disabled",
+              "source_stage": "hits",
+              "source_column": "disabled"
+            },
+            {
+              "name": "visibility",
+              "source_stage": "hits",
+              "source_column": "visibility"
+            },
+            {
+              "name": "license",
+              "source_stage": "hits",
+              "source_column": "license"
+            },
+            {
+              "name": "permissions",
+              "source_stage": "hits",
+              "source_column": "permissions"
+            },
+            {
+              "name": "text_matches",
+              "source_stage": "hits",
+              "source_column": "text_matches"
+            },
+            {
+              "name": "allow_merge_commit",
+              "source_stage": "hits",
+              "source_column": "allow_merge_commit"
+            },
+            {
+              "name": "allow_squash_merge",
+              "source_stage": "hits",
+              "source_column": "allow_squash_merge"
+            },
+            {
+              "name": "allow_rebase_merge",
+              "source_stage": "hits",
+              "source_column": "allow_rebase_merge"
+            },
+            {
+              "name": "allow_auto_merge",
+              "source_stage": "hits",
+              "source_column": "allow_auto_merge"
+            },
+            {
+              "name": "delete_branch_on_merge",
+              "source_stage": "hits",
+              "source_column": "delete_branch_on_merge"
+            },
+            {
+              "name": "allow_forking",
+              "source_stage": "hits",
+              "source_column": "allow_forking"
+            },
+            {
+              "name": "is_template",
+              "source_stage": "hits",
+              "source_column": "is_template"
+            },
+            {
+              "name": "web_commit_signoff_required",
+              "source_stage": "hits",
+              "source_column": "web_commit_signoff_required"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "hits",
+                "entity": "search_repository_hits_source",
+                "arguments": {
+                  "search_query": {
+                    "parameter": "search_query"
+                  },
+                  "search_repositories_sort": {
+                    "parameter": "search_repositories_sort"
+                  },
+                  "search_order": {
+                    "parameter": "search_order"
+                  }
+                }
+              }
+            ],
+            "output_stage": "hits"
+          },
+          "population": "One exact GitHub query population under the supplied API sort/search-mode/repository selectors. Every advertised page must report complete results and a stable total_count matching all emitted hits."
+        }
+      ]
+    },
+    {
+      "name": "search_topic_hits",
+      "description": "Query-qualified topics search hit observations. Grain combines the exact query with canonical returned identity; ordering and search-mode selectors define the invocation population. Result position is response order across pages, not durable identity. Total count and incomplete_results are exposed per returned hit and are not additive facts. A partial response, changed count, or 1000-result API cap prevents successful completion. Optional text-match fields remain typed when returned; this route does not request highlighted-media enrichment. released and created_by are descriptive strings, not inferred dates or verified account identities.",
+      "grain": [
+        "search_query",
+        "topic_name"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "search_query",
+          "result_position",
+          "reported_total_count",
+          "incomplete_results",
+          "topic_name",
+          "display_name",
+          "short_description",
+          "description",
+          "created_by",
+          "released",
+          "created_at",
+          "updated_at",
+          "featured",
+          "curated",
+          "score",
+          "repository_count",
+          "logo_url",
+          "text_matches",
+          "related",
+          "aliases"
+        ],
+        "dimensions": [
+          "search_query",
+          "topic_name"
+        ],
+        "metrics": [
+          {
+            "name": "search_topic_hit_count",
+            "kind": "count",
+            "comment": "Query-qualified topics hits in one complete API response population, not a count of all GitHub topics."
+          }
+        ],
+        "sql_names": {
+          "search_query": "search_topic_hits_search_query",
+          "topic_name": "search_topic_hits_topic_name"
+        },
+        "crossfield": {
+          "metrics": {
+            "search_topic_hit_max_score": {
+              "expression": "MAX(search_topic_hits.score)"
+            }
+          },
+          "metric_semantics": {
+            "search_topic_hit_max_score": {
+              "dataset": "search_topic_hits",
+              "additivity": "non_additive",
+              "comment": "Maximum upstream relevance score in this selected query population; scores are not additive and are not comparable across different query kinds or invocations."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "query",
+          "select": [
+            "search_query"
+          ],
+          "arguments": [
+            {
+              "name": "search_query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+              "example": "crossfield",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "search_query",
+              "source_stage": "hits",
+              "source_column": "search_query"
+            },
+            {
+              "name": "result_position",
+              "source_stage": "hits",
+              "source_column": "result_position"
+            },
+            {
+              "name": "reported_total_count",
+              "source_stage": "hits",
+              "source_column": "reported_total_count"
+            },
+            {
+              "name": "incomplete_results",
+              "source_stage": "hits",
+              "source_column": "incomplete_results"
+            },
+            {
+              "name": "topic_name",
+              "source_stage": "hits",
+              "source_column": "topic_name"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "hits",
+              "source_column": "display_name"
+            },
+            {
+              "name": "short_description",
+              "source_stage": "hits",
+              "source_column": "short_description"
+            },
+            {
+              "name": "description",
+              "source_stage": "hits",
+              "source_column": "description"
+            },
+            {
+              "name": "created_by",
+              "source_stage": "hits",
+              "source_column": "created_by"
+            },
+            {
+              "name": "released",
+              "source_stage": "hits",
+              "source_column": "released"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "hits",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "hits",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "featured",
+              "source_stage": "hits",
+              "source_column": "featured"
+            },
+            {
+              "name": "curated",
+              "source_stage": "hits",
+              "source_column": "curated"
+            },
+            {
+              "name": "score",
+              "source_stage": "hits",
+              "source_column": "score"
+            },
+            {
+              "name": "repository_count",
+              "source_stage": "hits",
+              "source_column": "repository_count"
+            },
+            {
+              "name": "logo_url",
+              "source_stage": "hits",
+              "source_column": "logo_url"
+            },
+            {
+              "name": "text_matches",
+              "source_stage": "hits",
+              "source_column": "text_matches"
+            },
+            {
+              "name": "related",
+              "source_stage": "hits",
+              "source_column": "related"
+            },
+            {
+              "name": "aliases",
+              "source_stage": "hits",
+              "source_column": "aliases"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "hits",
+                "entity": "search_topic_hits_source",
+                "arguments": {
+                  "search_query": {
+                    "parameter": "search_query"
+                  }
+                }
+              }
+            ],
+            "output_stage": "hits"
+          },
+          "population": "One exact GitHub query population under the supplied API sort/search-mode/repository selectors. Every advertised page must report complete results and a stable total_count matching all emitted hits."
+        }
+      ]
+    },
+    {
+      "name": "search_account_hits",
+      "description": "Query-qualified users search hit observations. Grain combines the exact query with canonical returned identity; ordering and search-mode selectors define the invocation population. Result position is response order across pages, not durable identity. Total count and incomplete_results are exposed per returned hit and are not additive facts. A partial response, changed count, or 1000-result API cap prevents successful completion. Optional text-match fields remain typed when returned; this route does not request highlighted-media enrichment. This endpoint is explicitly anonymous and only returns public accounts, including account types outside the canonical personal-user entity.",
+      "grain": [
+        "search_query",
+        "account_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "search_query",
+          "result_position",
+          "reported_total_count",
+          "incomplete_results",
+          "account_login",
+          "account_id",
+          "node_id",
+          "avatar_url",
+          "gravatar_id",
+          "url",
+          "html_url",
+          "followers_url",
+          "subscriptions_url",
+          "organizations_url",
+          "repos_url",
+          "received_events_url",
+          "account_type",
+          "score",
+          "following_url",
+          "gists_url",
+          "starred_url",
+          "events_url",
+          "public_repos",
+          "public_gists",
+          "followers",
+          "following",
+          "created_at",
+          "updated_at",
+          "name",
+          "bio",
+          "email",
+          "location",
+          "site_admin",
+          "hireable",
+          "text_matches",
+          "blog",
+          "company",
+          "suspended_at",
+          "user_view_type"
+        ],
+        "dimensions": [
+          "search_query",
+          "account_login",
+          "account_type"
+        ],
+        "metrics": [
+          {
+            "name": "search_account_hit_count",
+            "kind": "count",
+            "comment": "Query-qualified users hits in one complete API response population, not a count of all GitHub users."
+          }
+        ],
+        "sql_names": {
+          "search_query": "search_account_hits_search_query",
+          "account_login": "search_account_hits_account_login",
+          "account_type": "search_account_hits_account_type"
+        },
+        "crossfield": {
+          "metrics": {
+            "search_account_hit_max_score": {
+              "expression": "MAX(search_account_hits.score)"
+            }
+          },
+          "metric_semantics": {
+            "search_account_hit_max_score": {
+              "dataset": "search_account_hits",
+              "additivity": "non_additive",
+              "comment": "Maximum upstream relevance score in this selected query population; scores are not additive and are not comparable across different query kinds or invocations."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "query",
+          "select": [
+            "search_query"
+          ],
+          "arguments": [
+            {
+              "name": "search_query",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GitHub REST search query text. Query syntax and searchable population depend on the selected search entity; no query rewriting or authorization widening is performed.",
+              "example": "crossfield",
+              "min_length": 1
+            },
+            {
+              "name": "search_users_sort",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional GitHub users search sort field; omission retains best-match ordering.",
+              "example": "followers",
+              "enum": [
+                "followers",
+                "repositories",
+                "joined"
+              ],
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "search_order",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional REST search result order; omission preserves the API default.",
+              "example": "desc",
+              "enum": [
+                "desc",
+                "asc"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "search_query",
+              "source_stage": "hits",
+              "source_column": "search_query"
+            },
+            {
+              "name": "result_position",
+              "source_stage": "hits",
+              "source_column": "result_position"
+            },
+            {
+              "name": "reported_total_count",
+              "source_stage": "hits",
+              "source_column": "reported_total_count"
+            },
+            {
+              "name": "incomplete_results",
+              "source_stage": "hits",
+              "source_column": "incomplete_results"
+            },
+            {
+              "name": "account_login",
+              "source_stage": "hits",
+              "source_column": "account_login"
+            },
+            {
+              "name": "account_id",
+              "source_stage": "hits",
+              "source_column": "account_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "hits",
+              "source_column": "node_id"
+            },
+            {
+              "name": "avatar_url",
+              "source_stage": "hits",
+              "source_column": "avatar_url"
+            },
+            {
+              "name": "gravatar_id",
+              "source_stage": "hits",
+              "source_column": "gravatar_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "hits",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "hits",
+              "source_column": "html_url"
+            },
+            {
+              "name": "followers_url",
+              "source_stage": "hits",
+              "source_column": "followers_url"
+            },
+            {
+              "name": "subscriptions_url",
+              "source_stage": "hits",
+              "source_column": "subscriptions_url"
+            },
+            {
+              "name": "organizations_url",
+              "source_stage": "hits",
+              "source_column": "organizations_url"
+            },
+            {
+              "name": "repos_url",
+              "source_stage": "hits",
+              "source_column": "repos_url"
+            },
+            {
+              "name": "received_events_url",
+              "source_stage": "hits",
+              "source_column": "received_events_url"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "hits",
+              "source_column": "account_type"
+            },
+            {
+              "name": "score",
+              "source_stage": "hits",
+              "source_column": "score"
+            },
+            {
+              "name": "following_url",
+              "source_stage": "hits",
+              "source_column": "following_url"
+            },
+            {
+              "name": "gists_url",
+              "source_stage": "hits",
+              "source_column": "gists_url"
+            },
+            {
+              "name": "starred_url",
+              "source_stage": "hits",
+              "source_column": "starred_url"
+            },
+            {
+              "name": "events_url",
+              "source_stage": "hits",
+              "source_column": "events_url"
+            },
+            {
+              "name": "public_repos",
+              "source_stage": "hits",
+              "source_column": "public_repos"
+            },
+            {
+              "name": "public_gists",
+              "source_stage": "hits",
+              "source_column": "public_gists"
+            },
+            {
+              "name": "followers",
+              "source_stage": "hits",
+              "source_column": "followers"
+            },
+            {
+              "name": "following",
+              "source_stage": "hits",
+              "source_column": "following"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "hits",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "hits",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "name",
+              "source_stage": "hits",
+              "source_column": "name"
+            },
+            {
+              "name": "bio",
+              "source_stage": "hits",
+              "source_column": "bio"
+            },
+            {
+              "name": "email",
+              "source_stage": "hits",
+              "source_column": "email"
+            },
+            {
+              "name": "location",
+              "source_stage": "hits",
+              "source_column": "location"
+            },
+            {
+              "name": "site_admin",
+              "source_stage": "hits",
+              "source_column": "site_admin"
+            },
+            {
+              "name": "hireable",
+              "source_stage": "hits",
+              "source_column": "hireable"
+            },
+            {
+              "name": "text_matches",
+              "source_stage": "hits",
+              "source_column": "text_matches"
+            },
+            {
+              "name": "blog",
+              "source_stage": "hits",
+              "source_column": "blog"
+            },
+            {
+              "name": "company",
+              "source_stage": "hits",
+              "source_column": "company"
+            },
+            {
+              "name": "suspended_at",
+              "source_stage": "hits",
+              "source_column": "suspended_at"
+            },
+            {
+              "name": "user_view_type",
+              "source_stage": "hits",
+              "source_column": "user_view_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "hits",
+                "entity": "search_account_hits_source",
+                "arguments": {
+                  "search_query": {
+                    "parameter": "search_query"
+                  },
+                  "search_users_sort": {
+                    "parameter": "search_users_sort"
+                  },
+                  "search_order": {
+                    "parameter": "search_order"
+                  }
+                }
+              }
+            ],
+            "output_stage": "hits"
+          },
+          "population": "One exact GitHub query population under the supplied API sort/search-mode/repository selectors. Every advertised page must report complete results and a stable total_count matching all emitted hits."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "search_code_hits_to_repositories",
+      "from": "search_code_hits",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "search_commit_hits_to_repositories",
+      "from": "search_commit_hits",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "search_label_hits_to_repositories",
+      "from": "search_label_hits",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "search_repository_hits_to_repositories",
+      "from": "search_repository_hits",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "search_commit_hits_to_commits",
+      "from": "search_commit_hits",
+      "to": "commits",
+      "from_columns": [
+        "repository_id",
+        "commit_sha"
+      ],
+      "to_columns": [
+        "repository_id",
+        "commit_sha"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "commit_ref": "commit_sha"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "search_label_hits_to_repository_labels",
+      "from": "search_label_hits",
+      "to": "repository_labels",
+      "from_columns": [
+        "repository_id",
+        "label_node_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "label_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "label": "name"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "search_issue_hits_to_repositories",
+      "from": "search_issue_hits",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "search_issue_hits_to_issues",
+      "from": "search_issue_hits",
+      "to": "issues",
+      "from_columns": [
+        "node_id"
+      ],
+      "to_columns": [
+        "issue_node_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "nodes",
+          "bindings": {
+            "issue_node_id": "node_id"
+          },
+          "when": {
+            "subject_kind": "Issue"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "search_issue_hits_to_pull_requests",
+      "from": "search_issue_hits",
+      "to": "pull_requests",
+      "from_columns": [
+        "repository_id",
+        "number"
+      ],
+      "to_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "number"
+          },
+          "when": {
+            "subject_kind": "PullRequest"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "search_account_hits_to_users",
+      "from": "search_account_hits",
+      "to": "users",
+      "from_columns": [
+        "account_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "numeric_identity",
+          "bindings": {
+            "user_account_id": "account_id"
+          },
+          "when": {
+            "account_type": "User"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "search_account_hits_to_organizations",
+      "from": "search_account_hits",
+      "to": "organizations",
+      "from_columns": [
+        "account_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "account_login"
+          },
+          "when": {
+            "account_type": "Organization"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    }
+  ]
+}

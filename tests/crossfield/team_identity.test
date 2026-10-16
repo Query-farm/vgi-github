@@ -1,0 +1,244 @@
+# Canonical teams, inherited active memberships, pending records and access roles.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT team_count FROM engineering.semantic.github(organization=>'team-fixture');
+----
+4
+
+query I
+SELECT team_count FROM engineering.semantic.github(team_numeric_id=>3201);
+----
+1
+
+query I
+SELECT team_count FROM engineering.semantic.github(authenticated_user=>true);
+----
+2
+
+# Immediate children exclude the grandchild widget.
+query IT
+SELECT team_id,team_slug FROM engineering.detail.teams(parent_team_numeric_id=>3201) ORDER BY team_id;
+----
+3202	ui
+3203	empty
+
+query I
+SELECT team_count FROM engineering.semantic.github(organization=>'team-fixture',parent_team_slug=>'platform');
+----
+2
+
+query I
+SELECT team_count FROM engineering.semantic.github(parent_team_numeric_id=>3203);
+----
+0
+
+statement ok
+CREATE TEMP TABLE team_profile AS SELECT * FROM engineering.detail.teams(team_numeric_id=>3202);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query ITII
+SELECT parent_team_id,parent.slug,members_count,repos_count FROM team_profile;
+----
+3201	platform	2	1
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT team_membership_count,team_membership_record_count,pending_team_membership_count FROM engineering.semantic.github(team_numeric_id=>3201);
+----
+3	3	0
+
+query III
+SELECT team_membership_count,team_membership_record_count,pending_team_membership_count FROM engineering.semantic.github(team_numeric_id=>3201,team_member_user=>'team-carol');
+----
+0	1	1
+
+query I
+SELECT team_membership_count FROM engineering.semantic.github(organization=>'team-fixture',team_slug=>'platform',team_member_role=>'member');
+----
+2
+
+query I
+SELECT team_membership_count FROM engineering.semantic.github(team_numeric_id=>3201,team_member_role=>'maintainer');
+----
+1
+
+query TTI
+SELECT team_member_role,team_membership_inherited,team_membership_count FROM engineering.semantic.github(team_numeric_id=>3201) GROUP BY team_member_role,team_membership_inherited ORDER BY team_member_role,team_membership_inherited;
+----
+maintainer	false	1
+member	false	1
+member	true	1
+
+query ITT
+SELECT team_id,member_role,membership_inherited FROM engineering.detail.team_memberships(authenticated_user=>true) ORDER BY team_id;
+----
+3201	maintainer	NULL
+3202	member	NULL
+
+query I
+SELECT team_membership_count FROM engineering.semantic.github(organization=>'team-fixture');
+----
+6
+
+query I
+SELECT organization_invitation_count FROM engineering.semantic.github(team_numeric_id=>3201);
+----
+2
+
+query I
+SELECT organization_invitation_count FROM engineering.semantic.github(organization=>'team-fixture',team_slug=>'ui');
+----
+1
+
+statement ok
+CREATE TEMP TABLE team_invitation_detail AS SELECT * FROM engineering.detail.organization_invitations(team_numeric_id=>3202);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IITTI
+SELECT organization_id,invitation_id,login,email,inviter.id FROM team_invitation_detail;
+----
+3300	3502	NULL	external@example.com	903
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT team_repository_access_count FROM engineering.semantic.github(team_numeric_id=>3201);
+----
+2
+
+query I
+SELECT team_repository_access_count FROM engineering.semantic.github(repository=>'team-fixture/alpha');
+----
+2
+
+query I
+SELECT repository_count FROM engineering.semantic.github(team_numeric_id=>3201);
+----
+2
+
+statement ok
+CREATE TEMP TABLE team_access_detail AS SELECT * FROM engineering.detail.team_repository_access(repository=>'team-fixture/alpha');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query ITTT
+SELECT team_id,role_name,permissions.push,permissions.pull FROM team_access_detail ORDER BY team_id;
+----
+3201	push	true	true
+3202	pull	false	true
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT team_repository_access_count FROM engineering.semantic.github(team_numeric_id=>3201,repository=>'team-fixture/alpha',team_repository_permission=>true);
+----
+1
+
+query III
+SELECT team_membership_check_count,confirmed_team_membership_check_count,unconfirmed_team_membership_check_count FROM engineering.semantic.github(team_numeric_id=>3201,team_member_user=>'team-alice',team_membership_check=>true);
+----
+1	1	0
+
+# Pending membership is real, while the legacy active-membership status is 404.
+query III
+SELECT team_membership_check_count,confirmed_team_membership_check_count,unconfirmed_team_membership_check_count FROM engineering.semantic.github(team_numeric_id=>3201,team_member_user=>'team-carol',team_membership_check=>true);
+----
+1	0	1
+
+query III
+SELECT team_repository_permission_check_count,confirmed_team_repository_permission_check_count,unconfirmed_team_repository_permission_check_count FROM engineering.semantic.github(team_numeric_id=>3201,repository=>'team-fixture/alpha',team_repository_check=>true);
+----
+1	1	0
+
+query III
+SELECT team_repository_permission_check_count,confirmed_team_repository_permission_check_count,unconfirmed_team_repository_permission_check_count FROM engineering.semantic.github(organization=>'team-fixture',team_slug=>'platform',repository=>'team-fixture/gamma',team_repository_check=>true);
+----
+1	0	1
+
+statement error
+SELECT team_repository_access_count FROM engineering.semantic.github(team_numeric_id=>3201,repository=>'team-fixture/gamma',team_repository_permission=>true);
+----
+404
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT team_count FROM engineering.semantic.github(team_numeric_id=>3201,organization=>'team-fixture');
+----
+arguments do not apply
+
+statement error
+SELECT team_membership_count FROM engineering.semantic.github(team_numeric_id=>3201,team_member_user=>'team-alice',team_member_role=>'member');
+----
+arguments do not apply
+
+statement error
+SELECT team_membership_count FROM engineering.semantic.github(team_numeric_id=>3201,team_member_role=>'admin');
+----
+team_member_role
+
+statement error
+SELECT organization_invitation_count FROM engineering.semantic.github(organization=>'team-fixture');
+----
+team_slug
+
+statement error
+SELECT team_repository_access_count FROM engineering.semantic.github(team_numeric_id=>3201,repository=>'team-fixture/alpha');
+----
+arguments do not apply
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

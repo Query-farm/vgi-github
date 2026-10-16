@@ -65,61 +65,64 @@
         },
         "response_variants": "common_fields"
       }
+    },
+    {
+      "name": "repository_collaborators_source",
+      "description": "Pinned GitHub repos/list-collaborators retrieval.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name."
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "user_login"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-collaborators",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
     }
   ],
   "functions": [
     {
       "name": "users",
-      "description": "One canonical personal GitHub user profile. User scope does not mean owned repositories; organization logins reject.",
-      "arguments": [
-        {
-          "name": "user",
-          "type": "VARCHAR",
-          "nullable": false,
-          "min_length": 1,
-          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
-          "example": "octocat"
-        }
-      ],
-      "columns": [
-        {
-          "name": "user_id",
-          "source_stage": "users",
-          "source_column": "user_id"
-        },
-        {
-          "name": "user_login",
-          "source_stage": "users",
-          "source_column": "user_login"
-        },
-        {
-          "name": "account_type",
-          "source_stage": "users",
-          "source_column": "account_type"
-        },
-        {
-          "name": "name",
-          "source_stage": "users",
-          "source_column": "name"
-        },
-        {
-          "name": "created_at",
-          "source_stage": "users",
-          "source_column": "created_at"
-        }
-      ],
+      "description": "Canonical personal user profiles selected by identity, organization membership, team membership, or repository collaboration. Numeric identity, authenticated identity and explicit global directory routes preserve that personal User-only population.",
       "grain": [
         "user_id"
       ],
-      "traversal": {
-        "stages": [
-          {
-            "name": "users",
-            "scope": "users"
-          }
-        ],
-        "output_stage": "users"
-      },
       "semantics": {
         "detail_fields": [
           "user_id",
@@ -144,7 +147,551 @@
           "user_login": "user_login",
           "name": "user_name"
         }
-      }
+      },
+      "routes": [
+        {
+          "name": "numeric_identity",
+          "arguments": [
+            {
+              "name": "user_account_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Stable numeric account ID for the canonical personal User-only population. Organization and Bot accounts are outside that population.",
+              "example": 2601,
+              "minimum": 1
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "user_identity_by_id_source",
+                "arguments": {
+                  "user_account_id": {
+                    "parameter": "user_account_id"
+                  }
+                },
+                "where": {
+                  "account_type": "User"
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "records",
+              "source_column": "account_type"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            }
+          ],
+          "select": [
+            "user_account_id"
+          ],
+          "population": "One numeric account ID, retained only when it is a personal User account. Bot and Organization accounts are excluded consistently with the canonical users contract."
+        },
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                },
+                "where": {
+                  "account_type": "User"
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "records",
+              "source_column": "account_type"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            }
+          ],
+          "select": [
+            "authenticated_user"
+          ],
+          "population": "The authenticated personal user account, resolved through /user."
+        },
+        {
+          "name": "directory",
+          "arguments": [
+            {
+              "name": "user_directory",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "description": "Explicitly enumerate the global public account directory, retaining only personal User accounts and hydrating canonical profiles.",
+              "example": true,
+              "enum": [
+                true
+              ]
+            },
+            {
+              "name": "user_since_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Optional exclusive numeric account-ID cursor for global directory retrieval; results cover only accounts after this ID.",
+              "example": 2600,
+              "minimum": 0,
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovery",
+                "entity": "user_identity_directory_source",
+                "arguments": {
+                  "user_directory": {
+                    "parameter": "user_directory"
+                  },
+                  "user_since_id": {
+                    "parameter": "user_since_id"
+                  }
+                },
+                "where": {
+                  "account_type": "User"
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_identity_discovered_profile_source",
+                "arguments": {
+                  "user": {
+                    "stage": "discovery",
+                    "column": "user_login"
+                  },
+                  "expected_user_id": {
+                    "stage": "discovery",
+                    "column": "user_id"
+                  }
+                },
+                "where": {
+                  "account_type": "User"
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "records",
+              "source_column": "account_type"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            }
+          ],
+          "select": [
+            "user_directory"
+          ],
+          "population": "Personal User accounts from the global public directory, optionally strictly after user_since_id. Organization and Bot rows are excluded before profile hydration; all advertised since-based pages are exhausted."
+        },
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "users",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "users",
+              "source_column": "user_login"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "users",
+              "source_column": "account_type"
+            },
+            {
+              "name": "name",
+              "source_stage": "users",
+              "source_column": "name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "users",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "users",
+                "scope": "users"
+              }
+            ],
+            "output_stage": "users"
+          }
+        },
+        {
+          "name": "team_members",
+          "select": [
+            "team_slug"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "example": "core"
+            }
+          ],
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "users",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "users",
+              "source_column": "user_login"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "users",
+              "source_column": "account_type"
+            },
+            {
+              "name": "name",
+              "source_stage": "users",
+              "source_column": "name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "users",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "scope": "organizations"
+              },
+              {
+                "name": "teams",
+                "entity": "team_lookup",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "team_slug": {
+                    "parameter": "team_slug"
+                  }
+                }
+              },
+              {
+                "name": "members",
+                "entity": "team_members_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "team_slug": {
+                    "stage": "teams",
+                    "column": "team_slug"
+                  }
+                }
+              },
+              {
+                "name": "users",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "stage": "members",
+                    "column": "team_member_login"
+                  }
+                },
+                "where": {
+                  "account_type": "User"
+                }
+              }
+            ],
+            "output_stage": "users"
+          },
+          "population": "Personal user profiles for credential-visible team members."
+        },
+        {
+          "name": "organization_members",
+          "select": [
+            "organization"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "users",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "users",
+              "source_column": "user_login"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "users",
+              "source_column": "account_type"
+            },
+            {
+              "name": "name",
+              "source_stage": "users",
+              "source_column": "name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "users",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "scope": "organizations"
+              },
+              {
+                "name": "members",
+                "entity": "organization_members_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  }
+                }
+              },
+              {
+                "name": "users",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "stage": "members",
+                    "column": "member_login"
+                  }
+                },
+                "where": {
+                  "account_type": "User"
+                }
+              }
+            ],
+            "output_stage": "users"
+          },
+          "population": "Personal user profiles for credential-visible organization members."
+        },
+        {
+          "name": "repository_collaborators",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "user_id",
+              "source_stage": "users",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "users",
+              "source_column": "user_login"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "users",
+              "source_column": "account_type"
+            },
+            {
+              "name": "name",
+              "source_stage": "users",
+              "source_column": "name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "users",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "members",
+                "entity": "repository_collaborators_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "users",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "stage": "members",
+                    "column": "user_login"
+                  }
+                },
+                "where": {
+                  "account_type": "User"
+                }
+              }
+            ],
+            "output_stage": "users"
+          },
+          "deduplicate": true,
+          "population": "Distinct collaborators visible to the credentials across the selected repositories. Access denials propagate.",
+          "select": [
+            "owner",
+            "repository",
+            "repositories"
+          ]
+        }
+      ],
+      "cohort_root": "lookup"
     }
   ],
   "scopes": {
@@ -176,12 +723,11 @@
   "shared_dimensions": {
     "github.user.id.v1": [
       "users.user_id",
-      "authored_pull_requests.user_id",
-      "authored_issues.user_id",
-      "authored_discussions.user_id",
-      "authored_issue_comments.user_id",
-      "authored_discussion_comments.user_id",
-      "authored_commit_comments.user_id"
+      "issues.author_id",
+      "discussions.author_id",
+      "issue_comments.author_id",
+      "discussion_comments.author_id",
+      "commit_comments.author_id"
     ]
   }
 }

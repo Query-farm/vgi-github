@@ -1,14 +1,14 @@
 PREPARE github_pr_focus AS
 WITH earlier AS (
-    SELECT authored_repository_name AS repository, authored_pr_count AS prs
+    SELECT pull_request_repository_name AS repository, pull_request_count AS prs
     FROM engineering.semantic.github(user => $1)
-    WHERE authored_pr_created_day >= $2 AND authored_pr_created_day < $3
-    GROUP BY authored_repository_name
+    WHERE pull_request_created_day >= $2 AND pull_request_created_day < $3
+    GROUP BY pull_request_repository_name
 ), later AS (
-    SELECT authored_repository_name AS repository, authored_pr_count AS prs
+    SELECT pull_request_repository_name AS repository, pull_request_count AS prs
     FROM engineering.semantic.github(user => $1)
-    WHERE authored_pr_created_day >= $4 AND authored_pr_created_day < $5
-    GROUP BY authored_repository_name
+    WHERE pull_request_created_day >= $4 AND pull_request_created_day < $5
+    GROUP BY pull_request_repository_name
 ), earlier_shares AS (
     SELECT *, 100.0 * prs / SUM(prs) OVER () AS share FROM earlier
 ), later_shares AS (

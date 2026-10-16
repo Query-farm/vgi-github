@@ -1,0 +1,170 @@
+# Independent organizations, memberships, teams and authored-work graph.
+# HTTP fixture accounts and memberships are deliberately different populations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Distinct target entities and membership pairs retain different grains.
+query II
+SELECT organization_count, organization_member_count FROM engineering.semantic.github(users=>[{'login':'alice'},{'login':'carol'}]);
+----
+2	3
+
+query I
+SELECT organization_count FROM engineering.semantic.github(owner=>'public-user');
+----
+0
+
+query II
+SELECT team_id,user_id FROM engineering.detail.team_memberships(organization=>'example',user=>'alice') ORDER BY team_id;
+----
+501	201
+502	201
+
+query I
+SELECT user_count FROM engineering.semantic.github(organization=>'example',team_slug=>'core');
+----
+2
+
+query I
+SELECT user_count FROM engineering.semantic.github(owner=>'example');
+----
+3
+
+query I
+SELECT team_count FROM engineering.semantic.github(owner=>'example');
+----
+2
+
+query II
+SELECT pull_request_count,submitted_review_count FROM engineering.semantic.github(repository=>'example/alpha',label=>'bug');
+----
+2	3
+
+query II
+SELECT pull_request_count,submitted_review_count FROM engineering.semantic.github(repository=>'example/alpha',label=>'bug',user=>'alice');
+----
+1	2
+
+query I
+SELECT label_count FROM engineering.semantic.github(repository=>'example/alpha',pull_request_number=>1);
+----
+2
+
+query I
+SELECT label_count FROM engineering.semantic.github(repository=>'example/alpha',issue_number=>2);
+----
+1
+
+query I
+SELECT issue_count FROM engineering.semantic.github(repository=>'example/alpha',label=>'bug');
+----
+2
+
+query I
+SELECT issue_comment_count FROM engineering.semantic.github(repository=>'example/alpha',issue_number=>2);
+----
+2
+
+query I
+SELECT discussion_comment_count FROM engineering.semantic.github(repository=>'example/alpha',discussion_number=>1);
+----
+5
+
+query I
+SELECT discussion_comment_count FROM engineering.semantic.github(discussion_comment_id=>'C1');
+----
+3
+
+query I
+SELECT discussion_comment_count FROM engineering.semantic.github(discussion_comment_id=>'C1',user=>'alice');
+----
+1
+
+# Deleted authors remain visible through the optional author relationship.
+query TI
+SELECT user_login,issue_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY user_login ORDER BY user_login NULLS LAST;
+----
+alice	1
+bob	1
+NULL	1
+
+query I
+SELECT issue_count FROM engineering.semantic.github(repository=>'example/alpha',issue_number=>2);
+----
+1
+
+query I
+SELECT discussion_count FROM engineering.semantic.github(repository=>'example/alpha',discussion_number=>1);
+----
+1
+
+statement error
+SELECT issue_count FROM engineering.semantic.github(repository=>'example/alpha',issue_number=>999);
+----
+404
+
+# Parameter validation precedes API calls, including during preparation.
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT issue_count FROM engineering.semantic.github(label=>'bug');
+----
+repository
+
+statement error
+SELECT repository_count FROM engineering.semantic.github(team_slug=>'core');
+----
+organization
+
+statement error
+SELECT discussion_comment_count FROM engineering.semantic.github(discussion_number=>1);
+----
+repository
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

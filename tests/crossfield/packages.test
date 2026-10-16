@@ -1,0 +1,211 @@
+# Package identities and independent inventory/version populations across account access modes.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Two package pages and two version pages: parent summaries must not fan out.
+query IIIIII
+SELECT package_count,public_package_count,private_package_count,reported_package_version_count,package_version_count,deleted_package_version_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'container');
+----
+2	1	1	3	3	0
+
+query IIIIII
+SELECT package_count,public_package_count,private_package_count,reported_package_version_count,package_version_count,deleted_package_version_count FROM engineering.semantic.github(user=>'package-fixture-user',package_type=>'container');
+----
+1	1	0	1	1	0
+
+# Authenticated private metadata has a nullable response owner; /user still establishes identity.
+query IIIIII
+SELECT package_count,public_package_count,private_package_count,reported_package_version_count,package_version_count,deleted_package_version_count FROM engineering.semantic.github(authenticated_user=>true,package_type=>'container');
+----
+2	1	1	1	1	0
+
+query TITII
+SELECT package_owner_kind,package_owner_id,package_access_mode,package_id,reported_owner_id FROM engineering.detail.packages(authenticated_user=>true,package_type=>'container') ORDER BY package_id;
+----
+User	903	authenticated	31	NULL
+User	903	authenticated	32	903
+
+# Names repeat between accounts, while qualified package identity stays distinct.
+query TIITI
+SELECT package_owner_kind,package_owner_id,package_id,package_name,reported_version_count FROM engineering.detail.packages(organization=>'package-fixture-org',package_type=>'container',package_name=>'shared');
+----
+Organization	901	11	shared	2
+
+query TIITI
+SELECT package_owner_kind,package_owner_id,package_id,package_name,reported_version_count FROM engineering.detail.packages(user=>'package-fixture-user',package_type=>'container',package_name=>'shared');
+----
+User	902	21	shared	1
+
+query III
+SELECT package_count,reported_package_version_count,package_version_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'container',package_name=>'shared');
+----
+1	2	2
+
+query III
+SELECT package_owner_id,package_id,package_version_id FROM engineering.detail.package_versions(organization=>'package-fixture-org',package_type=>'container') ORDER BY package_id,package_version_id;
+----
+901	11	111
+901	11	112
+901	12	121
+
+query III
+SELECT package_owner_id,package_id,package_version_id FROM engineering.detail.package_versions(organization=>'package-fixture-org',package_type=>'container',package_name=>'shared',package_version_id=>111);
+----
+901	11	111
+
+query III
+SELECT package_owner_id,package_id,package_version_id FROM engineering.detail.package_versions(user=>'package-fixture-user',package_type=>'container',package_name=>'shared',package_version_id=>211);
+----
+902	21	211
+
+query III
+SELECT package_owner_id,package_id,package_version_id FROM engineering.detail.package_versions(authenticated_user=>true,package_type=>'container',package_name=>'shared',package_version_id=>311);
+----
+903	31	311
+
+# Deleted version listings are explicit populations, independently of the current parent counter.
+query II
+SELECT package_version_count,deleted_package_version_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'container',package_version_state=>'deleted');
+----
+1	1
+
+query II
+SELECT package_version_count,deleted_package_version_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'container',package_name=>'shared',package_version_state=>'deleted');
+----
+1	1
+
+query II
+SELECT package_version_count,deleted_package_version_count FROM engineering.semantic.github(authenticated_user=>true,package_type=>'container',package_version_state=>'deleted');
+----
+1	1
+
+query II
+SELECT package_version_count,deleted_package_version_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'container',package_name=>'shared',package_version_id=>113);
+----
+1	1
+
+# Empty packages remain package rows and contribute zero versions.
+query III
+SELECT package_count,reported_package_version_count,package_version_count FROM engineering.semantic.github(authenticated_user=>true,package_type=>'container',package_name=>'unlinked');
+----
+1	0	0
+
+query II
+SELECT package_count,package_version_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'npm');
+----
+0	0
+
+# Conflict collections are a separate Docker migration population for each owner scope.
+query II
+SELECT package_count,public_package_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_population=>'docker_migration_conflicts');
+----
+1	1
+
+query II
+SELECT package_count,public_package_count FROM engineering.semantic.github(user=>'package-fixture-user',package_population=>'docker_migration_conflicts');
+----
+1	1
+
+query II
+SELECT package_count,private_package_count FROM engineering.semantic.github(authenticated_user=>true,package_population=>'docker_migration_conflicts');
+----
+1	1
+
+query TI
+SELECT packages_package_created_day,package_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'container') GROUP BY packages_package_created_day;
+----
+2026-08-01	2
+
+query TI
+SELECT package_versions_package_version_created_day,package_version_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'container') GROUP BY package_versions_package_version_created_day;
+----
+2026-08-02	3
+
+# Known repository names come from the package; unlinked packages retain NULL.
+query TI
+SELECT repository_name,package_count FROM engineering.semantic.github(authenticated_user=>true,package_type=>'container') GROUP BY repository_name ORDER BY repository_name NULLS LAST;
+----
+package-fixture-org/source	1
+NULL	1
+
+# Versions inherit their package's known repository without dropping an unlinked package.
+query TII
+SELECT repository_name,package_count,package_version_count FROM engineering.semantic.github(authenticated_user=>true,package_type=>'container') GROUP BY repository_name ORDER BY repository_name NULLS LAST;
+----
+package-fixture-org/source	1	1
+NULL	1	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+# Package repository metadata does not establish the independently scoped owner's attributes.
+statement error
+SELECT repository_owner_type,package_count FROM engineering.semantic.github(authenticated_user=>true,package_type=>'container') GROUP BY repository_owner_type;
+----
+CROSSFIELD_INCOMPATIBLE_GRAIN
+
+statement error
+SELECT package_count FROM engineering.semantic.github(authenticated_user=>false,package_type=>'container');
+----
+authenticated_user
+
+statement error
+SELECT package_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'unknown');
+----
+package_type
+
+statement error
+SELECT package_version_count FROM engineering.semantic.github(user=>'package-fixture-user',package_type=>'container',package_version_state=>'deleted');
+----
+Specify exactly one of organization, authenticated_user
+
+statement error
+SELECT package_version_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_type=>'container',package_name=>'shared',package_version_id=>111,package_version_state=>'active');
+----
+arguments do not apply
+
+statement error
+SELECT package_count FROM engineering.semantic.github(organization=>'package-fixture-org',package_population=>'docker_migration_conflicts',package_name=>'shared');
+----
+Parameter 'package_name' requires non-NULL package_type
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

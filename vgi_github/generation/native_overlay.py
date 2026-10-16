@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from copy import deepcopy
 
-NATIVE_SECTIONS = {"invocations", "metrics", "policy", "semantic_query", "relationships"}
+NATIVE_SECTIONS = {"invocations", "metrics", "policy", "semantic_query", "relationships", "conformances"}
 
 
 def _record_origins(value, path, source, origins):
@@ -40,7 +40,10 @@ def _definition(path):
     )
 
 
-def _named(item):
+def _named(item, path=()):
+    if path == ("conformances",):
+        identity = item.get("id") if isinstance(item, dict) else None
+        return identity if isinstance(identity, str) else None
     name = item.get("name") if isinstance(item, dict) else None
     return name.casefold() if isinstance(name, str) else None
 
@@ -76,13 +79,15 @@ def merge_native(target, additions, *, source, origins=None, path=(), generated=
             merge_native(old, value, source=source, origins=origins, path=location, generated=generated)
         elif isinstance(old, list) and isinstance(value, list):
             signatures = {json.dumps(item, sort_keys=True, ensure_ascii=False) for item in old}
-            names = {_named(item) for item in old} - {None}
+            names = {_named(item, location) for item in old} - {None}
             for item in value:
                 signature = json.dumps(item, sort_keys=True, ensure_ascii=False)
                 duplicate = signature in signatures
-                name = _named(item)
+                name = _named(item, location)
                 if name in names and not (generated and duplicate):
-                    raise ValueError(f"{source}: duplicate named declaration in {label}")
+                    raise ValueError(
+                        f"{source}: duplicate named declaration in {label}; first declared in {first}"
+                    )
                 if duplicate:
                     if generated:
                         continue
@@ -99,12 +104,16 @@ def apply_native_overlay(model, fragment):
     """Preserve emitted provider wire contracts while adding native definitions."""
     if not isinstance(fragment, dict):
         raise ValueError("crossfield must be a native manifest fragment")
-    for section in NATIVE_SECTIONS - {"relationships"}:
+    for section in NATIVE_SECTIONS - {"relationships", "conformances"}:
         if section in fragment and not isinstance(fragment[section], dict):
             raise ValueError(f"crossfield.{section} must be an object")
+    if "conformances" in fragment and not isinstance(fragment["conformances"], list):
+        raise ValueError("crossfield.conformances must be an array")
     invocations = fragment.get("invocations", {})
     if set(invocations) - {"derived_datasets", "input_contracts", "sources"}:
-        raise ValueError("Native invocations may add derived datasets, input contracts and modeled source fields")
+        raise ValueError(
+            "Native invocations may add derived datasets, input contracts and modeled source fields"
+        )
     sources = invocations.get("sources", {})
     if not isinstance(sources, dict):
         raise ValueError("crossfield.invocations.sources must be an object")

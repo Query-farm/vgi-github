@@ -1,0 +1,3548 @@
+{
+  "components": {
+    "examples": {
+      "code-scanning-alert-dismissal-request-item": {
+        "value": {
+          "created_at": "2024-07-01T08:43:03Z",
+          "data": [
+            {
+              "alert_number": 2,
+              "reason": "won't fix"
+            }
+          ],
+          "expires_at": "2024-07-08T08:43:03Z",
+          "html_url": "https://github.com/octo-org/smile/code-scanning/alerts/1",
+          "id": 21,
+          "number": 42,
+          "organization": {
+            "id": 1,
+            "name": "octo-org"
+          },
+          "repository": {
+            "full_name": "octo-org/smile",
+            "id": 1,
+            "name": "smile"
+          },
+          "request_type": "code_scanning_alert_dismissal",
+          "requester": {
+            "actor_id": 12,
+            "actor_name": "monalisa"
+          },
+          "requester_comment": "Won't fix",
+          "resource_identifier": "1/1",
+          "responses": [
+            {
+              "created_at": "2024-07-02T08:43:04Z",
+              "id": 42,
+              "reviewer": {
+                "actor_id": 4,
+                "actor_name": "octocat"
+              },
+              "status": "denied"
+            }
+          ],
+          "status": "denied",
+          "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/code-scanning/1"
+        }
+      },
+      "code-scanning-alert-dismissal-request-items": {
+        "value": [
+          {
+            "created_at": "2024-07-01T08:43:03Z",
+            "data": [
+              {
+                "alert_number": 1,
+                "reason": "won't fix"
+              }
+            ],
+            "expires_at": "2024-07-08T08:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/code-scanning/alerts/1",
+            "id": 21,
+            "number": 42,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "code_scanning_alert_dismissal",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Won't fix",
+            "resource_identifier": "123/10",
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 42,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "denied"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/code-scanning/1"
+          },
+          {
+            "created_at": "2024-07-01T07:43:03Z",
+            "data": [
+              {
+                "alert_number": 2,
+                "reason": "won't fix"
+              }
+            ],
+            "expires_at": "2024-07-08T07:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/code-scanning/alerts/2",
+            "id": 12,
+            "number": 24,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "code_scanning_alert_dismissal",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Token is already revoked, I'll remove it later",
+            "resource_identifier": "123/12",
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 42,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "denied"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/code-scanning/2"
+          }
+        ]
+      },
+      "dependabot-alert-dismissal-request-item": {
+        "value": {
+          "created_at": "2024-07-01T08:43:03Z",
+          "data": [
+            {
+              "alert_number": "1",
+              "alert_title": "lodash - GHSA-1234-abcd-5678",
+              "reason": "no_bandwidth"
+            }
+          ],
+          "expires_at": "2024-07-08T08:43:03Z",
+          "html_url": "https://github.com/octo-org/smile/security/dependabot/1",
+          "id": 21,
+          "number": 42,
+          "organization": {
+            "id": 1,
+            "name": "octo-org"
+          },
+          "repository": {
+            "full_name": "octo-org/smile",
+            "id": 1,
+            "name": "smile"
+          },
+          "request_type": "dependabot_alert_dismissal",
+          "requester": {
+            "actor_id": 12,
+            "actor_name": "monalisa"
+          },
+          "requester_comment": "No bandwidth to fix this right now",
+          "resource_identifier": "1",
+          "responses": [],
+          "status": "pending",
+          "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/dependabot/1"
+        }
+      },
+      "dependabot-alert-dismissal-request-items": {
+        "value": [
+          {
+            "created_at": "2024-07-01T08:43:03Z",
+            "data": [
+              {
+                "alert_number": "1",
+                "alert_title": "lodash - GHSA-1234-abcd-5678",
+                "reason": "no_bandwidth"
+              }
+            ],
+            "expires_at": "2024-07-08T08:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/security/dependabot/1",
+            "id": 21,
+            "number": 42,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "dependabot_alert_dismissal",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "No bandwidth to fix this right now",
+            "resource_identifier": "1",
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 42,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "denied"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/dependabot/1"
+          },
+          {
+            "created_at": "2024-07-01T07:43:03Z",
+            "data": [
+              {
+                "alert_number": "2",
+                "alert_title": "axios - GHSA-5678-efgh-9012",
+                "reason": "tolerable_risk"
+              }
+            ],
+            "expires_at": "2024-07-08T07:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/security/dependabot/2",
+            "id": 12,
+            "number": 24,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "dependabot_alert_dismissal",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Risk is acceptable for this internal tool",
+            "resource_identifier": "2",
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 43,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "approved"
+              }
+            ],
+            "status": "approved",
+            "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/dependabot/2"
+          }
+        ]
+      },
+      "push-rule-bypass-request-item": {
+        "value": {
+          "created_at": "2024-07-01T07:43:03Z",
+          "data": [
+            {
+              "rule_type": "file_extension_restriction",
+              "ruleset_id": 410,
+              "ruleset_name": "Exclude image files",
+              "total_violations": 1
+            }
+          ],
+          "expires_at": "2024-07-08T07:43:03Z",
+          "html_url": "https://github.com/octo-org/smile/exemptions/2",
+          "id": 12,
+          "number": 24,
+          "organization": {
+            "id": 1,
+            "name": "octo-org"
+          },
+          "repository": {
+            "full_name": "octo-org/smile",
+            "id": 1,
+            "name": "smile"
+          },
+          "request_type": "push_ruleset_bypass",
+          "requester": {
+            "actor_id": 12,
+            "actor_name": "monalisa"
+          },
+          "requester_comment": "Updating site images to follow changes in marketing. Part 2",
+          "resource_identifier": "827efc6d56897b048c772eb4087f854f46255555",
+          "responses": [
+            {
+              "created_at": "2024-07-02T08:43:04Z",
+              "id": 42,
+              "reviewer": {
+                "actor_id": 4,
+                "actor_name": "octocat"
+              },
+              "status": "denied"
+            }
+          ],
+          "status": "denied",
+          "url": "https://api.github.com/repos/octo-org/smile/bypass-requests/push-rules/2"
+        }
+      },
+      "push-rule-bypass-request-items": {
+        "value": [
+          {
+            "created_at": "2024-07-01T08:43:03Z",
+            "data": [
+              {
+                "rule_type": "file_extension_restriction",
+                "ruleset_id": 410,
+                "ruleset_name": "Exclude image files",
+                "total_violations": 1
+              }
+            ],
+            "expires_at": "2024-07-08T08:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/exemptions/1",
+            "id": 21,
+            "number": 42,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "push_ruleset_bypass",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Updating site images to follow changes in marketing. Part 1",
+            "resource_identifier": "827efc6d56897b048c772eb4087f854f46256132",
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 42,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "denied"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/bypass-requests/push-rules/1"
+          },
+          {
+            "created_at": "2024-07-01T07:43:03Z",
+            "data": [
+              {
+                "rule_type": "file_extension_restriction",
+                "ruleset_id": 410,
+                "ruleset_name": "Exclude image files",
+                "total_violations": 1
+              }
+            ],
+            "expires_at": "2024-07-08T07:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/exemptions/2",
+            "id": 12,
+            "number": 24,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "push_ruleset_bypass",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Updating site images to follow changes in marketing. Part 2",
+            "resource_identifier": "827efc6d56897b048c772eb4087f854f46255555",
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 42,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "denied"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/bypass-requests/push-rules/2"
+          }
+        ]
+      },
+      "secret-scanning-bypass-request-item": {
+        "value": {
+          "created_at": "2024-07-01T08:43:03Z",
+          "data": [
+            {
+              "branch": "refs/heads/main",
+              "bypass_reason": "used_in_tests",
+              "path": "/tests/README.md:16:0",
+              "secret_type": "adafruit_io_key"
+            }
+          ],
+          "expires_at": "2024-07-08T08:43:03Z",
+          "html_url": "https://github.com/octo-org/smile/exemptions/1",
+          "id": 21,
+          "number": 42,
+          "organization": {
+            "id": 1,
+            "name": "octo-org"
+          },
+          "repository": {
+            "full_name": "octo-org/smile",
+            "id": 1,
+            "name": "smile"
+          },
+          "request_type": "secret_scanning",
+          "requester": {
+            "actor_id": 12,
+            "actor_name": "monalisa"
+          },
+          "requester_comment": "Test token used in the readme as an example",
+          "resource_identifier": "827efc6d56897b048c772eb4087f854f46256132",
+          "responses": [
+            {
+              "created_at": "2024-07-02T08:43:04Z",
+              "id": 42,
+              "reviewer": {
+                "actor_id": 4,
+                "actor_name": "octocat"
+              },
+              "status": "denied"
+            }
+          ],
+          "status": "denied",
+          "url": "https://api.github.com/repos/octo-org/smile/bypass-requests/secret-scanning/1"
+        }
+      },
+      "secret-scanning-bypass-request-items": {
+        "value": [
+          {
+            "created_at": "2024-07-01T08:43:03Z",
+            "data": [
+              {
+                "branch": "refs/heads/main",
+                "bypass_reason": "used_in_tests",
+                "path": "/tests/README.md:16:0",
+                "secret_type": "adafruit_io_key"
+              }
+            ],
+            "expires_at": "2024-07-08T08:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/exemptions/1",
+            "id": 21,
+            "number": 42,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "secret_scanning",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Test token used in the readme as an example",
+            "resource_identifier": "827efc6d56897b048c772eb4087f854f46256132",
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 42,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "denied"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/bypass-requests/secret-scanning/1"
+          },
+          {
+            "created_at": "2024-07-01T07:43:03Z",
+            "data": [
+              {
+                "branch": "refs/heads/my-branch",
+                "bypass_reason": "fix_later",
+                "path": "README.md:17:0",
+                "secret_type": "adafruit_io_key"
+              }
+            ],
+            "expires_at": "2024-07-08T07:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/exemptions/2",
+            "id": 12,
+            "number": 24,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "secret_scanning",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Token is already revoked, I'll remove it later",
+            "resource_identifier": "827efc6d56897b048c772eb4087f854f46255555",
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 42,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "denied"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/bypass-requests/secret-scanning/2"
+          }
+        ]
+      },
+      "secret-scanning-dismissal-request-item": {
+        "value": {
+          "created_at": "2024-07-01T08:43:03Z",
+          "data": [
+            {
+              "alert_number": 17,
+              "reason": "false_positive",
+              "secret_type": "adafruit_io_key"
+            }
+          ],
+          "expires_at": "2024-07-08T08:43:03Z",
+          "html_url": "https://github.com/octo-org/smile/security/secret-scanning/17",
+          "id": 21,
+          "number": 42,
+          "organization": {
+            "id": 1,
+            "name": "octo-org"
+          },
+          "repository": {
+            "full_name": "octo-org/smile",
+            "id": 1,
+            "name": "smile"
+          },
+          "request_type": "secret_scanning_closure",
+          "requester": {
+            "actor_id": 12,
+            "actor_name": "monalisa"
+          },
+          "requester_comment": "Test token used in the readme as an example",
+          "resource_identifier": 17,
+          "responses": [
+            {
+              "created_at": "2024-07-02T08:43:04Z",
+              "id": 42,
+              "reviewer": {
+                "actor_id": 4,
+                "actor_name": "octocat"
+              },
+              "status": "denied"
+            }
+          ],
+          "status": "denied",
+          "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/secret-scanning/21"
+        }
+      },
+      "secret-scanning-dismissal-request-items": {
+        "value": [
+          {
+            "created_at": "2024-07-01T08:43:03Z",
+            "data": [
+              {
+                "alert_number": 17,
+                "reason": "false_positive",
+                "secret_type": "adafruit_io_key"
+              }
+            ],
+            "expires_at": "2024-07-08T08:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/security/secret-scanning/17",
+            "id": 21,
+            "number": 42,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "secret_scanning_closure",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Test token used in the readme as an example",
+            "resource_identifier": 17,
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 42,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "denied"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/secret-scanning/21"
+          },
+          {
+            "created_at": "2024-07-01T08:43:03Z",
+            "data": [
+              {
+                "alert_number": 19,
+                "secret_type": "adafruit_io_key"
+              }
+            ],
+            "expires_at": "2024-07-08T08:43:03Z",
+            "html_url": "https://github.com/octo-org/smile/security/secret-scanning/19",
+            "id": 22,
+            "number": 43,
+            "organization": {
+              "id": 1,
+              "name": "octo-org"
+            },
+            "repository": {
+              "full_name": "octo-org/smile",
+              "id": 1,
+              "name": "smile"
+            },
+            "request_type": "secret_scanning_closure",
+            "requester": {
+              "actor_id": 12,
+              "actor_name": "monalisa"
+            },
+            "requester_comment": "Test token used in the readme as an example",
+            "resource_identifier": 19,
+            "responses": [
+              {
+                "created_at": "2024-07-02T08:43:04Z",
+                "id": 46,
+                "reviewer": {
+                  "actor_id": 4,
+                  "actor_name": "octocat"
+                },
+                "status": "approved"
+              }
+            ],
+            "status": "denied",
+            "url": "https://api.github.com/repos/octo-org/smile/dismissal-requests/secret-scanning/22"
+          }
+        ]
+      }
+    },
+    "parameters": {
+      "alert-dismissal-request-status": {
+        "description": "Filter alert dismissal requests by status. When specified, only requests with this status will be returned.",
+        "in": "query",
+        "name": "request_status",
+        "required": false,
+        "schema": {
+          "default": "all",
+          "enum": [
+            "open",
+            "approved",
+            "expired",
+            "denied",
+            "all"
+          ],
+          "type": "string"
+        }
+      },
+      "alert-dismissal-requester-name": {
+        "description": "Filter alert dismissal requests by the handle of the GitHub user who requested the dismissal.",
+        "in": "query",
+        "name": "requester",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alert-dismissal-reviewer-name": {
+        "description": "Filter alert dismissal requests by the handle of the GitHub user who reviewed the dismissal request.",
+        "in": "query",
+        "name": "reviewer",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "alert-dismissal-time-period": {
+        "description": "The time period to filter by.\n\nFor example, `day` will filter for rule suites that occurred in the past 24 hours, and `week` will filter for insights that occurred in the past 7 days (168 hours).",
+        "in": "query",
+        "name": "time_period",
+        "required": false,
+        "schema": {
+          "default": "month",
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "month"
+          ],
+          "type": "string"
+        }
+      },
+      "bypass-request-status": {
+        "description": "The status of the bypass request to filter on. When specified, only requests with this status will be returned.",
+        "in": "query",
+        "name": "request_status",
+        "required": false,
+        "schema": {
+          "default": "all",
+          "enum": [
+            "completed",
+            "cancelled",
+            "approved",
+            "expired",
+            "deleted",
+            "denied",
+            "open",
+            "all"
+          ],
+          "type": "string"
+        }
+      },
+      "bypass-requester-name": {
+        "description": "Filter bypass requests by the handle of the GitHub user who requested the bypass.",
+        "in": "query",
+        "name": "requester",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "bypass-reviewer-name": {
+        "description": "Filter bypass requests by the handle of the GitHub user who reviewed the bypass request.",
+        "in": "query",
+        "name": "reviewer",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "dismissal-request-status": {
+        "description": "The status of the dismissal request to filter on. When specified, only requests with this status will be returned.",
+        "in": "query",
+        "name": "request_status",
+        "required": false,
+        "schema": {
+          "default": "all",
+          "enum": [
+            "completed",
+            "cancelled",
+            "approved",
+            "expired",
+            "denied",
+            "open",
+            "all"
+          ],
+          "type": "string"
+        }
+      },
+      "org": {
+        "description": "The organization name. The name is not case sensitive.",
+        "in": "path",
+        "name": "org",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "owner": {
+        "description": "The account owner of the repository. The name is not case sensitive.",
+        "in": "path",
+        "name": "owner",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "page": {
+        "description": "The page number of the results to fetch. For more information, see \"[Using pagination in the REST API](https://docs.github.com/enterprise-cloud@latest/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+        "in": "query",
+        "name": "page",
+        "schema": {
+          "default": 1,
+          "type": "integer"
+        }
+      },
+      "per-page": {
+        "description": "The number of results per page (max 100). For more information, see \"[Using pagination in the REST API](https://docs.github.com/enterprise-cloud@latest/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+        "in": "query",
+        "name": "per_page",
+        "schema": {
+          "default": 30,
+          "type": "integer"
+        }
+      },
+      "repo": {
+        "description": "The name of the repository without the `.git` extension. The name is not case sensitive.",
+        "in": "path",
+        "name": "repo",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "repository-name-in-query": {
+        "description": "The name of the repository to filter on.",
+        "in": "query",
+        "name": "repository_name",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "time-period": {
+        "description": "The time period to filter by.\n\nFor example, `day` will filter for rule suites that occurred in the past 24 hours, and `week` will filter for rule suites that occurred in the past 7 days (168 hours).",
+        "in": "query",
+        "name": "time_period",
+        "required": false,
+        "schema": {
+          "default": "day",
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "month"
+          ],
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "forbidden": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          }
+        },
+        "description": "Forbidden"
+      },
+      "internal_error": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          }
+        },
+        "description": "Internal Error"
+      },
+      "not_found": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          }
+        },
+        "description": "Resource not found"
+      },
+      "validation_failed": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/validation-error"
+            }
+          }
+        },
+        "description": "Validation failed, or the endpoint has been spammed."
+      }
+    },
+    "schemas": {
+      "basic-error": {
+        "description": "Basic Error",
+        "properties": {
+          "documentation_url": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "title": "Basic Error",
+        "type": "object"
+      },
+      "bypass-response": {
+        "description": "A response made by a delegated bypasser to a bypass request.",
+        "properties": {
+          "created_at": {
+            "description": "The date and time the response to the bypass request was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The ID of the response to the bypass request.",
+            "type": "integer"
+          },
+          "reviewer": {
+            "description": "The user who reviewed the bypass request.",
+            "properties": {
+              "actor_id": {
+                "description": "The ID of the GitHub user who reviewed the bypass request.",
+                "type": "integer"
+              },
+              "actor_name": {
+                "description": "The name of the GitHub user who reviewed the bypass request.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "description": "The response status to the bypass request until dismissed.",
+            "enum": [
+              "approved",
+              "denied",
+              "dismissed"
+            ],
+            "type": "string"
+          }
+        },
+        "title": "Bypass response",
+        "type": "object"
+      },
+      "code-scanning-alert-dismissal-request": {
+        "description": "Alert dismisal request made by a user asking to dismiss a code scanning alert.",
+        "properties": {
+          "created_at": {
+            "description": "The date and time the dismissal request was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "data": {
+            "description": "Data describing the dismissal request metadata.",
+            "items": {
+              "properties": {
+                "alert_number": {
+                  "description": "alert number.",
+                  "type": "string"
+                },
+                "pr_review_thread_id": {
+                  "description": "The ID of the pull request review thread.",
+                  "type": "string"
+                },
+                "reason": {
+                  "description": "The reason for the dismissal request.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expires_at": {
+            "description": "The date and time the dismissal request will expire.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "html_url": {
+            "description": "The URL to view the dismissal request in a browser.",
+            "example": "https://github.com/octo-org/smile/code-scanning/alerts/1",
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier of the dismissal request.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "number": {
+            "description": "The number uniquely identifying the dismissal request within its repository.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "organization": {
+            "description": "The organization associated with the repository the dismissal request is for.",
+            "properties": {
+              "id": {
+                "description": "The ID of the organization.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the organization.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "repository": {
+            "description": "The repository the dismissal request is for.",
+            "properties": {
+              "full_name": {
+                "description": "The full name of the repository the dismissal request is for.",
+                "type": "string"
+              },
+              "id": {
+                "description": "The ID of the repository the dismissal request is for.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the repository the dismissal request is for.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "request_type": {
+            "description": "The type of request.",
+            "type": "string"
+          },
+          "requester": {
+            "description": "The user who requested the dismissal request.",
+            "properties": {
+              "actor_id": {
+                "description": "The ID of the GitHub user who requested the dismissal request.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "actor_name": {
+                "description": "The name of the GitHub user who requested the dismissal request.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "requester_comment": {
+            "description": "The comment the requester provided when creating the dismissal request.",
+            "nullable": true,
+            "type": "string"
+          },
+          "resource_identifier": {
+            "description": "The unique identifier for the request type of the dismissal request.",
+            "example": "827efc6d56897b048c772eb4087f854f46256132",
+            "type": "string"
+          },
+          "responses": {
+            "description": "The responses to the dismissal request.",
+            "items": {
+              "$ref": "#/components/schemas/dismissal-request-response"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "status": {
+            "description": "The status of the dismissal request.",
+            "enum": [
+              "pending",
+              "denied",
+              "approved",
+              "expired"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "example": "https://api.github.com/repos/octo-org/smile/dismissal-requests/code-scanning/1",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "title": "Code scanning alert dismissal request",
+        "type": "object"
+      },
+      "dependabot-alert-dismissal-request": {
+        "description": "Alert dismissal request made by a user asking to dismiss a Dependabot alert.",
+        "properties": {
+          "created_at": {
+            "description": "The date and time the dismissal request was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "data": {
+            "description": "Data describing the dismissal request metadata.",
+            "items": {
+              "properties": {
+                "alert_number": {
+                  "description": "The alert number.",
+                  "type": "string"
+                },
+                "alert_title": {
+                  "description": "The title of the alert.",
+                  "type": "string"
+                },
+                "reason": {
+                  "description": "The reason for the dismissal request.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expires_at": {
+            "description": "The date and time the dismissal request will expire.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "html_url": {
+            "description": "The URL to view the dismissal request in a browser.",
+            "example": "https://github.com/octo-org/smile/security/dependabot/1",
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier of the dismissal request.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "number": {
+            "description": "The number uniquely identifying the dismissal request within its repository.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "organization": {
+            "description": "The organization associated with the repository the dismissal request is for.",
+            "properties": {
+              "id": {
+                "description": "The ID of the organization.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the organization.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "repository": {
+            "description": "The repository the dismissal request is for.",
+            "properties": {
+              "full_name": {
+                "description": "The full name of the repository the dismissal request is for.",
+                "type": "string"
+              },
+              "id": {
+                "description": "The ID of the repository the dismissal request is for.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the repository the dismissal request is for.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "request_type": {
+            "description": "The type of request.",
+            "type": "string"
+          },
+          "requester": {
+            "description": "The user who requested the dismissal request.",
+            "properties": {
+              "actor_id": {
+                "description": "The ID of the GitHub user who requested the dismissal request.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "actor_name": {
+                "description": "The name of the GitHub user who requested the dismissal request.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "requester_comment": {
+            "description": "The comment the requester provided when creating the dismissal request.",
+            "nullable": true,
+            "type": "string"
+          },
+          "resource_identifier": {
+            "description": "The unique identifier for the request type of the dismissal request.",
+            "example": "123",
+            "type": "string"
+          },
+          "responses": {
+            "description": "The responses to the dismissal request.",
+            "items": {
+              "$ref": "#/components/schemas/dismissal-request-response"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "status": {
+            "description": "The status of the dismissal request.",
+            "enum": [
+              "pending",
+              "denied",
+              "approved",
+              "expired"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "example": "https://api.github.com/repos/octo-org/smile/dismissal-requests/dependabot/1",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "title": "Dependabot alert dismissal request",
+        "type": "object"
+      },
+      "dismissal-request-response": {
+        "description": "A response made by a requester to dismiss the request.",
+        "properties": {
+          "created_at": {
+            "description": "The date and time the response to the dismissal request was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "The ID of the response to the dismissal request.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "description": "The response comment of the reviewer.",
+            "nullable": true,
+            "type": "string"
+          },
+          "reviewer": {
+            "description": "The user who reviewed the dismissal request.",
+            "properties": {
+              "actor_id": {
+                "description": "The ID of the GitHub user who reviewed the dismissal request.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "actor_name": {
+                "description": "The name of the GitHub user who reviewed the dismissal request.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "description": "The response status to the dismissal request until dismissed.",
+            "enum": [
+              "approved",
+              "denied",
+              "dismissed"
+            ],
+            "type": "string"
+          }
+        },
+        "title": "Dismissal request response",
+        "type": "object"
+      },
+      "nullable-simple-user": {
+        "description": "A GitHub user.",
+        "nullable": true,
+        "properties": {
+          "avatar_url": {
+            "example": "https://github.com/images/error/octocat_happy.gif",
+            "format": "uri",
+            "type": "string"
+          },
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "events_url": {
+            "example": "https://api.github.com/users/octocat/events{/privacy}",
+            "type": "string"
+          },
+          "followers_url": {
+            "example": "https://api.github.com/users/octocat/followers",
+            "format": "uri",
+            "type": "string"
+          },
+          "following_url": {
+            "example": "https://api.github.com/users/octocat/following{/other_user}",
+            "type": "string"
+          },
+          "gists_url": {
+            "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+            "type": "string"
+          },
+          "gravatar_id": {
+            "example": "41d064eb2195891e12d0413f63227ea7",
+            "nullable": true,
+            "type": "string"
+          },
+          "html_url": {
+            "example": "https://github.com/octocat",
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "example": 1,
+            "format": "int64",
+            "type": "integer"
+          },
+          "login": {
+            "example": "octocat",
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "node_id": {
+            "example": "MDQ6VXNlcjE=",
+            "type": "string"
+          },
+          "organizations_url": {
+            "example": "https://api.github.com/users/octocat/orgs",
+            "format": "uri",
+            "type": "string"
+          },
+          "received_events_url": {
+            "example": "https://api.github.com/users/octocat/received_events",
+            "format": "uri",
+            "type": "string"
+          },
+          "repos_url": {
+            "example": "https://api.github.com/users/octocat/repos",
+            "format": "uri",
+            "type": "string"
+          },
+          "site_admin": {
+            "type": "boolean"
+          },
+          "starred_at": {
+            "example": "\"2020-07-09T00:17:55Z\"",
+            "type": "string"
+          },
+          "starred_url": {
+            "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+            "type": "string"
+          },
+          "subscriptions_url": {
+            "example": "https://api.github.com/users/octocat/subscriptions",
+            "format": "uri",
+            "type": "string"
+          },
+          "type": {
+            "example": "User",
+            "type": "string"
+          },
+          "url": {
+            "example": "https://api.github.com/users/octocat",
+            "format": "uri",
+            "type": "string"
+          },
+          "user_view_type": {
+            "example": "public",
+            "type": "string"
+          }
+        },
+        "required": [
+          "avatar_url",
+          "events_url",
+          "followers_url",
+          "following_url",
+          "gists_url",
+          "gravatar_id",
+          "html_url",
+          "id",
+          "node_id",
+          "login",
+          "organizations_url",
+          "received_events_url",
+          "repos_url",
+          "site_admin",
+          "starred_url",
+          "subscriptions_url",
+          "type",
+          "url"
+        ],
+        "title": "Simple User",
+        "type": "object"
+      },
+      "pull-request-minimal": {
+        "properties": {
+          "base": {
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "repo": {
+                "properties": {
+                  "id": {
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "url",
+                  "name"
+                ],
+                "type": "object"
+              },
+              "sha": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref",
+              "sha",
+              "repo"
+            ],
+            "type": "object"
+          },
+          "head": {
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "repo": {
+                "properties": {
+                  "id": {
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "url",
+                  "name"
+                ],
+                "type": "object"
+              },
+              "sha": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref",
+              "sha",
+              "repo"
+            ],
+            "type": "object"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "url",
+          "head",
+          "base"
+        ],
+        "title": "Pull Request Minimal",
+        "type": "object"
+      },
+      "pull-request-stack-minimal": {
+        "properties": {
+          "base": {
+            "properties": {
+              "ref": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref"
+            ],
+            "type": "object"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "open": {
+            "description": "Whether the stack has any open pull request. False when all pull requests are merged or closed.",
+            "type": "boolean"
+          },
+          "pull_requests": {
+            "items": {
+              "properties": {
+                "draft": {
+                  "type": "boolean"
+                },
+                "head": {
+                  "properties": {
+                    "ref": {
+                      "type": "string"
+                    },
+                    "sha": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ref",
+                    "sha"
+                  ],
+                  "type": "object"
+                },
+                "merged_at": {
+                  "format": "date-time",
+                  "nullable": true,
+                  "type": "string"
+                },
+                "number": {
+                  "type": "integer"
+                },
+                "state": {
+                  "enum": [
+                    "open",
+                    "closed"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "number",
+                "state",
+                "draft",
+                "merged_at",
+                "head"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "node_id",
+          "url",
+          "base",
+          "open",
+          "created_at",
+          "pull_requests"
+        ],
+        "title": "Pull Request Stack Minimal",
+        "type": "object"
+      },
+      "pull-request-stack-pull-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/pull-request-minimal"
+          },
+          {
+            "properties": {
+              "draft": {
+                "type": "boolean"
+              },
+              "html_url": {
+                "format": "uri",
+                "type": "string"
+              },
+              "merged_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "node_id": {
+                "type": "string"
+              },
+              "state": {
+                "enum": [
+                  "open",
+                  "closed"
+                ],
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/nullable-simple-user"
+              }
+            },
+            "required": [
+              "node_id",
+              "title",
+              "state",
+              "merged_at",
+              "draft",
+              "html_url",
+              "user"
+            ],
+            "type": "object"
+          }
+        ],
+        "title": "Pull Request Stack Pull Request",
+        "type": "object"
+      },
+      "push-rule-bypass-request": {
+        "description": "A bypass request made by a user asking to be exempted from a push rule in this repository.",
+        "properties": {
+          "created_at": {
+            "description": "The date and time the bypass request was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "data": {
+            "description": "Data describing the push rules that are being requested to be bypassed.",
+            "items": {
+              "properties": {
+                "rule_type": {
+                  "description": "The type of rule that was violated.",
+                  "type": "string"
+                },
+                "ruleset_id": {
+                  "description": "The ID of the ruleset for the rules that were violated.",
+                  "type": "integer"
+                },
+                "ruleset_name": {
+                  "description": "The name of the ruleset for the rules that were violated.",
+                  "type": "string"
+                },
+                "total_violations": {
+                  "description": "The number of rule violations generated from the push associated with this request.",
+                  "type": "integer"
+                }
+              },
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expires_at": {
+            "description": "The date and time the bypass request will expire.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "html_url": {
+            "description": "The URL to view the bypass request in a browser.",
+            "example": "https://github.com/octo-org/smile/exemptions/1",
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier of the bypass request.",
+            "type": "integer"
+          },
+          "number": {
+            "description": "The number uniquely identifying the bypass request within its repository.",
+            "type": "integer"
+          },
+          "organization": {
+            "description": "The organization associated with the repository the bypass request is for.",
+            "properties": {
+              "id": {
+                "description": "The ID of the organization.",
+                "nullable": true,
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the organization.",
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "repository": {
+            "description": "The repository the bypass request is for.",
+            "properties": {
+              "full_name": {
+                "description": "The full name of the repository the bypass request is for.",
+                "nullable": true,
+                "type": "string"
+              },
+              "id": {
+                "description": "The ID of the repository the bypass request is for.",
+                "nullable": true,
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the repository the bypass request is for.",
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "request_type": {
+            "description": "The type of request.",
+            "type": "string"
+          },
+          "requester": {
+            "description": "The user who requested the bypass.",
+            "properties": {
+              "actor_id": {
+                "description": "The ID of the GitHub user who requested the bypass.",
+                "type": "integer"
+              },
+              "actor_name": {
+                "description": "The name of the GitHub user who requested the bypass.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "requester_comment": {
+            "description": "The comment the requester provided when creating the bypass request.",
+            "nullable": true,
+            "type": "string"
+          },
+          "resource_identifier": {
+            "description": "The unique identifier for the request type of the bypass request. For example, a commit SHA.",
+            "example": "827efc6d56897b048c772eb4087f854f46256132",
+            "type": "string"
+          },
+          "responses": {
+            "description": "The responses to the bypass request.",
+            "items": {
+              "$ref": "#/components/schemas/bypass-response"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "status": {
+            "description": "The status of the bypass request.",
+            "enum": [
+              "pending",
+              "denied",
+              "approved",
+              "cancelled",
+              "completed",
+              "expired",
+              "deleted",
+              "open"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "example": "https://api.github.com/repos/octo-org/smile/bypass-requests/push-rules/1",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "title": "Push rule bypass request",
+        "type": "object"
+      },
+      "secret-scanning-bypass-request": {
+        "description": "A bypass request made by a user asking to be exempted from push protection in this repository.",
+        "properties": {
+          "created_at": {
+            "description": "The date and time the bypass request was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "data": {
+            "description": "Data describing the push rules that are being requested to be bypassed.",
+            "items": {
+              "properties": {
+                "branch": {
+                  "description": "The branch in the repo where the secret was located during the request.",
+                  "type": "string"
+                },
+                "bypass_reason": {
+                  "description": "The reason the bypass was requested.",
+                  "enum": [
+                    "used_in_tests",
+                    "false_positive",
+                    "fix_later"
+                  ],
+                  "type": "string"
+                },
+                "path": {
+                  "description": "The path in the repo where the secret was located during the request.",
+                  "type": "string"
+                },
+                "secret_type": {
+                  "description": "The type of secret that secret scanning detected.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expires_at": {
+            "description": "The date and time the bypass request will expire.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "html_url": {
+            "description": "The URL to view the bypass request in a browser.",
+            "example": "https://github.com/octo-org/smile/exemptions/1",
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier of the bypass request.",
+            "type": "integer"
+          },
+          "number": {
+            "description": "The number uniquely identifying the bypass request within its repository.",
+            "type": "integer"
+          },
+          "organization": {
+            "description": "The organization associated with the repository the bypass request is for.",
+            "properties": {
+              "id": {
+                "description": "The ID of the organization.",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the organization.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "repository": {
+            "description": "The repository the bypass request is for.",
+            "properties": {
+              "full_name": {
+                "description": "The full name of the repository the bypass request is for.",
+                "type": "string"
+              },
+              "id": {
+                "description": "The ID of the repository the bypass request is for.",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the repository the bypass request is for.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "request_type": {
+            "description": "The type of request.",
+            "type": "string"
+          },
+          "requester": {
+            "description": "The user who requested the bypass.",
+            "properties": {
+              "actor_id": {
+                "description": "The ID of the GitHub user who requested the bypass.",
+                "type": "integer"
+              },
+              "actor_name": {
+                "description": "The name of the GitHub user who requested the bypass.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "requester_comment": {
+            "description": "The comment the requester provided when creating the bypass request.",
+            "nullable": true,
+            "type": "string"
+          },
+          "resource_identifier": {
+            "description": "The unique identifier for the request type of the bypass request. For example, a commit SHA.",
+            "example": "827efc6d56897b048c772eb4087f854f46256132",
+            "type": "string"
+          },
+          "responses": {
+            "description": "The responses to the bypass request.",
+            "items": {
+              "$ref": "#/components/schemas/bypass-response"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "status": {
+            "description": "The status of the bypass request.",
+            "enum": [
+              "pending",
+              "denied",
+              "approved",
+              "cancelled",
+              "completed",
+              "expired",
+              "open"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "example": "https://api.github.com/repos/octo-org/smile/bypass-requests/secret-scanning/1",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "title": "Secret scanning bypass request",
+        "type": "object"
+      },
+      "secret-scanning-dismissal-request": {
+        "description": "A dismissal request made by a user asking to close a secret scanning alert in this repository.",
+        "properties": {
+          "created_at": {
+            "description": "The date and time the dismissal request was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "data": {
+            "description": "Data describing the secret alert that is being requested to be dismissed.",
+            "items": {
+              "properties": {
+                "alert_number": {
+                  "description": "The number of the secret scanning alert that was detected.",
+                  "type": "string"
+                },
+                "reason": {
+                  "description": "The reason the user provided for requesting the dismissal.",
+                  "enum": [
+                    "fixed_later",
+                    "false_positive",
+                    "tests",
+                    "revoked"
+                  ],
+                  "type": "string"
+                },
+                "secret_type": {
+                  "description": "The type of secret that secret scanning detected.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "expires_at": {
+            "description": "The date and time the dismissal request will expire.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "html_url": {
+            "description": "The URL to view the dismissal request in a browser.",
+            "example": "https://github.com/octo-org/smile/security/secret-scanning/17",
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier of the dismissal request.",
+            "type": "integer"
+          },
+          "number": {
+            "description": "The number uniquely identifying the dismissal request within its repository.",
+            "type": "integer"
+          },
+          "organization": {
+            "description": "The organization associated with the repository the dismissal request is for.",
+            "properties": {
+              "id": {
+                "description": "The ID of the organization.",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the organization.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "repository": {
+            "description": "The repository the dismissal request is for.",
+            "properties": {
+              "full_name": {
+                "description": "The full name of the repository the dismissal request is for.",
+                "type": "string"
+              },
+              "id": {
+                "description": "The ID of the repository the dismissal request is for.",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The name of the repository the dismissal request is for.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "request_type": {
+            "description": "The type of request.",
+            "type": "string"
+          },
+          "requester": {
+            "description": "The user who requested the dismissal.",
+            "properties": {
+              "actor_id": {
+                "description": "The ID of the GitHub user who requested the dismissal.",
+                "type": "integer"
+              },
+              "actor_name": {
+                "description": "The name of the GitHub user who requested the dismissal.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "requester_comment": {
+            "description": "The comment the requester provided when creating the dismissal request.",
+            "nullable": true,
+            "type": "string"
+          },
+          "resource_identifier": {
+            "description": "The number of the secret scanning alert that was detected.",
+            "example": 1234,
+            "type": "string"
+          },
+          "responses": {
+            "description": "The responses to the dismissal request.",
+            "items": {
+              "$ref": "#/components/schemas/bypass-response"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "status": {
+            "description": "The status of the dismissal request.",
+            "enum": [
+              "pending",
+              "denied",
+              "approved",
+              "cancelled",
+              "expired"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "example": "https://api.github.com/repos/octo-org/smile/dismissal-requests/secret-scanning/1",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "title": "Secret scanning alert dismissal request",
+        "type": "object"
+      },
+      "validation-error": {
+        "description": "Validation Error",
+        "properties": {
+          "documentation_url": {
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "index": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "resource": {
+                  "type": "string"
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "nullable": true,
+                      "type": "integer"
+                    },
+                    {
+                      "items": {
+                        "type": "string"
+                      },
+                      "nullable": true,
+                      "type": "array"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "code"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message",
+          "documentation_url"
+        ],
+        "title": "Validation Error",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "name": "Support",
+      "url": "https://support.github.com/contact?tags=dotcom-rest-api"
+    },
+    "description": "GitHub's v3 REST API.",
+    "license": {
+      "name": "MIT",
+      "url": "https://spdx.org/licenses/MIT"
+    },
+    "termsOfService": "https://docs.github.com/articles/github-terms-of-service",
+    "title": "GitHub v3 REST API",
+    "version": "1.1.4",
+    "x-github-plan": "ghec"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/orgs/{org}/bypass-requests/push-rules": {
+      "get": {
+        "description": "Lists the requests made by users of a repository to bypass push protection rules within an organization.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/orgs/bypass-requests#list-push-rule-bypass-requests-within-an-organization"
+        },
+        "operationId": "orgs/list-push-bypass-requests",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/org"
+          },
+          {
+            "$ref": "#/components/parameters/repository-name-in-query"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/time-period"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/push-rule-bypass-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/push-rule-bypass-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Response"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List push rule bypass requests within an organization",
+        "tags": [
+          "orgs"
+        ],
+        "x-github": {
+          "category": "orgs",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "bypass-requests"
+        }
+      }
+    },
+    "/orgs/{org}/bypass-requests/secret-scanning": {
+      "get": {
+        "description": "List requests to bypass secret scanning push protection in an org.\n\nDelegated bypass must be enabled on repositories in the org and the user must be a bypass reviewer to access this endpoint.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/secret-scanning/delegated-bypass#list-bypass-requests-for-secret-scanning-for-an-org"
+        },
+        "operationId": "secret-scanning/list-org-bypass-requests",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/org"
+          },
+          {
+            "$ref": "#/components/parameters/repository-name-in-query"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/time-period"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/secret-scanning-bypass-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/secret-scanning-bypass-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Response"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List bypass requests for secret scanning for an org",
+        "tags": [
+          "secret-scanning"
+        ],
+        "x-github": {
+          "category": "secret-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "delegated-bypass"
+        }
+      }
+    },
+    "/orgs/{org}/dismissal-requests/code-scanning": {
+      "get": {
+        "description": "Lists dismissal requests for code scanning alerts for all repositories in an organization.\n\nThe user must be authorized to review dismissal requests for the organization.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/code-scanning/alert-dismissal-requests#list-dismissal-requests-for-code-scanning-alerts-for-an-organization"
+        },
+        "operationId": "code-scanning/list-org-dismissal-requests",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/org"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-time-period"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/repository-name-in-query"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/code-scanning-alert-dismissal-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/code-scanning-alert-dismissal-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A list of alert dismissal requests."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List dismissal requests for code scanning alerts for an organization",
+        "tags": [
+          "code-scanning"
+        ],
+        "x-github": {
+          "category": "code-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/orgs/{org}/dismissal-requests/dependabot": {
+      "get": {
+        "description": "Lists dismissal requests for Dependabot alerts in an organization.\n\nDelegated alert dismissal must be enabled on repositories in the org and the user must be an org admin, security manager,\nor have the appropriate permission to access this endpoint.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/dependabot/alert-dismissal-requests#list-dismissal-requests-for-dependabot-alerts-for-an-organization"
+        },
+        "operationId": "dependabot/list-dismissal-requests-for-org",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/org"
+          },
+          {
+            "$ref": "#/components/parameters/repository-name-in-query"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/time-period"
+          },
+          {
+            "$ref": "#/components/parameters/dismissal-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/dependabot-alert-dismissal-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/dependabot-alert-dismissal-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A list of alert dismissal requests."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List dismissal requests for Dependabot alerts for an organization",
+        "tags": [
+          "dependabot"
+        ],
+        "x-github": {
+          "category": "dependabot",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/orgs/{org}/dismissal-requests/secret-scanning": {
+      "get": {
+        "description": "Lists requests to dismiss secret scanning alerts in an org.\n\nDelegated alert dismissal must be enabled on repositories in the org and the user must be an org admin, security manager,\nor have the \"Review and manage secret scanning alert dismissal requests\" permission to access this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/secret-scanning/alert-dismissal-requests#list-alert-dismissal-requests-for-secret-scanning-for-an-org"
+        },
+        "operationId": "secret-scanning/list-org-dismissal-requests",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/org"
+          },
+          {
+            "$ref": "#/components/parameters/repository-name-in-query"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/time-period"
+          },
+          {
+            "$ref": "#/components/parameters/dismissal-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/secret-scanning-dismissal-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/secret-scanning-dismissal-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A list of the alert dismissal requests."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List alert dismissal requests for secret scanning for an org",
+        "tags": [
+          "secret-scanning"
+        ],
+        "x-github": {
+          "category": "secret-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/bypass-requests/push-rules": {
+      "get": {
+        "description": "Lists the requests made by users of a repository to bypass push protection rules",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/repos/bypass-requests#list-repository-push-rule-bypass-requests"
+        },
+        "operationId": "repos/list-repo-push-bypass-requests",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/time-period"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/push-rule-bypass-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/push-rule-bypass-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Response"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List repository push rule bypass requests",
+        "tags": [
+          "repos"
+        ],
+        "x-github": {
+          "category": "repos",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "bypass-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/bypass-requests/push-rules/{bypass_request_number}": {
+      "get": {
+        "description": "Get information about a request to bypass push protection rules for a repository.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/repos/bypass-requests#get-a-repository-push-bypass-request"
+        },
+        "operationId": "repos/get-repo-push-bypass-request",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "description": "The number that identifies the bypass request within the context of the given repository.",
+            "example": 1,
+            "in": "path",
+            "name": "bypass_request_number",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/push-rule-bypass-request-item"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/push-rule-bypass-request"
+                }
+              }
+            },
+            "description": "Response"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "Get a repository push bypass request",
+        "tags": [
+          "repos"
+        ],
+        "x-github": {
+          "category": "repos",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "bypass-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/bypass-requests/secret-scanning": {
+      "get": {
+        "description": "Lists requests to bypass secret scanning push protection in a repository.\n\nDelegated bypass must be enabled on the repository and the user must be a bypass reviewer to access this endpoint.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/secret-scanning/delegated-bypass#list-bypass-requests-for-secret-scanning-for-a-repository"
+        },
+        "operationId": "secret-scanning/list-repo-bypass-requests",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/time-period"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/secret-scanning-bypass-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/secret-scanning-bypass-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A list of the bypass requests."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List bypass requests for secret scanning for a repository",
+        "tags": [
+          "secret-scanning"
+        ],
+        "x-github": {
+          "category": "secret-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "delegated-bypass"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/bypass-requests/secret-scanning/{bypass_request_number}": {
+      "get": {
+        "description": "Gets a specific request to bypass secret scanning push protection in a repository.\n\nDelegated bypass must be enabled on the repository and the user must be a bypass reviewer to access this endpoint.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/secret-scanning/delegated-bypass#get-a-bypass-request-for-secret-scanning"
+        },
+        "operationId": "secret-scanning/get-bypass-request",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "description": "The number that identifies the bypass request in a repository.",
+            "in": "path",
+            "name": "bypass_request_number",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/secret-scanning-bypass-request-item"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/secret-scanning-bypass-request"
+                }
+              }
+            },
+            "description": "A single bypass request."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "Get a bypass request for secret scanning",
+        "tags": [
+          "secret-scanning"
+        ],
+        "x-github": {
+          "category": "secret-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "delegated-bypass"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/dismissal-requests/code-scanning": {
+      "get": {
+        "description": "Lists dismissal requests for code scanning alerts for a repository.\n\nDelegated alert dismissal must be enabled on the repository.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/code-scanning/alert-dismissal-requests#list-dismissal-requests-for-code-scanning-alerts-for-a-repository"
+        },
+        "operationId": "code-scanning/list-dismissal-requests-for-repo",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-time-period"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/code-scanning-alert-dismissal-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/code-scanning-alert-dismissal-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A list of alert dismissal requests."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List dismissal requests for code scanning alerts for a repository",
+        "tags": [
+          "code-scanning"
+        ],
+        "x-github": {
+          "category": "code-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/dismissal-requests/code-scanning/{alert_number}": {
+      "get": {
+        "description": "Gets a dismissal request to dismiss a code scanning alert in a repository.\n\nDelegated alert dismissal must be enabled on the repository.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/code-scanning/alert-dismissal-requests#get-a-dismissal-request-for-a-code-scanning-alert-for-a-repository"
+        },
+        "operationId": "code-scanning/get-dismissal-request-for-repo",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "description": "The number that identifies the code scanning alert.",
+            "in": "path",
+            "name": "alert_number",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/code-scanning-alert-dismissal-request-item"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/code-scanning-alert-dismissal-request"
+                }
+              }
+            },
+            "description": "A single dismissal request."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "Get a dismissal request for a code scanning alert for a repository",
+        "tags": [
+          "code-scanning"
+        ],
+        "x-github": {
+          "category": "code-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/dismissal-requests/dependabot": {
+      "get": {
+        "description": "Lists dismissal requests for Dependabot alerts for a repository.\n\nDelegated alert dismissal must be enabled on the repository.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/dependabot/alert-dismissal-requests#list-dismissal-requests-for-dependabot-alerts-for-a-repository"
+        },
+        "operationId": "dependabot/list-dismissal-requests-for-repo",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-time-period"
+          },
+          {
+            "$ref": "#/components/parameters/alert-dismissal-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/dependabot-alert-dismissal-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/dependabot-alert-dismissal-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A list of alert dismissal requests."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List dismissal requests for Dependabot alerts for a repository",
+        "tags": [
+          "dependabot"
+        ],
+        "x-github": {
+          "category": "dependabot",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/dismissal-requests/dependabot/{alert_number}": {
+      "get": {
+        "description": "Gets a dismissal request to dismiss a Dependabot alert in a repository.\n\nDelegated alert dismissal must be enabled on the repository.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/dependabot/alert-dismissal-requests#get-a-dismissal-request-for-a-dependabot-alert-for-a-repository"
+        },
+        "operationId": "dependabot/get-dismissal-request-for-repo",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "description": "The number that identifies the Dependabot alert.",
+            "in": "path",
+            "name": "alert_number",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/dependabot-alert-dismissal-request-item"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/dependabot-alert-dismissal-request"
+                }
+              }
+            },
+            "description": "A single dismissal request."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "Get a dismissal request for a Dependabot alert for a repository",
+        "tags": [
+          "dependabot"
+        ],
+        "x-github": {
+          "category": "dependabot",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/dismissal-requests/secret-scanning": {
+      "get": {
+        "description": "Lists requests to dismiss secret scanning alerts in a repository.\n\nDelegated alert dismissal must be enabled on the repository and the user must be an org admin, security manager,\nor have the \"Review and manage secret scanning alert dismissal requests\" permission to access this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/secret-scanning/alert-dismissal-requests#list-alert-dismissal-requests-for-secret-scanning-for-a-repository"
+        },
+        "operationId": "secret-scanning/list-repo-dismissal-requests",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-reviewer-name"
+          },
+          {
+            "$ref": "#/components/parameters/bypass-requester-name"
+          },
+          {
+            "$ref": "#/components/parameters/time-period"
+          },
+          {
+            "$ref": "#/components/parameters/dismissal-request-status"
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/secret-scanning-dismissal-request-items"
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/secret-scanning-dismissal-request"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A list of the alert dismissal requests."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "List alert dismissal requests for secret scanning for a repository",
+        "tags": [
+          "secret-scanning"
+        ],
+        "x-github": {
+          "category": "secret-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/dismissal-requests/secret-scanning/{alert_number}": {
+      "get": {
+        "description": "Gets a specific request to dismiss a secret scanning alert in a repository.\n\nDelegated alert dismissal must be enabled on the repository and the user must be an org admin, security manager,\nor have the \"Review and manage secret scanning alert dismissal requests\" permission to access this endpoint.\nPersonal access tokens (classic) need the `security_events` scope to use this endpoint.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/secret-scanning/alert-dismissal-requests#get-an-alert-dismissal-request-for-secret-scanning"
+        },
+        "operationId": "secret-scanning/get-dismissal-request",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "description": "The number that identifies the secret scanning alert in a repository.",
+            "in": "path",
+            "name": "alert_number",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/secret-scanning-dismissal-request-item"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/secret-scanning-dismissal-request"
+                }
+              }
+            },
+            "description": "A single dismissal request."
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "500": {
+            "$ref": "#/components/responses/internal_error"
+          }
+        },
+        "summary": "Get an alert dismissal request for secret scanning",
+        "tags": [
+          "secret-scanning"
+        ],
+        "x-github": {
+          "category": "secret-scanning",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": true,
+          "subcategory": "alert-dismissal-requests"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/stacks": {
+      "get": {
+        "description": "Lists pull request stacks in a repository.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/pulls/stacks#list-pull-request-stacks"
+        },
+        "operationId": "pull-request-stacks/list",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "description": "Filter to the stack containing this repository pull request number.",
+            "in": "query",
+            "name": "pull_request",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/per-page"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "value": [
+                      {
+                        "base": {
+                          "ref": "main"
+                        },
+                        "created_at": "2026-04-15T10:00:00Z",
+                        "id": 9876543,
+                        "node_id": "S_kwDOABCDEF4AAAAA",
+                        "number": 42,
+                        "open": true,
+                        "pull_requests": [
+                          {
+                            "draft": false,
+                            "head": {
+                              "ref": "user-model",
+                              "sha": "aaa1111aaa1111aaa1111aaa1111aaa1111aaa11"
+                            },
+                            "merged_at": null,
+                            "number": 101,
+                            "state": "open"
+                          },
+                          {
+                            "draft": false,
+                            "head": {
+                              "ref": "user-api",
+                              "sha": "bbb2222bbb2222bbb2222bbb2222bbb2222bbb22"
+                            },
+                            "merged_at": null,
+                            "number": 102,
+                            "state": "open"
+                          }
+                        ],
+                        "url": "https://api.github.com/repos/octocat/hello-world/stacks/42"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/pull-request-stack-minimal"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Response"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          }
+        },
+        "summary": "List pull request stacks",
+        "tags": [
+          "pulls"
+        ],
+        "x-github": {
+          "category": "pulls",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": false,
+          "subcategory": "stacks"
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/stacks/{stack_number}": {
+      "get": {
+        "description": "Gets a pull request stack by providing its stack number.",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/enterprise-cloud@latest/rest/pulls/stacks#get-a-pull-request-stack"
+        },
+        "operationId": "pull-request-stacks/get",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "description": "The number that identifies the pull request stack.",
+            "in": "path",
+            "name": "stack_number",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "value": {
+                      "base": {
+                        "ref": "main"
+                      },
+                      "created_at": "2026-04-15T10:00:00Z",
+                      "id": 9876543,
+                      "node_id": "S_kwDOABCDEF4AAAAA",
+                      "number": 42,
+                      "open": true,
+                      "pull_requests": [
+                        {
+                          "base": {
+                            "ref": "main",
+                            "repo": {
+                              "id": 1296269,
+                              "name": "hello-world",
+                              "url": "https://api.github.com/repos/octocat/hello-world"
+                            },
+                            "sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
+                          },
+                          "draft": false,
+                          "head": {
+                            "ref": "user-model",
+                            "repo": {
+                              "id": 1296269,
+                              "name": "hello-world",
+                              "url": "https://api.github.com/repos/octocat/hello-world"
+                            },
+                            "sha": "aaa1111aaa1111aaa1111aaa1111aaa1111aaa11"
+                          },
+                          "html_url": "https://github.com/octocat/hello-world/pull/101",
+                          "id": 100001,
+                          "merged_at": null,
+                          "node_id": "PR_kwDOABCDEF4AAAAA",
+                          "number": 101,
+                          "state": "open",
+                          "title": "Add user model",
+                          "url": "https://api.github.com/repos/octocat/hello-world/pulls/101",
+                          "user": {
+                            "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+                            "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+                            "followers_url": "https://api.github.com/users/octocat/followers",
+                            "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+                            "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+                            "gravatar_id": "",
+                            "html_url": "https://github.com/octocat",
+                            "id": 1,
+                            "login": "octocat",
+                            "node_id": "MDQ6VXNlcjE=",
+                            "organizations_url": "https://api.github.com/users/octocat/orgs",
+                            "received_events_url": "https://api.github.com/users/octocat/received_events",
+                            "repos_url": "https://api.github.com/users/octocat/repos",
+                            "site_admin": false,
+                            "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+                            "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+                            "type": "User",
+                            "url": "https://api.github.com/users/octocat",
+                            "user_view_type": "public"
+                          }
+                        },
+                        {
+                          "base": {
+                            "ref": "user-model",
+                            "repo": {
+                              "id": 1296269,
+                              "name": "hello-world",
+                              "url": "https://api.github.com/repos/octocat/hello-world"
+                            },
+                            "sha": "aaa1111aaa1111aaa1111aaa1111aaa1111aaa11"
+                          },
+                          "draft": true,
+                          "head": {
+                            "ref": "user-api",
+                            "repo": {
+                              "id": 1296269,
+                              "name": "hello-world",
+                              "url": "https://api.github.com/repos/octocat/hello-world"
+                            },
+                            "sha": "bbb2222bbb2222bbb2222bbb2222bbb2222bbb22"
+                          },
+                          "html_url": "https://github.com/octocat/hello-world/pull/102",
+                          "id": 100002,
+                          "merged_at": null,
+                          "node_id": "PR_kwDOABCDEF4AAAAB",
+                          "number": 102,
+                          "state": "open",
+                          "title": "Add user API",
+                          "url": "https://api.github.com/repos/octocat/hello-world/pulls/102",
+                          "user": {
+                            "avatar_url": "https://github.com/images/error/octocat_happy.gif",
+                            "events_url": "https://api.github.com/users/octocat/events{/privacy}",
+                            "followers_url": "https://api.github.com/users/octocat/followers",
+                            "following_url": "https://api.github.com/users/octocat/following{/other_user}",
+                            "gists_url": "https://api.github.com/users/octocat/gists{/gist_id}",
+                            "gravatar_id": "",
+                            "html_url": "https://github.com/octocat",
+                            "id": 1,
+                            "login": "octocat",
+                            "node_id": "MDQ6VXNlcjE=",
+                            "organizations_url": "https://api.github.com/users/octocat/orgs",
+                            "received_events_url": "https://api.github.com/users/octocat/received_events",
+                            "repos_url": "https://api.github.com/users/octocat/repos",
+                            "site_admin": false,
+                            "starred_url": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+                            "subscriptions_url": "https://api.github.com/users/octocat/subscriptions",
+                            "type": "User",
+                            "url": "https://api.github.com/users/octocat",
+                            "user_view_type": "public"
+                          }
+                        }
+                      ],
+                      "url": "https://api.github.com/repos/octocat/hello-world/stacks/42"
+                    }
+                  }
+                },
+                "schema": {
+                  "properties": {
+                    "base": {
+                      "properties": {
+                        "ref": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "ref"
+                      ],
+                      "type": "object"
+                    },
+                    "created_at": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "integer"
+                    },
+                    "node_id": {
+                      "type": "string"
+                    },
+                    "number": {
+                      "type": "integer"
+                    },
+                    "open": {
+                      "description": "Whether the stack has any open pull request. False when all pull requests are merged or closed.",
+                      "type": "boolean"
+                    },
+                    "pull_requests": {
+                      "items": {
+                        "$ref": "#/components/schemas/pull-request-stack-pull-request"
+                      },
+                      "type": "array"
+                    },
+                    "url": {
+                      "format": "uri",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "number",
+                    "node_id",
+                    "url",
+                    "base",
+                    "open",
+                    "created_at",
+                    "pull_requests"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Response"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          }
+        },
+        "summary": "Get a pull request stack",
+        "tags": [
+          "pulls"
+        ],
+        "x-github": {
+          "category": "pulls",
+          "enabledForGitHubApps": true,
+          "githubCloudOnly": false,
+          "subcategory": "stacks"
+        }
+      }
+    }
+  }
+}

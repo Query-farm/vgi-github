@@ -1,0 +1,4852 @@
+{
+  "entities": [
+    {
+      "name": "codespace_lookup_source",
+      "description": "Pinned operational Codespaces read: get-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "codespace_name",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Exact generated Codespace name, used by the authenticated-user Codespaces API.",
+          "example": "fixture-space-a",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "codespace_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "codespace_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "billable_owner_id",
+          "path": [
+            "billable_owner",
+            "id"
+          ]
+        },
+        {
+          "name": "billable_owner_login",
+          "path": [
+            "billable_owner",
+            "login"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        },
+        {
+          "name": "environment_id",
+          "path": [
+            "environment_id"
+          ]
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ]
+        },
+        {
+          "name": "billable_owner",
+          "path": [
+            "billable_owner"
+          ]
+        },
+        {
+          "name": "machine",
+          "path": [
+            "machine"
+          ]
+        },
+        {
+          "name": "devcontainer_path",
+          "path": [
+            "devcontainer_path"
+          ]
+        },
+        {
+          "name": "prebuild",
+          "path": [
+            "prebuild"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "last_used_at",
+          "path": [
+            "last_used_at"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_status",
+          "path": [
+            "git_status"
+          ]
+        },
+        {
+          "name": "location",
+          "path": [
+            "location"
+          ]
+        },
+        {
+          "name": "idle_timeout_minutes",
+          "path": [
+            "idle_timeout_minutes"
+          ]
+        },
+        {
+          "name": "web_url",
+          "path": [
+            "web_url"
+          ]
+        },
+        {
+          "name": "machines_url",
+          "path": [
+            "machines_url"
+          ]
+        },
+        {
+          "name": "start_url",
+          "path": [
+            "start_url"
+          ]
+        },
+        {
+          "name": "stop_url",
+          "path": [
+            "stop_url"
+          ]
+        },
+        {
+          "name": "publish_url",
+          "path": [
+            "publish_url"
+          ]
+        },
+        {
+          "name": "pulls_url",
+          "path": [
+            "pulls_url"
+          ]
+        },
+        {
+          "name": "recent_folders",
+          "path": [
+            "recent_folders"
+          ]
+        },
+        {
+          "name": "runtime_constraints",
+          "path": [
+            "runtime_constraints"
+          ]
+        },
+        {
+          "name": "pending_operation",
+          "path": [
+            "pending_operation"
+          ]
+        },
+        {
+          "name": "pending_operation_disabled_reason",
+          "path": [
+            "pending_operation_disabled_reason"
+          ]
+        },
+        {
+          "name": "idle_timeout_notice",
+          "path": [
+            "idle_timeout_notice"
+          ]
+        },
+        {
+          "name": "retention_period_minutes",
+          "path": [
+            "retention_period_minutes"
+          ]
+        },
+        {
+          "name": "retention_expires_at",
+          "path": [
+            "retention_expires_at"
+          ]
+        },
+        {
+          "name": "last_known_stop_notice",
+          "path": [
+            "last_known_stop_notice"
+          ]
+        },
+        {
+          "name": "machine_cpus",
+          "path": [
+            "machine",
+            "cpus"
+          ]
+        },
+        {
+          "name": "machine_memory_bytes",
+          "path": [
+            "machine",
+            "memory_in_bytes"
+          ]
+        },
+        {
+          "name": "machine_storage_bytes",
+          "path": [
+            "machine",
+            "storage_in_bytes"
+          ]
+        }
+      ],
+      "grain": [
+        "codespace_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/get-for-authenticated-user",
+        "path_bindings": {
+          "codespace_name": {
+            "argument": "codespace_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "codespace_name",
+            "argument": "codespace_name",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "repository_codespaces_source",
+      "description": "Pinned operational Codespaces read: list-in-repository-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "codespace_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "codespace_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "billable_owner_id",
+          "path": [
+            "billable_owner",
+            "id"
+          ]
+        },
+        {
+          "name": "billable_owner_login",
+          "path": [
+            "billable_owner",
+            "login"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        },
+        {
+          "name": "environment_id",
+          "path": [
+            "environment_id"
+          ]
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ]
+        },
+        {
+          "name": "billable_owner",
+          "path": [
+            "billable_owner"
+          ]
+        },
+        {
+          "name": "machine",
+          "path": [
+            "machine"
+          ]
+        },
+        {
+          "name": "devcontainer_path",
+          "path": [
+            "devcontainer_path"
+          ]
+        },
+        {
+          "name": "prebuild",
+          "path": [
+            "prebuild"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "last_used_at",
+          "path": [
+            "last_used_at"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_status",
+          "path": [
+            "git_status"
+          ]
+        },
+        {
+          "name": "location",
+          "path": [
+            "location"
+          ]
+        },
+        {
+          "name": "idle_timeout_minutes",
+          "path": [
+            "idle_timeout_minutes"
+          ]
+        },
+        {
+          "name": "web_url",
+          "path": [
+            "web_url"
+          ]
+        },
+        {
+          "name": "machines_url",
+          "path": [
+            "machines_url"
+          ]
+        },
+        {
+          "name": "start_url",
+          "path": [
+            "start_url"
+          ]
+        },
+        {
+          "name": "stop_url",
+          "path": [
+            "stop_url"
+          ]
+        },
+        {
+          "name": "publish_url",
+          "path": [
+            "publish_url"
+          ]
+        },
+        {
+          "name": "pulls_url",
+          "path": [
+            "pulls_url"
+          ]
+        },
+        {
+          "name": "recent_folders",
+          "path": [
+            "recent_folders"
+          ]
+        },
+        {
+          "name": "runtime_constraints",
+          "path": [
+            "runtime_constraints"
+          ]
+        },
+        {
+          "name": "pending_operation",
+          "path": [
+            "pending_operation"
+          ]
+        },
+        {
+          "name": "pending_operation_disabled_reason",
+          "path": [
+            "pending_operation_disabled_reason"
+          ]
+        },
+        {
+          "name": "idle_timeout_notice",
+          "path": [
+            "idle_timeout_notice"
+          ]
+        },
+        {
+          "name": "retention_period_minutes",
+          "path": [
+            "retention_period_minutes"
+          ]
+        },
+        {
+          "name": "retention_expires_at",
+          "path": [
+            "retention_expires_at"
+          ]
+        },
+        {
+          "name": "last_known_stop_notice",
+          "path": [
+            "last_known_stop_notice"
+          ]
+        },
+        {
+          "name": "machine_cpus",
+          "path": [
+            "machine",
+            "cpus"
+          ]
+        },
+        {
+          "name": "machine_memory_bytes",
+          "path": [
+            "machine",
+            "memory_in_bytes"
+          ]
+        },
+        {
+          "name": "machine_storage_bytes",
+          "path": [
+            "machine",
+            "storage_in_bytes"
+          ]
+        }
+      ],
+      "grain": [
+        "codespace_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/list-in-repository-for-authenticated-user",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "codespaces"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "repository",
+            "argument": "repository",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_codespaces_source",
+      "description": "Pinned operational Codespaces read: list-in-organization.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "codespace_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "codespace_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "billable_owner_id",
+          "path": [
+            "billable_owner",
+            "id"
+          ]
+        },
+        {
+          "name": "billable_owner_login",
+          "path": [
+            "billable_owner",
+            "login"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        },
+        {
+          "name": "environment_id",
+          "path": [
+            "environment_id"
+          ]
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ]
+        },
+        {
+          "name": "billable_owner",
+          "path": [
+            "billable_owner"
+          ]
+        },
+        {
+          "name": "machine",
+          "path": [
+            "machine"
+          ]
+        },
+        {
+          "name": "devcontainer_path",
+          "path": [
+            "devcontainer_path"
+          ]
+        },
+        {
+          "name": "prebuild",
+          "path": [
+            "prebuild"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "last_used_at",
+          "path": [
+            "last_used_at"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_status",
+          "path": [
+            "git_status"
+          ]
+        },
+        {
+          "name": "location",
+          "path": [
+            "location"
+          ]
+        },
+        {
+          "name": "idle_timeout_minutes",
+          "path": [
+            "idle_timeout_minutes"
+          ]
+        },
+        {
+          "name": "web_url",
+          "path": [
+            "web_url"
+          ]
+        },
+        {
+          "name": "machines_url",
+          "path": [
+            "machines_url"
+          ]
+        },
+        {
+          "name": "start_url",
+          "path": [
+            "start_url"
+          ]
+        },
+        {
+          "name": "stop_url",
+          "path": [
+            "stop_url"
+          ]
+        },
+        {
+          "name": "publish_url",
+          "path": [
+            "publish_url"
+          ]
+        },
+        {
+          "name": "pulls_url",
+          "path": [
+            "pulls_url"
+          ]
+        },
+        {
+          "name": "recent_folders",
+          "path": [
+            "recent_folders"
+          ]
+        },
+        {
+          "name": "runtime_constraints",
+          "path": [
+            "runtime_constraints"
+          ]
+        },
+        {
+          "name": "pending_operation",
+          "path": [
+            "pending_operation"
+          ]
+        },
+        {
+          "name": "pending_operation_disabled_reason",
+          "path": [
+            "pending_operation_disabled_reason"
+          ]
+        },
+        {
+          "name": "idle_timeout_notice",
+          "path": [
+            "idle_timeout_notice"
+          ]
+        },
+        {
+          "name": "retention_period_minutes",
+          "path": [
+            "retention_period_minutes"
+          ]
+        },
+        {
+          "name": "retention_expires_at",
+          "path": [
+            "retention_expires_at"
+          ]
+        },
+        {
+          "name": "last_known_stop_notice",
+          "path": [
+            "last_known_stop_notice"
+          ]
+        },
+        {
+          "name": "machine_cpus",
+          "path": [
+            "machine",
+            "cpus"
+          ]
+        },
+        {
+          "name": "machine_memory_bytes",
+          "path": [
+            "machine",
+            "memory_in_bytes"
+          ]
+        },
+        {
+          "name": "machine_storage_bytes",
+          "path": [
+            "machine",
+            "storage_in_bytes"
+          ]
+        }
+      ],
+      "grain": [
+        "codespace_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/list-in-organization",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "codespaces"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "organization_member_codespaces_source",
+      "description": "Pinned operational Codespaces read: get-codespaces-for-user-in-org.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "codespace_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "codespace_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "billable_owner_id",
+          "path": [
+            "billable_owner",
+            "id"
+          ]
+        },
+        {
+          "name": "billable_owner_login",
+          "path": [
+            "billable_owner",
+            "login"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        },
+        {
+          "name": "environment_id",
+          "path": [
+            "environment_id"
+          ]
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ]
+        },
+        {
+          "name": "billable_owner",
+          "path": [
+            "billable_owner"
+          ]
+        },
+        {
+          "name": "machine",
+          "path": [
+            "machine"
+          ]
+        },
+        {
+          "name": "devcontainer_path",
+          "path": [
+            "devcontainer_path"
+          ]
+        },
+        {
+          "name": "prebuild",
+          "path": [
+            "prebuild"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "last_used_at",
+          "path": [
+            "last_used_at"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_status",
+          "path": [
+            "git_status"
+          ]
+        },
+        {
+          "name": "location",
+          "path": [
+            "location"
+          ]
+        },
+        {
+          "name": "idle_timeout_minutes",
+          "path": [
+            "idle_timeout_minutes"
+          ]
+        },
+        {
+          "name": "web_url",
+          "path": [
+            "web_url"
+          ]
+        },
+        {
+          "name": "machines_url",
+          "path": [
+            "machines_url"
+          ]
+        },
+        {
+          "name": "start_url",
+          "path": [
+            "start_url"
+          ]
+        },
+        {
+          "name": "stop_url",
+          "path": [
+            "stop_url"
+          ]
+        },
+        {
+          "name": "publish_url",
+          "path": [
+            "publish_url"
+          ]
+        },
+        {
+          "name": "pulls_url",
+          "path": [
+            "pulls_url"
+          ]
+        },
+        {
+          "name": "recent_folders",
+          "path": [
+            "recent_folders"
+          ]
+        },
+        {
+          "name": "runtime_constraints",
+          "path": [
+            "runtime_constraints"
+          ]
+        },
+        {
+          "name": "pending_operation",
+          "path": [
+            "pending_operation"
+          ]
+        },
+        {
+          "name": "pending_operation_disabled_reason",
+          "path": [
+            "pending_operation_disabled_reason"
+          ]
+        },
+        {
+          "name": "idle_timeout_notice",
+          "path": [
+            "idle_timeout_notice"
+          ]
+        },
+        {
+          "name": "retention_period_minutes",
+          "path": [
+            "retention_period_minutes"
+          ]
+        },
+        {
+          "name": "retention_expires_at",
+          "path": [
+            "retention_expires_at"
+          ]
+        },
+        {
+          "name": "last_known_stop_notice",
+          "path": [
+            "last_known_stop_notice"
+          ]
+        },
+        {
+          "name": "machine_cpus",
+          "path": [
+            "machine",
+            "cpus"
+          ]
+        },
+        {
+          "name": "machine_memory_bytes",
+          "path": [
+            "machine",
+            "memory_in_bytes"
+          ]
+        },
+        {
+          "name": "machine_storage_bytes",
+          "path": [
+            "machine",
+            "storage_in_bytes"
+          ]
+        }
+      ],
+      "grain": [
+        "codespace_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/get-codespaces-for-user-in-org",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          },
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "codespaces"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "owner_login",
+            "argument": "user",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authenticated_codespaces_source",
+      "description": "Pinned operational Codespaces read: list-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "codespace_repository_id",
+          "type": "BIGINT",
+          "description": "Optional numeric repository filter for the authenticated user Codespaces listing.",
+          "example": 31001,
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "codespace_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "codespace_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "owner_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "billable_owner_id",
+          "path": [
+            "billable_owner",
+            "id"
+          ]
+        },
+        {
+          "name": "billable_owner_login",
+          "path": [
+            "billable_owner",
+            "login"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        },
+        {
+          "name": "environment_id",
+          "path": [
+            "environment_id"
+          ]
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ]
+        },
+        {
+          "name": "billable_owner",
+          "path": [
+            "billable_owner"
+          ]
+        },
+        {
+          "name": "machine",
+          "path": [
+            "machine"
+          ]
+        },
+        {
+          "name": "devcontainer_path",
+          "path": [
+            "devcontainer_path"
+          ]
+        },
+        {
+          "name": "prebuild",
+          "path": [
+            "prebuild"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "last_used_at",
+          "path": [
+            "last_used_at"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_status",
+          "path": [
+            "git_status"
+          ]
+        },
+        {
+          "name": "location",
+          "path": [
+            "location"
+          ]
+        },
+        {
+          "name": "idle_timeout_minutes",
+          "path": [
+            "idle_timeout_minutes"
+          ]
+        },
+        {
+          "name": "web_url",
+          "path": [
+            "web_url"
+          ]
+        },
+        {
+          "name": "machines_url",
+          "path": [
+            "machines_url"
+          ]
+        },
+        {
+          "name": "start_url",
+          "path": [
+            "start_url"
+          ]
+        },
+        {
+          "name": "stop_url",
+          "path": [
+            "stop_url"
+          ]
+        },
+        {
+          "name": "publish_url",
+          "path": [
+            "publish_url"
+          ]
+        },
+        {
+          "name": "pulls_url",
+          "path": [
+            "pulls_url"
+          ]
+        },
+        {
+          "name": "recent_folders",
+          "path": [
+            "recent_folders"
+          ]
+        },
+        {
+          "name": "runtime_constraints",
+          "path": [
+            "runtime_constraints"
+          ]
+        },
+        {
+          "name": "pending_operation",
+          "path": [
+            "pending_operation"
+          ]
+        },
+        {
+          "name": "pending_operation_disabled_reason",
+          "path": [
+            "pending_operation_disabled_reason"
+          ]
+        },
+        {
+          "name": "idle_timeout_notice",
+          "path": [
+            "idle_timeout_notice"
+          ]
+        },
+        {
+          "name": "retention_period_minutes",
+          "path": [
+            "retention_period_minutes"
+          ]
+        },
+        {
+          "name": "retention_expires_at",
+          "path": [
+            "retention_expires_at"
+          ]
+        },
+        {
+          "name": "last_known_stop_notice",
+          "path": [
+            "last_known_stop_notice"
+          ]
+        },
+        {
+          "name": "machine_cpus",
+          "path": [
+            "machine",
+            "cpus"
+          ]
+        },
+        {
+          "name": "machine_memory_bytes",
+          "path": [
+            "machine",
+            "memory_in_bytes"
+          ]
+        },
+        {
+          "name": "machine_storage_bytes",
+          "path": [
+            "machine",
+            "storage_in_bytes"
+          ]
+        }
+      ],
+      "grain": [
+        "codespace_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/list-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "repository_id": {
+            "argument": "codespace_repository_id"
+          }
+        },
+        "result_path": [
+          "codespaces"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "repository_codespace_machines_source",
+      "description": "Pinned operational Codespaces read: repo-machines-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "codespace_name",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Exact generated Codespace name, used by the authenticated-user Codespaces API.",
+          "example": "fixture-space-a",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "availability_scope",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "nullable": false
+        },
+        {
+          "name": "availability_key",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "nullable": false
+        },
+        {
+          "name": "codespace_ref",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Git branch or commit reference for Codespaces availability, creation defaults or devcontainer permission checks.",
+          "example": "main",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "codespace_location",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Location for repository machine availability.",
+          "example": "WestUs2",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "codespace_client_ip",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Client IP used by GitHub to resolve location-sensitive Codespaces availability and defaults.",
+          "example": "192.0.2.1",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "codespace_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "codespace_name",
+          "source_argument": "codespace_name"
+        },
+        {
+          "name": "availability_scope",
+          "source_argument": "availability_scope"
+        },
+        {
+          "name": "availability_key",
+          "source_argument": "availability_key"
+        },
+        {
+          "name": "codespace_ref",
+          "source_argument": "codespace_ref"
+        },
+        {
+          "name": "codespace_location",
+          "source_argument": "codespace_location"
+        },
+        {
+          "name": "codespace_client_ip",
+          "source_argument": "codespace_client_ip"
+        },
+        {
+          "name": "machine_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        },
+        {
+          "name": "operating_system",
+          "path": [
+            "operating_system"
+          ]
+        },
+        {
+          "name": "storage_in_bytes",
+          "path": [
+            "storage_in_bytes"
+          ]
+        },
+        {
+          "name": "memory_in_bytes",
+          "path": [
+            "memory_in_bytes"
+          ]
+        },
+        {
+          "name": "cpus",
+          "path": [
+            "cpus"
+          ]
+        },
+        {
+          "name": "prebuild_availability",
+          "path": [
+            "prebuild_availability"
+          ]
+        },
+        {
+          "name": "codespace_id",
+          "source_argument": "codespace_id"
+        }
+      ],
+      "grain": [
+        "availability_scope",
+        "availability_key",
+        "machine_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/repo-machines-for-authenticated-user",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "codespace_ref"
+          },
+          "location": {
+            "argument": "codespace_location"
+          },
+          "client_ip": {
+            "argument": "codespace_client_ip"
+          }
+        },
+        "result_path": [
+          "machines"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "codespace_machines_source",
+      "description": "Pinned operational Codespaces read: codespace-machines-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "codespace_name",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Exact generated Codespace name, used by the authenticated-user Codespaces API.",
+          "example": "fixture-space-a",
+          "nullable": false
+        },
+        {
+          "name": "availability_scope",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "nullable": false
+        },
+        {
+          "name": "availability_key",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "nullable": false
+        },
+        {
+          "name": "codespace_ref",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Git branch or commit reference for Codespaces availability, creation defaults or devcontainer permission checks.",
+          "example": "main",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "codespace_location",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Location for repository machine availability.",
+          "example": "WestUs2",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "codespace_client_ip",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Client IP used by GitHub to resolve location-sensitive Codespaces availability and defaults.",
+          "example": "192.0.2.1",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "codespace_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "codespace_name",
+          "source_argument": "codespace_name"
+        },
+        {
+          "name": "availability_scope",
+          "source_argument": "availability_scope"
+        },
+        {
+          "name": "availability_key",
+          "source_argument": "availability_key"
+        },
+        {
+          "name": "codespace_ref",
+          "source_argument": "codespace_ref"
+        },
+        {
+          "name": "codespace_location",
+          "source_argument": "codespace_location"
+        },
+        {
+          "name": "codespace_client_ip",
+          "source_argument": "codespace_client_ip"
+        },
+        {
+          "name": "machine_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        },
+        {
+          "name": "operating_system",
+          "path": [
+            "operating_system"
+          ]
+        },
+        {
+          "name": "storage_in_bytes",
+          "path": [
+            "storage_in_bytes"
+          ]
+        },
+        {
+          "name": "memory_in_bytes",
+          "path": [
+            "memory_in_bytes"
+          ]
+        },
+        {
+          "name": "cpus",
+          "path": [
+            "cpus"
+          ]
+        },
+        {
+          "name": "prebuild_availability",
+          "path": [
+            "prebuild_availability"
+          ]
+        },
+        {
+          "name": "codespace_id",
+          "source_argument": "codespace_id"
+        }
+      ],
+      "grain": [
+        "availability_scope",
+        "availability_key",
+        "machine_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/codespace-machines-for-authenticated-user",
+        "path_bindings": {
+          "codespace_name": {
+            "argument": "codespace_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "machines"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "repository_devcontainers_source",
+      "description": "Pinned operational Codespaces read: list-devcontainers-in-repository-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "devcontainer_path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "display_name",
+          "path": [
+            "display_name"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "devcontainer_path"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/list-devcontainers-in-repository-for-authenticated-user",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "devcontainers"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "codespace_creation_defaults_source",
+      "description": "Pinned operational Codespaces read: pre-flight-with-repo-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "codespace_ref",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Git branch or commit reference for Codespaces availability, creation defaults or devcontainer permission checks.",
+          "example": "main",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "codespace_client_ip",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Client IP used by GitHub to resolve location-sensitive Codespaces availability and defaults.",
+          "example": "192.0.2.1",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "codespace_ref",
+          "source_argument": "codespace_ref"
+        },
+        {
+          "name": "codespace_client_ip",
+          "source_argument": "codespace_client_ip"
+        },
+        {
+          "name": "billable_owner",
+          "path": [
+            "billable_owner"
+          ]
+        },
+        {
+          "name": "default_location",
+          "path": [
+            "defaults",
+            "location"
+          ]
+        },
+        {
+          "name": "default_devcontainer_path",
+          "path": [
+            "defaults",
+            "devcontainer_path"
+          ]
+        }
+      ],
+      "grain": [
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/pre-flight-with-repo-for-authenticated-user",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "codespace_ref"
+          },
+          "client_ip": {
+            "argument": "codespace_client_ip"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "codespace_devcontainer_permissions_source",
+      "description": "Pinned operational Codespaces read: check-permissions-for-devcontainer.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "codespace_ref",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Git branch or commit reference for Codespaces availability, creation defaults or devcontainer permission checks.",
+          "example": "main",
+          "nullable": false
+        },
+        {
+          "name": "devcontainer_path",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Exact repository-relative devcontainer configuration path.",
+          "example": ".devcontainer/devcontainer.json",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "codespace_ref",
+          "source_argument": "codespace_ref"
+        },
+        {
+          "name": "devcontainer_path",
+          "source_argument": "devcontainer_path"
+        },
+        {
+          "name": "accepted",
+          "path": [
+            "accepted"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "codespace_ref",
+        "devcontainer_path"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/check-permissions-for-devcontainer",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "codespace_ref"
+          },
+          "devcontainer_path": {
+            "argument": "devcontainer_path"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "codespace_export_details_source",
+      "description": "Pinned operational Codespaces read: get-export-details-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "codespace_name",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Exact generated Codespace name, used by the authenticated-user Codespaces API.",
+          "example": "fixture-space-a",
+          "nullable": false
+        },
+        {
+          "name": "codespace_export_id",
+          "type": "VARCHAR",
+          "min_length": 1,
+          "description": "Codespace export selector: an export ID or latest. The latest alias is a current observation, not a durable export identity.",
+          "example": "latest",
+          "nullable": false
+        }
+      ],
+      "columns": [
+        {
+          "name": "codespace_name",
+          "source_argument": "codespace_name"
+        },
+        {
+          "name": "codespace_export_id",
+          "source_argument": "codespace_export_id"
+        },
+        {
+          "name": "reported_export_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "path": [
+            "completed_at"
+          ]
+        },
+        {
+          "name": "branch",
+          "path": [
+            "branch"
+          ]
+        },
+        {
+          "name": "sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "export_url",
+          "path": [
+            "export_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        }
+      ],
+      "grain": [
+        "codespace_name",
+        "codespace_export_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codespaces/get-export-details-for-authenticated-user",
+        "path_bindings": {
+          "codespace_name": {
+            "argument": "codespace_name"
+          },
+          "export_id": {
+            "argument": "codespace_export_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "codespaces",
+      "description": "Canonical Codespace instances across organization, organization-member, repository and authenticated-user scopes. Codespace owner is distinct from repository owner and billable owner. Machine capacity describes the configured machine and is not running utilization or billing consumption. Nullable machines and the API-declared Unknown state remain observable; undeclared state values fail pinned-schema validation. Repository relationship uses returned repository identity, without parsing incidental URLs.",
+      "grain": [
+        "codespace_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "codespace_id",
+          "codespace_name",
+          "repository_id",
+          "repository",
+          "owner_id",
+          "owner_login",
+          "billable_owner_id",
+          "billable_owner_login",
+          "display_name",
+          "environment_id",
+          "owner",
+          "billable_owner",
+          "machine",
+          "devcontainer_path",
+          "prebuild",
+          "created_at",
+          "updated_at",
+          "last_used_at",
+          "state",
+          "url",
+          "git_status",
+          "location",
+          "idle_timeout_minutes",
+          "web_url",
+          "machines_url",
+          "start_url",
+          "stop_url",
+          "publish_url",
+          "pulls_url",
+          "recent_folders",
+          "runtime_constraints",
+          "pending_operation",
+          "pending_operation_disabled_reason",
+          "idle_timeout_notice",
+          "retention_period_minutes",
+          "retention_expires_at",
+          "last_known_stop_notice",
+          "machine_cpus",
+          "machine_memory_bytes",
+          "machine_storage_bytes",
+          "codespace_created_day"
+        ],
+        "dimensions": [
+          "codespace_id",
+          "codespace_name",
+          "repository",
+          "owner_id",
+          "owner_login",
+          "state",
+          "location",
+          "prebuild",
+          "created_at",
+          "last_used_at",
+          "retention_expires_at",
+          "codespace_created_day"
+        ],
+        "sql_names": {
+          "codespace_id": "codespaces_codespace_id",
+          "codespace_name": "codespaces_codespace_name",
+          "repository": "codespaces_repository",
+          "owner_id": "codespaces_owner_id",
+          "owner_login": "codespaces_owner_login",
+          "state": "codespaces_state",
+          "location": "codespaces_location",
+          "prebuild": "codespaces_prebuild",
+          "created_at": "codespaces_created_at",
+          "last_used_at": "codespaces_last_used_at",
+          "retention_expires_at": "codespaces_retention_expires_at",
+          "codespace_created_day": "codespaces_codespace_created_day"
+        },
+        "metrics": [
+          {
+            "name": "codespace_count",
+            "kind": "count",
+            "comment": "Enumerated Codespace instances."
+          },
+          {
+            "name": "available_codespace_count",
+            "kind": "count",
+            "comment": "Codespaces reporting Available.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "Available"
+            }
+          },
+          {
+            "name": "shutdown_codespace_count",
+            "kind": "count",
+            "comment": "Codespaces reporting Shutdown.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "Shutdown"
+            }
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "codespace_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC date of created_at."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "configured_codespace_cpu_count": {
+              "expression": "SUM(codespaces.machine_cpus)"
+            },
+            "configured_codespace_memory_bytes": {
+              "expression": "SUM(codespaces.machine_memory_bytes)"
+            },
+            "configured_codespace_storage_bytes": {
+              "expression": "SUM(codespaces.machine_storage_bytes)"
+            },
+            "prebuilt_codespace_count": {
+              "expression": "COUNT(*) FILTER (WHERE codespaces.prebuild = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "configured_codespace_cpu_count": {
+              "dataset": "codespaces",
+              "comment": "Sum of configured machine cores, not utilization.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "configured_codespace_memory_bytes": {
+              "dataset": "codespaces",
+              "comment": "Configured machine memory capacity.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "configured_codespace_storage_bytes": {
+              "dataset": "codespaces",
+              "comment": "Configured machine storage capacity.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "prebuilt_codespace_count": {
+              "dataset": "codespaces",
+              "comment": "Instances explicitly created from prebuilds.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "codespace_name",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Exact generated Codespace name, used by the authenticated-user Codespaces API.",
+              "example": "fixture-space-a",
+              "nullable": false
+            }
+          ],
+          "columns": [
+            {
+              "name": "codespace_id",
+              "source_stage": "records",
+              "source_column": "codespace_id"
+            },
+            {
+              "name": "codespace_name",
+              "source_stage": "records",
+              "source_column": "codespace_name"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "records",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "records",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "billable_owner_id",
+              "source_stage": "records",
+              "source_column": "billable_owner_id"
+            },
+            {
+              "name": "billable_owner_login",
+              "source_stage": "records",
+              "source_column": "billable_owner_login"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "records",
+              "source_column": "display_name"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "records",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "owner",
+              "source_stage": "records",
+              "source_column": "owner"
+            },
+            {
+              "name": "billable_owner",
+              "source_stage": "records",
+              "source_column": "billable_owner"
+            },
+            {
+              "name": "machine",
+              "source_stage": "records",
+              "source_column": "machine"
+            },
+            {
+              "name": "devcontainer_path",
+              "source_stage": "records",
+              "source_column": "devcontainer_path"
+            },
+            {
+              "name": "prebuild",
+              "source_stage": "records",
+              "source_column": "prebuild"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "last_used_at",
+              "source_stage": "records",
+              "source_column": "last_used_at"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "git_status",
+              "source_stage": "records",
+              "source_column": "git_status"
+            },
+            {
+              "name": "location",
+              "source_stage": "records",
+              "source_column": "location"
+            },
+            {
+              "name": "idle_timeout_minutes",
+              "source_stage": "records",
+              "source_column": "idle_timeout_minutes"
+            },
+            {
+              "name": "web_url",
+              "source_stage": "records",
+              "source_column": "web_url"
+            },
+            {
+              "name": "machines_url",
+              "source_stage": "records",
+              "source_column": "machines_url"
+            },
+            {
+              "name": "start_url",
+              "source_stage": "records",
+              "source_column": "start_url"
+            },
+            {
+              "name": "stop_url",
+              "source_stage": "records",
+              "source_column": "stop_url"
+            },
+            {
+              "name": "publish_url",
+              "source_stage": "records",
+              "source_column": "publish_url"
+            },
+            {
+              "name": "pulls_url",
+              "source_stage": "records",
+              "source_column": "pulls_url"
+            },
+            {
+              "name": "recent_folders",
+              "source_stage": "records",
+              "source_column": "recent_folders"
+            },
+            {
+              "name": "runtime_constraints",
+              "source_stage": "records",
+              "source_column": "runtime_constraints"
+            },
+            {
+              "name": "pending_operation",
+              "source_stage": "records",
+              "source_column": "pending_operation"
+            },
+            {
+              "name": "pending_operation_disabled_reason",
+              "source_stage": "records",
+              "source_column": "pending_operation_disabled_reason"
+            },
+            {
+              "name": "idle_timeout_notice",
+              "source_stage": "records",
+              "source_column": "idle_timeout_notice"
+            },
+            {
+              "name": "retention_period_minutes",
+              "source_stage": "records",
+              "source_column": "retention_period_minutes"
+            },
+            {
+              "name": "retention_expires_at",
+              "source_stage": "records",
+              "source_column": "retention_expires_at"
+            },
+            {
+              "name": "last_known_stop_notice",
+              "source_stage": "records",
+              "source_column": "last_known_stop_notice"
+            },
+            {
+              "name": "machine_cpus",
+              "source_stage": "records",
+              "source_column": "machine_cpus"
+            },
+            {
+              "name": "machine_memory_bytes",
+              "source_stage": "records",
+              "source_column": "machine_memory_bytes"
+            },
+            {
+              "name": "machine_storage_bytes",
+              "source_stage": "records",
+              "source_column": "machine_storage_bytes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "codespace_lookup_source",
+                "arguments": {
+                  "codespace_name": {
+                    "parameter": "codespace_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One Codespace visible through the authenticated-user lookup.",
+          "select": [
+            "codespace_name"
+          ]
+        },
+        {
+          "name": "organization_members",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "codespace_id",
+              "source_stage": "records",
+              "source_column": "codespace_id"
+            },
+            {
+              "name": "codespace_name",
+              "source_stage": "records",
+              "source_column": "codespace_name"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "records",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "records",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "billable_owner_id",
+              "source_stage": "records",
+              "source_column": "billable_owner_id"
+            },
+            {
+              "name": "billable_owner_login",
+              "source_stage": "records",
+              "source_column": "billable_owner_login"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "records",
+              "source_column": "display_name"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "records",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "owner",
+              "source_stage": "records",
+              "source_column": "owner"
+            },
+            {
+              "name": "billable_owner",
+              "source_stage": "records",
+              "source_column": "billable_owner"
+            },
+            {
+              "name": "machine",
+              "source_stage": "records",
+              "source_column": "machine"
+            },
+            {
+              "name": "devcontainer_path",
+              "source_stage": "records",
+              "source_column": "devcontainer_path"
+            },
+            {
+              "name": "prebuild",
+              "source_stage": "records",
+              "source_column": "prebuild"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "last_used_at",
+              "source_stage": "records",
+              "source_column": "last_used_at"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "git_status",
+              "source_stage": "records",
+              "source_column": "git_status"
+            },
+            {
+              "name": "location",
+              "source_stage": "records",
+              "source_column": "location"
+            },
+            {
+              "name": "idle_timeout_minutes",
+              "source_stage": "records",
+              "source_column": "idle_timeout_minutes"
+            },
+            {
+              "name": "web_url",
+              "source_stage": "records",
+              "source_column": "web_url"
+            },
+            {
+              "name": "machines_url",
+              "source_stage": "records",
+              "source_column": "machines_url"
+            },
+            {
+              "name": "start_url",
+              "source_stage": "records",
+              "source_column": "start_url"
+            },
+            {
+              "name": "stop_url",
+              "source_stage": "records",
+              "source_column": "stop_url"
+            },
+            {
+              "name": "publish_url",
+              "source_stage": "records",
+              "source_column": "publish_url"
+            },
+            {
+              "name": "pulls_url",
+              "source_stage": "records",
+              "source_column": "pulls_url"
+            },
+            {
+              "name": "recent_folders",
+              "source_stage": "records",
+              "source_column": "recent_folders"
+            },
+            {
+              "name": "runtime_constraints",
+              "source_stage": "records",
+              "source_column": "runtime_constraints"
+            },
+            {
+              "name": "pending_operation",
+              "source_stage": "records",
+              "source_column": "pending_operation"
+            },
+            {
+              "name": "pending_operation_disabled_reason",
+              "source_stage": "records",
+              "source_column": "pending_operation_disabled_reason"
+            },
+            {
+              "name": "idle_timeout_notice",
+              "source_stage": "records",
+              "source_column": "idle_timeout_notice"
+            },
+            {
+              "name": "retention_period_minutes",
+              "source_stage": "records",
+              "source_column": "retention_period_minutes"
+            },
+            {
+              "name": "retention_expires_at",
+              "source_stage": "records",
+              "source_column": "retention_expires_at"
+            },
+            {
+              "name": "last_known_stop_notice",
+              "source_stage": "records",
+              "source_column": "last_known_stop_notice"
+            },
+            {
+              "name": "machine_cpus",
+              "source_stage": "records",
+              "source_column": "machine_cpus"
+            },
+            {
+              "name": "machine_memory_bytes",
+              "source_stage": "records",
+              "source_column": "machine_memory_bytes"
+            },
+            {
+              "name": "machine_storage_bytes",
+              "source_stage": "records",
+              "source_column": "machine_storage_bytes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "organization_member_codespaces_source",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  },
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One organization member's visible Codespaces.",
+          "select": [
+            "user"
+          ]
+        },
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "codespace_id",
+              "source_stage": "records",
+              "source_column": "codespace_id"
+            },
+            {
+              "name": "codespace_name",
+              "source_stage": "records",
+              "source_column": "codespace_name"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "records",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "records",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "billable_owner_id",
+              "source_stage": "records",
+              "source_column": "billable_owner_id"
+            },
+            {
+              "name": "billable_owner_login",
+              "source_stage": "records",
+              "source_column": "billable_owner_login"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "records",
+              "source_column": "display_name"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "records",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "owner",
+              "source_stage": "records",
+              "source_column": "owner"
+            },
+            {
+              "name": "billable_owner",
+              "source_stage": "records",
+              "source_column": "billable_owner"
+            },
+            {
+              "name": "machine",
+              "source_stage": "records",
+              "source_column": "machine"
+            },
+            {
+              "name": "devcontainer_path",
+              "source_stage": "records",
+              "source_column": "devcontainer_path"
+            },
+            {
+              "name": "prebuild",
+              "source_stage": "records",
+              "source_column": "prebuild"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "last_used_at",
+              "source_stage": "records",
+              "source_column": "last_used_at"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "git_status",
+              "source_stage": "records",
+              "source_column": "git_status"
+            },
+            {
+              "name": "location",
+              "source_stage": "records",
+              "source_column": "location"
+            },
+            {
+              "name": "idle_timeout_minutes",
+              "source_stage": "records",
+              "source_column": "idle_timeout_minutes"
+            },
+            {
+              "name": "web_url",
+              "source_stage": "records",
+              "source_column": "web_url"
+            },
+            {
+              "name": "machines_url",
+              "source_stage": "records",
+              "source_column": "machines_url"
+            },
+            {
+              "name": "start_url",
+              "source_stage": "records",
+              "source_column": "start_url"
+            },
+            {
+              "name": "stop_url",
+              "source_stage": "records",
+              "source_column": "stop_url"
+            },
+            {
+              "name": "publish_url",
+              "source_stage": "records",
+              "source_column": "publish_url"
+            },
+            {
+              "name": "pulls_url",
+              "source_stage": "records",
+              "source_column": "pulls_url"
+            },
+            {
+              "name": "recent_folders",
+              "source_stage": "records",
+              "source_column": "recent_folders"
+            },
+            {
+              "name": "runtime_constraints",
+              "source_stage": "records",
+              "source_column": "runtime_constraints"
+            },
+            {
+              "name": "pending_operation",
+              "source_stage": "records",
+              "source_column": "pending_operation"
+            },
+            {
+              "name": "pending_operation_disabled_reason",
+              "source_stage": "records",
+              "source_column": "pending_operation_disabled_reason"
+            },
+            {
+              "name": "idle_timeout_notice",
+              "source_stage": "records",
+              "source_column": "idle_timeout_notice"
+            },
+            {
+              "name": "retention_period_minutes",
+              "source_stage": "records",
+              "source_column": "retention_period_minutes"
+            },
+            {
+              "name": "retention_expires_at",
+              "source_stage": "records",
+              "source_column": "retention_expires_at"
+            },
+            {
+              "name": "last_known_stop_notice",
+              "source_stage": "records",
+              "source_column": "last_known_stop_notice"
+            },
+            {
+              "name": "machine_cpus",
+              "source_stage": "records",
+              "source_column": "machine_cpus"
+            },
+            {
+              "name": "machine_memory_bytes",
+              "source_stage": "records",
+              "source_column": "machine_memory_bytes"
+            },
+            {
+              "name": "machine_storage_bytes",
+              "source_stage": "records",
+              "source_column": "machine_storage_bytes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "organization_codespaces_source",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All Codespaces visible to the caller in the selected organization; not limited to the caller's own Codespaces.",
+          "select": [
+            "organization"
+          ]
+        },
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "codespace_repository_id",
+              "type": "BIGINT",
+              "description": "Optional numeric repository filter for the authenticated user Codespaces listing.",
+              "example": 31001,
+              "nullable": true,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "codespace_id",
+              "source_stage": "records",
+              "source_column": "codespace_id"
+            },
+            {
+              "name": "codespace_name",
+              "source_stage": "records",
+              "source_column": "codespace_name"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "records",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "records",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "billable_owner_id",
+              "source_stage": "records",
+              "source_column": "billable_owner_id"
+            },
+            {
+              "name": "billable_owner_login",
+              "source_stage": "records",
+              "source_column": "billable_owner_login"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "records",
+              "source_column": "display_name"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "records",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "owner",
+              "source_stage": "records",
+              "source_column": "owner"
+            },
+            {
+              "name": "billable_owner",
+              "source_stage": "records",
+              "source_column": "billable_owner"
+            },
+            {
+              "name": "machine",
+              "source_stage": "records",
+              "source_column": "machine"
+            },
+            {
+              "name": "devcontainer_path",
+              "source_stage": "records",
+              "source_column": "devcontainer_path"
+            },
+            {
+              "name": "prebuild",
+              "source_stage": "records",
+              "source_column": "prebuild"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "last_used_at",
+              "source_stage": "records",
+              "source_column": "last_used_at"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "git_status",
+              "source_stage": "records",
+              "source_column": "git_status"
+            },
+            {
+              "name": "location",
+              "source_stage": "records",
+              "source_column": "location"
+            },
+            {
+              "name": "idle_timeout_minutes",
+              "source_stage": "records",
+              "source_column": "idle_timeout_minutes"
+            },
+            {
+              "name": "web_url",
+              "source_stage": "records",
+              "source_column": "web_url"
+            },
+            {
+              "name": "machines_url",
+              "source_stage": "records",
+              "source_column": "machines_url"
+            },
+            {
+              "name": "start_url",
+              "source_stage": "records",
+              "source_column": "start_url"
+            },
+            {
+              "name": "stop_url",
+              "source_stage": "records",
+              "source_column": "stop_url"
+            },
+            {
+              "name": "publish_url",
+              "source_stage": "records",
+              "source_column": "publish_url"
+            },
+            {
+              "name": "pulls_url",
+              "source_stage": "records",
+              "source_column": "pulls_url"
+            },
+            {
+              "name": "recent_folders",
+              "source_stage": "records",
+              "source_column": "recent_folders"
+            },
+            {
+              "name": "runtime_constraints",
+              "source_stage": "records",
+              "source_column": "runtime_constraints"
+            },
+            {
+              "name": "pending_operation",
+              "source_stage": "records",
+              "source_column": "pending_operation"
+            },
+            {
+              "name": "pending_operation_disabled_reason",
+              "source_stage": "records",
+              "source_column": "pending_operation_disabled_reason"
+            },
+            {
+              "name": "idle_timeout_notice",
+              "source_stage": "records",
+              "source_column": "idle_timeout_notice"
+            },
+            {
+              "name": "retention_period_minutes",
+              "source_stage": "records",
+              "source_column": "retention_period_minutes"
+            },
+            {
+              "name": "retention_expires_at",
+              "source_stage": "records",
+              "source_column": "retention_expires_at"
+            },
+            {
+              "name": "last_known_stop_notice",
+              "source_stage": "records",
+              "source_column": "last_known_stop_notice"
+            },
+            {
+              "name": "machine_cpus",
+              "source_stage": "records",
+              "source_column": "machine_cpus"
+            },
+            {
+              "name": "machine_memory_bytes",
+              "source_stage": "records",
+              "source_column": "machine_memory_bytes"
+            },
+            {
+              "name": "machine_storage_bytes",
+              "source_stage": "records",
+              "source_column": "machine_storage_bytes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "authenticated_codespaces_source",
+                "arguments": {
+                  "codespace_repository_id": {
+                    "parameter": "codespace_repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Authenticated caller's Codespaces, optionally filtered by numeric repository ID.",
+          "select": [
+            "authenticated_user"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "codespace_id",
+              "source_stage": "records",
+              "source_column": "codespace_id"
+            },
+            {
+              "name": "codespace_name",
+              "source_stage": "records",
+              "source_column": "codespace_name"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "owner_id",
+              "source_stage": "records",
+              "source_column": "owner_id"
+            },
+            {
+              "name": "owner_login",
+              "source_stage": "records",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "billable_owner_id",
+              "source_stage": "records",
+              "source_column": "billable_owner_id"
+            },
+            {
+              "name": "billable_owner_login",
+              "source_stage": "records",
+              "source_column": "billable_owner_login"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "records",
+              "source_column": "display_name"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "records",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "owner",
+              "source_stage": "records",
+              "source_column": "owner"
+            },
+            {
+              "name": "billable_owner",
+              "source_stage": "records",
+              "source_column": "billable_owner"
+            },
+            {
+              "name": "machine",
+              "source_stage": "records",
+              "source_column": "machine"
+            },
+            {
+              "name": "devcontainer_path",
+              "source_stage": "records",
+              "source_column": "devcontainer_path"
+            },
+            {
+              "name": "prebuild",
+              "source_stage": "records",
+              "source_column": "prebuild"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "last_used_at",
+              "source_stage": "records",
+              "source_column": "last_used_at"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "git_status",
+              "source_stage": "records",
+              "source_column": "git_status"
+            },
+            {
+              "name": "location",
+              "source_stage": "records",
+              "source_column": "location"
+            },
+            {
+              "name": "idle_timeout_minutes",
+              "source_stage": "records",
+              "source_column": "idle_timeout_minutes"
+            },
+            {
+              "name": "web_url",
+              "source_stage": "records",
+              "source_column": "web_url"
+            },
+            {
+              "name": "machines_url",
+              "source_stage": "records",
+              "source_column": "machines_url"
+            },
+            {
+              "name": "start_url",
+              "source_stage": "records",
+              "source_column": "start_url"
+            },
+            {
+              "name": "stop_url",
+              "source_stage": "records",
+              "source_column": "stop_url"
+            },
+            {
+              "name": "publish_url",
+              "source_stage": "records",
+              "source_column": "publish_url"
+            },
+            {
+              "name": "pulls_url",
+              "source_stage": "records",
+              "source_column": "pulls_url"
+            },
+            {
+              "name": "recent_folders",
+              "source_stage": "records",
+              "source_column": "recent_folders"
+            },
+            {
+              "name": "runtime_constraints",
+              "source_stage": "records",
+              "source_column": "runtime_constraints"
+            },
+            {
+              "name": "pending_operation",
+              "source_stage": "records",
+              "source_column": "pending_operation"
+            },
+            {
+              "name": "pending_operation_disabled_reason",
+              "source_stage": "records",
+              "source_column": "pending_operation_disabled_reason"
+            },
+            {
+              "name": "idle_timeout_notice",
+              "source_stage": "records",
+              "source_column": "idle_timeout_notice"
+            },
+            {
+              "name": "retention_period_minutes",
+              "source_stage": "records",
+              "source_column": "retention_period_minutes"
+            },
+            {
+              "name": "retention_expires_at",
+              "source_stage": "records",
+              "source_column": "retention_expires_at"
+            },
+            {
+              "name": "last_known_stop_notice",
+              "source_stage": "records",
+              "source_column": "last_known_stop_notice"
+            },
+            {
+              "name": "machine_cpus",
+              "source_stage": "records",
+              "source_column": "machine_cpus"
+            },
+            {
+              "name": "machine_memory_bytes",
+              "source_stage": "records",
+              "source_column": "machine_memory_bytes"
+            },
+            {
+              "name": "machine_storage_bytes",
+              "source_stage": "records",
+              "source_column": "machine_storage_bytes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_codespaces_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Authenticated caller's Codespaces for selected repositories, not every organization member's Codespaces."
+        }
+      ]
+    },
+    {
+      "name": "codespace_machine_options",
+      "description": "Machine eligibility observations qualified by repository or Codespace context and machine name. Query inputs preserve location, ref and client-IP provenance; capacity is an offered configuration, not an allocated resource. Repository and Codespace availability may differ and must not be deduplicated by machine name alone.",
+      "grain": [
+        "availability_scope",
+        "availability_key",
+        "machine_name"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "codespace_name",
+          "availability_scope",
+          "availability_key",
+          "codespace_ref",
+          "codespace_location",
+          "codespace_client_ip",
+          "machine_name",
+          "display_name",
+          "operating_system",
+          "storage_in_bytes",
+          "memory_in_bytes",
+          "cpus",
+          "prebuild_availability",
+          "codespace_id"
+        ],
+        "dimensions": [
+          "repository",
+          "codespace_name",
+          "availability_scope",
+          "availability_key",
+          "machine_name",
+          "operating_system",
+          "prebuild_availability",
+          "codespace_ref",
+          "codespace_location"
+        ],
+        "sql_names": {
+          "repository": "codespace_machine_options_repository",
+          "codespace_name": "codespace_machine_options_codespace_name",
+          "availability_scope": "codespace_machine_options_availability_scope",
+          "availability_key": "codespace_machine_options_availability_key",
+          "machine_name": "codespace_machine_options_machine_name",
+          "operating_system": "codespace_machine_options_operating_system",
+          "prebuild_availability": "codespace_machine_options_prebuild_availability",
+          "codespace_ref": "codespace_machine_options_codespace_ref",
+          "codespace_location": "codespace_machine_options_codespace_location"
+        },
+        "metrics": [
+          {
+            "name": "codespace_machine_option_count",
+            "kind": "count",
+            "comment": "Eligible machine configurations in the selected contexts."
+          },
+          {
+            "name": "ready_prebuild_machine_option_count",
+            "kind": "count",
+            "comment": "Machine options reporting a ready prebuild.",
+            "where": {
+              "field": "prebuild_availability",
+              "op": "eq",
+              "value": "ready"
+            }
+          }
+        ],
+        "derived_fields": [],
+        "crossfield": {
+          "metrics": {
+            "offered_codespace_cpu_count": {
+              "expression": "SUM(codespace_machine_options.cpus)"
+            }
+          },
+          "metric_semantics": {
+            "offered_codespace_cpu_count": {
+              "dataset": "codespace_machine_options",
+              "comment": "Sum of offered cores across options, not allocated machine cores.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "codespaces",
+          "arguments": [
+            {
+              "name": "codespace_name",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Exact generated Codespace name, used by the authenticated-user Codespaces API.",
+              "example": "fixture-space-a",
+              "nullable": false
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "codespaces",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "codespace_name",
+              "source_stage": "records",
+              "source_column": "codespace_name"
+            },
+            {
+              "name": "availability_scope",
+              "source_stage": "records",
+              "source_column": "availability_scope"
+            },
+            {
+              "name": "availability_key",
+              "source_stage": "records",
+              "source_column": "availability_key"
+            },
+            {
+              "name": "codespace_ref",
+              "source_stage": "records",
+              "source_column": "codespace_ref"
+            },
+            {
+              "name": "codespace_location",
+              "source_stage": "records",
+              "source_column": "codespace_location"
+            },
+            {
+              "name": "codespace_client_ip",
+              "source_stage": "records",
+              "source_column": "codespace_client_ip"
+            },
+            {
+              "name": "machine_name",
+              "source_stage": "records",
+              "source_column": "machine_name"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "records",
+              "source_column": "display_name"
+            },
+            {
+              "name": "operating_system",
+              "source_stage": "records",
+              "source_column": "operating_system"
+            },
+            {
+              "name": "storage_in_bytes",
+              "source_stage": "records",
+              "source_column": "storage_in_bytes"
+            },
+            {
+              "name": "memory_in_bytes",
+              "source_stage": "records",
+              "source_column": "memory_in_bytes"
+            },
+            {
+              "name": "cpus",
+              "source_stage": "records",
+              "source_column": "cpus"
+            },
+            {
+              "name": "prebuild_availability",
+              "source_stage": "records",
+              "source_column": "prebuild_availability"
+            },
+            {
+              "name": "codespace_id",
+              "source_stage": "records",
+              "source_column": "codespace_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "codespaces",
+                "entity": "codespace_lookup_source",
+                "arguments": {
+                  "codespace_name": {
+                    "parameter": "codespace_name"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "codespace_machines_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "codespaces",
+                    "column": "repository"
+                  },
+                  "codespace_name": {
+                    "stage": "codespaces",
+                    "column": "codespace_name"
+                  },
+                  "availability_scope": {
+                    "literal": "codespace"
+                  },
+                  "availability_key": {
+                    "stage": "codespaces",
+                    "column": "codespace_name"
+                  },
+                  "codespace_ref": {
+                    "literal": null
+                  },
+                  "codespace_location": {
+                    "literal": null
+                  },
+                  "codespace_client_ip": {
+                    "literal": null
+                  },
+                  "codespace_id": {
+                    "stage": "codespaces",
+                    "column": "codespace_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Machine alternatives for one existing Codespace, including context-specific prebuild availability.",
+          "select": [
+            "codespace_name"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "codespace_ref",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Git branch or commit reference for Codespaces availability, creation defaults or devcontainer permission checks.",
+              "example": "main",
+              "nullable": true,
+              "default": null
+            },
+            {
+              "name": "codespace_location",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Location for repository machine availability.",
+              "example": "WestUs2",
+              "nullable": true,
+              "default": null
+            },
+            {
+              "name": "codespace_client_ip",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Client IP used by GitHub to resolve location-sensitive Codespaces availability and defaults.",
+              "example": "192.0.2.1",
+              "nullable": true,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "codespace_name",
+              "source_stage": "records",
+              "source_column": "codespace_name"
+            },
+            {
+              "name": "availability_scope",
+              "source_stage": "records",
+              "source_column": "availability_scope"
+            },
+            {
+              "name": "availability_key",
+              "source_stage": "records",
+              "source_column": "availability_key"
+            },
+            {
+              "name": "codespace_ref",
+              "source_stage": "records",
+              "source_column": "codespace_ref"
+            },
+            {
+              "name": "codespace_location",
+              "source_stage": "records",
+              "source_column": "codespace_location"
+            },
+            {
+              "name": "codespace_client_ip",
+              "source_stage": "records",
+              "source_column": "codespace_client_ip"
+            },
+            {
+              "name": "machine_name",
+              "source_stage": "records",
+              "source_column": "machine_name"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "records",
+              "source_column": "display_name"
+            },
+            {
+              "name": "operating_system",
+              "source_stage": "records",
+              "source_column": "operating_system"
+            },
+            {
+              "name": "storage_in_bytes",
+              "source_stage": "records",
+              "source_column": "storage_in_bytes"
+            },
+            {
+              "name": "memory_in_bytes",
+              "source_stage": "records",
+              "source_column": "memory_in_bytes"
+            },
+            {
+              "name": "cpus",
+              "source_stage": "records",
+              "source_column": "cpus"
+            },
+            {
+              "name": "prebuild_availability",
+              "source_stage": "records",
+              "source_column": "prebuild_availability"
+            },
+            {
+              "name": "codespace_id",
+              "source_stage": "records",
+              "source_column": "codespace_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_codespace_machines_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "codespace_name": {
+                    "literal": null
+                  },
+                  "availability_scope": {
+                    "literal": "repository"
+                  },
+                  "availability_key": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "codespace_ref": {
+                    "parameter": "codespace_ref"
+                  },
+                  "codespace_location": {
+                    "parameter": "codespace_location"
+                  },
+                  "codespace_client_ip": {
+                    "parameter": "codespace_client_ip"
+                  },
+                  "codespace_id": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected repositories or repository cohort, using the authenticated caller for operational eligibility."
+        }
+      ]
+    },
+    {
+      "name": "repository_devcontainers",
+      "description": "Repository devcontainer configurations visible to the authenticated caller. Paths qualify configuration identity within a repository; optional display labels are not keys.",
+      "grain": [
+        "repository_id",
+        "devcontainer_path"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "devcontainer_path",
+          "name",
+          "display_name"
+        ],
+        "dimensions": [
+          "repository",
+          "devcontainer_path",
+          "name",
+          "display_name"
+        ],
+        "sql_names": {
+          "repository": "repository_devcontainers_repository",
+          "devcontainer_path": "repository_devcontainers_devcontainer_path",
+          "name": "repository_devcontainers_name",
+          "display_name": "repository_devcontainers_display_name"
+        },
+        "metrics": [
+          {
+            "name": "repository_devcontainer_count",
+            "kind": "count",
+            "comment": "Enumerated repository devcontainer paths."
+          }
+        ],
+        "derived_fields": []
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "devcontainer_path",
+              "source_stage": "records",
+              "source_column": "devcontainer_path"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "display_name",
+              "source_stage": "records",
+              "source_column": "display_name"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_devcontainers_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected repositories or repository cohort, using the authenticated caller for operational eligibility."
+        }
+      ]
+    },
+    {
+      "name": "codespace_creation_defaults",
+      "description": "Caller-specific preflight observations of defaults for creating a Codespace. This GET reads defaults without creating an instance. Absent defaults and unknown devcontainer paths remain NULL.",
+      "grain": [
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "codespace_ref",
+          "codespace_client_ip",
+          "billable_owner",
+          "default_location",
+          "default_devcontainer_path"
+        ],
+        "dimensions": [
+          "repository",
+          "codespace_ref",
+          "default_location",
+          "default_devcontainer_path"
+        ],
+        "sql_names": {
+          "repository": "codespace_creation_defaults_repository",
+          "codespace_ref": "codespace_creation_defaults_codespace_ref",
+          "default_location": "codespace_creation_defaults_default_location",
+          "default_devcontainer_path": "codespace_creation_defaults_default_devcontainer_path"
+        },
+        "metrics": [
+          {
+            "name": "codespace_creation_default_observation_count",
+            "kind": "count",
+            "comment": "Returned repository preflight observations, including empty defaults."
+          }
+        ],
+        "derived_fields": []
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "codespace_ref",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Git branch or commit reference for Codespaces availability, creation defaults or devcontainer permission checks.",
+              "example": "main",
+              "nullable": true,
+              "default": null
+            },
+            {
+              "name": "codespace_client_ip",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Client IP used by GitHub to resolve location-sensitive Codespaces availability and defaults.",
+              "example": "192.0.2.1",
+              "nullable": true,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "codespace_ref",
+              "source_stage": "records",
+              "source_column": "codespace_ref"
+            },
+            {
+              "name": "codespace_client_ip",
+              "source_stage": "records",
+              "source_column": "codespace_client_ip"
+            },
+            {
+              "name": "billable_owner",
+              "source_stage": "records",
+              "source_column": "billable_owner"
+            },
+            {
+              "name": "default_location",
+              "source_stage": "records",
+              "source_column": "default_location"
+            },
+            {
+              "name": "default_devcontainer_path",
+              "source_stage": "records",
+              "source_column": "default_devcontainer_path"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "codespace_creation_defaults_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "codespace_ref": {
+                    "parameter": "codespace_ref"
+                  },
+                  "codespace_client_ip": {
+                    "parameter": "codespace_client_ip"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected repositories or repository cohort, using the authenticated caller for operational eligibility."
+        }
+      ]
+    },
+    {
+      "name": "codespace_devcontainer_permissions",
+      "description": "Operational permission-acceptance observations for a devcontainer at an exact repository reference. accepted describes the authenticated caller's existing acceptance and this read does not grant permissions.",
+      "grain": [
+        "repository_id",
+        "codespace_ref",
+        "devcontainer_path"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "codespace_ref",
+          "devcontainer_path",
+          "accepted"
+        ],
+        "dimensions": [
+          "repository",
+          "codespace_ref",
+          "devcontainer_path",
+          "accepted"
+        ],
+        "sql_names": {
+          "repository": "codespace_devcontainer_permissions_repository",
+          "codespace_ref": "codespace_devcontainer_permissions_codespace_ref",
+          "devcontainer_path": "codespace_devcontainer_permissions_devcontainer_path",
+          "accepted": "codespace_devcontainer_permissions_accepted"
+        },
+        "metrics": [
+          {
+            "name": "codespace_devcontainer_permission_check_count",
+            "kind": "count",
+            "comment": "Returned devcontainer permission observations."
+          }
+        ],
+        "derived_fields": [],
+        "crossfield": {
+          "metrics": {
+            "accepted_devcontainer_permission_count": {
+              "expression": "COUNT(*) FILTER (WHERE codespace_devcontainer_permissions.accepted = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "accepted_devcontainer_permission_count": {
+              "dataset": "codespace_devcontainer_permissions",
+              "comment": "Checks whose permissions the caller has accepted.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "codespace_ref",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Git branch or commit reference for Codespaces availability, creation defaults or devcontainer permission checks.",
+              "example": "main",
+              "nullable": false
+            },
+            {
+              "name": "devcontainer_path",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Exact repository-relative devcontainer configuration path.",
+              "example": ".devcontainer/devcontainer.json",
+              "nullable": false
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "codespace_ref",
+              "source_stage": "records",
+              "source_column": "codespace_ref"
+            },
+            {
+              "name": "devcontainer_path",
+              "source_stage": "records",
+              "source_column": "devcontainer_path"
+            },
+            {
+              "name": "accepted",
+              "source_stage": "records",
+              "source_column": "accepted"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "codespace_devcontainer_permissions_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "codespace_ref": {
+                    "parameter": "codespace_ref"
+                  },
+                  "devcontainer_path": {
+                    "parameter": "devcontainer_path"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected repositories or repository cohort, using the authenticated caller for operational eligibility."
+        }
+      ]
+    },
+    {
+      "name": "codespace_export_observations",
+      "description": "Export-status observations qualified by Codespace identity and requested export selector. The API makes reported export ID optional and documents latest as a selector; no durable export identity or export listing is invented. Empty response objects remain an observation with unknown status.",
+      "grain": [
+        "codespace_id",
+        "codespace_export_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "codespace_id",
+          "repository_id",
+          "repository",
+          "codespace_name",
+          "codespace_export_id",
+          "reported_export_id",
+          "state",
+          "completed_at",
+          "branch",
+          "sha",
+          "export_url",
+          "html_url",
+          "export_completed_day"
+        ],
+        "dimensions": [
+          "repository",
+          "codespace_name",
+          "codespace_export_id",
+          "reported_export_id",
+          "state",
+          "branch",
+          "sha",
+          "completed_at",
+          "export_completed_day"
+        ],
+        "sql_names": {
+          "repository": "codespace_export_observations_repository",
+          "codespace_name": "codespace_export_observations_codespace_name",
+          "codespace_export_id": "codespace_export_observations_codespace_export_id",
+          "reported_export_id": "codespace_export_observations_reported_export_id",
+          "state": "codespace_export_observations_state",
+          "branch": "codespace_export_observations_branch",
+          "sha": "codespace_export_observations_sha",
+          "completed_at": "codespace_export_observations_completed_at",
+          "export_completed_day": "codespace_export_observations_export_completed_day"
+        },
+        "metrics": [
+          {
+            "name": "codespace_export_observation_count",
+            "kind": "count",
+            "comment": "Requested export observations, including unknown status."
+          },
+          {
+            "name": "succeeded_codespace_export_count",
+            "kind": "count",
+            "comment": "Export observations reporting succeeded.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "succeeded"
+            }
+          },
+          {
+            "name": "failed_codespace_export_count",
+            "kind": "count",
+            "comment": "Export observations reporting failed.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "failed"
+            }
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "export_completed_day",
+            "kind": "date",
+            "source": "completed_at",
+            "timezone": "UTC",
+            "comment": "UTC date of completed_at."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "codespaces",
+          "arguments": [
+            {
+              "name": "codespace_name",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Exact generated Codespace name, used by the authenticated-user Codespaces API.",
+              "example": "fixture-space-a",
+              "nullable": false
+            },
+            {
+              "name": "codespace_export_id",
+              "type": "VARCHAR",
+              "min_length": 1,
+              "description": "Codespace export selector: an export ID or latest. The latest alias is a current observation, not a durable export identity.",
+              "example": "latest",
+              "nullable": false
+            }
+          ],
+          "columns": [
+            {
+              "name": "codespace_id",
+              "source_stage": "codespaces",
+              "source_column": "codespace_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "codespaces",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "codespaces",
+              "source_column": "repository"
+            },
+            {
+              "name": "codespace_name",
+              "source_stage": "records",
+              "source_column": "codespace_name"
+            },
+            {
+              "name": "codespace_export_id",
+              "source_stage": "records",
+              "source_column": "codespace_export_id"
+            },
+            {
+              "name": "reported_export_id",
+              "source_stage": "records",
+              "source_column": "reported_export_id"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "records",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "branch",
+              "source_stage": "records",
+              "source_column": "branch"
+            },
+            {
+              "name": "sha",
+              "source_stage": "records",
+              "source_column": "sha"
+            },
+            {
+              "name": "export_url",
+              "source_stage": "records",
+              "source_column": "export_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "codespaces",
+                "entity": "codespace_lookup_source",
+                "arguments": {
+                  "codespace_name": {
+                    "parameter": "codespace_name"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "codespace_export_details_source",
+                "arguments": {
+                  "codespace_name": {
+                    "stage": "codespaces",
+                    "column": "codespace_name"
+                  },
+                  "codespace_export_id": {
+                    "parameter": "codespace_export_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One requested Codespace export observation; latest observes the mutable latest-export alias, not all historical exports.",
+          "select": [
+            "codespace_name"
+          ]
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "codespaces_to_repositories",
+      "from": "codespaces",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "codespace_machine_options_to_repositories",
+      "from": "codespace_machine_options",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_devcontainers_to_repositories",
+      "from": "repository_devcontainers",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "codespace_creation_defaults_to_repositories",
+      "from": "codespace_creation_defaults",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "codespace_devcontainer_permissions_to_repositories",
+      "from": "codespace_devcontainer_permissions",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "codespace_export_observations_to_repositories",
+      "from": "codespace_export_observations",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "codespaces_to_owners",
+      "from": "codespaces",
+      "to": "users",
+      "from_columns": [
+        "owner_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "owner_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "codespace_machine_options_to_codespaces",
+      "from": "codespace_machine_options",
+      "to": "codespaces",
+      "from_columns": [
+        "codespace_id"
+      ],
+      "to_columns": [
+        "codespace_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "codespace_name": "codespace_name"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "codespaces",
+          "bindings": {
+            "codespace_name": "codespace_name"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "codespace_export_observations_to_codespaces",
+      "from": "codespace_export_observations",
+      "to": "codespaces",
+      "from_columns": [
+        "codespace_id"
+      ],
+      "to_columns": [
+        "codespace_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "codespace_name": "codespace_name"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "codespace_permissions_to_devcontainers",
+      "from": "codespace_devcontainer_permissions",
+      "to": "repository_devcontainers",
+      "from_columns": [
+        "repository_id",
+        "devcontainer_path"
+      ],
+      "to_columns": [
+        "repository_id",
+        "devcontainer_path"
+      ],
+      "retrievals": [],
+      "optional": true,
+      "analytical": false
+    }
+  ]
+}

@@ -220,7 +220,8 @@
           "type": "VARCHAR",
           "nullable": false,
           "min_length": 1,
-          "description": "Slug of one team in the organization."
+          "description": "Slug of one team in the organization.",
+          "example": "core"
         }
       ],
       "columns": [
@@ -278,62 +279,222 @@
           "kind": "link"
         }
       }
+    },
+    {
+      "name": "user_organizations_source",
+      "description": "Pinned GitHub orgs/list-for-user retrieval.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_login"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "team_lookup",
+      "description": "Schema-derived teams/list source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "team_slug",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Slug of one team; requires organization.",
+          "example": "core"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "teams/get-by-name",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          },
+          "team_slug": {
+            "argument": "team_slug"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_teams_source",
+      "description": "Schema-derived teams/list source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "team_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "privacy",
+          "path": [
+            "privacy"
+          ]
+        },
+        {
+          "name": "team_type",
+          "path": [
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-teams",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
     }
   ],
   "functions": [
     {
       "name": "organizations",
-      "description": "Canonical organization profiles for an explicit organization scope; not an inventory of every organization on GitHub.",
-      "arguments": [
-        {
-          "name": "organization",
-          "type": "VARCHAR",
-          "nullable": true,
-          "default": null,
-          "min_length": 1,
-          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
-          "example": "Query-farm"
-        }
-      ],
-      "columns": [
-        {
-          "name": "organization_id",
-          "source_stage": "organizations",
-          "source_column": "organization_id"
-        },
-        {
-          "name": "organization_login",
-          "source_stage": "organizations",
-          "source_column": "organization_login"
-        },
-        {
-          "name": "name",
-          "source_stage": "organizations",
-          "source_column": "name"
-        },
-        {
-          "name": "description",
-          "source_stage": "organizations",
-          "source_column": "description"
-        },
-        {
-          "name": "created_at",
-          "source_stage": "organizations",
-          "source_column": "created_at"
-        }
-      ],
+      "description": "Canonical organizations selected directly, through public user memberships, or through repository ownership.",
       "grain": [
         "organization_id"
       ],
-      "traversal": {
-        "stages": [
-          {
-            "name": "organizations",
-            "scope": "organizations"
-          }
-        ],
-        "output_stage": "organizations"
-      },
       "semantics": {
         "detail_fields": [
           "organization_id",
@@ -358,164 +519,2221 @@
           "organization_login": "organization_login",
           "name": "organization_name"
         }
-      }
+      },
+      "routes": [
+        {
+          "name": "directory",
+          "arguments": [
+            {
+              "name": "organization_directory",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "description": "Explicitly enumerate the global public organization directory; optionally start after organization_since_id.",
+              "enum": [
+                true
+              ],
+              "example": true
+            },
+            {
+              "name": "organization_since_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Exclusive numeric organization-ID cursor for global directory retrieval; this scopes the returned population.",
+              "minimum": 0,
+              "example": 2500,
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovery",
+                "entity": "organization_directory_source",
+                "arguments": {
+                  "organization_directory": {
+                    "parameter": "organization_directory"
+                  },
+                  "organization_since_id": {
+                    "parameter": "organization_since_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_discovered_profile_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "discovery",
+                    "column": "organization_login"
+                  },
+                  "expected_organization_id": {
+                    "stage": "discovery",
+                    "column": "organization_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            }
+          ],
+          "select": [
+            "organization_directory"
+          ],
+          "population": "All advertised since-based pages of the public organization directory, optionally after the selected numeric ID."
+        },
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovery",
+                "entity": "organization_authenticated_list_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_discovered_profile_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "discovery",
+                    "column": "organization_login"
+                  },
+                  "expected_organization_id": {
+                    "stage": "discovery",
+                    "column": "organization_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            }
+          ],
+          "select": [
+            "authenticated_user"
+          ],
+          "population": "Credential-authorized organizations returned by /user/orgs. Fine-grained tokens may return an empty list by API contract; this does not prove absence of memberships."
+        },
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "name",
+              "source_stage": "organizations",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "organizations",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "organizations",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "scope": "organizations"
+              }
+            ],
+            "output_stage": "organizations"
+          },
+          "select": [
+            "organization"
+          ]
+        },
+        {
+          "name": "members",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "name",
+              "source_stage": "organizations",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "organizations",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "organizations",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "users",
+                "scope": "users"
+              },
+              {
+                "name": "memberships",
+                "entity": "user_organizations_source",
+                "arguments": {
+                  "user": {
+                    "stage": "users",
+                    "column": "user_login"
+                  }
+                }
+              },
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "stage": "memberships",
+                    "column": "organization_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "organizations"
+          },
+          "deduplicate": true,
+          "population": "Public organization memberships of the selected personal users; private memberships are not returned by this endpoint."
+        },
+        {
+          "name": "repository_owners",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "name",
+              "source_stage": "organizations",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "organizations",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "organizations",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories",
+                "where": {
+                  "owner_account_type": "Organization"
+                }
+              },
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "stage": "repositories",
+                    "column": "owner_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "organizations"
+          },
+          "deduplicate": true,
+          "population": "Distinct organization owners of selected repositories; personal owners produce no organization.",
+          "select": [
+            "owner",
+            "repository",
+            "repositories"
+          ]
+        }
+      ]
     },
     {
       "name": "organization_memberships",
-      "description": "Current organization membership visible to the attached credentials, including concealed members only when authorized. Membership does not imply employment; outside repository contributors are not members.",
-      "arguments": [
-        {
-          "name": "organization",
-          "type": "VARCHAR",
-          "nullable": true,
-          "default": null,
-          "min_length": 1,
-          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
-          "example": "Query-farm"
-        }
-      ],
-      "columns": [
-        {
-          "name": "organization_id",
-          "source_stage": "organizations",
-          "source_column": "organization_id"
-        },
-        {
-          "name": "user_id",
-          "source_stage": "members",
-          "source_column": "user_id"
-        },
-        {
-          "name": "member_login",
-          "source_stage": "members",
-          "source_column": "member_login"
-        },
-        {
-          "name": "member_type",
-          "source_stage": "members",
-          "source_column": "member_type"
-        }
-      ],
+      "description": "Organization/user membership pairs. Organization scope follows credential visibility; user scope enumerates public memberships only. Membership-object routes preserve active versus pending state and role. Enterprise team slugs are an observed list capped at 100 by GitHub, not a complete enterprise membership inventory. Summary endpoints establish active state but do not expose membership-object detail; those detail columns remain NULL.",
       "grain": [
         "organization_id",
         "user_id"
       ],
-      "traversal": {
-        "stages": [
-          {
-            "name": "organizations",
-            "scope": "organizations"
-          },
-          {
-            "name": "members",
-            "entity": "organization_members_source",
-            "arguments": {
-              "organization": {
-                "stage": "organizations",
-                "column": "organization_login"
-              }
-            }
-          }
-        ],
-        "output_stage": "members"
-      },
       "semantics": {
         "detail_fields": [
           "organization_id",
           "user_id",
           "member_login",
-          "member_type"
+          "member_type",
+          "organization_login",
+          "membership_state",
+          "membership_role",
+          "direct_membership",
+          "enterprise_team_slugs",
+          "membership_url",
+          "organization_url",
+          "can_create_repository",
+          "organization_node_id",
+          "organization_api_url",
+          "organization_repos_url",
+          "organization_events_url",
+          "organization_hooks_url",
+          "organization_issues_url",
+          "organization_members_url",
+          "organization_public_members_url",
+          "organization_avatar_url",
+          "organization_description",
+          "observed_member_name",
+          "observed_member_email",
+          "observed_member_login",
+          "observed_member_id",
+          "observed_member_node_id",
+          "observed_member_avatar_url",
+          "observed_member_gravatar_id",
+          "observed_member_url",
+          "observed_member_html_url",
+          "observed_member_followers_url",
+          "observed_member_following_url",
+          "observed_member_gists_url",
+          "observed_member_starred_url",
+          "observed_member_subscriptions_url",
+          "observed_member_organizations_url",
+          "observed_member_repos_url",
+          "observed_member_events_url",
+          "observed_member_received_events_url",
+          "observed_member_type",
+          "observed_member_site_admin",
+          "observed_member_starred_at",
+          "observed_member_user_view_type"
         ],
         "dimensions": [
           "member_login",
-          "member_type"
+          "member_type",
+          "membership_state",
+          "membership_role",
+          "direct_membership"
         ],
         "metrics": [
           {
             "name": "organization_member_count",
             "kind": "count",
-            "comment": "Current visible organization-member relationships, one per organization and account. Credential visibility defines the population; not employees or distinct members across organizations."
+            "comment": "Active visible organization/account relationships. Pending invitations are retained as membership records but excluded from this active member count.",
+            "where": {
+              "field": "membership_state",
+              "op": "eq",
+              "value": "active"
+            }
+          },
+          {
+            "name": "organization_membership_record_count",
+            "kind": "count",
+            "comment": "Selected active or pending organization membership records at organization/account grain."
+          },
+          {
+            "name": "pending_organization_membership_count",
+            "kind": "count",
+            "where": {
+              "field": "membership_state",
+              "op": "eq",
+              "value": "pending"
+            },
+            "comment": "Selected organization memberships still pending acceptance; not active organization members."
           }
         ],
         "sql_names": {
           "member_login": "member_login",
-          "member_type": "member_type"
+          "member_type": "member_type",
+          "membership_state": "organization_memberships_membership_state",
+          "membership_role": "organization_memberships_membership_role",
+          "direct_membership": "organization_memberships_direct_membership"
         }
-      }
+      },
+      "routes": [
+        {
+          "name": "public_members",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "organization_public_members",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "description": "Select only publicly declared organization memberships; private membership is outside this retrieval population.",
+              "enum": [
+                true
+              ],
+              "example": true
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_public_memberships_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "summary_membership_state": {
+                    "literal": "active"
+                  },
+                  "summary_membership_role": {
+                    "literal": null
+                  },
+                  "summary_direct_membership": {
+                    "literal": null
+                  },
+                  "summary_enterprise_team_slugs": {
+                    "literal": null
+                  },
+                  "summary_membership_url": {
+                    "literal": null
+                  },
+                  "summary_organization_url": {
+                    "literal": null
+                  },
+                  "summary_can_create_repository": {
+                    "literal": null
+                  },
+                  "summary_organization_node_id": {
+                    "literal": null
+                  },
+                  "summary_organization_repos_url": {
+                    "literal": null
+                  },
+                  "summary_organization_events_url": {
+                    "literal": null
+                  },
+                  "summary_organization_hooks_url": {
+                    "literal": null
+                  },
+                  "summary_organization_issues_url": {
+                    "literal": null
+                  },
+                  "summary_organization_members_url": {
+                    "literal": null
+                  },
+                  "summary_organization_public_members_url": {
+                    "literal": null
+                  },
+                  "summary_organization_avatar_url": {
+                    "literal": null
+                  },
+                  "summary_organization_description": {
+                    "literal": null
+                  },
+                  "summary_observed_member_name": {
+                    "literal": null
+                  },
+                  "summary_observed_member_email": {
+                    "literal": null
+                  },
+                  "summary_observed_member_login": {
+                    "literal": null
+                  },
+                  "summary_observed_member_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_node_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_avatar_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_gravatar_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_html_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_followers_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_following_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_gists_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_starred_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_subscriptions_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_organizations_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_repos_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_events_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_received_events_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_type": {
+                    "literal": null
+                  },
+                  "summary_observed_member_site_admin": {
+                    "literal": null
+                  },
+                  "summary_observed_member_starred_at": {
+                    "literal": null
+                  },
+                  "summary_observed_member_user_view_type": {
+                    "literal": null
+                  },
+                  "summary_organization_api_url": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "member_login",
+              "source_stage": "records",
+              "source_column": "member_login"
+            },
+            {
+              "name": "member_type",
+              "source_stage": "records",
+              "source_column": "member_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "records",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_role",
+              "source_stage": "records",
+              "source_column": "membership_role"
+            },
+            {
+              "name": "direct_membership",
+              "source_stage": "records",
+              "source_column": "direct_membership"
+            },
+            {
+              "name": "enterprise_team_slugs",
+              "source_stage": "records",
+              "source_column": "enterprise_team_slugs"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "records",
+              "source_column": "membership_url"
+            },
+            {
+              "name": "organization_url",
+              "source_stage": "records",
+              "source_column": "organization_url"
+            },
+            {
+              "name": "can_create_repository",
+              "source_stage": "records",
+              "source_column": "can_create_repository"
+            },
+            {
+              "name": "organization_node_id",
+              "source_stage": "records",
+              "source_column": "organization_node_id"
+            },
+            {
+              "name": "organization_api_url",
+              "source_stage": "records",
+              "source_column": "organization_api_url"
+            },
+            {
+              "name": "organization_repos_url",
+              "source_stage": "records",
+              "source_column": "organization_repos_url"
+            },
+            {
+              "name": "organization_events_url",
+              "source_stage": "records",
+              "source_column": "organization_events_url"
+            },
+            {
+              "name": "organization_hooks_url",
+              "source_stage": "records",
+              "source_column": "organization_hooks_url"
+            },
+            {
+              "name": "organization_issues_url",
+              "source_stage": "records",
+              "source_column": "organization_issues_url"
+            },
+            {
+              "name": "organization_members_url",
+              "source_stage": "records",
+              "source_column": "organization_members_url"
+            },
+            {
+              "name": "organization_public_members_url",
+              "source_stage": "records",
+              "source_column": "organization_public_members_url"
+            },
+            {
+              "name": "organization_avatar_url",
+              "source_stage": "records",
+              "source_column": "organization_avatar_url"
+            },
+            {
+              "name": "organization_description",
+              "source_stage": "records",
+              "source_column": "organization_description"
+            },
+            {
+              "name": "observed_member_name",
+              "source_stage": "records",
+              "source_column": "observed_member_name"
+            },
+            {
+              "name": "observed_member_email",
+              "source_stage": "records",
+              "source_column": "observed_member_email"
+            },
+            {
+              "name": "observed_member_login",
+              "source_stage": "records",
+              "source_column": "observed_member_login"
+            },
+            {
+              "name": "observed_member_id",
+              "source_stage": "records",
+              "source_column": "observed_member_id"
+            },
+            {
+              "name": "observed_member_node_id",
+              "source_stage": "records",
+              "source_column": "observed_member_node_id"
+            },
+            {
+              "name": "observed_member_avatar_url",
+              "source_stage": "records",
+              "source_column": "observed_member_avatar_url"
+            },
+            {
+              "name": "observed_member_gravatar_id",
+              "source_stage": "records",
+              "source_column": "observed_member_gravatar_id"
+            },
+            {
+              "name": "observed_member_url",
+              "source_stage": "records",
+              "source_column": "observed_member_url"
+            },
+            {
+              "name": "observed_member_html_url",
+              "source_stage": "records",
+              "source_column": "observed_member_html_url"
+            },
+            {
+              "name": "observed_member_followers_url",
+              "source_stage": "records",
+              "source_column": "observed_member_followers_url"
+            },
+            {
+              "name": "observed_member_following_url",
+              "source_stage": "records",
+              "source_column": "observed_member_following_url"
+            },
+            {
+              "name": "observed_member_gists_url",
+              "source_stage": "records",
+              "source_column": "observed_member_gists_url"
+            },
+            {
+              "name": "observed_member_starred_url",
+              "source_stage": "records",
+              "source_column": "observed_member_starred_url"
+            },
+            {
+              "name": "observed_member_subscriptions_url",
+              "source_stage": "records",
+              "source_column": "observed_member_subscriptions_url"
+            },
+            {
+              "name": "observed_member_organizations_url",
+              "source_stage": "records",
+              "source_column": "observed_member_organizations_url"
+            },
+            {
+              "name": "observed_member_repos_url",
+              "source_stage": "records",
+              "source_column": "observed_member_repos_url"
+            },
+            {
+              "name": "observed_member_events_url",
+              "source_stage": "records",
+              "source_column": "observed_member_events_url"
+            },
+            {
+              "name": "observed_member_received_events_url",
+              "source_stage": "records",
+              "source_column": "observed_member_received_events_url"
+            },
+            {
+              "name": "observed_member_type",
+              "source_stage": "records",
+              "source_column": "observed_member_type"
+            },
+            {
+              "name": "observed_member_site_admin",
+              "source_stage": "records",
+              "source_column": "observed_member_site_admin"
+            },
+            {
+              "name": "observed_member_starred_at",
+              "source_stage": "records",
+              "source_column": "observed_member_starred_at"
+            },
+            {
+              "name": "observed_member_user_view_type",
+              "source_stage": "records",
+              "source_column": "observed_member_user_view_type"
+            }
+          ],
+          "select": [
+            "organization_public_members"
+          ],
+          "population": "Active publicly declared organization memberships; private memberships are outside this population."
+        },
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "membership_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Account login whose organization membership or membership-check observation is selected.",
+              "min_length": 1,
+              "example": "identity-alice"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "members",
+                "entity": "organization_member_identity_source",
+                "arguments": {
+                  "selected_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "membership_user": {
+                    "parameter": "membership_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_membership_named_source",
+                "arguments": {
+                  "selected_organization_id": {
+                    "stage": "members",
+                    "column": "organization_id"
+                  },
+                  "selected_organization_login": {
+                    "stage": "members",
+                    "column": "organization_login"
+                  },
+                  "selected_membership_user_id": {
+                    "stage": "members",
+                    "column": "user_id"
+                  },
+                  "selected_membership_user_login": {
+                    "stage": "members",
+                    "column": "user_login"
+                  },
+                  "selected_membership_user_type": {
+                    "stage": "members",
+                    "column": "account_type"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "member_login",
+              "source_stage": "records",
+              "source_column": "member_login"
+            },
+            {
+              "name": "member_type",
+              "source_stage": "records",
+              "source_column": "member_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "records",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_role",
+              "source_stage": "records",
+              "source_column": "membership_role"
+            },
+            {
+              "name": "direct_membership",
+              "source_stage": "records",
+              "source_column": "direct_membership"
+            },
+            {
+              "name": "enterprise_team_slugs",
+              "source_stage": "records",
+              "source_column": "enterprise_team_slugs"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "records",
+              "source_column": "membership_url"
+            },
+            {
+              "name": "organization_url",
+              "source_stage": "records",
+              "source_column": "organization_url"
+            },
+            {
+              "name": "can_create_repository",
+              "source_stage": "records",
+              "source_column": "can_create_repository"
+            },
+            {
+              "name": "organization_node_id",
+              "source_stage": "records",
+              "source_column": "organization_node_id"
+            },
+            {
+              "name": "organization_api_url",
+              "source_stage": "records",
+              "source_column": "organization_api_url"
+            },
+            {
+              "name": "organization_repos_url",
+              "source_stage": "records",
+              "source_column": "organization_repos_url"
+            },
+            {
+              "name": "organization_events_url",
+              "source_stage": "records",
+              "source_column": "organization_events_url"
+            },
+            {
+              "name": "organization_hooks_url",
+              "source_stage": "records",
+              "source_column": "organization_hooks_url"
+            },
+            {
+              "name": "organization_issues_url",
+              "source_stage": "records",
+              "source_column": "organization_issues_url"
+            },
+            {
+              "name": "organization_members_url",
+              "source_stage": "records",
+              "source_column": "organization_members_url"
+            },
+            {
+              "name": "organization_public_members_url",
+              "source_stage": "records",
+              "source_column": "organization_public_members_url"
+            },
+            {
+              "name": "organization_avatar_url",
+              "source_stage": "records",
+              "source_column": "organization_avatar_url"
+            },
+            {
+              "name": "organization_description",
+              "source_stage": "records",
+              "source_column": "organization_description"
+            },
+            {
+              "name": "observed_member_name",
+              "source_stage": "records",
+              "source_column": "observed_member_name"
+            },
+            {
+              "name": "observed_member_email",
+              "source_stage": "records",
+              "source_column": "observed_member_email"
+            },
+            {
+              "name": "observed_member_login",
+              "source_stage": "records",
+              "source_column": "observed_member_login"
+            },
+            {
+              "name": "observed_member_id",
+              "source_stage": "records",
+              "source_column": "observed_member_id"
+            },
+            {
+              "name": "observed_member_node_id",
+              "source_stage": "records",
+              "source_column": "observed_member_node_id"
+            },
+            {
+              "name": "observed_member_avatar_url",
+              "source_stage": "records",
+              "source_column": "observed_member_avatar_url"
+            },
+            {
+              "name": "observed_member_gravatar_id",
+              "source_stage": "records",
+              "source_column": "observed_member_gravatar_id"
+            },
+            {
+              "name": "observed_member_url",
+              "source_stage": "records",
+              "source_column": "observed_member_url"
+            },
+            {
+              "name": "observed_member_html_url",
+              "source_stage": "records",
+              "source_column": "observed_member_html_url"
+            },
+            {
+              "name": "observed_member_followers_url",
+              "source_stage": "records",
+              "source_column": "observed_member_followers_url"
+            },
+            {
+              "name": "observed_member_following_url",
+              "source_stage": "records",
+              "source_column": "observed_member_following_url"
+            },
+            {
+              "name": "observed_member_gists_url",
+              "source_stage": "records",
+              "source_column": "observed_member_gists_url"
+            },
+            {
+              "name": "observed_member_starred_url",
+              "source_stage": "records",
+              "source_column": "observed_member_starred_url"
+            },
+            {
+              "name": "observed_member_subscriptions_url",
+              "source_stage": "records",
+              "source_column": "observed_member_subscriptions_url"
+            },
+            {
+              "name": "observed_member_organizations_url",
+              "source_stage": "records",
+              "source_column": "observed_member_organizations_url"
+            },
+            {
+              "name": "observed_member_repos_url",
+              "source_stage": "records",
+              "source_column": "observed_member_repos_url"
+            },
+            {
+              "name": "observed_member_events_url",
+              "source_stage": "records",
+              "source_column": "observed_member_events_url"
+            },
+            {
+              "name": "observed_member_received_events_url",
+              "source_stage": "records",
+              "source_column": "observed_member_received_events_url"
+            },
+            {
+              "name": "observed_member_type",
+              "source_stage": "records",
+              "source_column": "observed_member_type"
+            },
+            {
+              "name": "observed_member_site_admin",
+              "source_stage": "records",
+              "source_column": "observed_member_site_admin"
+            },
+            {
+              "name": "observed_member_starred_at",
+              "source_stage": "records",
+              "source_column": "observed_member_starred_at"
+            },
+            {
+              "name": "observed_member_user_view_type",
+              "source_stage": "records",
+              "source_column": "observed_member_user_view_type"
+            }
+          ],
+          "select": [
+            "membership_user"
+          ],
+          "population": "Visible membership object records retaining active or pending state. Exact missing affiliation and permission failures propagate."
+        },
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            },
+            {
+              "name": "organization_membership_state",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional authenticated membership state filter. Pending means an invitation has not been accepted; active member counts exclude pending rows.",
+              "enum": [
+                "active",
+                "pending"
+              ],
+              "example": "active",
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "members",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "scope": "authenticated_organization_memberships",
+                "where_parameters": {
+                  "membership_state": "organization_membership_state"
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "member_login",
+              "source_stage": "records",
+              "source_column": "member_login"
+            },
+            {
+              "name": "member_type",
+              "source_stage": "records",
+              "source_column": "member_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "records",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_role",
+              "source_stage": "records",
+              "source_column": "membership_role"
+            },
+            {
+              "name": "direct_membership",
+              "source_stage": "records",
+              "source_column": "direct_membership"
+            },
+            {
+              "name": "enterprise_team_slugs",
+              "source_stage": "records",
+              "source_column": "enterprise_team_slugs"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "records",
+              "source_column": "membership_url"
+            },
+            {
+              "name": "organization_url",
+              "source_stage": "records",
+              "source_column": "organization_url"
+            },
+            {
+              "name": "can_create_repository",
+              "source_stage": "records",
+              "source_column": "can_create_repository"
+            },
+            {
+              "name": "organization_node_id",
+              "source_stage": "records",
+              "source_column": "organization_node_id"
+            },
+            {
+              "name": "organization_api_url",
+              "source_stage": "records",
+              "source_column": "organization_api_url"
+            },
+            {
+              "name": "organization_repos_url",
+              "source_stage": "records",
+              "source_column": "organization_repos_url"
+            },
+            {
+              "name": "organization_events_url",
+              "source_stage": "records",
+              "source_column": "organization_events_url"
+            },
+            {
+              "name": "organization_hooks_url",
+              "source_stage": "records",
+              "source_column": "organization_hooks_url"
+            },
+            {
+              "name": "organization_issues_url",
+              "source_stage": "records",
+              "source_column": "organization_issues_url"
+            },
+            {
+              "name": "organization_members_url",
+              "source_stage": "records",
+              "source_column": "organization_members_url"
+            },
+            {
+              "name": "organization_public_members_url",
+              "source_stage": "records",
+              "source_column": "organization_public_members_url"
+            },
+            {
+              "name": "organization_avatar_url",
+              "source_stage": "records",
+              "source_column": "organization_avatar_url"
+            },
+            {
+              "name": "organization_description",
+              "source_stage": "records",
+              "source_column": "organization_description"
+            },
+            {
+              "name": "observed_member_name",
+              "source_stage": "records",
+              "source_column": "observed_member_name"
+            },
+            {
+              "name": "observed_member_email",
+              "source_stage": "records",
+              "source_column": "observed_member_email"
+            },
+            {
+              "name": "observed_member_login",
+              "source_stage": "records",
+              "source_column": "observed_member_login"
+            },
+            {
+              "name": "observed_member_id",
+              "source_stage": "records",
+              "source_column": "observed_member_id"
+            },
+            {
+              "name": "observed_member_node_id",
+              "source_stage": "records",
+              "source_column": "observed_member_node_id"
+            },
+            {
+              "name": "observed_member_avatar_url",
+              "source_stage": "records",
+              "source_column": "observed_member_avatar_url"
+            },
+            {
+              "name": "observed_member_gravatar_id",
+              "source_stage": "records",
+              "source_column": "observed_member_gravatar_id"
+            },
+            {
+              "name": "observed_member_url",
+              "source_stage": "records",
+              "source_column": "observed_member_url"
+            },
+            {
+              "name": "observed_member_html_url",
+              "source_stage": "records",
+              "source_column": "observed_member_html_url"
+            },
+            {
+              "name": "observed_member_followers_url",
+              "source_stage": "records",
+              "source_column": "observed_member_followers_url"
+            },
+            {
+              "name": "observed_member_following_url",
+              "source_stage": "records",
+              "source_column": "observed_member_following_url"
+            },
+            {
+              "name": "observed_member_gists_url",
+              "source_stage": "records",
+              "source_column": "observed_member_gists_url"
+            },
+            {
+              "name": "observed_member_starred_url",
+              "source_stage": "records",
+              "source_column": "observed_member_starred_url"
+            },
+            {
+              "name": "observed_member_subscriptions_url",
+              "source_stage": "records",
+              "source_column": "observed_member_subscriptions_url"
+            },
+            {
+              "name": "observed_member_organizations_url",
+              "source_stage": "records",
+              "source_column": "observed_member_organizations_url"
+            },
+            {
+              "name": "observed_member_repos_url",
+              "source_stage": "records",
+              "source_column": "observed_member_repos_url"
+            },
+            {
+              "name": "observed_member_events_url",
+              "source_stage": "records",
+              "source_column": "observed_member_events_url"
+            },
+            {
+              "name": "observed_member_received_events_url",
+              "source_stage": "records",
+              "source_column": "observed_member_received_events_url"
+            },
+            {
+              "name": "observed_member_type",
+              "source_stage": "records",
+              "source_column": "observed_member_type"
+            },
+            {
+              "name": "observed_member_site_admin",
+              "source_stage": "records",
+              "source_column": "observed_member_site_admin"
+            },
+            {
+              "name": "observed_member_starred_at",
+              "source_stage": "records",
+              "source_column": "observed_member_starred_at"
+            },
+            {
+              "name": "observed_member_user_view_type",
+              "source_stage": "records",
+              "source_column": "observed_member_user_view_type"
+            }
+          ],
+          "select": [
+            "authenticated_user"
+          ],
+          "population": "Authenticated account membership records across all organizations or one explicit organization. Optional state filters apply to the selected rows; pending records are retained but not counted as active members. Missing exact affiliation and permission errors fail."
+        },
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "members",
+              "source_column": "user_id"
+            },
+            {
+              "name": "member_login",
+              "source_stage": "members",
+              "source_column": "member_login"
+            },
+            {
+              "name": "member_type",
+              "source_stage": "members",
+              "source_column": "member_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "members",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_role",
+              "source_stage": "members",
+              "source_column": "membership_role"
+            },
+            {
+              "name": "direct_membership",
+              "source_stage": "members",
+              "source_column": "direct_membership"
+            },
+            {
+              "name": "enterprise_team_slugs",
+              "source_stage": "members",
+              "source_column": "enterprise_team_slugs"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "members",
+              "source_column": "membership_url"
+            },
+            {
+              "name": "organization_url",
+              "source_stage": "members",
+              "source_column": "organization_url"
+            },
+            {
+              "name": "can_create_repository",
+              "source_stage": "members",
+              "source_column": "can_create_repository"
+            },
+            {
+              "name": "organization_node_id",
+              "source_stage": "members",
+              "source_column": "organization_node_id"
+            },
+            {
+              "name": "organization_api_url",
+              "source_stage": "members",
+              "source_column": "organization_api_url"
+            },
+            {
+              "name": "organization_repos_url",
+              "source_stage": "members",
+              "source_column": "organization_repos_url"
+            },
+            {
+              "name": "organization_events_url",
+              "source_stage": "members",
+              "source_column": "organization_events_url"
+            },
+            {
+              "name": "organization_hooks_url",
+              "source_stage": "members",
+              "source_column": "organization_hooks_url"
+            },
+            {
+              "name": "organization_issues_url",
+              "source_stage": "members",
+              "source_column": "organization_issues_url"
+            },
+            {
+              "name": "organization_members_url",
+              "source_stage": "members",
+              "source_column": "organization_members_url"
+            },
+            {
+              "name": "organization_public_members_url",
+              "source_stage": "members",
+              "source_column": "organization_public_members_url"
+            },
+            {
+              "name": "organization_avatar_url",
+              "source_stage": "members",
+              "source_column": "organization_avatar_url"
+            },
+            {
+              "name": "organization_description",
+              "source_stage": "members",
+              "source_column": "organization_description"
+            },
+            {
+              "name": "observed_member_name",
+              "source_stage": "members",
+              "source_column": "observed_member_name"
+            },
+            {
+              "name": "observed_member_email",
+              "source_stage": "members",
+              "source_column": "observed_member_email"
+            },
+            {
+              "name": "observed_member_login",
+              "source_stage": "members",
+              "source_column": "observed_member_login"
+            },
+            {
+              "name": "observed_member_id",
+              "source_stage": "members",
+              "source_column": "observed_member_id"
+            },
+            {
+              "name": "observed_member_node_id",
+              "source_stage": "members",
+              "source_column": "observed_member_node_id"
+            },
+            {
+              "name": "observed_member_avatar_url",
+              "source_stage": "members",
+              "source_column": "observed_member_avatar_url"
+            },
+            {
+              "name": "observed_member_gravatar_id",
+              "source_stage": "members",
+              "source_column": "observed_member_gravatar_id"
+            },
+            {
+              "name": "observed_member_url",
+              "source_stage": "members",
+              "source_column": "observed_member_url"
+            },
+            {
+              "name": "observed_member_html_url",
+              "source_stage": "members",
+              "source_column": "observed_member_html_url"
+            },
+            {
+              "name": "observed_member_followers_url",
+              "source_stage": "members",
+              "source_column": "observed_member_followers_url"
+            },
+            {
+              "name": "observed_member_following_url",
+              "source_stage": "members",
+              "source_column": "observed_member_following_url"
+            },
+            {
+              "name": "observed_member_gists_url",
+              "source_stage": "members",
+              "source_column": "observed_member_gists_url"
+            },
+            {
+              "name": "observed_member_starred_url",
+              "source_stage": "members",
+              "source_column": "observed_member_starred_url"
+            },
+            {
+              "name": "observed_member_subscriptions_url",
+              "source_stage": "members",
+              "source_column": "observed_member_subscriptions_url"
+            },
+            {
+              "name": "observed_member_organizations_url",
+              "source_stage": "members",
+              "source_column": "observed_member_organizations_url"
+            },
+            {
+              "name": "observed_member_repos_url",
+              "source_stage": "members",
+              "source_column": "observed_member_repos_url"
+            },
+            {
+              "name": "observed_member_events_url",
+              "source_stage": "members",
+              "source_column": "observed_member_events_url"
+            },
+            {
+              "name": "observed_member_received_events_url",
+              "source_stage": "members",
+              "source_column": "observed_member_received_events_url"
+            },
+            {
+              "name": "observed_member_type",
+              "source_stage": "members",
+              "source_column": "observed_member_type"
+            },
+            {
+              "name": "observed_member_site_admin",
+              "source_stage": "members",
+              "source_column": "observed_member_site_admin"
+            },
+            {
+              "name": "observed_member_starred_at",
+              "source_stage": "members",
+              "source_column": "observed_member_starred_at"
+            },
+            {
+              "name": "observed_member_user_view_type",
+              "source_stage": "members",
+              "source_column": "observed_member_user_view_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "scope": "organizations"
+              },
+              {
+                "name": "members",
+                "entity": "organization_memberships_summary_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "summary_membership_state": {
+                    "literal": "active"
+                  },
+                  "summary_membership_role": {
+                    "literal": null
+                  },
+                  "summary_direct_membership": {
+                    "literal": null
+                  },
+                  "summary_enterprise_team_slugs": {
+                    "literal": null
+                  },
+                  "summary_membership_url": {
+                    "literal": null
+                  },
+                  "summary_organization_url": {
+                    "literal": null
+                  },
+                  "summary_can_create_repository": {
+                    "literal": null
+                  },
+                  "summary_organization_node_id": {
+                    "literal": null
+                  },
+                  "summary_organization_repos_url": {
+                    "literal": null
+                  },
+                  "summary_organization_events_url": {
+                    "literal": null
+                  },
+                  "summary_organization_hooks_url": {
+                    "literal": null
+                  },
+                  "summary_organization_issues_url": {
+                    "literal": null
+                  },
+                  "summary_organization_members_url": {
+                    "literal": null
+                  },
+                  "summary_organization_public_members_url": {
+                    "literal": null
+                  },
+                  "summary_organization_avatar_url": {
+                    "literal": null
+                  },
+                  "summary_organization_description": {
+                    "literal": null
+                  },
+                  "summary_observed_member_name": {
+                    "literal": null
+                  },
+                  "summary_observed_member_email": {
+                    "literal": null
+                  },
+                  "summary_observed_member_login": {
+                    "literal": null
+                  },
+                  "summary_observed_member_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_node_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_avatar_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_gravatar_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_html_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_followers_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_following_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_gists_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_starred_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_subscriptions_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_organizations_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_repos_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_events_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_received_events_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_type": {
+                    "literal": null
+                  },
+                  "summary_observed_member_site_admin": {
+                    "literal": null
+                  },
+                  "summary_observed_member_starred_at": {
+                    "literal": null
+                  },
+                  "summary_observed_member_user_view_type": {
+                    "literal": null
+                  },
+                  "summary_organization_api_url": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "members"
+          },
+          "select": [
+            "organization"
+          ]
+        },
+        {
+          "name": "members",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "users",
+              "source_column": "user_id"
+            },
+            {
+              "name": "member_login",
+              "source_stage": "users",
+              "source_column": "user_login"
+            },
+            {
+              "name": "member_type",
+              "source_stage": "users",
+              "source_column": "account_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "memberships",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_role",
+              "source_stage": "memberships",
+              "source_column": "membership_role"
+            },
+            {
+              "name": "direct_membership",
+              "source_stage": "memberships",
+              "source_column": "direct_membership"
+            },
+            {
+              "name": "enterprise_team_slugs",
+              "source_stage": "memberships",
+              "source_column": "enterprise_team_slugs"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "memberships",
+              "source_column": "membership_url"
+            },
+            {
+              "name": "organization_url",
+              "source_stage": "memberships",
+              "source_column": "organization_url"
+            },
+            {
+              "name": "can_create_repository",
+              "source_stage": "memberships",
+              "source_column": "can_create_repository"
+            },
+            {
+              "name": "organization_node_id",
+              "source_stage": "memberships",
+              "source_column": "organization_node_id"
+            },
+            {
+              "name": "organization_api_url",
+              "source_stage": "memberships",
+              "source_column": "organization_api_url"
+            },
+            {
+              "name": "organization_repos_url",
+              "source_stage": "memberships",
+              "source_column": "organization_repos_url"
+            },
+            {
+              "name": "organization_events_url",
+              "source_stage": "memberships",
+              "source_column": "organization_events_url"
+            },
+            {
+              "name": "organization_hooks_url",
+              "source_stage": "memberships",
+              "source_column": "organization_hooks_url"
+            },
+            {
+              "name": "organization_issues_url",
+              "source_stage": "memberships",
+              "source_column": "organization_issues_url"
+            },
+            {
+              "name": "organization_members_url",
+              "source_stage": "memberships",
+              "source_column": "organization_members_url"
+            },
+            {
+              "name": "organization_public_members_url",
+              "source_stage": "memberships",
+              "source_column": "organization_public_members_url"
+            },
+            {
+              "name": "organization_avatar_url",
+              "source_stage": "memberships",
+              "source_column": "organization_avatar_url"
+            },
+            {
+              "name": "organization_description",
+              "source_stage": "memberships",
+              "source_column": "organization_description"
+            },
+            {
+              "name": "observed_member_name",
+              "source_stage": "memberships",
+              "source_column": "observed_member_name"
+            },
+            {
+              "name": "observed_member_email",
+              "source_stage": "memberships",
+              "source_column": "observed_member_email"
+            },
+            {
+              "name": "observed_member_login",
+              "source_stage": "memberships",
+              "source_column": "observed_member_login"
+            },
+            {
+              "name": "observed_member_id",
+              "source_stage": "memberships",
+              "source_column": "observed_member_id"
+            },
+            {
+              "name": "observed_member_node_id",
+              "source_stage": "memberships",
+              "source_column": "observed_member_node_id"
+            },
+            {
+              "name": "observed_member_avatar_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_avatar_url"
+            },
+            {
+              "name": "observed_member_gravatar_id",
+              "source_stage": "memberships",
+              "source_column": "observed_member_gravatar_id"
+            },
+            {
+              "name": "observed_member_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_url"
+            },
+            {
+              "name": "observed_member_html_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_html_url"
+            },
+            {
+              "name": "observed_member_followers_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_followers_url"
+            },
+            {
+              "name": "observed_member_following_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_following_url"
+            },
+            {
+              "name": "observed_member_gists_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_gists_url"
+            },
+            {
+              "name": "observed_member_starred_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_starred_url"
+            },
+            {
+              "name": "observed_member_subscriptions_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_subscriptions_url"
+            },
+            {
+              "name": "observed_member_organizations_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_organizations_url"
+            },
+            {
+              "name": "observed_member_repos_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_repos_url"
+            },
+            {
+              "name": "observed_member_events_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_events_url"
+            },
+            {
+              "name": "observed_member_received_events_url",
+              "source_stage": "memberships",
+              "source_column": "observed_member_received_events_url"
+            },
+            {
+              "name": "observed_member_type",
+              "source_stage": "memberships",
+              "source_column": "observed_member_type"
+            },
+            {
+              "name": "observed_member_site_admin",
+              "source_stage": "memberships",
+              "source_column": "observed_member_site_admin"
+            },
+            {
+              "name": "observed_member_starred_at",
+              "source_stage": "memberships",
+              "source_column": "observed_member_starred_at"
+            },
+            {
+              "name": "observed_member_user_view_type",
+              "source_stage": "memberships",
+              "source_column": "observed_member_user_view_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "users",
+                "scope": "users"
+              },
+              {
+                "name": "memberships",
+                "entity": "user_public_organization_memberships_source",
+                "arguments": {
+                  "user": {
+                    "stage": "users",
+                    "column": "user_login"
+                  },
+                  "summary_membership_state": {
+                    "literal": "active"
+                  },
+                  "summary_membership_role": {
+                    "literal": null
+                  },
+                  "summary_direct_membership": {
+                    "literal": null
+                  },
+                  "summary_enterprise_team_slugs": {
+                    "literal": null
+                  },
+                  "summary_membership_url": {
+                    "literal": null
+                  },
+                  "summary_organization_url": {
+                    "literal": null
+                  },
+                  "summary_can_create_repository": {
+                    "literal": null
+                  },
+                  "summary_organization_node_id": {
+                    "literal": null
+                  },
+                  "summary_organization_repos_url": {
+                    "literal": null
+                  },
+                  "summary_organization_events_url": {
+                    "literal": null
+                  },
+                  "summary_organization_hooks_url": {
+                    "literal": null
+                  },
+                  "summary_organization_issues_url": {
+                    "literal": null
+                  },
+                  "summary_organization_members_url": {
+                    "literal": null
+                  },
+                  "summary_organization_public_members_url": {
+                    "literal": null
+                  },
+                  "summary_organization_avatar_url": {
+                    "literal": null
+                  },
+                  "summary_organization_description": {
+                    "literal": null
+                  },
+                  "summary_observed_member_name": {
+                    "literal": null
+                  },
+                  "summary_observed_member_email": {
+                    "literal": null
+                  },
+                  "summary_observed_member_login": {
+                    "literal": null
+                  },
+                  "summary_observed_member_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_node_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_avatar_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_gravatar_id": {
+                    "literal": null
+                  },
+                  "summary_observed_member_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_html_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_followers_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_following_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_gists_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_starred_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_subscriptions_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_organizations_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_repos_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_events_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_received_events_url": {
+                    "literal": null
+                  },
+                  "summary_observed_member_type": {
+                    "literal": null
+                  },
+                  "summary_observed_member_site_admin": {
+                    "literal": null
+                  },
+                  "summary_observed_member_starred_at": {
+                    "literal": null
+                  },
+                  "summary_observed_member_user_view_type": {
+                    "literal": null
+                  },
+                  "summary_organization_api_url": {
+                    "literal": null
+                  }
+                }
+              },
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "stage": "memberships",
+                    "column": "organization_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "organizations"
+          },
+          "population": "Public memberships of selected users. This reverse endpoint excludes private memberships, even with authentication."
+        }
+      ]
     },
     {
       "name": "teams",
-      "description": "Teams in the selected organization visible to the attached credentials; includes teams with no returned members.",
-      "arguments": [
-        {
-          "name": "organization",
-          "type": "VARCHAR",
-          "nullable": true,
-          "default": null,
-          "min_length": 1,
-          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
-          "example": "Query-farm"
-        }
-      ],
-      "columns": [
-        {
-          "name": "organization_id",
-          "source_stage": "organizations",
-          "source_column": "organization_id"
-        },
-        {
-          "name": "team_id",
-          "source_stage": "teams",
-          "source_column": "team_id"
-        },
-        {
-          "name": "team_slug",
-          "source_stage": "teams",
-          "source_column": "team_slug"
-        },
-        {
-          "name": "team_name",
-          "source_stage": "teams",
-          "source_column": "team_name"
-        },
-        {
-          "name": "description",
-          "source_stage": "teams",
-          "source_column": "description"
-        },
-        {
-          "name": "privacy",
-          "source_stage": "teams",
-          "source_column": "privacy"
-        },
-        {
-          "name": "team_type",
-          "source_stage": "teams",
-          "source_column": "team_type"
-        }
-      ],
+      "description": "Canonical teams selected by organization, one team slug, or repository access. Numeric, authenticated-account and immediate-child retrieval routes share stable team identity. Full-team-only fields remain NULL on summary routes; pinned numeric routes are deprecated upstream.",
       "grain": [
         "team_id"
       ],
-      "traversal": {
-        "stages": [
-          {
-            "name": "organizations",
-            "scope": "organizations"
-          },
-          {
-            "name": "teams",
-            "entity": "teams_source",
-            "arguments": {
-              "organization": {
-                "stage": "organizations",
-                "column": "organization_login"
-              }
-            }
-          }
-        ],
-        "output_stage": "teams"
-      },
       "semantics": {
         "detail_fields": [
           "organization_id",
@@ -524,7 +2742,24 @@
           "team_name",
           "description",
           "privacy",
-          "team_type"
+          "team_type",
+          "organization_login",
+          "node_id",
+          "url",
+          "html_url",
+          "notification_setting",
+          "permission",
+          "members_url",
+          "repositories_url",
+          "owning_organization_id",
+          "enterprise_id",
+          "parent",
+          "parent_team_id",
+          "created_at",
+          "updated_at",
+          "members_count",
+          "repos_count",
+          "ldap_dn"
         ],
         "dimensions": [
           "team_id",
@@ -546,91 +2781,1209 @@
           "privacy": "team_privacy",
           "team_type": "team_type"
         }
-      }
+      },
+      "routes": [
+        {
+          "name": "invitations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "organization_invitation_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact organization invitation identity used to retrieve its associated teams.",
+              "minimum": 1,
+              "example": 3502
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "discovery",
+                "entity": "organization_invitation_teams_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "organization_invitation_id": {
+                    "parameter": "organization_invitation_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "team_identity_numeric_source",
+                "arguments": {
+                  "team_numeric_id": {
+                    "stage": "discovery",
+                    "column": "team_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "team_name",
+              "source_stage": "records",
+              "source_column": "team_name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "privacy",
+              "source_stage": "records",
+              "source_column": "privacy"
+            },
+            {
+              "name": "team_type",
+              "source_stage": "records",
+              "source_column": "team_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "notification_setting",
+              "source_stage": "records",
+              "source_column": "notification_setting"
+            },
+            {
+              "name": "permission",
+              "source_stage": "records",
+              "source_column": "permission"
+            },
+            {
+              "name": "members_url",
+              "source_stage": "records",
+              "source_column": "members_url"
+            },
+            {
+              "name": "repositories_url",
+              "source_stage": "records",
+              "source_column": "repositories_url"
+            },
+            {
+              "name": "owning_organization_id",
+              "source_stage": "records",
+              "source_column": "owning_organization_id"
+            },
+            {
+              "name": "enterprise_id",
+              "source_stage": "records",
+              "source_column": "enterprise_id"
+            },
+            {
+              "name": "parent",
+              "source_stage": "records",
+              "source_column": "parent"
+            },
+            {
+              "name": "parent_team_id",
+              "source_stage": "records",
+              "source_column": "parent_team_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "members_count",
+              "source_stage": "records",
+              "source_column": "members_count"
+            },
+            {
+              "name": "repos_count",
+              "source_stage": "records",
+              "source_column": "repos_count"
+            },
+            {
+              "name": "ldap_dn",
+              "source_stage": "records",
+              "source_column": "ldap_dn"
+            }
+          ],
+          "select": [
+            "organization_invitation_id"
+          ],
+          "population": "Teams associated with one invitation, hydrated to canonical team identity."
+        },
+        {
+          "name": "numeric_identity",
+          "arguments": [
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "team_identity_numeric_source",
+                "arguments": {
+                  "team_numeric_id": {
+                    "parameter": "team_numeric_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "team_name",
+              "source_stage": "records",
+              "source_column": "team_name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "privacy",
+              "source_stage": "records",
+              "source_column": "privacy"
+            },
+            {
+              "name": "team_type",
+              "source_stage": "records",
+              "source_column": "team_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "notification_setting",
+              "source_stage": "records",
+              "source_column": "notification_setting"
+            },
+            {
+              "name": "permission",
+              "source_stage": "records",
+              "source_column": "permission"
+            },
+            {
+              "name": "members_url",
+              "source_stage": "records",
+              "source_column": "members_url"
+            },
+            {
+              "name": "repositories_url",
+              "source_stage": "records",
+              "source_column": "repositories_url"
+            },
+            {
+              "name": "owning_organization_id",
+              "source_stage": "records",
+              "source_column": "owning_organization_id"
+            },
+            {
+              "name": "enterprise_id",
+              "source_stage": "records",
+              "source_column": "enterprise_id"
+            },
+            {
+              "name": "parent",
+              "source_stage": "records",
+              "source_column": "parent"
+            },
+            {
+              "name": "parent_team_id",
+              "source_stage": "records",
+              "source_column": "parent_team_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "members_count",
+              "source_stage": "records",
+              "source_column": "members_count"
+            },
+            {
+              "name": "repos_count",
+              "source_stage": "records",
+              "source_column": "repos_count"
+            },
+            {
+              "name": "ldap_dn",
+              "source_stage": "records",
+              "source_column": "ldap_dn"
+            }
+          ],
+          "select": [
+            "team_numeric_id"
+          ],
+          "population": "One exact team by stable numeric identity through the pinned deprecated endpoint."
+        },
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "team_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "team_name",
+              "source_stage": "records",
+              "source_column": "team_name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "privacy",
+              "source_stage": "records",
+              "source_column": "privacy"
+            },
+            {
+              "name": "team_type",
+              "source_stage": "records",
+              "source_column": "team_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "notification_setting",
+              "source_stage": "records",
+              "source_column": "notification_setting"
+            },
+            {
+              "name": "permission",
+              "source_stage": "records",
+              "source_column": "permission"
+            },
+            {
+              "name": "members_url",
+              "source_stage": "records",
+              "source_column": "members_url"
+            },
+            {
+              "name": "repositories_url",
+              "source_stage": "records",
+              "source_column": "repositories_url"
+            },
+            {
+              "name": "owning_organization_id",
+              "source_stage": "records",
+              "source_column": "owning_organization_id"
+            },
+            {
+              "name": "enterprise_id",
+              "source_stage": "records",
+              "source_column": "enterprise_id"
+            },
+            {
+              "name": "parent",
+              "source_stage": "records",
+              "source_column": "parent"
+            },
+            {
+              "name": "parent_team_id",
+              "source_stage": "records",
+              "source_column": "parent_team_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "members_count",
+              "source_stage": "records",
+              "source_column": "members_count"
+            },
+            {
+              "name": "repos_count",
+              "source_stage": "records",
+              "source_column": "repos_count"
+            },
+            {
+              "name": "ldap_dn",
+              "source_stage": "records",
+              "source_column": "ldap_dn"
+            }
+          ],
+          "select": [
+            "authenticated_user"
+          ],
+          "population": "All advertised pages of teams available to the authenticated account; fine-grained token ownership limits the visible organizations."
+        },
+        {
+          "name": "children_named",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "parent_team_slug",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Select immediate child teams of this team slug; requires organization. This does not recursively enumerate descendants.",
+              "min_length": 1,
+              "example": "platform"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovery",
+                "entity": "team_children_named_source",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  },
+                  "parent_team_slug": {
+                    "parameter": "parent_team_slug"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "team_identity_numeric_source",
+                "arguments": {
+                  "team_numeric_id": {
+                    "stage": "discovery",
+                    "column": "team_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "team_name",
+              "source_stage": "records",
+              "source_column": "team_name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "privacy",
+              "source_stage": "records",
+              "source_column": "privacy"
+            },
+            {
+              "name": "team_type",
+              "source_stage": "records",
+              "source_column": "team_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "notification_setting",
+              "source_stage": "records",
+              "source_column": "notification_setting"
+            },
+            {
+              "name": "permission",
+              "source_stage": "records",
+              "source_column": "permission"
+            },
+            {
+              "name": "members_url",
+              "source_stage": "records",
+              "source_column": "members_url"
+            },
+            {
+              "name": "repositories_url",
+              "source_stage": "records",
+              "source_column": "repositories_url"
+            },
+            {
+              "name": "owning_organization_id",
+              "source_stage": "records",
+              "source_column": "owning_organization_id"
+            },
+            {
+              "name": "enterprise_id",
+              "source_stage": "records",
+              "source_column": "enterprise_id"
+            },
+            {
+              "name": "parent",
+              "source_stage": "records",
+              "source_column": "parent"
+            },
+            {
+              "name": "parent_team_id",
+              "source_stage": "records",
+              "source_column": "parent_team_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "members_count",
+              "source_stage": "records",
+              "source_column": "members_count"
+            },
+            {
+              "name": "repos_count",
+              "source_stage": "records",
+              "source_column": "repos_count"
+            },
+            {
+              "name": "ldap_dn",
+              "source_stage": "records",
+              "source_column": "ldap_dn"
+            }
+          ],
+          "select": [
+            "parent_team_slug"
+          ],
+          "population": "Immediate child teams only; each child hydrates to its canonical stable identity."
+        },
+        {
+          "name": "children_numeric",
+          "arguments": [
+            {
+              "name": "parent_team_numeric_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Select immediate child teams of this stable parent team ID through the pinned legacy route.",
+              "minimum": 1,
+              "example": 3201
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovery",
+                "entity": "team_children_numeric_source",
+                "arguments": {
+                  "parent_team_numeric_id": {
+                    "parameter": "parent_team_numeric_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "team_identity_numeric_source",
+                "arguments": {
+                  "team_numeric_id": {
+                    "stage": "discovery",
+                    "column": "team_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "team_name",
+              "source_stage": "records",
+              "source_column": "team_name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "privacy",
+              "source_stage": "records",
+              "source_column": "privacy"
+            },
+            {
+              "name": "team_type",
+              "source_stage": "records",
+              "source_column": "team_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "notification_setting",
+              "source_stage": "records",
+              "source_column": "notification_setting"
+            },
+            {
+              "name": "permission",
+              "source_stage": "records",
+              "source_column": "permission"
+            },
+            {
+              "name": "members_url",
+              "source_stage": "records",
+              "source_column": "members_url"
+            },
+            {
+              "name": "repositories_url",
+              "source_stage": "records",
+              "source_column": "repositories_url"
+            },
+            {
+              "name": "owning_organization_id",
+              "source_stage": "records",
+              "source_column": "owning_organization_id"
+            },
+            {
+              "name": "enterprise_id",
+              "source_stage": "records",
+              "source_column": "enterprise_id"
+            },
+            {
+              "name": "parent",
+              "source_stage": "records",
+              "source_column": "parent"
+            },
+            {
+              "name": "parent_team_id",
+              "source_stage": "records",
+              "source_column": "parent_team_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "members_count",
+              "source_stage": "records",
+              "source_column": "members_count"
+            },
+            {
+              "name": "repos_count",
+              "source_stage": "records",
+              "source_column": "repos_count"
+            },
+            {
+              "name": "ldap_dn",
+              "source_stage": "records",
+              "source_column": "ldap_dn"
+            }
+          ],
+          "select": [
+            "parent_team_numeric_id"
+          ],
+          "population": "Immediate child teams only; each child hydrates to its canonical stable identity."
+        },
+        {
+          "name": "organizations",
+          "select": [
+            "organization"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "teams",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "teams",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "team_name",
+              "source_stage": "teams",
+              "source_column": "team_name"
+            },
+            {
+              "name": "description",
+              "source_stage": "teams",
+              "source_column": "description"
+            },
+            {
+              "name": "privacy",
+              "source_stage": "teams",
+              "source_column": "privacy"
+            },
+            {
+              "name": "team_type",
+              "source_stage": "teams",
+              "source_column": "team_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "teams",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "teams",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "teams",
+              "source_column": "html_url"
+            },
+            {
+              "name": "notification_setting",
+              "source_stage": "teams",
+              "source_column": "notification_setting"
+            },
+            {
+              "name": "permission",
+              "source_stage": "teams",
+              "source_column": "permission"
+            },
+            {
+              "name": "members_url",
+              "source_stage": "teams",
+              "source_column": "members_url"
+            },
+            {
+              "name": "repositories_url",
+              "source_stage": "teams",
+              "source_column": "repositories_url"
+            },
+            {
+              "name": "owning_organization_id",
+              "source_stage": "teams",
+              "source_column": "owning_organization_id"
+            },
+            {
+              "name": "enterprise_id",
+              "source_stage": "teams",
+              "source_column": "enterprise_id"
+            },
+            {
+              "name": "parent",
+              "source_stage": "teams",
+              "source_column": "parent"
+            },
+            {
+              "name": "parent_team_id",
+              "source_stage": "teams",
+              "source_column": "parent_team_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "teams",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "teams",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "members_count",
+              "source_stage": "teams",
+              "source_column": "members_count"
+            },
+            {
+              "name": "repos_count",
+              "source_stage": "teams",
+              "source_column": "repos_count"
+            },
+            {
+              "name": "ldap_dn",
+              "source_stage": "teams",
+              "source_column": "ldap_dn"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "scope": "organizations"
+              },
+              {
+                "name": "teams",
+                "scope": "teams"
+              }
+            ],
+            "output_stage": "teams"
+          }
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "repositories",
+              "source_column": "owner_account_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "teams",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "teams",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "team_name",
+              "source_stage": "teams",
+              "source_column": "team_name"
+            },
+            {
+              "name": "description",
+              "source_stage": "teams",
+              "source_column": "description"
+            },
+            {
+              "name": "privacy",
+              "source_stage": "teams",
+              "source_column": "privacy"
+            },
+            {
+              "name": "team_type",
+              "source_stage": "teams",
+              "source_column": "team_type"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "repositories",
+              "source_column": "owner_login"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "teams",
+              "source_column": "node_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "teams",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "teams",
+              "source_column": "html_url"
+            },
+            {
+              "name": "notification_setting",
+              "source_stage": "teams",
+              "source_column": "notification_setting"
+            },
+            {
+              "name": "permission",
+              "source_stage": "teams",
+              "source_column": "permission"
+            },
+            {
+              "name": "members_url",
+              "source_stage": "teams",
+              "source_column": "members_url"
+            },
+            {
+              "name": "repositories_url",
+              "source_stage": "teams",
+              "source_column": "repositories_url"
+            },
+            {
+              "name": "owning_organization_id",
+              "source_stage": "teams",
+              "source_column": "owning_organization_id"
+            },
+            {
+              "name": "enterprise_id",
+              "source_stage": "teams",
+              "source_column": "enterprise_id"
+            },
+            {
+              "name": "parent",
+              "source_stage": "teams",
+              "source_column": "parent"
+            },
+            {
+              "name": "parent_team_id",
+              "source_stage": "teams",
+              "source_column": "parent_team_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "teams",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "teams",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "members_count",
+              "source_stage": "teams",
+              "source_column": "members_count"
+            },
+            {
+              "name": "repos_count",
+              "source_stage": "teams",
+              "source_column": "repos_count"
+            },
+            {
+              "name": "ldap_dn",
+              "source_stage": "teams",
+              "source_column": "ldap_dn"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories",
+                "where": {
+                  "owner_account_type": "Organization"
+                }
+              },
+              {
+                "name": "teams",
+                "entity": "team_identity_repository_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "summary_team_created_at": {
+                    "literal": null
+                  },
+                  "summary_team_updated_at": {
+                    "literal": null
+                  },
+                  "summary_team_members_count": {
+                    "literal": null
+                  },
+                  "summary_team_repos_count": {
+                    "literal": null
+                  },
+                  "summary_team_ldap_dn": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "teams"
+          },
+          "deduplicate": true,
+          "population": "Distinct teams with access to the selected organization-owned repositories; requires permission to enumerate repository teams."
+        }
+      ]
     },
     {
       "name": "team_memberships",
-      "description": "Effective membership returned for each visible team. One person in two teams contributes two memberships. Child-team membership may be included by GitHub; optional role and inherited fields remain NULL when absent.",
-      "arguments": [
-        {
-          "name": "organization",
-          "type": "VARCHAR",
-          "nullable": true,
-          "default": null,
-          "min_length": 1,
-          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
-          "example": "Query-farm"
-        }
-      ],
-      "columns": [
-        {
-          "name": "organization_id",
-          "source_stage": "organizations",
-          "source_column": "organization_id"
-        },
-        {
-          "name": "team_id",
-          "source_stage": "teams",
-          "source_column": "team_id"
-        },
-        {
-          "name": "user_id",
-          "source_stage": "members",
-          "source_column": "user_id"
-        },
-        {
-          "name": "team_member_login",
-          "source_stage": "members",
-          "source_column": "team_member_login"
-        },
-        {
-          "name": "member_role",
-          "source_stage": "members",
-          "source_column": "member_role"
-        },
-        {
-          "name": "membership_inherited",
-          "source_stage": "members",
-          "source_column": "membership_inherited"
-        }
-      ],
+      "description": "Effective membership returned for each visible team. One person in two teams contributes two memberships. Child-team membership may be included by GitHub; optional role and inherited fields remain NULL when absent. Exact object routes retain pending state. Active member lists do not expose membership-object URLs; object routes do not expose inherited status, which remains NULL.",
       "grain": [
         "team_id",
         "user_id"
       ],
-      "traversal": {
-        "stages": [
-          {
-            "name": "organizations",
-            "scope": "organizations"
-          },
-          {
-            "name": "teams",
-            "entity": "teams_source",
-            "arguments": {
-              "organization": {
-                "stage": "organizations",
-                "column": "organization_login"
-              }
-            }
-          },
-          {
-            "name": "members",
-            "entity": "team_members_source",
-            "arguments": {
-              "organization": {
-                "stage": "organizations",
-                "column": "organization_login"
-              },
-              "team_slug": {
-                "stage": "teams",
-                "column": "team_slug"
-              }
-            }
-          }
-        ],
-        "output_stage": "members"
-      },
       "semantics": {
         "detail_fields": [
           "organization_id",
@@ -638,26 +3991,586 @@
           "user_id",
           "team_member_login",
           "member_role",
-          "membership_inherited"
+          "membership_inherited",
+          "organization_login",
+          "team_slug",
+          "membership_state",
+          "membership_url"
         ],
         "dimensions": [
           "team_member_login",
           "member_role",
-          "membership_inherited"
+          "membership_inherited",
+          "membership_state"
         ],
         "metrics": [
           {
             "name": "team_membership_count",
             "kind": "count",
-            "comment": "Current visible effective team-account pairs, including inherited membership when returned. Additive over teams as memberships, not distinct people or attributable PR activity."
+            "comment": "Active effective team/account relationships, including inherited members; pending invitations are excluded.",
+            "where": {
+              "field": "membership_state",
+              "op": "eq",
+              "value": "active"
+            }
+          },
+          {
+            "name": "team_membership_record_count",
+            "kind": "count",
+            "comment": "Selected active and pending team/account membership records."
+          },
+          {
+            "name": "pending_team_membership_count",
+            "kind": "count",
+            "where": {
+              "field": "membership_state",
+              "op": "eq",
+              "value": "pending"
+            },
+            "comment": "Selected pending team membership records, excluding active effective members."
           }
         ],
         "sql_names": {
           "team_member_login": "team_member_login",
           "member_role": "team_member_role",
-          "membership_inherited": "team_membership_inherited"
+          "membership_inherited": "team_membership_inherited",
+          "membership_state": "team_membership_state"
         }
-      }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            },
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201,
+              "default": null
+            },
+            {
+              "name": "team_member_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Account login for an exact team membership or membership-check observation.",
+              "min_length": 1,
+              "example": "membership-alice"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "teams",
+                "scope": "selected_identity_team"
+              },
+              {
+                "name": "members",
+                "entity": "team_member_identity_context_source",
+                "arguments": {
+                  "selected_team_id": {
+                    "stage": "teams",
+                    "column": "team_id"
+                  },
+                  "selected_team_slug": {
+                    "stage": "teams",
+                    "column": "team_slug"
+                  },
+                  "selected_team_organization_id": {
+                    "stage": "teams",
+                    "column": "organization_id"
+                  },
+                  "selected_team_organization_login": {
+                    "stage": "teams",
+                    "column": "organization_login"
+                  },
+                  "team_member_user": {
+                    "parameter": "team_member_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "scope": "selected_team_membership_object"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "team_member_login",
+              "source_stage": "records",
+              "source_column": "team_member_login"
+            },
+            {
+              "name": "member_role",
+              "source_stage": "records",
+              "source_column": "member_role"
+            },
+            {
+              "name": "membership_inherited",
+              "source_stage": "records",
+              "source_column": "membership_inherited"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "records",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "records",
+              "source_column": "membership_url"
+            }
+          ],
+          "select": [
+            "team_member_user"
+          ],
+          "population": "Exact visible team/account membership with active or pending state; missingmembership404 fails."
+        },
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "members",
+                "entity": "user_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "parameter": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "teams",
+                "entity": "team_identity_authenticated_source",
+                "arguments": {
+                  "authenticated_user": {
+                    "stage": "members",
+                    "column": "authenticated_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "team_membership_numeric_object_source",
+                "arguments": {
+                  "selected_team_id": {
+                    "stage": "teams",
+                    "column": "team_id"
+                  },
+                  "selected_team_slug": {
+                    "stage": "teams",
+                    "column": "team_slug"
+                  },
+                  "selected_team_organization_id": {
+                    "stage": "teams",
+                    "column": "organization_id"
+                  },
+                  "selected_team_organization_login": {
+                    "stage": "teams",
+                    "column": "organization_login"
+                  },
+                  "selected_team_user_id": {
+                    "stage": "members",
+                    "column": "user_id"
+                  },
+                  "selected_team_user_login": {
+                    "stage": "members",
+                    "column": "user_login"
+                  },
+                  "unknown_membership_inherited": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "team_member_login",
+              "source_stage": "records",
+              "source_column": "team_member_login"
+            },
+            {
+              "name": "member_role",
+              "source_stage": "records",
+              "source_column": "member_role"
+            },
+            {
+              "name": "membership_inherited",
+              "source_stage": "records",
+              "source_column": "membership_inherited"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "records",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "records",
+              "source_column": "membership_url"
+            }
+          ],
+          "select": [
+            "authenticated_user"
+          ],
+          "population": "Membership objects for every team returned for the authenticated account; token visibility scopes the population."
+        },
+        {
+          "name": "numeric_identity",
+          "arguments": [
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201
+            },
+            {
+              "name": "team_member_role",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Effective team member role filter; omission uses all roles. Child-team members can be inherited.",
+              "enum": [
+                "member",
+                "maintainer",
+                "all"
+              ],
+              "example": "maintainer",
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "teams",
+                "entity": "team_identity_numeric_source",
+                "arguments": {
+                  "team_numeric_id": {
+                    "parameter": "team_numeric_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "team_members_numeric_identity_source",
+                "arguments": {
+                  "selected_team_id": {
+                    "stage": "teams",
+                    "column": "team_id"
+                  },
+                  "selected_team_slug": {
+                    "stage": "teams",
+                    "column": "team_slug"
+                  },
+                  "selected_team_organization_id": {
+                    "stage": "teams",
+                    "column": "organization_id"
+                  },
+                  "selected_team_organization_login": {
+                    "stage": "teams",
+                    "column": "organization_login"
+                  },
+                  "team_member_role": {
+                    "parameter": "team_member_role"
+                  },
+                  "listed_team_membership_state": {
+                    "literal": "active"
+                  },
+                  "unknown_team_membership_url": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "team_member_login",
+              "source_stage": "records",
+              "source_column": "team_member_login"
+            },
+            {
+              "name": "member_role",
+              "source_stage": "records",
+              "source_column": "member_role"
+            },
+            {
+              "name": "membership_inherited",
+              "source_stage": "records",
+              "source_column": "membership_inherited"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "records",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "records",
+              "source_column": "membership_url"
+            }
+          ],
+          "select": [
+            "team_numeric_id"
+          ],
+          "population": "All advertised pages of active effective members, including inherited membership, of one numeric team."
+        },
+        {
+          "name": "organizations",
+          "select": [
+            "organization"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            },
+            {
+              "name": "team_member_role",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Effective team member role filter; omission uses all roles. Child-team members can be inherited.",
+              "enum": [
+                "member",
+                "maintainer",
+                "all"
+              ],
+              "example": "maintainer",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "teams",
+              "source_column": "team_id"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "members",
+              "source_column": "user_id"
+            },
+            {
+              "name": "team_member_login",
+              "source_stage": "members",
+              "source_column": "team_member_login"
+            },
+            {
+              "name": "member_role",
+              "source_stage": "members",
+              "source_column": "member_role"
+            },
+            {
+              "name": "membership_inherited",
+              "source_stage": "members",
+              "source_column": "membership_inherited"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "teams",
+              "source_column": "team_slug"
+            },
+            {
+              "name": "membership_state",
+              "source_stage": "members",
+              "source_column": "membership_state"
+            },
+            {
+              "name": "membership_url",
+              "source_stage": "members",
+              "source_column": "membership_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "scope": "organizations"
+              },
+              {
+                "name": "teams",
+                "scope": "teams"
+              },
+              {
+                "name": "members",
+                "entity": "team_members_named_identity_source",
+                "arguments": {
+                  "selected_team_id": {
+                    "stage": "teams",
+                    "column": "team_id"
+                  },
+                  "selected_team_slug": {
+                    "stage": "teams",
+                    "column": "team_slug"
+                  },
+                  "selected_team_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_team_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "team_member_role": {
+                    "parameter": "team_member_role"
+                  },
+                  "listed_team_membership_state": {
+                    "literal": "active"
+                  },
+                  "unknown_team_membership_url": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "members"
+          },
+          "population": "Visible organization or team membership pairs, including inherited members as returned by GitHub; user/users optionally selects the member identity."
+        }
+      ],
+      "filters": [
+        {
+          "function": "users",
+          "column": "user_id",
+          "key": "user_id"
+        }
+      ]
     }
   ],
   "scopes": {
@@ -674,6 +4587,53 @@
           }
         }
       }
+    },
+    "teams": {
+      "requires_parameters": {
+        "team_slug": [
+          "organization"
+        ]
+      },
+      "comment": "List teams in an organization, or retrieve one exact team slug.",
+      "select": {
+        "parameter": "team_slug",
+        "if_present": {
+          "entity": "team_identity_lookup_source",
+          "arguments": {
+            "organization": {
+              "stage": "organizations",
+              "column": "organization_login"
+            },
+            "team_slug": {
+              "parameter": "team_slug"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "team_identity_summary_source",
+          "arguments": {
+            "organization": {
+              "stage": "organizations",
+              "column": "organization_login"
+            },
+            "summary_team_created_at": {
+              "literal": null
+            },
+            "summary_team_updated_at": {
+              "literal": null
+            },
+            "summary_team_members_count": {
+              "literal": null
+            },
+            "summary_team_repos_count": {
+              "literal": null
+            },
+            "summary_team_ldap_dn": {
+              "literal": null
+            }
+          }
+        }
+      }
     }
   },
   "relationships": [
@@ -686,6 +4646,22 @@
       ],
       "to_columns": [
         "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
       ]
     },
     {
@@ -697,6 +4673,22 @@
       ],
       "to_columns": [
         "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
       ]
     },
     {
@@ -708,6 +4700,24 @@
       ],
       "to_columns": [
         "team_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login",
+            "team_slug": "team_slug"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login",
+            "team_slug": "team_slug"
+          }
+        }
       ]
     }
   ],

@@ -1,0 +1,3166 @@
+{
+  "entities": [
+    {
+      "name": "security_campaigns_source",
+      "description": "Pinned typed campaigns/list-org-campaigns read; authorization, missing objects and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "security_campaign_state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional security campaign state; omission includes open and closed campaigns.",
+          "example": "open",
+          "enum": [
+            "open",
+            "closed"
+          ],
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "campaign_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ]
+        },
+        {
+          "name": "ends_at",
+          "path": [
+            "ends_at"
+          ]
+        },
+        {
+          "name": "closed_at",
+          "path": [
+            "closed_at"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "contact_link",
+          "path": [
+            "contact_link"
+          ]
+        },
+        {
+          "name": "managers",
+          "path": [
+            "managers"
+          ],
+          "selection": {
+            "name": true,
+            "email": true,
+            "login": true,
+            "id": true,
+            "node_id": true,
+            "avatar_url": true,
+            "gravatar_id": true,
+            "url": true,
+            "html_url": true,
+            "followers_url": true,
+            "following_url": true,
+            "gists_url": true,
+            "starred_url": true,
+            "subscriptions_url": true,
+            "organizations_url": true,
+            "repos_url": true,
+            "events_url": true,
+            "received_events_url": true,
+            "type": true,
+            "site_admin": true,
+            "starred_at": true,
+            "user_view_type": true
+          }
+        },
+        {
+          "name": "team_managers",
+          "path": [
+            "team_managers"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "slug": true,
+            "description": true,
+            "privacy": true,
+            "notification_setting": true,
+            "permission": true,
+            "permissions": {
+              "pull": true,
+              "triage": true,
+              "push": true,
+              "maintain": true,
+              "admin": true
+            },
+            "url": true,
+            "html_url": true,
+            "members_url": true,
+            "repositories_url": true,
+            "type": true,
+            "access_source": true,
+            "organization_id": true,
+            "enterprise_id": true,
+            "parent": {
+              "id": true,
+              "node_id": true,
+              "url": true,
+              "members_url": true,
+              "name": true,
+              "description": true,
+              "permission": true,
+              "privacy": true,
+              "notification_setting": true,
+              "html_url": true,
+              "repositories_url": true,
+              "slug": true,
+              "ldap_dn": true,
+              "type": true,
+              "organization_id": true,
+              "enterprise_id": true
+            }
+          }
+        },
+        {
+          "name": "alert_stats",
+          "path": [
+            "alert_stats"
+          ],
+          "selection": {
+            "open_count": true,
+            "closed_count": true,
+            "in_progress_count": true
+          }
+        },
+        {
+          "name": "open_alert_count",
+          "path": [
+            "alert_stats",
+            "open_count"
+          ]
+        },
+        {
+          "name": "closed_alert_count",
+          "path": [
+            "alert_stats",
+            "closed_count"
+          ]
+        },
+        {
+          "name": "in_progress_alert_count",
+          "path": [
+            "alert_stats",
+            "in_progress_count"
+          ]
+        }
+      ],
+      "grain": [
+        "campaign_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "campaigns/list-org-campaigns",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "security_campaign_state"
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "security_campaign_lookup_source",
+      "description": "Pinned typed campaigns/get-campaign-summary read; authorization, missing objects and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "security_campaign_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Organization-local security campaign number, qualified by the stable organization ID.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "campaign_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "published_at",
+          "path": [
+            "published_at"
+          ]
+        },
+        {
+          "name": "ends_at",
+          "path": [
+            "ends_at"
+          ]
+        },
+        {
+          "name": "closed_at",
+          "path": [
+            "closed_at"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "contact_link",
+          "path": [
+            "contact_link"
+          ]
+        },
+        {
+          "name": "managers",
+          "path": [
+            "managers"
+          ],
+          "selection": {
+            "name": true,
+            "email": true,
+            "login": true,
+            "id": true,
+            "node_id": true,
+            "avatar_url": true,
+            "gravatar_id": true,
+            "url": true,
+            "html_url": true,
+            "followers_url": true,
+            "following_url": true,
+            "gists_url": true,
+            "starred_url": true,
+            "subscriptions_url": true,
+            "organizations_url": true,
+            "repos_url": true,
+            "events_url": true,
+            "received_events_url": true,
+            "type": true,
+            "site_admin": true,
+            "starred_at": true,
+            "user_view_type": true
+          }
+        },
+        {
+          "name": "team_managers",
+          "path": [
+            "team_managers"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "slug": true,
+            "description": true,
+            "privacy": true,
+            "notification_setting": true,
+            "permission": true,
+            "permissions": {
+              "pull": true,
+              "triage": true,
+              "push": true,
+              "maintain": true,
+              "admin": true
+            },
+            "url": true,
+            "html_url": true,
+            "members_url": true,
+            "repositories_url": true,
+            "type": true,
+            "access_source": true,
+            "organization_id": true,
+            "enterprise_id": true,
+            "parent": {
+              "id": true,
+              "node_id": true,
+              "url": true,
+              "members_url": true,
+              "name": true,
+              "description": true,
+              "permission": true,
+              "privacy": true,
+              "notification_setting": true,
+              "html_url": true,
+              "repositories_url": true,
+              "slug": true,
+              "ldap_dn": true,
+              "type": true,
+              "organization_id": true,
+              "enterprise_id": true
+            }
+          }
+        },
+        {
+          "name": "alert_stats",
+          "path": [
+            "alert_stats"
+          ],
+          "selection": {
+            "open_count": true,
+            "closed_count": true,
+            "in_progress_count": true
+          }
+        },
+        {
+          "name": "open_alert_count",
+          "path": [
+            "alert_stats",
+            "open_count"
+          ]
+        },
+        {
+          "name": "closed_alert_count",
+          "path": [
+            "alert_stats",
+            "closed_count"
+          ]
+        },
+        {
+          "name": "in_progress_alert_count",
+          "path": [
+            "alert_stats",
+            "in_progress_count"
+          ]
+        }
+      ],
+      "grain": [
+        "campaign_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "campaigns/get-campaign-summary",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          },
+          "campaign_number": {
+            "argument": "security_campaign_number"
+          }
+        },
+        "query_bindings": {},
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "campaign_number",
+            "argument": "security_campaign_number",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "code_quality_findings_source",
+      "description": "Pinned typed code-quality/list-findings-for-repo read; authorization, missing objects and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "code_quality_finding_state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional code-quality finding state; omission includes all visible states.",
+          "example": "open",
+          "enum": [
+            "open",
+            "dismissed"
+          ],
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "finding_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "rule",
+          "path": [
+            "rule"
+          ],
+          "selection": {
+            "id": true,
+            "title": true,
+            "description": true,
+            "help": true,
+            "severity": true,
+            "category": true
+          }
+        },
+        {
+          "name": "location",
+          "path": [
+            "location"
+          ],
+          "selection": {
+            "path": true,
+            "start_line": true,
+            "start_column": true,
+            "end_line": true,
+            "end_column": true
+          }
+        },
+        {
+          "name": "message",
+          "path": [
+            "message"
+          ],
+          "selection": {
+            "text": true,
+            "markdown": true
+          }
+        },
+        {
+          "name": "rule_id",
+          "path": [
+            "rule",
+            "id"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "rule",
+            "severity"
+          ]
+        },
+        {
+          "name": "category",
+          "path": [
+            "rule",
+            "category"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "location",
+            "path"
+          ]
+        }
+      ],
+      "grain": [
+        "finding_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "code-quality/list-findings-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "code_quality_finding_state"
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "code_quality_finding_lookup_source",
+      "description": "Pinned typed code-quality/get-finding read; authorization, missing objects and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "code_quality_finding_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Repository-local code-quality finding number; distinct from security alert numbers.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "finding_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "rule",
+          "path": [
+            "rule"
+          ],
+          "selection": {
+            "id": true,
+            "title": true,
+            "description": true,
+            "help": true,
+            "severity": true,
+            "category": true
+          }
+        },
+        {
+          "name": "location",
+          "path": [
+            "location"
+          ],
+          "selection": {
+            "path": true,
+            "start_line": true,
+            "start_column": true,
+            "end_line": true,
+            "end_column": true
+          }
+        },
+        {
+          "name": "message",
+          "path": [
+            "message"
+          ],
+          "selection": {
+            "text": true,
+            "markdown": true
+          }
+        },
+        {
+          "name": "rule_id",
+          "path": [
+            "rule",
+            "id"
+          ]
+        },
+        {
+          "name": "severity",
+          "path": [
+            "rule",
+            "severity"
+          ]
+        },
+        {
+          "name": "category",
+          "path": [
+            "rule",
+            "category"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "location",
+            "path"
+          ]
+        }
+      ],
+      "grain": [
+        "finding_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "code-quality/get-finding",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "finding_number": {
+            "argument": "code_quality_finding_number"
+          }
+        },
+        "query_bindings": {},
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "finding_number",
+            "argument": "code_quality_finding_number",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dependabot_dismissal_requests_source",
+      "description": "Pinned typed dependabot/list-dismissal-requests-for-repo read; authorization, missing objects and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "dependabot_dismissal_reviewer",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional login of a Dependabot dismissal reviewer, distinct from the requester.",
+          "example": "bob",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_dismissal_requester",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional login of the user requesting Dependabot alert dismissal.",
+          "example": "alice",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_dismissal_period",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Dismissal-request lookback window. Omission uses the pinned API defaults: month for repository lists, day for organization lists. Set explicitly when comparing those populations; never all historical requests.",
+          "example": "month",
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "month"
+          ],
+          "default": null
+        },
+        {
+          "name": "dependabot_dismissal_status",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository dismissal-request status filter. The response uses pending for an open request.",
+          "example": "all",
+          "enum": [
+            "open",
+            "approved",
+            "expired",
+            "denied",
+            "all"
+          ],
+          "default": null
+        },
+        {
+          "name": "selected_dependabot_alert_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Numeric alert scope supplied only by the exact dismissal lookup; collection metadata keeps source text unchanged.",
+          "example": 1,
+          "minimum": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "dismissal_request_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "dismissal_request_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_name",
+          "path": [
+            "organization",
+            "name"
+          ]
+        },
+        {
+          "name": "requester_id",
+          "path": [
+            "requester",
+            "actor_id"
+          ]
+        },
+        {
+          "name": "requester_login",
+          "path": [
+            "requester",
+            "actor_name"
+          ]
+        },
+        {
+          "name": "request_type",
+          "path": [
+            "request_type"
+          ]
+        },
+        {
+          "name": "resource_identifier",
+          "path": [
+            "resource_identifier"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "requester_comment",
+          "path": [
+            "requester_comment"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "data",
+          "path": [
+            "data"
+          ],
+          "selection": {
+            "reason": true,
+            "alert_number": true,
+            "alert_title": true
+          }
+        },
+        {
+          "name": "responses",
+          "path": [
+            "responses"
+          ],
+          "selection": {
+            "id": true,
+            "reviewer": {
+              "actor_id": true,
+              "actor_name": true
+            },
+            "message": true,
+            "status": true,
+            "created_at": true
+          }
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "repository",
+            "name"
+          ]
+        },
+        {
+          "name": "selected_alert_number",
+          "source_argument": "selected_dependabot_alert_number"
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "dismissal_request_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "ghec",
+        "operation_id": "dependabot/list-dismissal-requests-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "reviewer": {
+            "argument": "dependabot_dismissal_reviewer"
+          },
+          "requester": {
+            "argument": "dependabot_dismissal_requester"
+          },
+          "time_period": {
+            "argument": "dependabot_dismissal_period"
+          },
+          "request_status": {
+            "argument": "dependabot_dismissal_status"
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "repository_id",
+          "repository",
+          "dismissal_request_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "repository",
+            "argument": "repository",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dependabot_org_dismissal_requests_source",
+      "description": "Pinned typed dependabot/list-dismissal-requests-for-org read; authorization, missing objects and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "dependabot_dismissal_reviewer",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional login of a Dependabot dismissal reviewer, distinct from the requester.",
+          "example": "bob",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_dismissal_requester",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional login of the user requesting Dependabot alert dismissal.",
+          "example": "alice",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "dependabot_dismissal_period",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Dismissal-request lookback window. Omission uses the pinned API defaults: month for repository lists, day for organization lists. Set explicitly when comparing those populations; never all historical requests.",
+          "example": "month",
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "month"
+          ],
+          "default": null
+        },
+        {
+          "name": "dependabot_dismissal_org_status",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Organization dismissal-request status filter; also supports the organization-only completed and cancelled values. Response request status remains the pinned response enum.",
+          "example": "all",
+          "enum": [
+            "completed",
+            "cancelled",
+            "approved",
+            "expired",
+            "denied",
+            "open",
+            "all"
+          ],
+          "default": null
+        },
+        {
+          "name": "dependabot_dismissal_repository_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional repository name without its owner, filtering organization dismissal requests.",
+          "example": "crossfield",
+          "min_length": 1,
+          "default": null
+        },
+        {
+          "name": "selected_dependabot_alert_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Numeric alert scope supplied only by the exact dismissal lookup; collection metadata keeps source text unchanged.",
+          "example": 1,
+          "minimum": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "dismissal_request_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "dismissal_request_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_name",
+          "path": [
+            "organization",
+            "name"
+          ]
+        },
+        {
+          "name": "requester_id",
+          "path": [
+            "requester",
+            "actor_id"
+          ]
+        },
+        {
+          "name": "requester_login",
+          "path": [
+            "requester",
+            "actor_name"
+          ]
+        },
+        {
+          "name": "request_type",
+          "path": [
+            "request_type"
+          ]
+        },
+        {
+          "name": "resource_identifier",
+          "path": [
+            "resource_identifier"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "requester_comment",
+          "path": [
+            "requester_comment"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "data",
+          "path": [
+            "data"
+          ],
+          "selection": {
+            "reason": true,
+            "alert_number": true,
+            "alert_title": true
+          }
+        },
+        {
+          "name": "responses",
+          "path": [
+            "responses"
+          ],
+          "selection": {
+            "id": true,
+            "reviewer": {
+              "actor_id": true,
+              "actor_name": true
+            },
+            "message": true,
+            "status": true,
+            "created_at": true
+          }
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "repository",
+            "name"
+          ]
+        },
+        {
+          "name": "selected_alert_number",
+          "source_argument": "selected_dependabot_alert_number"
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "dismissal_request_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "ghec",
+        "operation_id": "dependabot/list-dismissal-requests-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "reviewer": {
+            "argument": "dependabot_dismissal_reviewer"
+          },
+          "requester": {
+            "argument": "dependabot_dismissal_requester"
+          },
+          "time_period": {
+            "argument": "dependabot_dismissal_period"
+          },
+          "request_status": {
+            "argument": "dependabot_dismissal_org_status"
+          },
+          "repository_name": {
+            "argument": "dependabot_dismissal_repository_name"
+          }
+        },
+        "result_shape": "array",
+        "result_path": [],
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "repository_id",
+          "repository",
+          "dismissal_request_id"
+        ]
+      }
+    },
+    {
+      "name": "dependabot_dismissal_lookup_source",
+      "description": "Pinned typed dependabot/get-dismissal-request-for-repo read; authorization, missing objects and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "dependabot_alert_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Repository-local Dependabot alert number; identity also includes the stable repository ID.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "dismissal_request_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "dismissal_request_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_name",
+          "path": [
+            "organization",
+            "name"
+          ]
+        },
+        {
+          "name": "requester_id",
+          "path": [
+            "requester",
+            "actor_id"
+          ]
+        },
+        {
+          "name": "requester_login",
+          "path": [
+            "requester",
+            "actor_name"
+          ]
+        },
+        {
+          "name": "request_type",
+          "path": [
+            "request_type"
+          ]
+        },
+        {
+          "name": "resource_identifier",
+          "path": [
+            "resource_identifier"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "requester_comment",
+          "path": [
+            "requester_comment"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "data",
+          "path": [
+            "data"
+          ],
+          "selection": {
+            "reason": true,
+            "alert_number": true,
+            "alert_title": true
+          }
+        },
+        {
+          "name": "responses",
+          "path": [
+            "responses"
+          ],
+          "selection": {
+            "id": true,
+            "reviewer": {
+              "actor_id": true,
+              "actor_name": true
+            },
+            "message": true,
+            "status": true,
+            "created_at": true
+          }
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "repository",
+            "name"
+          ]
+        },
+        {
+          "name": "selected_alert_number",
+          "source_argument": "dependabot_alert_number"
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "dismissal_request_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "ghec",
+        "operation_id": "dependabot/get-dismissal-request-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "alert_number": {
+            "argument": "dependabot_alert_number"
+          }
+        },
+        "query_bindings": {},
+        "result_shape": "object",
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "repository_id",
+          "repository",
+          "dismissal_request_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "repository",
+            "argument": "repository",
+            "comparison": "equal"
+          }
+        ],
+        "require_one_row": true
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "security_campaigns",
+      "description": "Organization-qualified security remediation campaigns, with complete typed user managers, team managers and observed alert statistics. Managers are distinct from alert authors or dismissal reviewers. Open/closed alert totals are membership observations and may overlap across campaigns.",
+      "grain": [
+        "organization_id",
+        "campaign_number"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "campaign_number",
+          "created_at",
+          "updated_at",
+          "name",
+          "description",
+          "published_at",
+          "ends_at",
+          "closed_at",
+          "state",
+          "contact_link",
+          "managers",
+          "team_managers",
+          "alert_stats",
+          "open_alert_count",
+          "closed_alert_count",
+          "in_progress_alert_count"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "campaign_number",
+          "created_at",
+          "updated_at",
+          "name",
+          "published_at",
+          "ends_at",
+          "closed_at",
+          "state",
+          "contact_link",
+          "open_alert_count",
+          "closed_alert_count",
+          "in_progress_alert_count"
+        ],
+        "metrics": [
+          {
+            "name": "security_campaign_count",
+            "kind": "count",
+            "comment": "Selected security_campaigns rows at the declared entity grain."
+          },
+          {
+            "name": "open_security_campaign_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "open"
+            },
+            "comment": "Selected security_campaigns rows at the declared entity grain. Restricted to state=open."
+          },
+          {
+            "name": "closed_security_campaign_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "closed"
+            },
+            "comment": "Selected security_campaigns rows at the declared entity grain. Restricted to state=closed."
+          }
+        ],
+        "sql_names": {
+          "organization_id": "security_campaigns_organization_id",
+          "organization_login": "security_campaigns_organization_login",
+          "campaign_number": "security_campaigns_campaign_number",
+          "created_at": "security_campaigns_created_at",
+          "updated_at": "security_campaigns_updated_at",
+          "name": "security_campaigns_name",
+          "published_at": "security_campaigns_published_at",
+          "ends_at": "security_campaigns_ends_at",
+          "closed_at": "security_campaigns_closed_at",
+          "state": "security_campaigns_state",
+          "contact_link": "security_campaigns_contact_link",
+          "open_alert_count": "security_campaigns_open_alert_count",
+          "closed_alert_count": "security_campaigns_closed_alert_count",
+          "in_progress_alert_count": "security_campaigns_in_progress_alert_count"
+        },
+        "crossfield": {
+          "metrics": {
+            "security_campaign_open_alert_occurrences": {
+              "expression": "SUM(security_campaigns.open_alert_count)",
+              "type": "HUGEINT"
+            },
+            "security_campaign_closed_alert_occurrences": {
+              "expression": "SUM(security_campaigns.closed_alert_count)",
+              "type": "HUGEINT"
+            },
+            "security_campaign_in_progress_alert_occurrences": {
+              "expression": "SUM(security_campaigns.in_progress_alert_count)",
+              "type": "HUGEINT"
+            }
+          },
+          "metric_semantics": {
+            "security_campaign_open_alert_occurrences": {
+              "dataset": "security_campaigns",
+              "additivity": "additive",
+              "missing": "null",
+              "comment": "Sum of reported campaign alert memberships; alerts can belong to more than one campaign. Missing statistics remain unknown.",
+              "unit": "campaign alert memberships"
+            },
+            "security_campaign_closed_alert_occurrences": {
+              "dataset": "security_campaigns",
+              "additivity": "additive",
+              "missing": "null",
+              "comment": "Sum of reported campaign alert memberships; alerts can belong to more than one campaign. Missing statistics remain unknown.",
+              "unit": "campaign alert memberships"
+            },
+            "security_campaign_in_progress_alert_occurrences": {
+              "dataset": "security_campaigns",
+              "additivity": "additive",
+              "missing": "null",
+              "comment": "Sum of reported campaign alert memberships; alerts can belong to more than one campaign. Missing statistics remain unknown.",
+              "unit": "campaign alert memberships"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "security_campaign_number"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "security_campaign_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Organization-local security campaign number, qualified by the stable organization ID.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "campaign_number",
+              "source_stage": "records",
+              "source_column": "campaign_number"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "published_at",
+              "source_stage": "records",
+              "source_column": "published_at"
+            },
+            {
+              "name": "ends_at",
+              "source_stage": "records",
+              "source_column": "ends_at"
+            },
+            {
+              "name": "closed_at",
+              "source_stage": "records",
+              "source_column": "closed_at"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "contact_link",
+              "source_stage": "records",
+              "source_column": "contact_link"
+            },
+            {
+              "name": "managers",
+              "source_stage": "records",
+              "source_column": "managers"
+            },
+            {
+              "name": "team_managers",
+              "source_stage": "records",
+              "source_column": "team_managers"
+            },
+            {
+              "name": "alert_stats",
+              "source_stage": "records",
+              "source_column": "alert_stats"
+            },
+            {
+              "name": "open_alert_count",
+              "source_stage": "records",
+              "source_column": "open_alert_count"
+            },
+            {
+              "name": "closed_alert_count",
+              "source_stage": "records",
+              "source_column": "closed_alert_count"
+            },
+            {
+              "name": "in_progress_alert_count",
+              "source_stage": "records",
+              "source_column": "in_progress_alert_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "security_campaign_lookup_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "security_campaign_number": {
+                    "parameter": "security_campaign_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All advertised pages of visible campaigns in the selected organization and optional state. Embedded alert statistics count campaign memberships, not distinct alerts across campaigns; optional absent statistics remain unknown."
+        },
+        {
+          "name": "organizations",
+          "select": [
+            "organization"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "security_campaign_state",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional security campaign state; omission includes open and closed campaigns.",
+              "example": "open",
+              "enum": [
+                "open",
+                "closed"
+              ],
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "campaign_number",
+              "source_stage": "records",
+              "source_column": "campaign_number"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "published_at",
+              "source_stage": "records",
+              "source_column": "published_at"
+            },
+            {
+              "name": "ends_at",
+              "source_stage": "records",
+              "source_column": "ends_at"
+            },
+            {
+              "name": "closed_at",
+              "source_stage": "records",
+              "source_column": "closed_at"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "contact_link",
+              "source_stage": "records",
+              "source_column": "contact_link"
+            },
+            {
+              "name": "managers",
+              "source_stage": "records",
+              "source_column": "managers"
+            },
+            {
+              "name": "team_managers",
+              "source_stage": "records",
+              "source_column": "team_managers"
+            },
+            {
+              "name": "alert_stats",
+              "source_stage": "records",
+              "source_column": "alert_stats"
+            },
+            {
+              "name": "open_alert_count",
+              "source_stage": "records",
+              "source_column": "open_alert_count"
+            },
+            {
+              "name": "closed_alert_count",
+              "source_stage": "records",
+              "source_column": "closed_alert_count"
+            },
+            {
+              "name": "in_progress_alert_count",
+              "source_stage": "records",
+              "source_column": "in_progress_alert_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "security_campaigns_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "security_campaign_state": {
+                    "parameter": "security_campaign_state"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All advertised pages of visible campaigns in the selected organization and optional state. Embedded alert statistics count campaign memberships, not distinct alerts across campaigns; optional absent statistics remain unknown."
+        }
+      ]
+    },
+    {
+      "name": "code_quality_findings",
+      "description": "Canonical repository-qualified code-quality findings with typed rule, file location and plain/Markdown message. Code-quality severity is not a security vulnerability severity.",
+      "grain": [
+        "repository_id",
+        "finding_number"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "finding_number",
+          "state",
+          "url",
+          "created_at",
+          "rule",
+          "location",
+          "message",
+          "rule_id",
+          "severity",
+          "category",
+          "path"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "finding_number",
+          "state",
+          "url",
+          "created_at",
+          "rule_id",
+          "severity",
+          "category",
+          "path"
+        ],
+        "metrics": [
+          {
+            "name": "code_quality_finding_count",
+            "kind": "count",
+            "comment": "Selected code_quality_findings rows at the declared entity grain."
+          },
+          {
+            "name": "code_quality_open_finding_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "open"
+            },
+            "comment": "Selected code_quality_findings rows at the declared entity grain. Restricted to state=open."
+          },
+          {
+            "name": "code_quality_dismissed_finding_count",
+            "kind": "count",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "dismissed"
+            },
+            "comment": "Selected code_quality_findings rows at the declared entity grain. Restricted to state=dismissed."
+          },
+          {
+            "name": "code_quality_error_finding_count",
+            "kind": "count",
+            "where": {
+              "field": "severity",
+              "op": "eq",
+              "value": "error"
+            },
+            "comment": "Selected code_quality_findings rows at the declared entity grain. Restricted to severity=error."
+          },
+          {
+            "name": "code_quality_warning_finding_count",
+            "kind": "count",
+            "where": {
+              "field": "severity",
+              "op": "eq",
+              "value": "warning"
+            },
+            "comment": "Selected code_quality_findings rows at the declared entity grain. Restricted to severity=warning."
+          },
+          {
+            "name": "code_quality_note_finding_count",
+            "kind": "count",
+            "where": {
+              "field": "severity",
+              "op": "eq",
+              "value": "note"
+            },
+            "comment": "Selected code_quality_findings rows at the declared entity grain. Restricted to severity=note."
+          },
+          {
+            "name": "code_quality_none_finding_count",
+            "kind": "count",
+            "where": {
+              "field": "severity",
+              "op": "eq",
+              "value": "none"
+            },
+            "comment": "Selected code_quality_findings rows at the declared entity grain. Restricted to severity=none."
+          }
+        ],
+        "sql_names": {
+          "repository_id": "code_quality_findings_repository_id",
+          "repository": "code_quality_findings_repository",
+          "finding_number": "code_quality_findings_finding_number",
+          "state": "code_quality_findings_state",
+          "url": "code_quality_findings_url",
+          "created_at": "code_quality_findings_created_at",
+          "rule_id": "code_quality_findings_rule_id",
+          "severity": "code_quality_findings_severity",
+          "category": "code_quality_findings_category",
+          "path": "code_quality_findings_path"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "code_quality_finding_number"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "code_quality_finding_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Repository-local code-quality finding number; distinct from security alert numbers.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "finding_number",
+              "source_stage": "records",
+              "source_column": "finding_number"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "rule",
+              "source_stage": "records",
+              "source_column": "rule"
+            },
+            {
+              "name": "location",
+              "source_stage": "records",
+              "source_column": "location"
+            },
+            {
+              "name": "message",
+              "source_stage": "records",
+              "source_column": "message"
+            },
+            {
+              "name": "rule_id",
+              "source_stage": "records",
+              "source_column": "rule_id"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "category",
+              "source_stage": "records",
+              "source_column": "category"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "code_quality_finding_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "code_quality_finding_number": {
+                    "parameter": "code_quality_finding_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible findings in the selected repositories and optional state; exhausts advertised cursor Link pages. Finding numbers are repository-local."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "code_quality_finding_state",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional code-quality finding state; omission includes all visible states.",
+              "example": "open",
+              "enum": [
+                "open",
+                "dismissed"
+              ],
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "finding_number",
+              "source_stage": "records",
+              "source_column": "finding_number"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "rule",
+              "source_stage": "records",
+              "source_column": "rule"
+            },
+            {
+              "name": "location",
+              "source_stage": "records",
+              "source_column": "location"
+            },
+            {
+              "name": "message",
+              "source_stage": "records",
+              "source_column": "message"
+            },
+            {
+              "name": "rule_id",
+              "source_stage": "records",
+              "source_column": "rule_id"
+            },
+            {
+              "name": "severity",
+              "source_stage": "records",
+              "source_column": "severity"
+            },
+            {
+              "name": "category",
+              "source_stage": "records",
+              "source_column": "category"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "code_quality_findings_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "code_quality_finding_state": {
+                    "parameter": "code_quality_finding_state"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible findings in the selected repositories and optional state; exhausts advertised cursor Link pages. Finding numbers are repository-local."
+        }
+      ]
+    },
+    {
+      "name": "dependabot_dismissal_requests",
+      "description": "Canonical GHEC Dependabot dismissal requests unified across organization, repository and exact alert scopes. Request ID, request number and alert number are distinct. Nested response reviewers remain distinct from the requester. selected_alert_number is populated only from the exact alert endpoint selector; source data.alert_number stays VARCHAR. Collection counts cover the explicit lookback window.",
+      "grain": [
+        "repository_id",
+        "dismissal_request_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "dismissal_request_id",
+          "dismissal_request_number",
+          "repository_id",
+          "repository",
+          "organization_id",
+          "organization_name",
+          "requester_id",
+          "requester_login",
+          "request_type",
+          "resource_identifier",
+          "status",
+          "requester_comment",
+          "expires_at",
+          "created_at",
+          "url",
+          "html_url",
+          "data",
+          "responses",
+          "repository_name",
+          "selected_alert_number"
+        ],
+        "dimensions": [
+          "dismissal_request_id",
+          "dismissal_request_number",
+          "repository_id",
+          "repository",
+          "organization_id",
+          "organization_name",
+          "requester_id",
+          "requester_login",
+          "request_type",
+          "resource_identifier",
+          "status",
+          "expires_at",
+          "created_at",
+          "url",
+          "html_url",
+          "repository_name",
+          "selected_alert_number"
+        ],
+        "metrics": [
+          {
+            "name": "dependabot_dismissal_request_count",
+            "kind": "count",
+            "comment": "Requests in the selected lookback window (repository default month; organization default day), not all historical requests."
+          },
+          {
+            "name": "dependabot_pending_dismissal_request_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "pending"
+            },
+            "comment": "Selected dependabot_dismissal_requests rows at the declared entity grain. Restricted to status=pending. Collection lookback defaults to month for repositories and day for organizations, not complete history."
+          },
+          {
+            "name": "dependabot_approved_dismissal_request_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "approved"
+            },
+            "comment": "Selected dependabot_dismissal_requests rows at the declared entity grain. Restricted to status=approved. Collection lookback defaults to month for repositories and day for organizations, not complete history."
+          },
+          {
+            "name": "dependabot_denied_dismissal_request_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "denied"
+            },
+            "comment": "Selected dependabot_dismissal_requests rows at the declared entity grain. Restricted to status=denied. Collection lookback defaults to month for repositories and day for organizations, not complete history."
+          },
+          {
+            "name": "dependabot_expired_dismissal_request_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "expired"
+            },
+            "comment": "Selected dependabot_dismissal_requests rows at the declared entity grain. Restricted to status=expired. Collection lookback defaults to month for repositories and day for organizations, not complete history."
+          }
+        ],
+        "sql_names": {
+          "dismissal_request_id": "dependabot_dismissal_requests_dismissal_request_id",
+          "dismissal_request_number": "dependabot_dismissal_requests_dismissal_request_number",
+          "repository_id": "dependabot_dismissal_requests_repository_id",
+          "repository": "dependabot_dismissal_requests_repository",
+          "organization_id": "dependabot_dismissal_requests_organization_id",
+          "organization_name": "dependabot_dismissal_requests_organization_name",
+          "requester_id": "dependabot_dismissal_requests_requester_id",
+          "requester_login": "dependabot_dismissal_requests_requester_login",
+          "request_type": "dependabot_dismissal_requests_request_type",
+          "resource_identifier": "dependabot_dismissal_requests_resource_identifier",
+          "status": "dependabot_dismissal_requests_status",
+          "expires_at": "dependabot_dismissal_requests_expires_at",
+          "created_at": "dependabot_dismissal_requests_created_at",
+          "url": "dependabot_dismissal_requests_url",
+          "html_url": "dependabot_dismissal_requests_html_url",
+          "repository_name": "dependabot_dismissal_requests_repository_name",
+          "selected_alert_number": "dependabot_dismissal_requests_selected_alert_number"
+        }
+      },
+      "routes": [
+        {
+          "name": "alerts",
+          "select": [
+            "dependabot_alert_number"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "dependabot_alert_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Repository-local Dependabot alert number; identity also includes the stable repository ID.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "dismissal_request_id",
+              "source_stage": "records",
+              "source_column": "dismissal_request_id"
+            },
+            {
+              "name": "dismissal_request_number",
+              "source_stage": "records",
+              "source_column": "dismissal_request_number"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_name",
+              "source_stage": "records",
+              "source_column": "organization_name"
+            },
+            {
+              "name": "requester_id",
+              "source_stage": "records",
+              "source_column": "requester_id"
+            },
+            {
+              "name": "requester_login",
+              "source_stage": "records",
+              "source_column": "requester_login"
+            },
+            {
+              "name": "request_type",
+              "source_stage": "records",
+              "source_column": "request_type"
+            },
+            {
+              "name": "resource_identifier",
+              "source_stage": "records",
+              "source_column": "resource_identifier"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "requester_comment",
+              "source_stage": "records",
+              "source_column": "requester_comment"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "data",
+              "source_stage": "records",
+              "source_column": "data"
+            },
+            {
+              "name": "responses",
+              "source_stage": "records",
+              "source_column": "responses"
+            },
+            {
+              "name": "repository_name",
+              "source_stage": "records",
+              "source_column": "repository_name"
+            },
+            {
+              "name": "selected_alert_number",
+              "source_stage": "records",
+              "source_column": "selected_alert_number"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "dependabot_dismissal_lookup_source",
+                "arguments": {
+                  "dependabot_alert_number": {
+                    "parameter": "dependabot_alert_number"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Exact selected alert dismissal request."
+        },
+        {
+          "name": "organizations",
+          "select": [
+            "organization"
+          ],
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "dependabot_dismissal_reviewer",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional login of a Dependabot dismissal reviewer, distinct from the requester.",
+              "example": "bob",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_dismissal_requester",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional login of the user requesting Dependabot alert dismissal.",
+              "example": "alice",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_dismissal_period",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Dismissal-request lookback window. Omission uses the pinned API defaults: month for repository lists, day for organization lists. Set explicitly when comparing those populations; never all historical requests.",
+              "example": "month",
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month"
+              ],
+              "default": null
+            },
+            {
+              "name": "dependabot_dismissal_org_status",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Organization dismissal-request status filter; also supports the organization-only completed and cancelled values. Response request status remains the pinned response enum.",
+              "example": "all",
+              "enum": [
+                "completed",
+                "cancelled",
+                "approved",
+                "expired",
+                "denied",
+                "open",
+                "all"
+              ],
+              "default": null
+            },
+            {
+              "name": "dependabot_dismissal_repository_name",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional repository name without its owner, filtering organization dismissal requests.",
+              "example": "crossfield",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "dismissal_request_id",
+              "source_stage": "records",
+              "source_column": "dismissal_request_id"
+            },
+            {
+              "name": "dismissal_request_number",
+              "source_stage": "records",
+              "source_column": "dismissal_request_number"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_name",
+              "source_stage": "records",
+              "source_column": "organization_name"
+            },
+            {
+              "name": "requester_id",
+              "source_stage": "records",
+              "source_column": "requester_id"
+            },
+            {
+              "name": "requester_login",
+              "source_stage": "records",
+              "source_column": "requester_login"
+            },
+            {
+              "name": "request_type",
+              "source_stage": "records",
+              "source_column": "request_type"
+            },
+            {
+              "name": "resource_identifier",
+              "source_stage": "records",
+              "source_column": "resource_identifier"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "requester_comment",
+              "source_stage": "records",
+              "source_column": "requester_comment"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "data",
+              "source_stage": "records",
+              "source_column": "data"
+            },
+            {
+              "name": "responses",
+              "source_stage": "records",
+              "source_column": "responses"
+            },
+            {
+              "name": "repository_name",
+              "source_stage": "records",
+              "source_column": "repository_name"
+            },
+            {
+              "name": "selected_alert_number",
+              "source_stage": "records",
+              "source_column": "selected_alert_number"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "dependabot_org_dismissal_requests_source",
+                "arguments": {
+                  "dependabot_dismissal_reviewer": {
+                    "parameter": "dependabot_dismissal_reviewer"
+                  },
+                  "dependabot_dismissal_requester": {
+                    "parameter": "dependabot_dismissal_requester"
+                  },
+                  "dependabot_dismissal_period": {
+                    "parameter": "dependabot_dismissal_period"
+                  },
+                  "dependabot_dismissal_org_status": {
+                    "parameter": "dependabot_dismissal_org_status"
+                  },
+                  "dependabot_dismissal_repository_name": {
+                    "parameter": "dependabot_dismissal_repository_name"
+                  },
+                  "selected_dependabot_alert_number": {
+                    "literal": null
+                  },
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All advertised pages of requests within the selected lookback window (repository default month; organization default day), with optional requester/reviewer/status filters. This is not complete historical request coverage."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "dependabot_dismissal_reviewer",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional login of a Dependabot dismissal reviewer, distinct from the requester.",
+              "example": "bob",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_dismissal_requester",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional login of the user requesting Dependabot alert dismissal.",
+              "example": "alice",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "dependabot_dismissal_period",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Dismissal-request lookback window. Omission uses the pinned API defaults: month for repository lists, day for organization lists. Set explicitly when comparing those populations; never all historical requests.",
+              "example": "month",
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month"
+              ],
+              "default": null
+            },
+            {
+              "name": "dependabot_dismissal_status",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Repository dismissal-request status filter. The response uses pending for an open request.",
+              "example": "all",
+              "enum": [
+                "open",
+                "approved",
+                "expired",
+                "denied",
+                "all"
+              ],
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "dismissal_request_id",
+              "source_stage": "records",
+              "source_column": "dismissal_request_id"
+            },
+            {
+              "name": "dismissal_request_number",
+              "source_stage": "records",
+              "source_column": "dismissal_request_number"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_name",
+              "source_stage": "records",
+              "source_column": "organization_name"
+            },
+            {
+              "name": "requester_id",
+              "source_stage": "records",
+              "source_column": "requester_id"
+            },
+            {
+              "name": "requester_login",
+              "source_stage": "records",
+              "source_column": "requester_login"
+            },
+            {
+              "name": "request_type",
+              "source_stage": "records",
+              "source_column": "request_type"
+            },
+            {
+              "name": "resource_identifier",
+              "source_stage": "records",
+              "source_column": "resource_identifier"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "requester_comment",
+              "source_stage": "records",
+              "source_column": "requester_comment"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "data",
+              "source_stage": "records",
+              "source_column": "data"
+            },
+            {
+              "name": "responses",
+              "source_stage": "records",
+              "source_column": "responses"
+            },
+            {
+              "name": "repository_name",
+              "source_stage": "records",
+              "source_column": "repository_name"
+            },
+            {
+              "name": "selected_alert_number",
+              "source_stage": "records",
+              "source_column": "selected_alert_number"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "dependabot_dismissal_requests_source",
+                "arguments": {
+                  "dependabot_dismissal_reviewer": {
+                    "parameter": "dependabot_dismissal_reviewer"
+                  },
+                  "dependabot_dismissal_requester": {
+                    "parameter": "dependabot_dismissal_requester"
+                  },
+                  "dependabot_dismissal_period": {
+                    "parameter": "dependabot_dismissal_period"
+                  },
+                  "dependabot_dismissal_status": {
+                    "parameter": "dependabot_dismissal_status"
+                  },
+                  "selected_dependabot_alert_number": {
+                    "literal": null
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All advertised pages of requests within the selected lookback window (repository default month; organization default day), with optional requester/reviewer/status filters. This is not complete historical request coverage."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "security_campaigns_to_organizations",
+      "from": "security_campaigns",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "code_quality_findings_to_repositories",
+      "from": "code_quality_findings",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dependabot_dismissal_requests_to_repositories",
+      "from": "dependabot_dismissal_requests",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dependabot_dismissal_requests_to_organizations",
+      "from": "dependabot_dismissal_requests",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "dependabot_dismissal_requests_to_requesters",
+      "from": "dependabot_dismissal_requests",
+      "to": "users",
+      "from_columns": [
+        "requester_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "requester_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "dependabot_dismissal_requests_to_alerts",
+      "from": "dependabot_dismissal_requests",
+      "to": "dependabot_alerts",
+      "from_columns": [
+        "repository_id",
+        "selected_alert_number"
+      ],
+      "to_columns": [
+        "repository_id",
+        "alert_number"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "dependabot_alert_number": "selected_alert_number"
+          },
+          "when_not_null": [
+            "repository",
+            "selected_alert_number"
+          ]
+        },
+        {
+          "direction": "reverse",
+          "route": "alerts",
+          "bindings": {
+            "repository": "repository",
+            "dependabot_alert_number": "alert_number"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    }
+  ]
+}

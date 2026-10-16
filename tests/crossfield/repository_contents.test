@@ -1,0 +1,141 @@
+# Unified content paths/root/README routes with typed media and explicit byte limits.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT repository_content_object_count,repository_content_reported_size_bytes FROM engineering.semantic.github(organization=>'contents-fixture');
+----
+2	10
+
+query TII
+SELECT repository_name,repository_content_object_count,repository_content_reported_size_bytes FROM engineering.semantic.github(owner=>'contents-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+contents-fixture/alpha	1	6
+contents-fixture/beta	1	4
+
+query II
+SELECT repository_content_object_count,repository_content_reported_size_bytes FROM engineering.semantic.github(organization=>'contents-fixture',content_path=>'');
+----
+2	0
+
+query II
+SELECT repository_content_object_count,repository_content_reported_size_bytes FROM engineering.semantic.github(repository=>'contents-fixture/alpha',readme_directory=>'docs');
+----
+1	4
+
+query II
+SELECT repository_content_object_count,repository_content_reported_size_bytes FROM engineering.semantic.github(repository=>'contents-fixture/alpha',content_path=>'big.bin');
+----
+1	2000000
+
+query II
+SELECT repository_content_object_count,repository_content_reported_size_bytes FROM engineering.semantic.github(repositories=>[],content_path=>'');
+----
+0	0
+
+statement ok
+CREATE TEMP TABLE contents_readme AS SELECT * FROM engineering.detail.repository_contents(repository=>'contents-fixture/alpha');
+
+statement ok
+CREATE TEMP TABLE contents_path AS SELECT * FROM engineering.detail.repository_contents(repository=>'contents-fixture/alpha',content_path=>'README.md');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query I
+SELECT count(*) FROM ((SELECT * FROM contents_readme EXCEPT SELECT * FROM contents_path) UNION ALL (SELECT * FROM contents_path EXCEPT SELECT * FROM contents_readme));
+----
+0
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTII
+SELECT content_path,content_encoding,encoded_content,size,entries IS NULL FROM contents_readme;
+----
+README.md	base64	aGVsbG8K	6	true
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE contents_roots AS SELECT * FROM engineering.detail.repository_contents(organization=>'contents-fixture',content_path=>'');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIITT
+SELECT repository,length(content_path),len(entries),entries[1].path,entries[1].type FROM contents_roots ORDER BY repository;
+----
+contents-fixture/alpha	0	2	README.md	file
+contents-fixture/beta	0	1	README.rst	file
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE contents_large AS SELECT * FROM engineering.detail.repository_contents(repository=>'contents-fixture/alpha',content_path=>'big.bin');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TII
+SELECT content_encoding,length(encoded_content),size FROM contents_large;
+----
+none	0	2000000
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE contents_old AS SELECT * FROM engineering.detail.repository_contents(repository=>'contents-fixture/alpha',content_ref=>'old');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTT
+SELECT content_ref,content_sha,encoded_content FROM contents_old;
+----
+old	ffffffffffffffffffffffffffffffffffffffff	b2xk
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT repository_content_object_count FROM engineering.semantic.github(repository=>'contents-fixture/alpha',content_path=>'missing');
+----
+404
+
+statement error
+SELECT repository_content_object_count FROM engineering.semantic.github(repository=>'contents-fixture/alpha',content_path=>'README.md',readme_directory=>'docs');
+----
+<REGEX>:(?s).*(content_path|readme_directory|arguments do not apply).*

@@ -1,0 +1,107 @@
+# Rolling traffic windows, non-additive unique counts, bucket grains and top-10 populations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIIIIIII
+SELECT repository_clone_traffic_observation_count,repository_clone_count,repository_clone_unique_max,repository_clone_traffic_buckets_count,repository_view_traffic_observation_count,repository_view_count,repository_view_unique_max,repository_view_traffic_buckets_count FROM engineering.semantic.github(organization=>'traffic-fixture');
+----
+2	8	4	2	2	17	5	3
+
+query TIIII
+SELECT repository_name,repository_clone_count,repository_clone_unique_max,repository_view_count,repository_view_unique_max FROM engineering.semantic.github(owner=>'traffic-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+traffic-fixture/alpha	8	4	15	5
+traffic-fixture/beta	0	0	2	2
+
+query IIIIII
+SELECT repository_clone_traffic_buckets_count,repository_clone_bucket_event_count,repository_clone_bucket_unique_max,repository_view_traffic_buckets_count,repository_view_bucket_event_count,repository_view_bucket_unique_max FROM engineering.semantic.github(organization=>'traffic-fixture',traffic_granularity=>'week');
+----
+1	8	4	2	17	5
+
+query IIIIII
+SELECT repository_clone_traffic_buckets_count,repository_clone_bucket_event_count,repository_clone_bucket_unique_max,repository_view_traffic_buckets_count,repository_view_bucket_event_count,repository_view_bucket_unique_max FROM engineering.semantic.github(organization=>'traffic-fixture',traffic_granularity=>'day');
+----
+2	8	3	3	17	4
+
+query IIIIII
+SELECT repository_top_paths_count,repository_top_paths_event_count,repository_top_paths_unique_max,repository_top_referrers_count,repository_top_referrers_event_count,repository_top_referrers_unique_max FROM engineering.semantic.github(organization=>'traffic-fixture');
+----
+3	17	4	2	8	3
+
+query IIII
+SELECT repository_clone_traffic_observation_count,repository_clone_count,repository_view_traffic_buckets_count,repository_top_paths_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0	0	0
+
+statement ok
+CREATE TEMP TABLE traffic_windows AS SELECT * FROM engineering.detail.repository_clone_traffic(repository=>'traffic-fixture/alpha');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIIII
+SELECT total_count,unique_count,len(buckets),buckets[1].uniques,buckets[2].uniques FROM traffic_windows;
+----
+8	4	2	2	3
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE traffic_buckets AS SELECT * FROM engineering.detail.repository_view_traffic_buckets(repository=>'traffic-fixture/alpha',traffic_granularity=>'week');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTII
+SELECT repository,traffic_granularity,bucket_start::VARCHAR,event_count,unique_count FROM traffic_buckets;
+----
+traffic-fixture/alpha	week	2026-05-04 00:00:00+00	15	5
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE traffic_paths AS SELECT * FROM engineering.detail.repository_top_paths(organization=>'traffic-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TITII
+SELECT repository,response_position,path,event_count,unique_count FROM traffic_paths ORDER BY repository,response_position;
+----
+traffic-fixture/alpha	1	/one	10	4
+traffic-fixture/alpha	2	/two	5	3
+traffic-fixture/beta	1	/	2	2
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT repository_view_count FROM engineering.semantic.github(repository=>'traffic-fixture/alpha',traffic_granularity=>'month');
+----
+traffic_granularity

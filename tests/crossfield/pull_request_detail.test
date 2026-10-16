@@ -1,0 +1,268 @@
+# Independent PR detail and reverse association answers; no generated expected results.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Repository lists preserve their population without requesting every PR's full detail.
+query III
+SELECT pull_request_count,pull_request_detail_observation_count,pull_request_reported_additions FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha');
+----
+2	0	NULL
+
+# Full-response counters describe one current PR, not a count of commit/file entities.
+query IIIIIIII
+SELECT pull_request_count,pull_request_detail_observation_count,pull_request_reported_comment_count,pull_request_reported_review_comment_count,pull_request_reported_commit_count,pull_request_reported_additions,pull_request_reported_deletions,pull_request_reported_changed_file_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>1);
+----
+1	1	3	2	2	10	3	2
+
+query IIII
+SELECT pull_request_detail_observation_count,pull_request_reported_commit_count,pull_request_reported_additions,pull_request_reported_changed_file_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>2);
+----
+1	0	0	0
+
+query TTII
+SELECT pull_request_base_ref,pull_request_head_ref,pull_request_count,pull_request_detail_observation_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha') GROUP BY pull_request_base_ref,pull_request_head_ref ORDER BY pull_request_head_ref;
+----
+main	change-1	1	0
+main	change-2	1	0
+
+statement ok
+CREATE TEMP TABLE canonical_pr_detail AS SELECT * FROM engineering.detail.pull_requests(repository=>'pull-detail-fixture/alpha',pull_request_number=>1);
+
+statement ok
+CREATE TEMP TABLE canonical_pr_draft AS SELECT * FROM engineering.detail.pull_requests(repository=>'pull-detail-fixture/alpha',pull_request_number=>2);
+
+statement ok
+CREATE TEMP TABLE canonical_pr_auto_merge AS SELECT * FROM engineering.detail.pull_requests(repository=>'pull-detail-fixture/beta',pull_request_number=>1);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IITTI
+SELECT base.repo.id,head.repo.id,base.repo.full_name,head.repo.full_name,merged_by.id FROM canonical_pr_detail;
+----
+1301	91301	pull-detail-fixture/alpha	pull-detail-alice/alpha	1402
+
+query ITIIT
+SELECT merged,mergeable_state,mergeable IS NULL,rebaseable IS NULL,merged_by.login FROM canonical_pr_draft;
+----
+false	unknown	true	true	NULL
+
+query ITT
+SELECT auto_merge.enabled_by.id,auto_merge.merge_method,merged_by.login FROM canonical_pr_auto_merge;
+----
+1401	squash	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+# Reviews, comments and changed files cannot multiply canonical PRs.
+query IIIII
+SELECT pull_request_count,submitted_review_count,approved_review_count,pull_request_review_comment_count,pull_request_file_count FROM engineering.semantic.github(organization=>'pull-detail-fixture');
+----
+3	2	1	4	3
+
+query TIII
+SELECT repository_name,pull_request_count,pull_request_review_comment_count,pull_request_file_count FROM engineering.semantic.github(organization=>'pull-detail-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+pull-detail-fixture/alpha	2	3	2
+pull-detail-fixture/beta	1	1	1
+
+query II
+SELECT submitted_review_count,approved_review_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>1,review_id=>1511);
+----
+1	1
+
+query III
+SELECT author_id,reviewer_id,review_id FROM engineering.detail.pull_request_reviews(repository=>'pull-detail-fixture/alpha',pull_request_number=>1,review_id=>1511);
+----
+1401	1402	1511
+
+# Repository and direct review-comment APIs do not supply a numeric PR parent.
+query III
+SELECT review_comment_id,pull_request_number,review_id FROM engineering.detail.pull_request_review_comments(repository=>'pull-detail-fixture/alpha') ORDER BY review_comment_id;
+----
+1611	NULL	1511
+1612	NULL	1512
+1621	NULL	NULL
+
+query III
+SELECT review_comment_id,pull_request_number,comment_author_id FROM engineering.detail.pull_request_review_comments(repository=>'pull-detail-fixture/alpha',review_comment_id=>1611);
+----
+1611	NULL	1402
+
+query III
+SELECT review_comment_id,pull_request_number,in_reply_to_id FROM engineering.detail.pull_request_review_comments(repository=>'pull-detail-fixture/alpha',pull_request_number=>1) ORDER BY review_comment_id;
+----
+1611	1	NULL
+1612	1	1611
+
+query I
+SELECT pull_request_review_comment_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>1,review_id=>1511);
+----
+1
+
+query TI
+SELECT pull_request_review_comments_review_comment_created_day,pull_request_review_comment_count FROM engineering.semantic.github(organization=>'pull-detail-fixture') GROUP BY pull_request_review_comments_review_comment_created_day;
+----
+2026-08-02	4
+
+query IIII
+SELECT pull_request_file_count,pull_request_file_additions,pull_request_file_deletions,pull_request_file_changes FROM engineering.semantic.github(organization=>'pull-detail-fixture');
+----
+3	12	4	16
+
+# The second file page is binary and has no textual patch.
+query TT
+SELECT filename,patch FROM engineering.detail.pull_request_files(repository=>'pull-detail-fixture/alpha',pull_request_number=>1) ORDER BY filename;
+----
+image.png	NULL
+main.py	@@ independent patch @@
+
+query TTT
+SELECT filename,previous_filename,status FROM engineering.detail.pull_request_files(repository=>'pull-detail-fixture/beta',pull_request_number=>1);
+----
+renamed.py	old.py	renamed
+
+query I
+SELECT pull_request_file_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>2);
+----
+0
+
+# Canonical commits and the existing membership entity accept the reversed PR route.
+query IIII
+SELECT commit_count,commit_added_lines,commit_deleted_lines,commit_pull_request_membership_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>1);
+----
+2	10	3	2
+
+query IIT
+SELECT repository_id,pull_request_id,commit_sha FROM engineering.detail.commit_pull_request_memberships(repository=>'pull-detail-fixture/alpha',pull_request_number=>1) ORDER BY commit_sha;
+----
+1301	1311	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+1301	1311	bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+
+query II
+SELECT commit_count,commit_pull_request_membership_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>2);
+----
+0	0
+
+# Outstanding user/team review requests are distinct from submitted reviews.
+query III
+SELECT review_request_population_count,requested_user_review_count,requested_team_review_count FROM engineering.semantic.github(organization=>'pull-detail-fixture');
+----
+3	3	1
+
+query III
+SELECT review_request_population_count,requested_user_review_count,requested_team_review_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>2);
+----
+1	0	0
+
+query III
+SELECT pull_request_merge_check_count,merged_pull_request_check_count,unmerged_pull_request_check_count FROM engineering.semantic.github(organization=>'pull-detail-fixture');
+----
+3	1	2
+
+query II
+SELECT pull_request_number,status_code FROM engineering.detail.pull_request_merge_statuses(repository=>'pull-detail-fixture/alpha') ORDER BY pull_request_number;
+----
+1	204
+2	404
+
+# A final enqueued result is not evidence that the PR merged.
+query III
+SELECT pull_request_merge_result_count,successful_async_merge_count,enqueued_async_merge_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>1,merge_request_uuid=>'enqueued');
+----
+1	0	1
+
+query III
+SELECT pull_request_merge_result_count,successful_async_merge_count,enqueued_async_merge_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>1,merge_request_uuid=>'merged');
+----
+1	1	0
+
+query TTT
+SELECT merge_status,merge_method,merge_commit_sha FROM engineering.detail.pull_request_merge_results(repository=>'pull-detail-fixture/alpha',pull_request_number=>1,merge_request_uuid=>'pending');
+----
+pending	merge	NULL
+
+query TTT
+SELECT merge_status,merge_method,merge_commit_sha FROM engineering.detail.pull_request_merge_results(repository=>'pull-detail-fixture/alpha',pull_request_number=>1,merge_request_uuid=>'failed');
+----
+failed	NULL	NULL
+
+query III
+SELECT pull_request_stack_count,open_pull_request_stack_count,stack_pull_request_membership_count FROM engineering.semantic.github(organization=>'pull-detail-fixture');
+----
+2	2	3
+
+query II
+SELECT pull_request_stack_count,stack_pull_request_membership_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',stack_number=>7);
+----
+1	2
+
+query II
+SELECT pull_request_stack_count,stack_pull_request_membership_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',pull_request_number=>1);
+----
+1	2
+
+query III
+SELECT pull_request_review_comment_count,pull_request_file_count,pull_request_stack_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/empty');
+----
+0	0	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT submitted_review_count FROM engineering.semantic.github(review_id=>1511);
+----
+repository
+
+statement error
+SELECT pull_request_review_comment_count FROM engineering.semantic.github(review_comment_id=>1611);
+----
+repository
+
+statement error
+SELECT pull_request_merge_result_count FROM engineering.semantic.github(repository=>'pull-detail-fixture/alpha',merge_request_uuid=>'pending');
+----
+pull_request_number
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

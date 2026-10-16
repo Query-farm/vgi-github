@@ -1,0 +1,147 @@
+# Copilot report metadata: counts describe available reports and signed links only.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'organization_day',copilot_report_day=>'2026-09-01');
+----
+1	2
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'repositories_day',copilot_report_day=>'2026-09-01');
+----
+1	1
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'user_teams_day',copilot_report_day=>'2026-09-01');
+----
+1	0
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'users_day',copilot_report_day=>'2026-09-01');
+----
+1	1
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'organization_latest');
+----
+1	1
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'users_latest');
+----
+1	3
+
+statement ok
+CREATE TEMP TABLE copilot_reports_shape_1 AS SELECT * FROM engineering.detail.copilot_report_metadata(organization=>'copilot-report-fixture',copilot_report_kind=>'users_latest');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTI
+SELECT report_start_day,report_end_day,requested_day,length(download_links) FROM copilot_reports_shape_1;
+----
+2026-08-05	2026-09-01	NULL	3
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE copilot_reports_shape_2 AS SELECT * FROM engineering.detail.copilot_report_metadata(organization=>'copilot-report-fixture',copilot_report_kind=>'organization_day',copilot_report_day=>'2026-09-01');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTI
+SELECT report_start_day,report_end_day,requested_day,length(download_links) FROM copilot_reports_shape_2;
+----
+2026-09-01	2026-09-01	2026-09-01	2
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'organization_day',copilot_report_day=>'2026-09-02');
+----
+0	0
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'repositories_day',copilot_report_day=>'2026-09-02');
+----
+0	0
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'user_teams_day',copilot_report_day=>'2026-09-02');
+----
+0	0
+
+query II
+SELECT available_copilot_report_count,copilot_report_download_link_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'users_day',copilot_report_day=>'2026-09-02');
+----
+0	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT available_copilot_report_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'organization_day');
+----
+copilot_report_day
+
+statement error
+SELECT available_copilot_report_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'organization_latest',copilot_report_day=>'2026-09-01');
+----
+<REGEX>:(?s).*(copilot_report_day|arguments do not apply).*
+
+statement error
+SELECT available_copilot_report_count FROM engineering.semantic.github(organization=>'copilot-report-fixture',copilot_report_kind=>'unknown');
+----
+select a retrieval population
+
+statement error
+SELECT available_copilot_report_count FROM engineering.semantic.github(copilot_report_kind=>'users_latest');
+----
+organization
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

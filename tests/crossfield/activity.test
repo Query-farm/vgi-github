@@ -1,0 +1,289 @@
+# Bidirectional stars/watchers, caller subscriptions, notifications and retained event envelopes.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Counts join through one repository relationship and preserve known empty repositories.
+query TIIII
+SELECT repository_name,repository_star_count,repository_watcher_count,repository_current_stars,repository_star_week_count FROM engineering.semantic.github(organization=>'activity-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+activity-fixture/alpha	2	1	2	2
+activity-fixture/beta	0	1	0	1
+
+query II
+SELECT repository_star_count,repository_watcher_count FROM engineering.semantic.github(user=>'activity-fixture-user');
+----
+1	1
+
+query II
+SELECT repository_star_count,repository_watcher_count FROM engineering.semantic.github();
+----
+1	1
+
+query II
+SELECT repository_star_count,repository_watcher_count FROM engineering.semantic.github(owner=>'activity-fixture');
+----
+2	2
+
+query II
+SELECT repository_star_count,repository_watcher_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0
+
+statement ok
+CREATE TEMP TABLE activity_detail_1 AS SELECT * FROM engineering.detail.repository_stars(user=>'activity-fixture-user');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIT
+SELECT repository_id,stargazer_id,CAST(starred_at AS DATE) FROM activity_detail_1;
+----
+6101	6110	2026-01-01
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE activity_detail_2 AS SELECT * FROM engineering.detail.repository_stars();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIT
+SELECT repository_id,stargazer_id,CAST(starred_at AS DATE) FROM activity_detail_2;
+----
+6101	903	2026-01-02
+
+statement ok
+SET crossfield_mode='strict';
+
+# Current counts and calendar-week creation buckets have distinct meanings.
+query IIII
+SELECT repository_star_count_observation_count,repository_current_stars,repository_star_week_count,repository_weekly_stars_created FROM engineering.semantic.github(organization=>'activity-fixture');
+----
+2	2	3	3
+
+statement ok
+CREATE TEMP TABLE activity_detail_3 AS SELECT * FROM engineering.detail.repository_star_history(organization=>'activity-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIII
+SELECT repository_id,week_unix,total,len(days) FROM activity_detail_3 ORDER BY repository_id,week_unix;
+----
+6101	1754179200	1	7
+6101	1754784000	2	7
+6102	1754784000	0	7
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT repository_subscription_observation_count,ignored_repository_subscription_count FROM engineering.semantic.github(organization=>'activity-fixture');
+----
+2	1
+
+query II
+SELECT repository_subscription_observation_count,ignored_repository_subscription_count FROM engineering.semantic.github();
+----
+1	0
+
+statement ok
+CREATE TEMP TABLE activity_detail_4 AS SELECT * FROM engineering.detail.repository_subscriptions(organization=>'activity-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIII
+SELECT caller_id,repository_id,subscribed,ignored FROM activity_detail_4 ORDER BY repository_id;
+----
+903	6101	false	true
+903	6102	true	false
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT repository_star_observation_count,starred_repository_observation_count FROM engineering.semantic.github(repository=>'activity-fixture/alpha');
+----
+1	1
+
+statement ok
+CREATE TEMP TABLE activity_detail_5 AS SELECT * FROM engineering.detail.repository_star_observations(repository=>'activity-fixture/missing');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query II
+SELECT caller_id,status_code FROM activity_detail_5;
+----
+903	404
+
+statement ok
+SET crossfield_mode='strict';
+
+# Notification lists request read and unread rows, then traverse subscriptions by canonical decimal identity.
+query IIII
+SELECT notification_count,unread_notification_count,notification_subscription_observation_count,subscribed_notification_count FROM engineering.semantic.github();
+----
+3	2	3	2
+
+query TIIII
+SELECT repository_name,notification_count,unread_notification_count,notification_subscription_observation_count,subscribed_notification_count FROM engineering.semantic.github(organization=>'activity-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+activity-fixture/alpha	2	1	2	1
+activity-fixture/beta	1	1	1	1
+
+query II
+SELECT notification_count,unread_notification_count FROM engineering.semantic.github(notification_participating=>true);
+----
+1	1
+
+statement ok
+CREATE TEMP TABLE activity_detail_6 AS SELECT * FROM engineering.detail.notifications(notification_thread_id=>'7102');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIII
+SELECT notification_thread_id,caller_id,repository_id,unread FROM activity_detail_6;
+----
+7102	903	6101	false
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE activity_detail_7 AS SELECT * FROM engineering.detail.notification_subscriptions(notification_thread_id=>'7102');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIII
+SELECT notification_thread_id,subscribed,ignored,created_at IS NULL FROM activity_detail_7;
+----
+7102	false	true	true
+
+statement ok
+SET crossfield_mode='strict';
+
+# The retained event envelope preserves one identity across feed directions without inventing payload fields.
+query I
+SELECT activity_event_count FROM engineering.semantic.github();
+----
+2
+
+query I
+SELECT activity_event_count FROM engineering.semantic.github(user=>'activity-fixture-user');
+----
+1
+
+query I
+SELECT activity_event_count FROM engineering.semantic.github(user=>'activity-fixture-user',activity_view=>'performed_public');
+----
+1
+
+query I
+SELECT activity_event_count FROM engineering.semantic.github(user=>'activity-fixture-user',activity_view=>'received');
+----
+2
+
+query I
+SELECT activity_event_count FROM engineering.semantic.github(user=>'activity-fixture-user',activity_view=>'received_public');
+----
+1
+
+query I
+SELECT activity_event_count FROM engineering.semantic.github(repository=>'activity-fixture/alpha',activity_view=>'network');
+----
+3
+
+query I
+SELECT activity_event_count FROM engineering.semantic.github(organization=>'activity-fixture');
+----
+2
+
+query I
+SELECT activity_event_count FROM engineering.semantic.github(user=>'activity-fixture-user',organization=>'activity-fixture',activity_view=>'organization_authenticated');
+----
+3
+
+statement ok
+CREATE TEMP TABLE activity_detail_8 AS SELECT * FROM engineering.detail.activity_events(user=>'activity-fixture-user',activity_view=>'received');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIII
+SELECT event_id,event_type IS NULL,created_at IS NULL,organization_id IS NULL FROM activity_detail_8 ORDER BY event_id;
+----
+E6101	false	false	false
+E6102	true	true	true
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT activity_feed_observation_count FROM engineering.semantic.github();
+----
+1
+
+statement ok
+CREATE TEMP TABLE activity_detail_9 AS SELECT * FROM engineering.detail.activity_feed_observations();
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IT
+SELECT len(current_user_organization_urls),links.timeline.type FROM activity_detail_9;
+----
+2	application/atom+xml
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT notification_count FROM engineering.semantic.github(notification_thread_id=>'07101');
+----
+canonical nonnegative decimal identity within BIGINT range
+
+statement error
+SELECT notification_count FROM engineering.semantic.github(notification_thread_id=>'9223372036854775808');
+----
+canonical nonnegative decimal identity within BIGINT range
+
+statement error
+SELECT activity_event_count FROM engineering.semantic.github(activity_view=>'received');
+----
+user

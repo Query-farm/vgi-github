@@ -1,0 +1,4136 @@
+{
+  "entities": [
+    {
+      "name": "public_repository_discovery_source",
+      "description": "Pinned repository business read: list-public.",
+      "arguments": [
+        {
+          "name": "public_repository_since_id",
+          "type": "BIGINT",
+          "description": "Only public repository IDs after this API creation-order cursor.",
+          "nullable": true,
+          "default": null,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        }
+      ],
+      "grain": [
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-public",
+        "path_bindings": {},
+        "query_bindings": {
+          "since": {
+            "argument": "public_repository_since_id"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "authenticated_repository_discovery_source",
+      "description": "Pinned repository business read: list-for-authenticated-user.",
+      "arguments": [
+        {
+          "name": "repository_visibility",
+          "type": "VARCHAR",
+          "description": "Authenticated repository visibility filter; incompatible with repository_access_type.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "all",
+          "enum": [
+            "all",
+            "public",
+            "private"
+          ]
+        },
+        {
+          "name": "repository_affiliation",
+          "type": "VARCHAR",
+          "description": "Comma-separated authenticated repository affiliations: owner, collaborator, organization_member. Incompatible with repository_access_type.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "owner,collaborator,organization_member"
+        },
+        {
+          "name": "repository_access_type",
+          "type": "VARCHAR",
+          "description": "Legacy authenticated repository access population; incompatible with repository_visibility and repository_affiliation.",
+          "nullable": true,
+          "min_length": 1,
+          "example": "all",
+          "enum": [
+            "all",
+            "owner",
+            "public",
+            "private",
+            "member"
+          ],
+          "default": null
+        },
+        {
+          "name": "repository_sort",
+          "type": "VARCHAR",
+          "description": "Ordering of authenticated repository results, without truncating the selected population.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "full_name",
+          "enum": [
+            "created",
+            "updated",
+            "pushed",
+            "full_name"
+          ]
+        },
+        {
+          "name": "repository_direction",
+          "type": "VARCHAR",
+          "description": "Ordering direction for authenticated repository results.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "asc",
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        {
+          "name": "repository_pushed_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "description": "Only authenticated repositories pushed after this instant.",
+          "nullable": true,
+          "default": null,
+          "example": "2026-09-01T00:00:00Z"
+        },
+        {
+          "name": "repository_pushed_before",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "description": "Only authenticated repositories pushed before this instant.",
+          "nullable": true,
+          "default": null,
+          "example": "2026-10-01T00:00:00Z"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        }
+      ],
+      "grain": [
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "visibility": {
+            "argument": "repository_visibility"
+          },
+          "affiliation": {
+            "argument": "repository_affiliation"
+          },
+          "type": {
+            "argument": "repository_access_type"
+          },
+          "sort": {
+            "argument": "repository_sort"
+          },
+          "direction": {
+            "argument": "repository_direction"
+          },
+          "since": {
+            "argument": "repository_pushed_since"
+          },
+          "before": {
+            "argument": "repository_pushed_before"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_fork_discovery_source",
+      "description": "Pinned repository business read: list-forks.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "parent_repository_id",
+          "type": "BIGINT",
+          "description": "",
+          "nullable": false
+        },
+        {
+          "name": "repository_fork_sort",
+          "type": "VARCHAR",
+          "description": "API ordering for the complete fork inventory.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "newest",
+          "enum": [
+            "newest",
+            "oldest",
+            "stargazers",
+            "watchers"
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "name": "parent_repository_id",
+          "source_argument": "parent_repository_id"
+        },
+        {
+          "name": "parent_repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        }
+      ],
+      "grain": [
+        "parent_repository_id",
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-forks",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "sort": {
+            "argument": "repository_fork_sort"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_topic_memberships_source",
+      "description": "Pinned repository business read: get-all-topics.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "topic_name",
+          "source_value": true
+        }
+      ],
+      "grain": [
+        "repository",
+        "topic_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-all-topics",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "names"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_codeowners_errors_source",
+      "description": "Pinned repository business read: codeowners-errors.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "codeowners_ref",
+          "type": "VARCHAR",
+          "description": "Branch, tag or commit selecting the CODEOWNERS version; omitted means the repository default branch.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "main"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "codeowners_ref",
+          "source_argument": "codeowners_ref"
+        },
+        {
+          "name": "error_ordinal",
+          "source_ordinal": true
+        },
+        {
+          "name": "line",
+          "path": [
+            "line"
+          ]
+        },
+        {
+          "name": "column",
+          "path": [
+            "column"
+          ]
+        },
+        {
+          "name": "source",
+          "path": [
+            "source"
+          ]
+        },
+        {
+          "name": "kind",
+          "path": [
+            "kind"
+          ]
+        },
+        {
+          "name": "suggestion",
+          "path": [
+            "suggestion"
+          ]
+        },
+        {
+          "name": "message",
+          "path": [
+            "message"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "error_ordinal"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/codeowners-errors",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "codeowners_ref"
+          }
+        },
+        "result_path": [
+          "errors"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_property_values_source",
+      "description": "Pinned repository business read: custom-properties-for-repos-get-repository-values.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "property_name",
+          "path": [
+            "property_name"
+          ]
+        },
+        {
+          "name": "value",
+          "path": [
+            "value"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": true
+          }
+        }
+      ],
+      "grain": [
+        "repository",
+        "property_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/custom-properties-for-repos-get-repository-values",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_community_profiles_source",
+      "description": "Pinned repository business read: get-community-profile-metrics.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "health_percentage",
+          "path": [
+            "health_percentage"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "documentation",
+          "path": [
+            "documentation"
+          ]
+        },
+        {
+          "name": "files",
+          "path": [
+            "files"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "content_reports_enabled",
+          "path": [
+            "content_reports_enabled"
+          ]
+        }
+      ],
+      "grain": [
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-community-profile-metrics",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_hash_algorithms_source",
+      "description": "Pinned repository business read: get-hash-algorithm.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "hash_algorithm",
+          "path": [
+            "hash_algorithm"
+          ]
+        }
+      ],
+      "grain": [
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-hash-algorithm",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_contributor_observations_source",
+      "description": "Pinned repository business read: list-contributors.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "contributor_anonymous",
+          "type": "VARCHAR",
+          "description": "Set true or 1 to include anonymous contributor rows. Omitted follows GitHub's linked-account-only default; the API only links the first500 author email addresses.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "true",
+          "enum": [
+            "true",
+            "1"
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "contributor_anonymous",
+          "source_argument": "contributor_anonymous"
+        },
+        {
+          "name": "contributor_ordinal",
+          "source_ordinal": true
+        },
+        {
+          "name": "contributor_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "contributor_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "avatar_url",
+          "path": [
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "gravatar_id",
+          "path": [
+            "gravatar_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "followers_url",
+          "path": [
+            "followers_url"
+          ]
+        },
+        {
+          "name": "following_url",
+          "path": [
+            "following_url"
+          ]
+        },
+        {
+          "name": "gists_url",
+          "path": [
+            "gists_url"
+          ]
+        },
+        {
+          "name": "starred_url",
+          "path": [
+            "starred_url"
+          ]
+        },
+        {
+          "name": "subscriptions_url",
+          "path": [
+            "subscriptions_url"
+          ]
+        },
+        {
+          "name": "organizations_url",
+          "path": [
+            "organizations_url"
+          ]
+        },
+        {
+          "name": "repos_url",
+          "path": [
+            "repos_url"
+          ]
+        },
+        {
+          "name": "events_url",
+          "path": [
+            "events_url"
+          ]
+        },
+        {
+          "name": "received_events_url",
+          "path": [
+            "received_events_url"
+          ]
+        },
+        {
+          "name": "contributor_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "site_admin",
+          "path": [
+            "site_admin"
+          ]
+        },
+        {
+          "name": "contributions",
+          "path": [
+            "contributions"
+          ]
+        },
+        {
+          "name": "email",
+          "path": [
+            "email"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "user_view_type",
+          "path": [
+            "user_view_type"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "contributor_ordinal"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-contributors",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "anon": {
+            "argument": "contributor_anonymous"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        },
+        "empty_response_statuses": [
+          "204"
+        ]
+      }
+    },
+    {
+      "name": "repository_collaborator_permissions_source",
+      "description": "Pinned repository business read: get-collaborator-permission-level.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "requested_user",
+          "source_argument": "user"
+        },
+        {
+          "name": "permission",
+          "path": [
+            "permission"
+          ]
+        },
+        {
+          "name": "role_name",
+          "path": [
+            "role_name"
+          ]
+        },
+        {
+          "name": "user",
+          "path": [
+            "user"
+          ]
+        },
+        {
+          "name": "user_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "requested_user"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-collaborator-permission-level",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_collaborator_checks_source",
+      "description": "Pinned repository business read: check-collaborator.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "requested_user",
+          "source_argument": "user"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "repository",
+        "requested_user"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/check-collaborator",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        },
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_invitations_source",
+      "description": "Pinned repository business read: list-invitations.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "invitation_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "invitee_id",
+          "path": [
+            "invitee",
+            "id"
+          ]
+        },
+        {
+          "name": "invitee_login",
+          "path": [
+            "invitee",
+            "login"
+          ]
+        },
+        {
+          "name": "inviter_id",
+          "path": [
+            "inviter",
+            "id"
+          ]
+        },
+        {
+          "name": "inviter_login",
+          "path": [
+            "inviter",
+            "login"
+          ]
+        },
+        {
+          "name": "invitee",
+          "path": [
+            "invitee"
+          ]
+        },
+        {
+          "name": "inviter",
+          "path": [
+            "inviter"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "expired",
+          "path": [
+            "expired"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        }
+      ],
+      "grain": [
+        "invitation_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-invitations",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "repository",
+            "argument": "repository",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "authenticated_repository_invitations_source",
+      "description": "Pinned repository business read: list-invitations-for-authenticated-user.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "invitation_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "invitee_id",
+          "path": [
+            "invitee",
+            "id"
+          ]
+        },
+        {
+          "name": "invitee_login",
+          "path": [
+            "invitee",
+            "login"
+          ]
+        },
+        {
+          "name": "inviter_id",
+          "path": [
+            "inviter",
+            "id"
+          ]
+        },
+        {
+          "name": "inviter_login",
+          "path": [
+            "inviter",
+            "login"
+          ]
+        },
+        {
+          "name": "invitee",
+          "path": [
+            "invitee"
+          ]
+        },
+        {
+          "name": "inviter",
+          "path": [
+            "inviter"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "expired",
+          "path": [
+            "expired"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        }
+      ],
+      "grain": [
+        "invitation_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-invitations-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_attestation_envelopes_source",
+      "description": "Pinned repository business read: list-attestations.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "description": "",
+          "nullable": false
+        },
+        {
+          "name": "attestation_subject_digest",
+          "type": "VARCHAR",
+          "description": "Attestation subject SHA256 digest in sha256:HEX_DIGEST form.",
+          "nullable": false,
+          "min_length": 1,
+          "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "name": "attestation_predicate_type",
+          "type": "VARCHAR",
+          "description": "Optional attestation predicate filter: provenance, sbom, release or a custom predicate type.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "provenance"
+        },
+        {
+          "name": "selected_attestation_scope_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "enum": [
+            "repository"
+          ],
+          "description": "Kind of resource whose selected retrieval defines attestation occurrence positions.",
+          "example": "repository"
+        },
+        {
+          "name": "unknown_retrieval_organization_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable retrieval-owner role for this scope.",
+          "default": null
+        },
+        {
+          "name": "unknown_retrieval_organization_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable retrieval-owner role for this scope.",
+          "default": null
+        },
+        {
+          "name": "unknown_retrieval_user_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable retrieval-owner role for this scope.",
+          "default": null
+        },
+        {
+          "name": "unknown_retrieval_user_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable retrieval-owner role for this scope.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "retrieval_scope_type",
+          "source_argument": "selected_attestation_scope_type"
+        },
+        {
+          "name": "retrieval_scope_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "attestation_subject_digest",
+          "source_argument": "attestation_subject_digest"
+        },
+        {
+          "name": "attestation_predicate_type",
+          "source_argument": "attestation_predicate_type"
+        },
+        {
+          "name": "attestation_ordinal",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_repository_id",
+          "path": [
+            "repository_id"
+          ]
+        },
+        {
+          "name": "bundle_media_type",
+          "path": [
+            "bundle",
+            "mediaType"
+          ]
+        },
+        {
+          "name": "bundle_url",
+          "path": [
+            "bundle_url"
+          ]
+        },
+        {
+          "name": "initiator",
+          "path": [
+            "initiator"
+          ]
+        },
+        {
+          "name": "retrieval_organization_id",
+          "source_argument": "unknown_retrieval_organization_id"
+        },
+        {
+          "name": "retrieval_organization_login",
+          "source_argument": "unknown_retrieval_organization_login"
+        },
+        {
+          "name": "retrieval_user_id",
+          "source_argument": "unknown_retrieval_user_id"
+        },
+        {
+          "name": "retrieval_user_login",
+          "source_argument": "unknown_retrieval_user_login"
+        }
+      ],
+      "grain": [
+        "retrieval_scope_type",
+        "retrieval_scope_id",
+        "attestation_subject_digest",
+        "attestation_ordinal"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-attestations",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "subject_digest": {
+            "argument": "attestation_subject_digest"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "predicate_type": {
+            "argument": "attestation_predicate_type"
+          }
+        },
+        "result_path": [
+          "attestations"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_repository_id",
+            "argument": "repository_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "repository_fork_memberships",
+      "description": "Explicit parent/fork associations discovered through GitHub fork listings. Repository IDs remain canonical; the parent and fork are distinct repository roles, not two identities for one row.",
+      "grain": [
+        "parent_repository_id",
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "parent_repository_id",
+          "parent_repository",
+          "repository_id",
+          "repository"
+        ],
+        "dimensions": [
+          "parent_repository_id",
+          "parent_repository",
+          "repository_id",
+          "repository"
+        ],
+        "sql_names": {
+          "parent_repository_id": "repository_fork_memberships_parent_repository_id",
+          "parent_repository": "repository_fork_memberships_parent_repository",
+          "repository_id": "repository_fork_memberships_repository_id",
+          "repository": "repository_fork_memberships_repository"
+        },
+        "metrics": [
+          {
+            "name": "repository_fork_membership_count",
+            "kind": "count",
+            "comment": "Visible parent/fork associations."
+          }
+        ],
+        "derived_fields": []
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository_fork_sort",
+              "type": "VARCHAR",
+              "description": "API ordering for the complete fork inventory.",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "example": "newest",
+              "enum": [
+                "newest",
+                "oldest",
+                "stargazers",
+                "watchers"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "parent_repository_id",
+              "source_stage": "records",
+              "source_column": "parent_repository_id"
+            },
+            {
+              "name": "parent_repository",
+              "source_stage": "records",
+              "source_column": "parent_repository"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_fork_discovery_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "parent_repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "repository_fork_sort": {
+                    "parameter": "repository_fork_sort"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Parent/fork memberships returned by the selected repository fork inventories."
+        }
+      ]
+    },
+    {
+      "name": "repository_codeowners_errors",
+      "description": "CODEOWNERS syntax-error occurrences in the selected ref or default branch. No durable error ID is supplied; error_ordinal preserves duplicate occurrences within this retrieval and does not claim identity across snapshots. File path/line/column locate evidence and need not be unique.",
+      "grain": [
+        "repository_id",
+        "error_ordinal"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "codeowners_ref",
+          "error_ordinal",
+          "line",
+          "column",
+          "source",
+          "kind",
+          "suggestion",
+          "message",
+          "path"
+        ],
+        "dimensions": [
+          "repository",
+          "codeowners_ref",
+          "error_ordinal",
+          "path",
+          "line",
+          "column",
+          "kind"
+        ],
+        "sql_names": {
+          "repository": "repository_codeowners_errors_repository",
+          "codeowners_ref": "repository_codeowners_errors_codeowners_ref",
+          "error_ordinal": "repository_codeowners_errors_error_ordinal",
+          "path": "repository_codeowners_errors_path",
+          "line": "repository_codeowners_errors_line",
+          "column": "repository_codeowners_errors_column",
+          "kind": "repository_codeowners_errors_kind"
+        },
+        "metrics": [
+          {
+            "name": "codeowners_error_count",
+            "kind": "count",
+            "comment": "Returned CODEOWNERS error occurrences."
+          }
+        ],
+        "derived_fields": []
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "codeowners_ref",
+              "type": "VARCHAR",
+              "description": "Branch, tag or commit selecting the CODEOWNERS version; omitted means the repository default branch.",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "example": "main"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "codeowners_ref",
+              "source_stage": "records",
+              "source_column": "codeowners_ref"
+            },
+            {
+              "name": "error_ordinal",
+              "source_stage": "records",
+              "source_column": "error_ordinal"
+            },
+            {
+              "name": "line",
+              "source_stage": "records",
+              "source_column": "line"
+            },
+            {
+              "name": "column",
+              "source_stage": "records",
+              "source_column": "column"
+            },
+            {
+              "name": "source",
+              "source_stage": "records",
+              "source_column": "source"
+            },
+            {
+              "name": "kind",
+              "source_stage": "records",
+              "source_column": "kind"
+            },
+            {
+              "name": "suggestion",
+              "source_stage": "records",
+              "source_column": "suggestion"
+            },
+            {
+              "name": "message",
+              "source_stage": "records",
+              "source_column": "message"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_codeowners_errors_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "codeowners_ref": {
+                    "parameter": "codeowners_ref"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    },
+    {
+      "name": "repository_property_values",
+      "description": "Typed custom property assignments on a repository, separate from administrative property definitions. Scalar strings, string lists and NULL values remain distinct.",
+      "grain": [
+        "repository_id",
+        "property_name"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "property_name",
+          "value"
+        ],
+        "dimensions": [
+          "repository",
+          "property_name"
+        ],
+        "sql_names": {
+          "repository": "repository_property_values_repository",
+          "property_name": "repository_property_values_property_name"
+        },
+        "metrics": [
+          {
+            "name": "repository_property_value_count",
+            "kind": "count",
+            "comment": "Property assignments, including explicitly null values."
+          }
+        ],
+        "derived_fields": []
+      },
+      "routes": [
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "property_repository_query",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional GitHub repository-search filter on organization custom-property repository discovery. Returned assignments are hydrated from the canonical per-repository endpoint.",
+              "min_length": 1,
+              "example": "archived:false",
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "discovery",
+                "entity": "organization_property_repositories_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "property_repository_query": {
+                    "parameter": "property_repository_query"
+                  }
+                }
+              },
+              {
+                "name": "repositories",
+                "entity": "organization_property_repository_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "discovery",
+                    "column": "repository"
+                  },
+                  "expected_property_repository_id": {
+                    "stage": "discovery",
+                    "column": "repository_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "repository_property_values_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "property_name",
+              "source_stage": "records",
+              "source_column": "property_name"
+            },
+            {
+              "name": "value",
+              "source_stage": "records",
+              "source_column": "value"
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "population": "All advertised pages of organization property-bearing repository discovery, optionally search-filtered; each repository hydrates canonical current per-property values. Nested properties in the discovery response are not claimed as directly mapped."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "property_name",
+              "source_stage": "records",
+              "source_column": "property_name"
+            },
+            {
+              "name": "value",
+              "source_stage": "records",
+              "source_column": "value"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_property_values_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    },
+    {
+      "name": "repository_community_profiles",
+      "description": "Community health observations for supported non-fork repositories. Health percentage measures recommended community files, not project activity or security posture. Unsupported fork reads fail with GitHub's response instead of becoming zero health.",
+      "grain": [
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "health_percentage",
+          "description",
+          "documentation",
+          "files",
+          "updated_at",
+          "content_reports_enabled"
+        ],
+        "dimensions": [
+          "repository",
+          "health_percentage",
+          "updated_at"
+        ],
+        "sql_names": {
+          "repository": "repository_community_profiles_repository",
+          "health_percentage": "repository_community_profiles_health_percentage",
+          "updated_at": "repository_community_profiles_updated_at"
+        },
+        "metrics": [
+          {
+            "name": "repository_community_profile_count",
+            "kind": "count",
+            "comment": "Returned community profile observations."
+          }
+        ],
+        "derived_fields": [],
+        "crossfield": {
+          "metrics": {
+            "average_repository_community_health": {
+              "expression": "AVG(repository_community_profiles.health_percentage)"
+            }
+          },
+          "metric_semantics": {
+            "average_repository_community_health": {
+              "dataset": "repository_community_profiles",
+              "comment": "Mean returned repository community health percentage.",
+              "additivity": "non_additive",
+              "missing": "null"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "health_percentage",
+              "source_stage": "records",
+              "source_column": "health_percentage"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "documentation",
+              "source_stage": "records",
+              "source_column": "documentation"
+            },
+            {
+              "name": "files",
+              "source_stage": "records",
+              "source_column": "files"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "content_reports_enabled",
+              "source_stage": "records",
+              "source_column": "content_reports_enabled"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_community_profiles_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    },
+    {
+      "name": "repository_hash_observations",
+      "description": "Current Git object hash-algorithm observations for canonical repositories. This dedicated optional read does not force additional requests on ordinary repository discovery.",
+      "grain": [
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "hash_algorithm"
+        ],
+        "dimensions": [
+          "repository",
+          "hash_algorithm"
+        ],
+        "sql_names": {
+          "repository": "repository_hash_observations_repository",
+          "hash_algorithm": "repository_hash_observations_hash_algorithm"
+        },
+        "metrics": [
+          {
+            "name": "repository_hash_observation_count",
+            "kind": "count",
+            "comment": "Repositories with an observed object hash algorithm."
+          },
+          {
+            "name": "sha256_repository_count",
+            "kind": "count",
+            "comment": "Repositories reporting sha256 object hashing.",
+            "where": {
+              "field": "hash_algorithm",
+              "op": "eq",
+              "value": "sha256"
+            }
+          }
+        ],
+        "derived_fields": []
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "hash_algorithm",
+              "source_stage": "records",
+              "source_column": "hash_algorithm"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_hash_algorithms_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    },
+    {
+      "name": "repository_contributor_observations",
+      "description": "Cached contributor-count observations, not commit rows. GitHub groups by user after matching author email addresses, but only the first500 author email addresses link to accounts; later addresses can appear anonymously when requested. Default listing excludes anonymous rows; contributor_anonymous=true or1 explicitly includes them. Optional IDs/emails are never promoted to guaranteed identity. The retrieval-local ordinal preserves anonymous rows and duplicate-looking occurrences. Empty repositories may return204 and emit no observation.",
+      "grain": [
+        "repository_id",
+        "contributor_ordinal"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "contributor_anonymous",
+          "contributor_ordinal",
+          "contributor_login",
+          "contributor_id",
+          "node_id",
+          "avatar_url",
+          "gravatar_id",
+          "url",
+          "html_url",
+          "followers_url",
+          "following_url",
+          "gists_url",
+          "starred_url",
+          "subscriptions_url",
+          "organizations_url",
+          "repos_url",
+          "events_url",
+          "received_events_url",
+          "contributor_type",
+          "site_admin",
+          "contributions",
+          "email",
+          "name",
+          "user_view_type"
+        ],
+        "dimensions": [
+          "repository",
+          "contributor_ordinal",
+          "contributor_id",
+          "contributor_login",
+          "contributor_type",
+          "name",
+          "email"
+        ],
+        "sql_names": {
+          "repository": "repository_contributor_observations_repository",
+          "contributor_ordinal": "repository_contributor_observations_contributor_ordinal",
+          "contributor_id": "repository_contributor_observations_contributor_id",
+          "contributor_login": "repository_contributor_observations_contributor_login",
+          "contributor_type": "repository_contributor_observations_contributor_type",
+          "name": "repository_contributor_observations_name",
+          "email": "repository_contributor_observations_email"
+        },
+        "metrics": [
+          {
+            "name": "repository_contributor_observation_count",
+            "kind": "count",
+            "comment": "Returned contributor observations in the selected anonymous population."
+          }
+        ],
+        "derived_fields": [],
+        "crossfield": {
+          "metrics": {
+            "reported_contributor_commit_count": {
+              "expression": "SUM(repository_contributor_observations.contributions)"
+            }
+          },
+          "metric_semantics": {
+            "reported_contributor_commit_count": {
+              "dataset": "repository_contributor_observations",
+              "comment": "Sum of cached API contribution counters; not independently enumerated commit count.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "contributor_anonymous",
+              "type": "VARCHAR",
+              "description": "Set true or 1 to include anonymous contributor rows. Omitted follows GitHub's linked-account-only default; the API only links the first500 author email addresses.",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "example": "true",
+              "enum": [
+                "true",
+                "1"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "contributor_anonymous",
+              "source_stage": "records",
+              "source_column": "contributor_anonymous"
+            },
+            {
+              "name": "contributor_ordinal",
+              "source_stage": "records",
+              "source_column": "contributor_ordinal"
+            },
+            {
+              "name": "contributor_login",
+              "source_stage": "records",
+              "source_column": "contributor_login"
+            },
+            {
+              "name": "contributor_id",
+              "source_stage": "records",
+              "source_column": "contributor_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "avatar_url",
+              "source_stage": "records",
+              "source_column": "avatar_url"
+            },
+            {
+              "name": "gravatar_id",
+              "source_stage": "records",
+              "source_column": "gravatar_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "followers_url",
+              "source_stage": "records",
+              "source_column": "followers_url"
+            },
+            {
+              "name": "following_url",
+              "source_stage": "records",
+              "source_column": "following_url"
+            },
+            {
+              "name": "gists_url",
+              "source_stage": "records",
+              "source_column": "gists_url"
+            },
+            {
+              "name": "starred_url",
+              "source_stage": "records",
+              "source_column": "starred_url"
+            },
+            {
+              "name": "subscriptions_url",
+              "source_stage": "records",
+              "source_column": "subscriptions_url"
+            },
+            {
+              "name": "organizations_url",
+              "source_stage": "records",
+              "source_column": "organizations_url"
+            },
+            {
+              "name": "repos_url",
+              "source_stage": "records",
+              "source_column": "repos_url"
+            },
+            {
+              "name": "events_url",
+              "source_stage": "records",
+              "source_column": "events_url"
+            },
+            {
+              "name": "received_events_url",
+              "source_stage": "records",
+              "source_column": "received_events_url"
+            },
+            {
+              "name": "contributor_type",
+              "source_stage": "records",
+              "source_column": "contributor_type"
+            },
+            {
+              "name": "site_admin",
+              "source_stage": "records",
+              "source_column": "site_admin"
+            },
+            {
+              "name": "contributions",
+              "source_stage": "records",
+              "source_column": "contributions"
+            },
+            {
+              "name": "email",
+              "source_stage": "records",
+              "source_column": "email"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "user_view_type",
+              "source_stage": "records",
+              "source_column": "user_view_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_contributor_observations_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "contributor_anonymous": {
+                    "parameter": "contributor_anonymous"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    },
+    {
+      "name": "repository_collaborator_permissions",
+      "description": "Effective repository permission observations for an explicitly requested user. Legacy permission maps maintain to write and triage to read; role_name preserves the actual assigned or custom role. Effective access can combine direct, team and organization grants. A nullable returned user is retained, with requested login as lookup provenance.",
+      "grain": [
+        "repository_id",
+        "requested_user"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "requested_user",
+          "permission",
+          "role_name",
+          "user",
+          "user_id",
+          "user_login"
+        ],
+        "dimensions": [
+          "repository",
+          "requested_user",
+          "permission",
+          "role_name",
+          "user_id",
+          "user_login"
+        ],
+        "sql_names": {
+          "repository": "repository_collaborator_permissions_repository",
+          "requested_user": "repository_collaborator_permissions_requested_user",
+          "permission": "repository_collaborator_permissions_permission",
+          "role_name": "repository_collaborator_permissions_role_name",
+          "user_id": "repository_collaborator_permissions_user_id",
+          "user_login": "repository_collaborator_permissions_user_login"
+        },
+        "metrics": [
+          {
+            "name": "repository_permission_observation_count",
+            "kind": "count",
+            "comment": "Returned effective permission observations, including none."
+          }
+        ],
+        "derived_fields": []
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "requested_user",
+              "source_stage": "records",
+              "source_column": "requested_user"
+            },
+            {
+              "name": "permission",
+              "source_stage": "records",
+              "source_column": "permission"
+            },
+            {
+              "name": "role_name",
+              "source_stage": "records",
+              "source_column": "role_name"
+            },
+            {
+              "name": "user",
+              "source_stage": "records",
+              "source_column": "user"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_collaborator_permissions_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    },
+    {
+      "name": "repository_collaborator_checks",
+      "description": "Caller-authorized repository collaborator membership checks. Status204 confirms membership;404 means the API did not confirm membership and can also reflect inaccessible resources. This observation does not grant access or infer the source of a grant.",
+      "grain": [
+        "repository_id",
+        "requested_user"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "requested_user",
+          "status_code"
+        ],
+        "dimensions": [
+          "repository",
+          "requested_user",
+          "status_code"
+        ],
+        "sql_names": {
+          "repository": "repository_collaborator_checks_repository",
+          "requested_user": "repository_collaborator_checks_requested_user",
+          "status_code": "repository_collaborator_checks_status_code"
+        },
+        "metrics": [
+          {
+            "name": "repository_collaborator_check_count",
+            "kind": "count",
+            "comment": "Returned membership-check observations."
+          }
+        ],
+        "derived_fields": [],
+        "crossfield": {
+          "metrics": {
+            "confirmed_repository_collaborator_count": {
+              "expression": "COUNT(*) FILTER (WHERE repository_collaborator_checks.status_code = 204)"
+            },
+            "unconfirmed_repository_collaborator_count": {
+              "expression": "COUNT(*) FILTER (WHERE repository_collaborator_checks.status_code = 404)"
+            }
+          },
+          "metric_semantics": {
+            "confirmed_repository_collaborator_count": {
+              "dataset": "repository_collaborator_checks",
+              "comment": "Checks with affirmative204 membership evidence.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "unconfirmed_repository_collaborator_count": {
+              "dataset": "repository_collaborator_checks",
+              "comment": "Checks returning404; not a claim of proven absence under every credential.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "requested_user",
+              "source_stage": "records",
+              "source_column": "requested_user"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_collaborator_checks_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    },
+    {
+      "name": "repository_invitations",
+      "description": "Canonical pending repository invitations shared by repository-visible and authenticated-invitee routes. Invitee and inviter are separate optional actors. Expired is an API observation; absence is unknown rather than false. Historical accepted/deleted invitations are outside these listing populations.",
+      "grain": [
+        "invitation_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "invitation_id",
+          "repository_id",
+          "repository",
+          "invitee_id",
+          "invitee_login",
+          "inviter_id",
+          "inviter_login",
+          "invitee",
+          "inviter",
+          "permissions",
+          "created_at",
+          "expired",
+          "url",
+          "html_url",
+          "node_id",
+          "invitation_created_day"
+        ],
+        "dimensions": [
+          "invitation_id",
+          "repository",
+          "invitee_id",
+          "invitee_login",
+          "inviter_id",
+          "inviter_login",
+          "permissions",
+          "created_at",
+          "expired",
+          "invitation_created_day"
+        ],
+        "sql_names": {
+          "invitation_id": "repository_invitations_invitation_id",
+          "repository": "repository_invitations_repository",
+          "invitee_id": "repository_invitations_invitee_id",
+          "invitee_login": "repository_invitations_invitee_login",
+          "inviter_id": "repository_invitations_inviter_id",
+          "inviter_login": "repository_invitations_inviter_login",
+          "permissions": "repository_invitations_permissions",
+          "created_at": "repository_invitations_created_at",
+          "expired": "repository_invitations_expired",
+          "invitation_created_day": "repository_invitations_invitation_created_day"
+        },
+        "metrics": [
+          {
+            "name": "repository_invitation_count",
+            "kind": "count",
+            "comment": "Visible currently open invitations."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "invitation_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC date of created_at."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "expired_repository_invitation_count": {
+              "expression": "COUNT(*) FILTER (WHERE repository_invitations.expired = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "expired_repository_invitation_count": {
+              "dataset": "repository_invitations",
+              "comment": "Returned invitations explicitly marked expired.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "authenticated_user",
+              "type": "BOOLEAN",
+              "nullable": false,
+              "enum": [
+                true
+              ],
+              "example": true,
+              "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+            }
+          ],
+          "columns": [
+            {
+              "name": "invitation_id",
+              "source_stage": "records",
+              "source_column": "invitation_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "invitee_id",
+              "source_stage": "records",
+              "source_column": "invitee_id"
+            },
+            {
+              "name": "invitee_login",
+              "source_stage": "records",
+              "source_column": "invitee_login"
+            },
+            {
+              "name": "inviter_id",
+              "source_stage": "records",
+              "source_column": "inviter_id"
+            },
+            {
+              "name": "inviter_login",
+              "source_stage": "records",
+              "source_column": "inviter_login"
+            },
+            {
+              "name": "invitee",
+              "source_stage": "records",
+              "source_column": "invitee"
+            },
+            {
+              "name": "inviter",
+              "source_stage": "records",
+              "source_column": "inviter"
+            },
+            {
+              "name": "permissions",
+              "source_stage": "records",
+              "source_column": "permissions"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "expired",
+              "source_stage": "records",
+              "source_column": "expired"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "authenticated_repository_invitations_source",
+                "arguments": {}
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Currently open repository invitations for the authenticated user.",
+          "select": [
+            "authenticated_user"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "invitation_id",
+              "source_stage": "records",
+              "source_column": "invitation_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "invitee_id",
+              "source_stage": "records",
+              "source_column": "invitee_id"
+            },
+            {
+              "name": "invitee_login",
+              "source_stage": "records",
+              "source_column": "invitee_login"
+            },
+            {
+              "name": "inviter_id",
+              "source_stage": "records",
+              "source_column": "inviter_id"
+            },
+            {
+              "name": "inviter_login",
+              "source_stage": "records",
+              "source_column": "inviter_login"
+            },
+            {
+              "name": "invitee",
+              "source_stage": "records",
+              "source_column": "invitee"
+            },
+            {
+              "name": "inviter",
+              "source_stage": "records",
+              "source_column": "inviter"
+            },
+            {
+              "name": "permissions",
+              "source_stage": "records",
+              "source_column": "permissions"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "expired",
+              "source_stage": "records",
+              "source_column": "expired"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_invitations_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Currently open invitations for repositories where the caller has the API-required administrative visibility; this read describes pending business membership."
+        }
+      ]
+    },
+    {
+      "name": "attestation_envelopes",
+      "description": "Attestation envelope occurrences qualified by retrieval scope type and stable scope ID, subject digest and occurrence ordinal. Ordinals are positions within the selected invocation and predicate filter, not durable attestation identities or cross-route equivalence. Attestation envelope occurrences for a subject digest, preserving reported media type, bundle URL and initiator. The pinned verificationMaterial and dsseEnvelope values are arbitrary objects without typed fields, so their dynamic content remains explicitly uncovered. Bundle URLs are evidence and are not fetched. Listing metadata is not cryptographic signature, timestamp or signer verification. No durable attestation ID is supplied; ordinal identity applies only within this retrieval. Organization/user listings expose optional reported repository IDs but no repository locators. Nullable repository evidence is retained; users/list-attestations bodyless204 is empty, while its ambiguous201 empty-object alternative is not a completed attestation population and fails.",
+      "grain": [
+        "retrieval_scope_type",
+        "retrieval_scope_id",
+        "attestation_subject_digest",
+        "attestation_ordinal"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "retrieval_scope_type",
+          "retrieval_scope_id",
+          "repository_id",
+          "repository",
+          "attestation_subject_digest",
+          "attestation_predicate_type",
+          "attestation_ordinal",
+          "reported_repository_id",
+          "bundle_media_type",
+          "bundle_url",
+          "initiator",
+          "retrieval_organization_id",
+          "retrieval_organization_login",
+          "retrieval_user_id",
+          "retrieval_user_login"
+        ],
+        "dimensions": [
+          "retrieval_scope_type",
+          "retrieval_scope_id",
+          "repository",
+          "attestation_subject_digest",
+          "attestation_predicate_type",
+          "attestation_ordinal",
+          "reported_repository_id",
+          "bundle_media_type",
+          "initiator",
+          "retrieval_organization_id",
+          "retrieval_organization_login",
+          "retrieval_user_id",
+          "retrieval_user_login"
+        ],
+        "sql_names": {
+          "repository": "attestation_envelopes_repository",
+          "attestation_subject_digest": "attestation_envelopes_attestation_subject_digest",
+          "attestation_predicate_type": "attestation_envelopes_attestation_predicate_type",
+          "attestation_ordinal": "attestation_envelopes_attestation_ordinal",
+          "reported_repository_id": "attestation_envelopes_reported_repository_id",
+          "bundle_media_type": "attestation_envelopes_bundle_media_type",
+          "initiator": "attestation_envelopes_initiator",
+          "retrieval_scope_type": "attestation_envelopes_retrieval_scope_type",
+          "retrieval_scope_id": "attestation_envelopes_retrieval_scope_id",
+          "retrieval_organization_id": "attestation_envelopes_retrieval_organization_id",
+          "retrieval_organization_login": "attestation_envelopes_retrieval_organization_login",
+          "retrieval_user_id": "attestation_envelopes_retrieval_user_id",
+          "retrieval_user_login": "attestation_envelopes_retrieval_user_login"
+        },
+        "metrics": [
+          {
+            "name": "attestation_envelope_count",
+            "kind": "count",
+            "comment": "Returned attestation envelope occurrences, not verified attestations."
+          }
+        ],
+        "derived_fields": []
+      },
+      "routes": [
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "attestation_subject_digest",
+              "type": "VARCHAR",
+              "description": "Attestation subject SHA256 digest in sha256:HEX_DIGEST form.",
+              "nullable": false,
+              "min_length": 1,
+              "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "attestation_predicate_type",
+              "type": "VARCHAR",
+              "description": "Optional attestation predicate filter: provenance, sbom, release or a custom predicate type.",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "example": "provenance"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owners",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_attestation_envelopes_source",
+                "arguments": {
+                  "selected_attestation_scope_id": {
+                    "stage": "owners",
+                    "column": "organization_id"
+                  },
+                  "selected_attestation_scope_login": {
+                    "stage": "owners",
+                    "column": "organization_login"
+                  },
+                  "selected_attestation_scope_type": {
+                    "literal": "organization"
+                  },
+                  "unknown_attestation_repository": {
+                    "literal": null
+                  },
+                  "attestation_subject_digest": {
+                    "parameter": "attestation_subject_digest"
+                  },
+                  "attestation_predicate_type": {
+                    "parameter": "attestation_predicate_type"
+                  },
+                  "unknown_retrieval_user_id": {
+                    "literal": null
+                  },
+                  "unknown_retrieval_user_login": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "retrieval_scope_type",
+              "source_stage": "records",
+              "source_column": "retrieval_scope_type"
+            },
+            {
+              "name": "retrieval_scope_id",
+              "source_stage": "records",
+              "source_column": "retrieval_scope_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "attestation_subject_digest",
+              "source_stage": "records",
+              "source_column": "attestation_subject_digest"
+            },
+            {
+              "name": "attestation_predicate_type",
+              "source_stage": "records",
+              "source_column": "attestation_predicate_type"
+            },
+            {
+              "name": "attestation_ordinal",
+              "source_stage": "records",
+              "source_column": "attestation_ordinal"
+            },
+            {
+              "name": "reported_repository_id",
+              "source_stage": "records",
+              "source_column": "reported_repository_id"
+            },
+            {
+              "name": "bundle_media_type",
+              "source_stage": "records",
+              "source_column": "bundle_media_type"
+            },
+            {
+              "name": "bundle_url",
+              "source_stage": "records",
+              "source_column": "bundle_url"
+            },
+            {
+              "name": "initiator",
+              "source_stage": "records",
+              "source_column": "initiator"
+            },
+            {
+              "name": "retrieval_organization_id",
+              "source_stage": "records",
+              "source_column": "retrieval_organization_id"
+            },
+            {
+              "name": "retrieval_organization_login",
+              "source_stage": "records",
+              "source_column": "retrieval_organization_login"
+            },
+            {
+              "name": "retrieval_user_id",
+              "source_stage": "records",
+              "source_column": "retrieval_user_id"
+            },
+            {
+              "name": "retrieval_user_login",
+              "source_stage": "records",
+              "source_column": "retrieval_user_login"
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "population": "All advertised attestation pages associated with repositories owned by the selected organization and visible to the caller. Repository fields remain optional evidence; ordinal positions are qualified by this retrieval scope, never equated to per-repository ordinal positions."
+        },
+        {
+          "name": "users",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "attestation_subject_digest",
+              "type": "VARCHAR",
+              "description": "Attestation subject SHA256 digest in sha256:HEX_DIGEST form.",
+              "nullable": false,
+              "min_length": 1,
+              "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "attestation_predicate_type",
+              "type": "VARCHAR",
+              "description": "Optional attestation predicate filter: provenance, sbom, release or a custom predicate type.",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "example": "provenance"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "owners",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "user_attestation_envelopes_source",
+                "arguments": {
+                  "selected_attestation_scope_id": {
+                    "stage": "owners",
+                    "column": "user_id"
+                  },
+                  "selected_attestation_scope_login": {
+                    "stage": "owners",
+                    "column": "user_login"
+                  },
+                  "selected_attestation_scope_type": {
+                    "literal": "user"
+                  },
+                  "unknown_attestation_repository": {
+                    "literal": null
+                  },
+                  "attestation_subject_digest": {
+                    "parameter": "attestation_subject_digest"
+                  },
+                  "attestation_predicate_type": {
+                    "parameter": "attestation_predicate_type"
+                  },
+                  "unknown_retrieval_organization_id": {
+                    "literal": null
+                  },
+                  "unknown_retrieval_organization_login": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "retrieval_scope_type",
+              "source_stage": "records",
+              "source_column": "retrieval_scope_type"
+            },
+            {
+              "name": "retrieval_scope_id",
+              "source_stage": "records",
+              "source_column": "retrieval_scope_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "attestation_subject_digest",
+              "source_stage": "records",
+              "source_column": "attestation_subject_digest"
+            },
+            {
+              "name": "attestation_predicate_type",
+              "source_stage": "records",
+              "source_column": "attestation_predicate_type"
+            },
+            {
+              "name": "attestation_ordinal",
+              "source_stage": "records",
+              "source_column": "attestation_ordinal"
+            },
+            {
+              "name": "reported_repository_id",
+              "source_stage": "records",
+              "source_column": "reported_repository_id"
+            },
+            {
+              "name": "bundle_media_type",
+              "source_stage": "records",
+              "source_column": "bundle_media_type"
+            },
+            {
+              "name": "bundle_url",
+              "source_stage": "records",
+              "source_column": "bundle_url"
+            },
+            {
+              "name": "initiator",
+              "source_stage": "records",
+              "source_column": "initiator"
+            },
+            {
+              "name": "retrieval_organization_id",
+              "source_stage": "records",
+              "source_column": "retrieval_organization_id"
+            },
+            {
+              "name": "retrieval_organization_login",
+              "source_stage": "records",
+              "source_column": "retrieval_organization_login"
+            },
+            {
+              "name": "retrieval_user_id",
+              "source_stage": "records",
+              "source_column": "retrieval_user_id"
+            },
+            {
+              "name": "retrieval_user_login",
+              "source_stage": "records",
+              "source_column": "retrieval_user_login"
+            }
+          ],
+          "select": [
+            "user"
+          ],
+          "population": "All advertised attestation pages associated with repositories owned by the selected user and visible to the caller. Repository fields remain optional evidence; ordinal positions are qualified by this retrieval scope, never equated to per-repository ordinal positions."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "attestation_subject_digest",
+              "type": "VARCHAR",
+              "description": "Attestation subject SHA256 digest in sha256:HEX_DIGEST form.",
+              "nullable": false,
+              "min_length": 1,
+              "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            {
+              "name": "attestation_predicate_type",
+              "type": "VARCHAR",
+              "description": "Optional attestation predicate filter: provenance, sbom, release or a custom predicate type.",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "example": "provenance"
+            }
+          ],
+          "columns": [
+            {
+              "name": "retrieval_scope_type",
+              "source_stage": "records",
+              "source_column": "retrieval_scope_type"
+            },
+            {
+              "name": "retrieval_scope_id",
+              "source_stage": "records",
+              "source_column": "retrieval_scope_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "attestation_subject_digest",
+              "source_stage": "records",
+              "source_column": "attestation_subject_digest"
+            },
+            {
+              "name": "attestation_predicate_type",
+              "source_stage": "records",
+              "source_column": "attestation_predicate_type"
+            },
+            {
+              "name": "attestation_ordinal",
+              "source_stage": "records",
+              "source_column": "attestation_ordinal"
+            },
+            {
+              "name": "reported_repository_id",
+              "source_stage": "records",
+              "source_column": "reported_repository_id"
+            },
+            {
+              "name": "bundle_media_type",
+              "source_stage": "records",
+              "source_column": "bundle_media_type"
+            },
+            {
+              "name": "bundle_url",
+              "source_stage": "records",
+              "source_column": "bundle_url"
+            },
+            {
+              "name": "initiator",
+              "source_stage": "records",
+              "source_column": "initiator"
+            },
+            {
+              "name": "retrieval_organization_id",
+              "source_stage": "records",
+              "source_column": "retrieval_organization_id"
+            },
+            {
+              "name": "retrieval_organization_login",
+              "source_stage": "records",
+              "source_column": "retrieval_organization_login"
+            },
+            {
+              "name": "retrieval_user_id",
+              "source_stage": "records",
+              "source_column": "retrieval_user_id"
+            },
+            {
+              "name": "retrieval_user_login",
+              "source_stage": "records",
+              "source_column": "retrieval_user_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_attestation_envelopes_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "attestation_subject_digest": {
+                    "parameter": "attestation_subject_digest"
+                  },
+                  "attestation_predicate_type": {
+                    "parameter": "attestation_predicate_type"
+                  },
+                  "selected_attestation_scope_type": {
+                    "literal": "repository"
+                  },
+                  "unknown_retrieval_organization_id": {
+                    "literal": null
+                  },
+                  "unknown_retrieval_organization_login": {
+                    "literal": null
+                  },
+                  "unknown_retrieval_user_id": {
+                    "literal": null
+                  },
+                  "unknown_retrieval_user_login": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    },
+    {
+      "name": "repository_topics",
+      "description": "Canonical repository/topic membership pairs across every topics endpoint page. The repository_topics dataset and existing topic metrics are preserved; parent repositories with no topics remain visible through repository facts.",
+      "grain": [
+        "repository_id",
+        "topic"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository_name",
+          "topic"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository_name",
+          "topic"
+        ],
+        "sql_names": {
+          "repository_id": "repository_topics_repository_id",
+          "repository_name": "repository_topics_repository_name",
+          "topic": "repository_topic"
+        },
+        "metrics": [
+          {
+            "name": "repository_topic_membership_count",
+            "kind": "count",
+            "comment": "Current repository/topic membership pairs in the complete selected endpoint population."
+          },
+          {
+            "name": "repositories_with_topic_count",
+            "kind": "count_distinct",
+            "field": "repository_id",
+            "comment": "Distinct repositories represented by the selected topic memberships; excludes empty parents and is non-additive across overlapping topics."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository_name",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "topic",
+              "source_stage": "records",
+              "source_column": "topic_name"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_topic_memberships_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Complete selected repository or repository-cohort observations; API errors are not empty results."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "repository_codeowners_errors_to_repositories",
+      "from": "repository_codeowners_errors",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_property_values_to_repositories",
+      "from": "repository_property_values",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_community_profiles_to_repositories",
+      "from": "repository_community_profiles",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_hash_observations_to_repositories",
+      "from": "repository_hash_observations",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_contributor_observations_to_repositories",
+      "from": "repository_contributor_observations",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_collaborator_permissions_to_repositories",
+      "from": "repository_collaborator_permissions",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_collaborator_checks_to_repositories",
+      "from": "repository_collaborator_checks",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_invitations_to_repositories",
+      "from": "repository_invitations",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "attestation_envelopes_to_repositories",
+      "from": "attestation_envelopes",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "repository_forks_to_parents",
+      "from": "repository_fork_memberships",
+      "to": "repositories",
+      "from_columns": [
+        "parent_repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "parent_repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "repository_forks_to_repositories",
+      "from": "repository_fork_memberships",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_invitations_to_invitee",
+      "from": "repository_invitations",
+      "to": "users",
+      "from_columns": [
+        "invitee_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "invitee_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "repository_invitations_to_inviter",
+      "from": "repository_invitations",
+      "to": "users",
+      "from_columns": [
+        "inviter_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "inviter_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "repository_topics_to_repositories",
+      "from": "repository_topics",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository_name"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -43,14 +43,12 @@ def fixture_packages():
     output = {}
     for name in ("accepted", "bad-expression", "bad-policy", "bad-reference"):
         case = deepcopy(contract)
-        entity = next(item for item in case["functions"] if item["name"] == "authored_pull_requests")
+        entity = next(item for item in case["functions"] if item["name"] == "pull_requests")
         native = entity["semantics"]["crossfield"]
         if name == "bad-expression":
             native["metrics"]["proof_p90_merge_hours"]["expression"] = "SUM("
         elif name == "bad-reference":
-            native["fields"]["proof_title_lower"]["expression"] = (
-                "LOWER(authored_pull_requests.no_such_field)"
-            )
+            native["fields"]["proof_title_lower"]["expression"] = "LOWER(pull_requests.no_such_field)"
         elif name == "bad-policy":
             native["metric_semantics"]["proof_p90_merge_hours"]["missing"] = "invented"
         output[name + ".package.json"] = emit_artifacts(case, overlay, provenance)[

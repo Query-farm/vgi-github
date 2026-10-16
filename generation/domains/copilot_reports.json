@@ -1,0 +1,1359 @@
+{
+  "entities": [
+    {
+      "name": "organization_copilot_organization_day_report_source",
+      "description": "Typed Copilot signed-download report metadata; no report payload rows are fetched or inferred. A declared bodyless204 means no available report and emits no row.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "copilot_report_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "enum": [
+            "organization_day",
+            "organization_latest",
+            "repositories_day",
+            "user_teams_day",
+            "users_day",
+            "users_latest"
+          ],
+          "example": "organization_day",
+          "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+        },
+        {
+          "name": "copilot_report_day",
+          "type": "DATE",
+          "nullable": false,
+          "example": "2026-09-01",
+          "description": "Exact UTC report day required by one-day Copilot report endpoints."
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_login",
+          "source_argument": "organization"
+        },
+        {
+          "name": "report_kind",
+          "source_argument": "copilot_report_kind"
+        },
+        {
+          "name": "requested_day",
+          "source_argument": "copilot_report_day"
+        },
+        {
+          "name": "report_start_day",
+          "path": [
+            "report_day"
+          ]
+        },
+        {
+          "name": "report_end_day",
+          "path": [
+            "report_day"
+          ]
+        },
+        {
+          "name": "download_links",
+          "path": [
+            "download_links"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_login",
+        "report_kind",
+        "report_start_day",
+        "report_end_day"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot/copilot-organization-one-day-usage-metrics",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "day": {
+            "argument": "copilot_report_day"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "empty_response_statuses": [
+          "204"
+        ]
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "report_start_day",
+            "argument": "copilot_report_day",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_copilot_organization_latest_report_source",
+      "description": "Typed Copilot signed-download report metadata; no report payload rows are fetched or inferred. Latest28-day window dates are taken from the response, not the current clock.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "copilot_report_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "enum": [
+            "organization_day",
+            "organization_latest",
+            "repositories_day",
+            "user_teams_day",
+            "users_day",
+            "users_latest"
+          ],
+          "example": "organization_day",
+          "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+        },
+        {
+          "name": "copilot_report_day",
+          "type": "DATE",
+          "nullable": true,
+          "example": "2026-09-01",
+          "description": "Exact UTC report day required by one-day Copilot report endpoints.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_login",
+          "source_argument": "organization"
+        },
+        {
+          "name": "report_kind",
+          "source_argument": "copilot_report_kind"
+        },
+        {
+          "name": "requested_day",
+          "source_argument": "copilot_report_day"
+        },
+        {
+          "name": "report_start_day",
+          "path": [
+            "report_start_day"
+          ]
+        },
+        {
+          "name": "report_end_day",
+          "path": [
+            "report_end_day"
+          ]
+        },
+        {
+          "name": "download_links",
+          "path": [
+            "download_links"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_login",
+        "report_kind",
+        "report_start_day",
+        "report_end_day"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot/copilot-organization-usage-metrics",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "organization_copilot_repositories_day_report_source",
+      "description": "Typed Copilot signed-download report metadata; no report payload rows are fetched or inferred. A declared bodyless204 means no available report and emits no row.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "copilot_report_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "enum": [
+            "organization_day",
+            "organization_latest",
+            "repositories_day",
+            "user_teams_day",
+            "users_day",
+            "users_latest"
+          ],
+          "example": "organization_day",
+          "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+        },
+        {
+          "name": "copilot_report_day",
+          "type": "DATE",
+          "nullable": false,
+          "example": "2026-09-01",
+          "description": "Exact UTC report day required by one-day Copilot report endpoints."
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_login",
+          "source_argument": "organization"
+        },
+        {
+          "name": "report_kind",
+          "source_argument": "copilot_report_kind"
+        },
+        {
+          "name": "requested_day",
+          "source_argument": "copilot_report_day"
+        },
+        {
+          "name": "report_start_day",
+          "path": [
+            "report_day"
+          ]
+        },
+        {
+          "name": "report_end_day",
+          "path": [
+            "report_day"
+          ]
+        },
+        {
+          "name": "download_links",
+          "path": [
+            "download_links"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_login",
+        "report_kind",
+        "report_start_day",
+        "report_end_day"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot/copilot-organization-repos-one-day-report",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "day": {
+            "argument": "copilot_report_day"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "empty_response_statuses": [
+          "204"
+        ]
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "report_start_day",
+            "argument": "copilot_report_day",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_copilot_user_teams_day_report_source",
+      "description": "Typed Copilot signed-download report metadata; no report payload rows are fetched or inferred. A declared bodyless204 means no available report and emits no row.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "copilot_report_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "enum": [
+            "organization_day",
+            "organization_latest",
+            "repositories_day",
+            "user_teams_day",
+            "users_day",
+            "users_latest"
+          ],
+          "example": "organization_day",
+          "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+        },
+        {
+          "name": "copilot_report_day",
+          "type": "DATE",
+          "nullable": false,
+          "example": "2026-09-01",
+          "description": "Exact UTC report day required by one-day Copilot report endpoints."
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_login",
+          "source_argument": "organization"
+        },
+        {
+          "name": "report_kind",
+          "source_argument": "copilot_report_kind"
+        },
+        {
+          "name": "requested_day",
+          "source_argument": "copilot_report_day"
+        },
+        {
+          "name": "report_start_day",
+          "path": [
+            "report_day"
+          ]
+        },
+        {
+          "name": "report_end_day",
+          "path": [
+            "report_day"
+          ]
+        },
+        {
+          "name": "download_links",
+          "path": [
+            "download_links"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_login",
+        "report_kind",
+        "report_start_day",
+        "report_end_day"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot/copilot-organization-user-teams-one-day-report",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "day": {
+            "argument": "copilot_report_day"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "empty_response_statuses": [
+          "204"
+        ]
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "report_start_day",
+            "argument": "copilot_report_day",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_copilot_users_day_report_source",
+      "description": "Typed Copilot signed-download report metadata; no report payload rows are fetched or inferred. A declared bodyless204 means no available report and emits no row.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "copilot_report_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "enum": [
+            "organization_day",
+            "organization_latest",
+            "repositories_day",
+            "user_teams_day",
+            "users_day",
+            "users_latest"
+          ],
+          "example": "organization_day",
+          "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+        },
+        {
+          "name": "copilot_report_day",
+          "type": "DATE",
+          "nullable": false,
+          "example": "2026-09-01",
+          "description": "Exact UTC report day required by one-day Copilot report endpoints."
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_login",
+          "source_argument": "organization"
+        },
+        {
+          "name": "report_kind",
+          "source_argument": "copilot_report_kind"
+        },
+        {
+          "name": "requested_day",
+          "source_argument": "copilot_report_day"
+        },
+        {
+          "name": "report_start_day",
+          "path": [
+            "report_day"
+          ]
+        },
+        {
+          "name": "report_end_day",
+          "path": [
+            "report_day"
+          ]
+        },
+        {
+          "name": "download_links",
+          "path": [
+            "download_links"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_login",
+        "report_kind",
+        "report_start_day",
+        "report_end_day"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot/copilot-organization-users-one-day-usage-metrics",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "day": {
+            "argument": "copilot_report_day"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "empty_response_statuses": [
+          "204"
+        ]
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "report_start_day",
+            "argument": "copilot_report_day",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_copilot_users_latest_report_source",
+      "description": "Typed Copilot signed-download report metadata; no report payload rows are fetched or inferred. Latest28-day window dates are taken from the response, not the current clock.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "copilot_report_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "enum": [
+            "organization_day",
+            "organization_latest",
+            "repositories_day",
+            "user_teams_day",
+            "users_day",
+            "users_latest"
+          ],
+          "example": "organization_day",
+          "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+        },
+        {
+          "name": "copilot_report_day",
+          "type": "DATE",
+          "nullable": true,
+          "example": "2026-09-01",
+          "description": "Exact UTC report day required by one-day Copilot report endpoints.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_login",
+          "source_argument": "organization"
+        },
+        {
+          "name": "report_kind",
+          "source_argument": "copilot_report_kind"
+        },
+        {
+          "name": "requested_day",
+          "source_argument": "copilot_report_day"
+        },
+        {
+          "name": "report_start_day",
+          "path": [
+            "report_start_day"
+          ]
+        },
+        {
+          "name": "report_end_day",
+          "path": [
+            "report_end_day"
+          ]
+        },
+        {
+          "name": "download_links",
+          "path": [
+            "download_links"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_login",
+        "report_kind",
+        "report_start_day",
+        "report_end_day"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot/copilot-organization-users-usage-metrics",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "copilot_report_metadata",
+      "description": "Available organization Copilot report metadata observations, qualified by organization, report population and the returned day/window. One-day endpoints can return204 when no report is available. download_links may contain multiple signed links; links are not users, usage events or completions. Downloaded payload schemas are not supplied by the pinned API, so this entity does not claim usage-row coverage and never follows arbitrary signed URLs automatically. Latest windows are response-derived and can overlap across snapshots.",
+      "grain": [
+        "organization_id",
+        "report_kind",
+        "report_start_day",
+        "report_end_day"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "report_kind",
+          "requested_day",
+          "report_start_day",
+          "report_end_day",
+          "download_links"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "report_kind",
+          "requested_day",
+          "report_start_day",
+          "report_end_day"
+        ],
+        "sql_names": {
+          "organization_id": "copilot_report_metadata_organization_id",
+          "organization_login": "copilot_report_metadata_organization_login",
+          "report_kind": "copilot_report_metadata_report_kind",
+          "requested_day": "copilot_report_metadata_requested_day",
+          "report_start_day": "copilot_report_metadata_report_start_day",
+          "report_end_day": "copilot_report_metadata_report_end_day"
+        },
+        "metrics": [
+          {
+            "name": "available_copilot_report_count",
+            "kind": "count",
+            "comment": "Available typed report metadata records;204 contributes zero."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "copilot_report_download_link_count": {
+              "expression": "SUM(length(copilot_report_metadata.download_links))"
+            }
+          },
+          "metric_semantics": {
+            "copilot_report_download_link_count": {
+              "dataset": "copilot_report_metadata",
+              "comment": "Signed download links advertised by available reports, not downloaded files or usage rows.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "organization_day",
+          "select": [
+            "copilot_report_kind"
+          ],
+          "select_values": {
+            "copilot_report_kind": [
+              "organization_day"
+            ]
+          },
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "copilot_report_kind",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "organization_day",
+                "organization_latest",
+                "repositories_day",
+                "user_teams_day",
+                "users_day",
+                "users_latest"
+              ],
+              "example": "organization_day",
+              "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+            },
+            {
+              "name": "copilot_report_day",
+              "type": "DATE",
+              "nullable": false,
+              "example": "2026-09-01",
+              "description": "Exact UTC report day required by one-day Copilot report endpoints."
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "report_kind",
+              "source_stage": "records",
+              "source_column": "report_kind"
+            },
+            {
+              "name": "requested_day",
+              "source_stage": "records",
+              "source_column": "requested_day"
+            },
+            {
+              "name": "report_start_day",
+              "source_stage": "records",
+              "source_column": "report_start_day"
+            },
+            {
+              "name": "report_end_day",
+              "source_stage": "records",
+              "source_column": "report_end_day"
+            },
+            {
+              "name": "download_links",
+              "source_stage": "records",
+              "source_column": "download_links"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_copilot_organization_day_report_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "copilot_report_kind": {
+                    "literal": "organization_day"
+                  },
+                  "copilot_report_day": {
+                    "parameter": "copilot_report_day"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Available organization_day report metadata only. Signed download URLs are returned as evidence; underlying usage rows and metrics are outside the pinned endpoint response contract."
+        },
+        {
+          "name": "organization_latest",
+          "select": [
+            "copilot_report_kind"
+          ],
+          "select_values": {
+            "copilot_report_kind": [
+              "organization_latest"
+            ]
+          },
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "copilot_report_kind",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "organization_day",
+                "organization_latest",
+                "repositories_day",
+                "user_teams_day",
+                "users_day",
+                "users_latest"
+              ],
+              "example": "organization_day",
+              "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "report_kind",
+              "source_stage": "records",
+              "source_column": "report_kind"
+            },
+            {
+              "name": "requested_day",
+              "source_stage": "records",
+              "source_column": "requested_day"
+            },
+            {
+              "name": "report_start_day",
+              "source_stage": "records",
+              "source_column": "report_start_day"
+            },
+            {
+              "name": "report_end_day",
+              "source_stage": "records",
+              "source_column": "report_end_day"
+            },
+            {
+              "name": "download_links",
+              "source_stage": "records",
+              "source_column": "download_links"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_copilot_organization_latest_report_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "copilot_report_kind": {
+                    "literal": "organization_latest"
+                  },
+                  "copilot_report_day": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Available organization_latest report metadata only. Signed download URLs are returned as evidence; underlying usage rows and metrics are outside the pinned endpoint response contract."
+        },
+        {
+          "name": "repositories_day",
+          "select": [
+            "copilot_report_kind"
+          ],
+          "select_values": {
+            "copilot_report_kind": [
+              "repositories_day"
+            ]
+          },
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "copilot_report_kind",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "organization_day",
+                "organization_latest",
+                "repositories_day",
+                "user_teams_day",
+                "users_day",
+                "users_latest"
+              ],
+              "example": "organization_day",
+              "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+            },
+            {
+              "name": "copilot_report_day",
+              "type": "DATE",
+              "nullable": false,
+              "example": "2026-09-01",
+              "description": "Exact UTC report day required by one-day Copilot report endpoints."
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "report_kind",
+              "source_stage": "records",
+              "source_column": "report_kind"
+            },
+            {
+              "name": "requested_day",
+              "source_stage": "records",
+              "source_column": "requested_day"
+            },
+            {
+              "name": "report_start_day",
+              "source_stage": "records",
+              "source_column": "report_start_day"
+            },
+            {
+              "name": "report_end_day",
+              "source_stage": "records",
+              "source_column": "report_end_day"
+            },
+            {
+              "name": "download_links",
+              "source_stage": "records",
+              "source_column": "download_links"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_copilot_repositories_day_report_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "copilot_report_kind": {
+                    "literal": "repositories_day"
+                  },
+                  "copilot_report_day": {
+                    "parameter": "copilot_report_day"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Available repositories_day report metadata only. Signed download URLs are returned as evidence; underlying usage rows and metrics are outside the pinned endpoint response contract."
+        },
+        {
+          "name": "user_teams_day",
+          "select": [
+            "copilot_report_kind"
+          ],
+          "select_values": {
+            "copilot_report_kind": [
+              "user_teams_day"
+            ]
+          },
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "copilot_report_kind",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "organization_day",
+                "organization_latest",
+                "repositories_day",
+                "user_teams_day",
+                "users_day",
+                "users_latest"
+              ],
+              "example": "organization_day",
+              "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+            },
+            {
+              "name": "copilot_report_day",
+              "type": "DATE",
+              "nullable": false,
+              "example": "2026-09-01",
+              "description": "Exact UTC report day required by one-day Copilot report endpoints."
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "report_kind",
+              "source_stage": "records",
+              "source_column": "report_kind"
+            },
+            {
+              "name": "requested_day",
+              "source_stage": "records",
+              "source_column": "requested_day"
+            },
+            {
+              "name": "report_start_day",
+              "source_stage": "records",
+              "source_column": "report_start_day"
+            },
+            {
+              "name": "report_end_day",
+              "source_stage": "records",
+              "source_column": "report_end_day"
+            },
+            {
+              "name": "download_links",
+              "source_stage": "records",
+              "source_column": "download_links"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_copilot_user_teams_day_report_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "copilot_report_kind": {
+                    "literal": "user_teams_day"
+                  },
+                  "copilot_report_day": {
+                    "parameter": "copilot_report_day"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Available user_teams_day report metadata only. Signed download URLs are returned as evidence; underlying usage rows and metrics are outside the pinned endpoint response contract."
+        },
+        {
+          "name": "users_day",
+          "select": [
+            "copilot_report_kind"
+          ],
+          "select_values": {
+            "copilot_report_kind": [
+              "users_day"
+            ]
+          },
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "copilot_report_kind",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "organization_day",
+                "organization_latest",
+                "repositories_day",
+                "user_teams_day",
+                "users_day",
+                "users_latest"
+              ],
+              "example": "organization_day",
+              "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+            },
+            {
+              "name": "copilot_report_day",
+              "type": "DATE",
+              "nullable": false,
+              "example": "2026-09-01",
+              "description": "Exact UTC report day required by one-day Copilot report endpoints."
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "report_kind",
+              "source_stage": "records",
+              "source_column": "report_kind"
+            },
+            {
+              "name": "requested_day",
+              "source_stage": "records",
+              "source_column": "requested_day"
+            },
+            {
+              "name": "report_start_day",
+              "source_stage": "records",
+              "source_column": "report_start_day"
+            },
+            {
+              "name": "report_end_day",
+              "source_stage": "records",
+              "source_column": "report_end_day"
+            },
+            {
+              "name": "download_links",
+              "source_stage": "records",
+              "source_column": "download_links"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_copilot_users_day_report_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "copilot_report_kind": {
+                    "literal": "users_day"
+                  },
+                  "copilot_report_day": {
+                    "parameter": "copilot_report_day"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Available users_day report metadata only. Signed download URLs are returned as evidence; underlying usage rows and metrics are outside the pinned endpoint response contract."
+        },
+        {
+          "name": "users_latest",
+          "select": [
+            "copilot_report_kind"
+          ],
+          "select_values": {
+            "copilot_report_kind": [
+              "users_latest"
+            ]
+          },
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "copilot_report_kind",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "organization_day",
+                "organization_latest",
+                "repositories_day",
+                "user_teams_day",
+                "users_day",
+                "users_latest"
+              ],
+              "example": "organization_day",
+              "description": "Copilot report metadata population: organization, repository, user/team mapping or user detail, for one requested day or the latest 28-day window. These endpoints return report links, not usage rows."
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "report_kind",
+              "source_stage": "records",
+              "source_column": "report_kind"
+            },
+            {
+              "name": "requested_day",
+              "source_stage": "records",
+              "source_column": "requested_day"
+            },
+            {
+              "name": "report_start_day",
+              "source_stage": "records",
+              "source_column": "report_start_day"
+            },
+            {
+              "name": "report_end_day",
+              "source_stage": "records",
+              "source_column": "report_end_day"
+            },
+            {
+              "name": "download_links",
+              "source_stage": "records",
+              "source_column": "download_links"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_copilot_users_latest_report_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "copilot_report_kind": {
+                    "literal": "users_latest"
+                  },
+                  "copilot_report_day": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Available users_latest report metadata only. Signed download URLs are returned as evidence; underlying usage rows and metrics are outside the pinned endpoint response contract."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "copilot_reports_to_organizations",
+      "from": "copilot_report_metadata",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,213 @@
+# Independent Codespace inventory, offered machines and operational observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIIIIII
+SELECT codespace_count,available_codespace_count,shutdown_codespace_count,prebuilt_codespace_count,configured_codespace_cpu_count,configured_codespace_memory_bytes,configured_codespace_storage_bytes FROM engineering.semantic.github(organization=>'codespaces-fixture');
+----
+3	1	1	1	6	60	300
+
+query TII
+SELECT codespaces_repository,codespace_count,configured_codespace_cpu_count FROM engineering.semantic.github(organization=>'codespaces-fixture') GROUP BY codespaces_repository ORDER BY codespaces_repository;
+----
+codespaces-fixture/alpha	2	2
+codespaces-fixture/beta	1	4
+
+# Repository listings include only the authenticated caller's Codespaces.
+query II
+SELECT codespace_count,configured_codespace_cpu_count FROM engineering.semantic.github(repository=>'codespaces-fixture/alpha');
+----
+1	2
+
+query II
+SELECT codespace_count,configured_codespace_cpu_count FROM engineering.semantic.github(authenticated_user=>true);
+----
+2	6
+
+query II
+SELECT codespace_count,configured_codespace_cpu_count FROM engineering.semantic.github(authenticated_user=>true,codespace_repository_id=>41002);
+----
+1	4
+
+# A returned Codespace without a machine has unknown capacity, not zero cores.
+query III
+SELECT codespace_count,shutdown_codespace_count,configured_codespace_cpu_count FROM engineering.semantic.github(organization=>'codespaces-fixture',user=>'codespaces-bob');
+----
+1	1	NULL
+
+statement ok
+CREATE TEMP TABLE codespaces_shape_1 AS SELECT * FROM engineering.detail.codespaces(codespace_name=>'fixture-space-b');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TII
+SELECT codespace_name,owner.id,billable_owner.id FROM codespaces_shape_1;
+----
+fixture-space-b	48102	48101
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE codespaces_shape_2 AS SELECT * FROM engineering.detail.codespaces(codespace_name=>'fixture-space-c');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIT
+SELECT codespace_name,machine.cpus,git_status.ref FROM codespaces_shape_2;
+----
+fixture-space-c	4	main
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT codespace_machine_option_count,ready_prebuild_machine_option_count,offered_codespace_cpu_count FROM engineering.semantic.github(organization=>'codespaces-fixture',codespace_ref=>'main',codespace_location=>'WestUs2');
+----
+3	2	10
+
+query III
+SELECT codespace_machine_option_count,ready_prebuild_machine_option_count,offered_codespace_cpu_count FROM engineering.semantic.github(codespace_name=>'fixture-space-a');
+----
+1	1	8
+
+query TTTI
+SELECT availability_scope,availability_key,machine_name,codespace_id FROM engineering.detail.codespace_machine_options(codespace_name=>'fixture-space-a');
+----
+codespace	fixture-space-a	large	42001
+
+query II
+SELECT codespace_machine_option_count,offered_codespace_cpu_count FROM engineering.semantic.github(codespace_name=>'fixture-space-b');
+----
+0	0
+
+query I
+SELECT repository_devcontainer_count FROM engineering.semantic.github(organization=>'codespaces-fixture');
+----
+3
+
+query TT
+SELECT devcontainer_path,name FROM engineering.detail.repository_devcontainers(repository=>'codespaces-fixture/alpha') ORDER BY devcontainer_path;
+----
+.devcontainer/devcontainer.json	Default
+.devcontainer/python/devcontainer.json	NULL
+
+query I
+SELECT codespace_creation_default_observation_count FROM engineering.semantic.github(organization=>'codespaces-fixture',codespace_ref=>'main');
+----
+3
+
+query ITT
+SELECT repository_id,default_location,default_devcontainer_path FROM engineering.detail.codespace_creation_defaults(organization=>'codespaces-fixture') ORDER BY repository_id;
+----
+41001	WestUs2	.devcontainer/devcontainer.json
+41002	NULL	NULL
+41003	EastUs	NULL
+
+query II
+SELECT codespace_devcontainer_permission_check_count,accepted_devcontainer_permission_count FROM engineering.semantic.github(organization=>'codespaces-fixture',codespace_ref=>'topic/a',devcontainer_path=>'.devcontainer/devcontainer.json');
+----
+3	1
+
+query II
+SELECT codespace_export_observation_count,succeeded_codespace_export_count FROM engineering.semantic.github(codespace_name=>'fixture-space-a',codespace_export_id=>'latest');
+----
+1	1
+
+query TTT
+SELECT codespace_export_id,reported_export_id,state FROM engineering.detail.codespace_export_observations(codespace_name=>'fixture-space-a',codespace_export_id=>'latest');
+----
+latest	export-a	succeeded
+
+query III
+SELECT codespace_export_observation_count,succeeded_codespace_export_count,failed_codespace_export_count FROM engineering.semantic.github(codespace_name=>'fixture-space-b',codespace_export_id=>'latest');
+----
+1	0	0
+
+query II
+SELECT codespace_export_observation_count,failed_codespace_export_count FROM engineering.semantic.github(codespace_name=>'fixture-space-c',codespace_export_id=>'latest');
+----
+1	1
+
+query III
+SELECT codespace_count,codespace_machine_option_count,repository_devcontainer_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT codespace_count FROM engineering.semantic.github(user=>'codespaces-bob');
+----
+organization
+
+statement error
+SELECT codespace_count FROM engineering.semantic.github(codespace_name=>'fixture-space-a',repository=>'codespaces-fixture/alpha');
+----
+<REGEX>:(?s).*(repository|arguments do not apply).*
+
+statement error
+SELECT codespace_count FROM engineering.semantic.github(authenticated_user=>false);
+----
+authenticated_user
+
+statement error
+SELECT codespace_machine_option_count FROM engineering.semantic.github(codespace_name=>'fixture-space-a',codespace_ref=>'main');
+----
+<REGEX>:(?s).*(codespace_ref|arguments do not apply).*
+
+statement error
+SELECT codespace_devcontainer_permission_check_count FROM engineering.semantic.github(repository=>'codespaces-fixture/alpha',devcontainer_path=>'.devcontainer/devcontainer.json');
+----
+codespace_ref
+
+statement error
+SELECT codespace_export_observation_count FROM engineering.semantic.github(codespace_name=>'fixture-space-a');
+----
+codespace_export_id
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

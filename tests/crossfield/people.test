@@ -42,8 +42,13 @@ DESCRIBE SELECT * FROM engineering.detail.teams(organization=>'example');
 statement ok
 DESCRIBE SELECT * FROM engineering.detail.team_memberships(organization=>'example');
 
+statement error
+DESCRIBE SELECT * FROM engineering.detail.team_memberships(team_member_user=>'alice',team_slug=>'core');
+----
+Parameter 'team_slug' requires non-NULL organization
+
 statement ok
-EXPLAIN (SEMANTIC) SELECT user_login,authored_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY user_login;
+EXPLAIN (SEMANTIC) SELECT user_login,pull_request_count,median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY user_login;
 
 statement ok
 EXPLAIN (SQL) SELECT organization_login,organization_member_count,team_count FROM engineering.semantic.github(organization=>'example') GROUP BY organization_login;
@@ -63,7 +68,7 @@ user	"octocat"	true
 query TT
 SELECT json_extract_string(requirements,'$.parameter_constraints[0].kind'),json_extract_string(requirements,'$.parameter_constraints[0].parameters') FROM crossfield_catalog_capabilities() WHERE database_name='engineering' AND name='user_count';
 ----
-exactly_one	["user","users"]
+at_least_one	["authenticated_user","organization","owner","repositories","repository","team_slug","user","user_account_id","user_directory","users"]
 
 statement ok
 SET crossfield_mode='off';
@@ -164,47 +169,47 @@ SELECT repository_count,pull_request_count FROM engineering.semantic.github(orga
 # User-authored work includes another owner's repository, irrespective of ownership.
 # Alice's merged durations are 48, 6 and 18 hours, whose median is 18.
 query TIIIR
-SELECT user_login,user_count,authored_pr_count,authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY user_login;
+SELECT user_login,user_count,pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY user_login;
 ----
 alice	1	4	3	18.000
 
 query TIIR rowsort
-SELECT authored_repository_name,authored_pr_count,authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY authored_repository_name;
+SELECT pull_request_repository_name,pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github(user=>'alice') GROUP BY pull_request_repository_name;
 ----
 example/alpha	2	1	48.000
 example/beta	1	1	6.000
 other/project	1	1	18.000
 
 query TII rowsort
-SELECT authored_pr_merged_day,authored_pr_count,authored_merged_pr_count FROM engineering.semantic.github(user=>'alice') GROUP BY authored_pr_merged_day;
+SELECT pull_request_merged_day,pull_request_count,merged_prs FROM engineering.semantic.github(user=>'alice') GROUP BY pull_request_merged_day;
 ----
 2026-09-03	2	2
 2026-09-07	1	1
 NULL	1	0
 
 query IR
-SELECT authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') WHERE authored_pr_merged_day >= DATE '2026-09-07' AND authored_pr_merged_day < DATE '2026-09-08';
+SELECT merged_prs,median_merge_hours FROM engineering.semantic.github(user=>'alice') WHERE pull_request_merged_day >= DATE '2026-09-07' AND pull_request_merged_day < DATE '2026-09-08';
 ----
 1	18.000
 
 query IR
-SELECT authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'alice') WHERE authored_pr_merged_at >= TIMESTAMPTZ '2026-09-07 00:00:00+00' AND authored_pr_merged_at < TIMESTAMPTZ '2026-09-08 00:00:00+00';
+SELECT merged_prs,median_merge_hours FROM engineering.semantic.github(user=>'alice') WHERE pull_request_merged_at >= TIMESTAMPTZ '2026-09-07 00:00:00+00' AND pull_request_merged_at < TIMESTAMPTZ '2026-09-08 00:00:00+00';
 ----
 1	18.000
 
 query TIIIR
-SELECT user_login,user_count,authored_pr_count,authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'empty-user') GROUP BY user_login;
+SELECT user_login,user_count,pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github(user=>'empty-user') GROUP BY user_login;
 ----
 empty-user	1	0	0	NULL
 
 query TIIR
-WITH authored AS (SELECT user_login,authored_pr_count,authored_merged_pr_count,authored_median_merge_hours FROM engineering.semantic.github(user=>'bob') GROUP BY user_login)
+WITH authored AS (SELECT user_login,pull_request_count,merged_prs,median_merge_hours FROM engineering.semantic.github(user=>'bob') GROUP BY user_login)
 SELECT * FROM authored;
 ----
 bob	1	1	12.000
 
 statement ok
-PREPARE by_user AS SELECT authored_pr_count,authored_merged_pr_count FROM engineering.semantic.github(user=>$1);
+PREPARE by_user AS SELECT pull_request_count,merged_prs FROM engineering.semantic.github(user=>$1);
 
 query II
 EXECUTE by_user('alice');
@@ -217,22 +222,71 @@ EXECUTE by_user('carol');
 0	0
 
 query TIT rowsort
-SELECT repository_name,pull_request_number,authored_pr_merged_day FROM engineering.detail.authored_pull_requests(user=>'alice');
+SELECT repository,pull_request_number,pull_request_merged_day FROM engineering.detail.pull_requests(user=>'alice');
 ----
 example/alpha	1	2026-09-03
 example/alpha	3	NULL
 example/beta	1	2026-09-03
 other/project	1	2026-09-07
 
+# Both retrieval paths use repository/number grain and REST state vocabulary.
+query IIIT rowsort
+SELECT repository_id,pull_request_number,author_id,state FROM engineering.detail.pull_requests(user=>'alice');
+----
+101	1	201	closed
+101	3	201	open
+102	1	201	closed
+301	1	201	closed
+
+# Author selection follows reviews of the selected PRs, not reviews submitted by Alice.
+query IIII
+SELECT pull_request_count,submitted_review_count,pull_request_label_membership_count,labeled_pull_request_count FROM engineering.semantic.github(user=>'alice');
+----
+4	3	3	2
+
+# Repository and author inputs intersect; labels and reviews retain their own grain.
+query IIII
+SELECT pull_request_count,submitted_review_count,pull_request_label_membership_count,labeled_pull_request_count FROM engineering.semantic.github(repository=>'example/alpha',user=>'alice');
+----
+2	2	2	1
+
+query III
+SELECT pull_request_count,merged_prs,submitted_review_count FROM engineering.semantic.github(repositories=>[{'repository':'example/alpha'},{'repository':'example/beta'}],users=>[{'login':'alice'},{'login':'bob'}]);
+----
+4	3	4
+
+query II
+SELECT pull_request_count,submitted_review_count FROM engineering.semantic.github(repository=>'example/alpha',users=>[]);
+----
+0	0
+
+statement ok
+PREPARE intersection AS SELECT pull_request_count FROM engineering.semantic.github(repository=>$1,user=>$2);
+
+query I
+EXECUTE intersection('example/alpha','alice');
+----
+2
+
+query I
+EXECUTE intersection('example/alpha','bob');
+----
+1
+
+statement error
+EXECUTE intersection(NULL,NULL);
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
 # User.pullRequests is an associated-work surface. The model verifies authorship
 # on every page, including a foreign or deleted author after a valid first page.
 statement error
-SELECT authored_pr_count FROM engineering.semantic.github(user=>'wrong-author');
+SELECT pull_request_count FROM engineering.semantic.github(user=>'wrong-author');
 ----
 row assertion failed
 
 statement error
-SELECT authored_pr_count FROM engineering.semantic.github(user=>'null-author');
+SELECT pull_request_count FROM engineering.semantic.github(user=>'null-author');
 ----
 row assertion failed
 
@@ -267,7 +321,7 @@ SELECT organization_member_count FROM engineering.semantic.github();
 SEMANTIC_PARAMETER_CONSTRAINT
 
 statement error
-SELECT team_slug,authored_pr_count FROM engineering.semantic.github(user=>'alice',organization=>'example') GROUP BY team_slug;
+SELECT team_slug,pull_request_count FROM engineering.semantic.github(user=>'alice',organization=>'example') GROUP BY team_slug;
 ----
 CROSSFIELD
 
@@ -309,12 +363,7 @@ SEMANTIC_PARAMETER_VALUE
 statement error
 SELECT organization_member_count FROM engineering.semantic.github(organization=>'example',user=>'alice');
 ----
-SEMANTIC_PARAMETER_UNUSED
-
-statement error
-SELECT authored_pr_count FROM engineering.semantic.github(user=>'alice',repository=>'example/alpha');
-----
-SEMANTIC_PARAMETER_UNUSED
+arguments do not apply to the selected population
 
 statement error
 SELECT user_count FROM engineering.semantic.github(user=>42);

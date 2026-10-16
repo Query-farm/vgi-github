@@ -1,0 +1,186 @@
+# Complete query-qualified search observations, typed envelope metadata and canonical node hydration.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# These are query hits, not global resource counts; relevance is a non-additive MAX metric.
+query IIIIII
+SELECT search_code_hit_count,search_commit_hit_count,search_issue_hit_count,search_repository_hit_count,search_topic_hit_count,search_account_hit_count FROM engineering.semantic.github(search_query=>'fixture');
+----
+2	2	2	2	2	2
+
+query RRRRRR
+SELECT search_code_hit_max_score,search_commit_hit_max_score,search_issue_hit_max_score,search_repository_hit_max_score,search_topic_hit_max_score,search_account_hit_max_score FROM engineering.semantic.github(search_query=>'fixture');
+----
+2.5	3.0	4.0	10.0	7.0	8.0
+
+query IIIIII
+SELECT search_code_hit_count,search_commit_hit_count,search_issue_hit_count,search_repository_hit_count,search_topic_hit_count,search_account_hit_count FROM engineering.semantic.github(search_query=>'empty');
+----
+0	0	0	0	0	0
+
+query TI
+SELECT repository_name,search_label_hit_count FROM engineering.semantic.github(organization=>'search-fixture',search_query=>'fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+search-fixture/alpha	2
+search-fixture/beta	1
+
+query I
+SELECT search_label_hit_count FROM engineering.semantic.github(repositories=>[],search_query=>'fixture');
+----
+0
+
+query TI
+SELECT search_issue_hits_subject_kind,search_issue_hit_count FROM engineering.semantic.github(search_query=>'fixture') GROUP BY search_issue_hits_subject_kind ORDER BY search_issue_hits_subject_kind;
+----
+Issue	1
+PullRequest	1
+
+# Approved detail materialization permits ordinary DuckDB shape inspection afterward.
+statement ok
+CREATE TEMP TABLE search_code_detail AS SELECT * FROM engineering.detail.search_code_hits(search_query=>'fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIIIR
+SELECT file_path,result_position,reported_total_count,incomplete_results,score FROM search_code_detail ORDER BY result_position;
+----
+src/first.py	1	2	false	2.5
+src/second.py	2	2	false	1.5
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TII
+SELECT line_numbers[1],text_matches[1].matches[1].indices[2],file_size FROM search_code_detail WHERE result_position=1;
+----
+1..2	7	8
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE search_issue_detail AS SELECT * FROM engineering.detail.search_issue_hits(search_query=>'fixture',issue_search_type=>'hybrid',issue_advanced_search=>'true');
+
+# A transferred issue's indexed number/repository URL do not control canonical follow-up retrieval.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTII
+SELECT node_id,subject_kind,repository,indexed_number,number FROM search_issue_detail ORDER BY result_position;
+----
+SEARCH_I1	Issue	search-fixture/beta	3	8
+SEARCH_PR1	PullRequest	search-fixture/alpha	9	9
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTT
+SELECT issue_search_type,performed_search_type,lexical_fallback_reason[1] FROM search_issue_detail ORDER BY result_position;
+----
+hybrid	lexical	service_unavailable
+hybrid	lexical	service_unavailable
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TI
+SELECT issue_field_values[1].data_type,issue_field_values[1].issue_field_id FROM search_issue_detail ORDER BY result_position;
+----
+number	1
+number	1
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE search_commit_detail AS SELECT * FROM engineering.detail.search_commit_hits(search_query=>'fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTII
+SELECT c.commit.author.name,c.committer_signature.name,c.commit.committer IS NULL,c.author_account IS NULL FROM search_commit_detail c ORDER BY result_position;
+----
+Git author	Committer	true	false
+Git author	Committer	true	true
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE search_topic_detail AS SELECT * FROM engineering.detail.search_topic_hits(search_query=>'fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTT
+SELECT topic_name,released,related[1].topic_relation.name FROM search_topic_detail ORDER BY result_position;
+----
+typed	sometime in 2020	other
+dictionary	sometime in 2020	other
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE search_account_detail AS SELECT * FROM engineering.detail.search_account_hits(search_query=>'fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTI
+SELECT account_login,account_type,account_id FROM search_account_detail ORDER BY result_position;
+----
+search-fixture-user	User	8110
+search-fixture	Organization	8100
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT search_code_hit_count FROM engineering.semantic.github(search_query=>'');
+----
+search_query
+
+statement error
+SELECT search_repository_hit_count FROM engineering.semantic.github(search_query=>'fixture',search_repositories_sort=>'score');
+----
+search_repositories_sort

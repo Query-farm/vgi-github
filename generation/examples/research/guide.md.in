@@ -8,8 +8,8 @@ the native SQLLogicTests, with independently authored expected answers:
 {{sql:monthly_pr_activity}}
 ```
 
-Swap the month dimension for `authored_pr_created_week`, `authored_repository_name`,
-`authored_pr_title_category` or `authored_pr_repository_language` to investigate timing,
+Swap the month dimension for `pull_request_created_week`, `pull_request_repository_name`,
+`pull_request_title_category` or `pull_request_repository_language` to investigate timing,
 repository mix or explicit title conventions. The issue, discussion and comment
 families have their own count, active-day, repository and UTC date fields listed below.
 Only the selected populations are fetched. Prefix the SELECT with `EXPLAIN (SEMANTIC)`
@@ -24,8 +24,60 @@ EXECUTE github_user_cohort([{'login': 'octocat'}, {'login': 'hubot'}]);
 
 The profile count keeps users with no observed activity in the result. An empty
 cohort returns no grouped rows. Use `repositories => [{'repository': 'owner/name'}]`
-for an explicit repository population. `user`/`users` and the repository scope
-alternatives are mutually exclusive; discovery exposes both forms and examples.
+for an explicit repository population. Each cohort is an alternative to its singular
+scope inputs. Activity entities can combine author and repository selections to
+retrieve their intersection; discovery exposes the inputs and examples.
+
+The same entities can start from repository, organization and team populations.
+The optional second input below selects an author within the repository; NULL
+includes every visible author, including records whose author has been deleted.
+Discussion comment counts follow every page of threaded replies.
+
+```sql
+{{sql:repository_activity}}
+EXECUTE github_repository_activity('Query-farm/crossfield', NULL);
+```
+
+Retrieve public organization memberships from a user, or repositories accessible
+to a team. GitHub's user-to-organization endpoint returns public memberships only;
+it cannot establish the absence of a private membership.
+
+```sql
+{{sql:member_organizations}}
+EXECUTE github_member_organizations('octocat');
+{{sql:team_repositories}}
+EXECUTE github_team_repositories('Query-farm', 'core');
+```
+
+Release inventory counts visible release identities, including drafts and prereleases,
+and follows every asset-list page. Asset byte sizes and download counters describe
+current metadata; the download total is cumulative, not downloads during a date range.
+Release assets are separate from Actions artifacts.
+
+```sql
+{{sql:release_inventory}}
+EXECUTE github_release_inventory('Query-farm/crossfield');
+```
+
+CI outcomes count each workflow run once and jobs across all returned attempts.
+A rerun can therefore leave one successful run alongside an earlier failed job.
+Artifact counts include retained expired metadata and artifacts without a known run;
+unknown run outcomes do not count as successes or failures.
+
+```sql
+{{sql:ci_outcomes}}
+EXECUTE github_ci_outcomes('Query-farm/crossfield');
+```
+
+Check results start from a commit SHA, branch or tag and enumerate suites before
+runs and annotations. Distinct rerun IDs and repeated annotation occurrences remain
+separate observations. A branch or tag resolves when GitHub serves the request;
+use a commit SHA when a fixed revision is required.
+
+```sql
+{{sql:check_results}}
+EXECUTE github_check_results('Query-farm/crossfield', 'main');
+```
 
 For a complete comparison, load the supplied SQL into the DuckDB CLI, then execute
 its prepared examples. Dates are inclusive start and exclusive end:
@@ -79,7 +131,7 @@ Evidence records explain the activity; NULL repository context remains visible f
 a comment whose discussion was deleted. Distinct days and repositories cannot be
 summed across activity kinds, months or categories.
 
-This profile covers visible authored PRs, issues, discussions and the three comment
+The user-activity portion covers visible authored PRs, issues, discussions and the three comment
 families. Complete user review submissions, authored commits, pushes, stars and
 historical membership are outside it. Existing repository review metrics remain
 available, but are not a complete user contribution timeline. Current titles, state

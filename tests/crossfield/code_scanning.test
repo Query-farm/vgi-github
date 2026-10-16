@@ -1,0 +1,233 @@
+# Independent code scanning populations, actor roles and controller/target identities.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIIII
+SELECT code_scanning_alert_count,code_scanning_open_alert_count,code_scanning_fixed_alert_count,code_scanning_dismissed_alert_count,code_scanning_high_security_alert_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha');
+----
+3	1	1	1	2
+
+query III
+SELECT code_scanning_alert_count,code_scanning_open_alert_count,code_scanning_high_security_alert_count FROM engineering.semantic.github(organization=>'scan-fixture');
+----
+4	2	2
+
+query TI
+SELECT code_scanning_alerts_state,code_scanning_alert_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha') GROUP BY code_scanning_alerts_state ORDER BY code_scanning_alerts_state;
+----
+dismissed	1
+fixed	1
+open	1
+
+query TTI
+SELECT code_scanning_alerts_rule_severity,code_scanning_alerts_security_severity,code_scanning_alert_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha') GROUP BY code_scanning_alerts_rule_severity,code_scanning_alerts_security_severity ORDER BY code_scanning_alerts_security_severity;
+----
+warning	critical	1
+warning	high	1
+warning	medium	1
+
+query I
+SELECT code_scanning_alert_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',code_scanning_state=>'closed');
+----
+2
+
+query I
+SELECT code_scanning_alert_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',code_scanning_ref=>'refs/heads/feature');
+----
+1
+
+query TT
+SELECT dismissed_by_login,dismissal_approved_by_login FROM engineering.detail.code_scanning_alerts(repository=>'scan-fixture/alpha',code_scanning_alert_number=>3);
+----
+bob	alice
+
+query II
+SELECT code_scanning_alert_count,code_scanning_alert_instance_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha');
+----
+3	4
+
+query TI
+SELECT code_scanning_alert_instances_ref,code_scanning_alert_instance_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',code_scanning_alert_number=>1) GROUP BY code_scanning_alert_instances_ref ORDER BY code_scanning_alert_instances_ref;
+----
+refs/heads/feature	1
+refs/heads/main	1
+
+query I
+SELECT code_scanning_alert_instance_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',code_scanning_alert_number=>1,code_scanning_ref=>'refs/heads/feature');
+----
+1
+
+# Three analysis records contain eight result observations, not eight distinct alerts.
+query III
+SELECT code_scanning_alert_count,code_scanning_analysis_count,code_scanning_analysis_result_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha');
+----
+3	3	8
+
+query TII
+SELECT code_scanning_analyses_sarif_id,code_scanning_analysis_count,code_scanning_analysis_result_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha') GROUP BY code_scanning_analyses_sarif_id ORDER BY code_scanning_analyses_sarif_id;
+----
+upload-1	2	8
+upload-2	1	0
+
+query II
+SELECT code_scanning_analysis_count,code_scanning_analysis_result_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',code_scanning_sarif_id=>'upload-1');
+----
+2	8
+
+query II
+SELECT analysis_id,rules_count FROM engineering.detail.code_scanning_analyses(repository=>'scan-fixture/alpha',code_scanning_analysis_id=>503);
+----
+503	0
+
+query II
+SELECT codeql_database_count,codeql_database_bytes FROM engineering.semantic.github(repository=>'scan-fixture/alpha');
+----
+2	40
+
+query II
+SELECT codeql_database_count,codeql_database_bytes FROM engineering.semantic.github(repository=>'scan-fixture/alpha',codeql_database_language=>'python');
+----
+1	10
+
+query TI
+SELECT codeql_databases_uploader_login,codeql_database_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha') GROUP BY codeql_databases_uploader_login;
+----
+bob	2
+
+query TT
+SELECT status,description FROM engineering.detail.code_scanning_autofixes(repository=>'scan-fixture/alpha',code_scanning_alert_number=>1);
+----
+success	Validate the input
+
+query TT
+SELECT sarif_id,processing_status FROM engineering.detail.code_scanning_sarif_uploads(repository=>'scan-fixture/alpha',code_scanning_analysis_id=>502);
+----
+upload-1	complete
+
+query TT
+SELECT state,pr_scan FROM engineering.detail.code_scanning_repository_settings(repository=>'scan-fixture/alpha');
+----
+configured	enabled
+
+query TT
+SELECT state,pr_scan FROM engineering.detail.code_scanning_repository_settings(repository=>'scan-fixture/empty');
+----
+not-configured	disabled
+
+query TI
+SELECT code_scanning_organization_settings_pr_scan,code_scanning_organization_settings_count FROM engineering.semantic.github(organization=>'scan-fixture') GROUP BY code_scanning_organization_settings_pr_scan;
+----
+enabled	1
+
+query IT
+SELECT controller_repository_id,actor_login FROM engineering.detail.codeql_variant_analyses(repository=>'scan-fixture/alpha',codeql_variant_analysis_id=>701);
+----
+911	alice
+
+query III
+SELECT codeql_variant_repository_task_count,codeql_variant_result_count,codeql_variant_artifact_bytes FROM engineering.semantic.github(repository=>'scan-fixture/alpha',codeql_variant_analysis_id=>701);
+----
+2	7	50
+
+# Target repository is a separate role from the controller repository context.
+query TII
+SELECT codeql_variant_repository_tasks_target_repository,codeql_variant_repository_task_count,codeql_variant_result_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',codeql_variant_analysis_id=>701) GROUP BY codeql_variant_repository_tasks_target_repository ORDER BY codeql_variant_repository_tasks_target_repository;
+----
+scan-fixture/alpha	1	7
+scan-fixture/target	1	NULL
+
+query IIT
+SELECT repository_id,target_repository_id,analysis_status FROM engineering.detail.codeql_variant_repository_tasks(repository=>'scan-fixture/alpha',codeql_variant_analysis_id=>701,codeql_target_repository=>'scan-fixture/target');
+----
+911	914	failed
+
+query I
+SELECT code_scanning_dismissal_request_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha');
+----
+2
+
+query I
+SELECT code_scanning_dismissal_request_count FROM engineering.semantic.github(organization=>'scan-fixture');
+----
+3
+
+query IIT
+SELECT dismissal_request_id,dismissal_request_number,requester_login FROM engineering.detail.code_scanning_dismissal_requests(repository=>'scan-fixture/alpha',code_scanning_alert_number=>3);
+----
+901	103	alice
+
+query TI
+SELECT code_scanning_dismissal_requests_status,code_scanning_dismissal_request_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha') GROUP BY code_scanning_dismissal_requests_status ORDER BY code_scanning_dismissal_requests_status;
+----
+approved	1
+pending	1
+
+query I
+SELECT code_scanning_dismissal_request_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',code_scanning_dismissal_reviewer=>'bob');
+----
+1
+
+query TII
+SELECT repository_name,code_scanning_alert_count,codeql_database_bytes FROM engineering.semantic.github(repository=>'scan-fixture/alpha') GROUP BY repository_name;
+----
+scan-fixture/alpha	3	40
+
+query IIII
+SELECT code_scanning_alert_count,code_scanning_alert_instance_count,code_scanning_analysis_count,codeql_database_count FROM engineering.semantic.github(repository=>'scan-fixture/empty');
+----
+0	0	0	0
+
+# Incompatible selectors reject before any retrieval.
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT code_scanning_alert_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',code_scanning_alert_number=>1,code_scanning_state=>'open');
+----
+arguments do not apply
+
+statement error
+SELECT code_scanning_analysis_count FROM engineering.semantic.github(repository=>'scan-fixture/alpha',code_scanning_analysis_id=>501,code_scanning_sarif_id=>'upload-1');
+----
+arguments do not apply
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

@@ -1,0 +1,174 @@
+# One reaction entity with explicit subject roles and unknown reacting accounts.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Five reactions from two known actors and one deleted actor, not five distinct people.
+query IIIII
+SELECT reaction_count,reaction_reactor_count,reaction_thumbsup_count,reaction_thumbsdown_count,reaction_unknown_reactor_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',issue_number=>1);
+----
+5	2	2	1	1
+
+query TI
+SELECT reactions_content,reaction_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',issue_number=>1) GROUP BY reactions_content ORDER BY reactions_content;
+----
++1	2
+-1	1
+eyes	1
+heart	1
+
+query TII
+SELECT reactions_reactor_login,reaction_count,reaction_reactor_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',issue_number=>1) GROUP BY reactions_reactor_login ORDER BY reactions_reactor_login NULLS LAST;
+----
+reaction-alice	2	1
+reaction-bob	2	1
+NULL	1	0
+
+query II
+SELECT reaction_count,reaction_reactor_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',issue_number=>1,reaction_content=>'+1');
+----
+2	2
+
+query TIII
+SELECT subject_kind,subject_id,subject_number,reaction_id FROM engineering.detail.reactions(repository=>'reaction-fixture/alpha',issue_number=>1,reaction_content=>'heart');
+----
+issue_thread	5101	1	9002
+
+# The issue-thread endpoint serves PR conversations too; the kind does not claim an Issue-only population.
+query TITT
+SELECT subject_kind,subject_id,reactor_login,reactor_type FROM engineering.detail.reactions(repository=>'reaction-fixture/alpha',issue_number=>2);
+----
+issue_thread	5102	reaction-bot	Bot
+
+query III
+SELECT reaction_count,reaction_reactor_count,reaction_unknown_reactor_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',issue_number=>3);
+----
+0	0	0
+
+# The numeric comment ID exceeds signed 32-bit range, and is not a GraphQL node ID.
+query III
+SELECT reaction_count,reaction_reactor_count,reaction_unknown_reactor_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',issue_comment_id=>5000000501);
+----
+2	1	1
+
+query III
+SELECT reaction_count,reaction_reactor_count,reaction_unknown_reactor_count FROM engineering.semantic.github(reaction_issue_comment_node_id=>'RIC5000000501');
+----
+2	1	1
+
+query TII
+SELECT subject_node_id,subject_id,reaction_id FROM engineering.detail.reactions(reaction_issue_comment_node_id=>'RIC5000000501') ORDER BY reaction_id;
+----
+RIC5000000501	5000000501	9021
+RIC5000000501	5000000501	9022
+
+query IIII
+SELECT reaction_count,reaction_reactor_count,reaction_thumbsup_count,reaction_thumbsdown_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',review_comment_id=>701);
+----
+3	2	1	1
+
+query I
+SELECT reaction_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',review_comment_id=>701,reaction_content=>'confused');
+----
+1
+
+query II
+SELECT reaction_count,reaction_reactor_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',commit_comment_id=>701);
+----
+2	2
+
+query II
+SELECT reaction_count,reaction_reactor_count FROM engineering.semantic.github(reaction_commit_comment_node_id=>'RCC701');
+----
+2	2
+
+query IIIII
+SELECT reaction_count,reaction_reactor_count,reaction_thumbsup_count,reaction_thumbsdown_count,reaction_unknown_reactor_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',release_id=>701);
+----
+3	2	1	0	1
+
+# Equal numeric subject IDs remain separated by subject kind and nullable role keys.
+query TIIII
+SELECT subject_kind,subject_id,subject_review_comment_id,subject_commit_comment_id,subject_release_id FROM engineering.detail.reactions(repository=>'reaction-fixture/alpha',review_comment_id=>701,reaction_content=>'confused');
+----
+pull_request_review_comment	701	701	NULL	NULL
+
+query TIIII
+SELECT subject_kind,subject_id,subject_review_comment_id,subject_commit_comment_id,subject_release_id FROM engineering.detail.reactions(repository=>'reaction-fixture/alpha',commit_comment_id=>701,reaction_content=>'heart');
+----
+commit_comment	701	NULL	701	NULL
+
+query TIIII
+SELECT subject_kind,subject_id,subject_review_comment_id,subject_commit_comment_id,subject_release_id FROM engineering.detail.reactions(repository=>'reaction-fixture/alpha',release_id=>701,reaction_content=>'heart');
+----
+release	701	NULL	NULL	701
+
+# Direct repository grouping keeps unknown reactors in the population.
+query TII
+SELECT repository_name,reaction_count,reaction_unknown_reactor_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',release_id=>701) GROUP BY repository_name;
+----
+reaction-fixture/alpha	3	1
+
+query TI
+SELECT reactions_subject_kind,reaction_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',issue_comment_id=>5000000501) GROUP BY reactions_subject_kind;
+----
+issue_comment	2
+
+query IT
+SELECT reaction_id,created_at FROM engineering.detail.reactions(repository=>'reaction-fixture/alpha',release_id=>701,reaction_content=>'heart');
+----
+9052	2026-09-03 12:00:00+00
+
+# No route claims all repository reactions, and incompatible subject selectors reject before HTTP.
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT reaction_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha',issue_number=>1,release_id=>701);
+----
+arguments do not apply
+
+statement error
+SELECT reaction_count FROM engineering.semantic.github(repository=>'reaction-fixture/alpha');
+----
+SEMANTIC_PARAMETER_CONSTRAINT
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

@@ -1,0 +1,130 @@
+# Canonical Pages site/build populations: all, latest, exact ID and repository traversal.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIIII
+SELECT pages_site_count,pages_build_count,successful_pages_build_count,failed_pages_build_count,pages_build_reported_duration FROM engineering.semantic.github(organization=>'pages-fixture');
+----
+2	4	2	1	90
+
+query TIIIII
+SELECT repository_name,pages_site_count,pages_build_count,successful_pages_build_count,failed_pages_build_count,pages_build_reported_duration FROM engineering.semantic.github(owner=>'pages-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+pages-fixture/alpha	1	3	2	1	90
+pages-fixture/beta	1	1	0	0	0
+
+query IIII
+SELECT pages_build_count,successful_pages_build_count,failed_pages_build_count,pages_build_reported_duration FROM engineering.semantic.github(organization=>'pages-fixture',pages_build_population=>'latest');
+----
+2	0	1	20
+
+query IIII
+SELECT pages_build_count,successful_pages_build_count,failed_pages_build_count,pages_build_reported_duration FROM engineering.semantic.github(repository=>'pages-fixture/alpha',pages_build_id=>102);
+----
+1	1	0	30
+
+query II
+SELECT pages_site_count,pages_build_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0
+
+query I
+SELECT pages_build_count FROM engineering.semantic.github(repositories=>[{'repository':'pages-fixture/alpha'},{'repository':'pages-fixture/beta'}],pages_build_population=>'latest');
+----
+2
+
+query TI
+SELECT pages_builds_status,pages_build_count FROM engineering.semantic.github(organization=>'pages-fixture') GROUP BY pages_builds_status ORDER BY pages_builds_status;
+----
+building	1
+built	2
+errored	1
+
+statement ok
+CREATE TEMP TABLE pages_site_detail AS SELECT * FROM engineering.detail.pages_sites(organization=>'pages-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTTTII
+SELECT repository,source_configuration.branch,source_configuration.path,https_certificate.expires_at::VARCHAR,https_certificate.domains[1],public,https_enforced FROM pages_site_detail ORDER BY repository;
+----
+pages-fixture/alpha	main	/docs	2027-01-01	pages.example.invalid	true	true
+pages-fixture/beta	main	/docs	2027-01-01	pages.example.invalid	false	true
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTT
+SELECT repository,cname,protected_domain_state FROM pages_site_detail ORDER BY repository;
+----
+pages-fixture/alpha	pages.example.invalid	verified
+pages-fixture/beta	NULL	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE pages_build_detail AS SELECT * FROM engineering.detail.pages_builds(repository=>'pages-fixture/alpha');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TITT
+SELECT status,pusher_id,pusher.login,error.message FROM pages_build_detail ORDER BY build_url;
+----
+built	6450	pages-fixture-pusher	NULL
+built	6450	pages-fixture-pusher	NULL
+errored	NULL	NULL	Build failed
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query III
+SELECT count(*),count(DISTINCT build_url),sum(reported_duration) FROM pages_build_detail;
+----
+3	3	90
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT pages_build_count FROM engineering.semantic.github(repository=>'pages-fixture/alpha',pages_build_id=>999);
+----
+404
+
+statement error
+SELECT pages_build_count FROM engineering.semantic.github(repository=>'pages-fixture/alpha',pages_build_population=>'successful');
+----
+pages_build_population

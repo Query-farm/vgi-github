@@ -1,0 +1,4163 @@
+{
+  "entities": [
+    {
+      "name": "repository_commit_statuses_source",
+      "description": "Pinned repos/list-commit-statuses-for-ref with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "commit_ref",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Commit SHA, branch or tag resolved to one canonical commit at request time.",
+          "example": "main",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "status_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "target_url",
+          "path": [
+            "target_url"
+          ]
+        },
+        {
+          "name": "context",
+          "path": [
+            "context"
+          ]
+        },
+        {
+          "name": "created_at_raw",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at_raw",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "avatar_url",
+          "path": [
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "creator",
+          "path": [
+            "creator"
+          ]
+        },
+        {
+          "name": "creator_id",
+          "path": [
+            "creator",
+            "id"
+          ]
+        },
+        {
+          "name": "creator_login",
+          "path": [
+            "creator",
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "status_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-commit-statuses-for-ref",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "ref": {
+            "argument": "commit_ref"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_commit_status_summary_source",
+      "description": "One combined status envelope per resolved commit. Only envelope fields are selected; statuses are independently paginated by the canonical commit_statuses latest route. A zero-context pending envelope is retained.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "commit_ref",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Commit SHA, branch or tag resolved to one canonical commit at request time.",
+          "example": "main",
+          "min_length": 1
+        },
+        {
+          "name": "expected_repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Canonical repository ID hydrated from the selected parent."
+        }
+      ],
+      "columns": [
+        {
+          "name": "commit_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "total_count",
+          "path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "reported_repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "reported_repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "repository_details",
+          "path": [
+            "repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": true,
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "url": true,
+            "archive_url": true,
+            "assignees_url": true,
+            "blobs_url": true,
+            "branches_url": true,
+            "collaborators_url": true,
+            "comments_url": true,
+            "commits_url": true,
+            "compare_url": true,
+            "contents_url": true,
+            "contributors_url": true,
+            "deployments_url": true,
+            "downloads_url": true,
+            "events_url": true,
+            "forks_url": true,
+            "git_commits_url": true,
+            "git_refs_url": true,
+            "git_tags_url": true,
+            "git_url": true,
+            "issue_comment_url": true,
+            "issue_events_url": true,
+            "issues_url": true,
+            "keys_url": true,
+            "labels_url": true,
+            "languages_url": true,
+            "merges_url": true,
+            "milestones_url": true,
+            "notifications_url": true,
+            "pulls_url": true,
+            "releases_url": true,
+            "ssh_url": true,
+            "stargazers_url": true,
+            "statuses_url": true,
+            "subscribers_url": true,
+            "subscription_url": true,
+            "tags_url": true,
+            "teams_url": true,
+            "trees_url": true,
+            "clone_url": true,
+            "mirror_url": true,
+            "hooks_url": true,
+            "svn_url": true,
+            "homepage": true,
+            "language": true,
+            "forks_count": true,
+            "stargazers_count": true,
+            "watchers_count": true,
+            "size": true,
+            "default_branch": true,
+            "open_issues_count": true,
+            "is_template": true,
+            "topics": true,
+            "has_issues": true,
+            "has_projects": true,
+            "has_wiki": true,
+            "has_pages": true,
+            "has_downloads": true,
+            "has_discussions": true,
+            "has_pull_requests": true,
+            "pull_request_creation_policy": true,
+            "archived": true,
+            "disabled": true,
+            "visibility": true,
+            "pushed_at": true,
+            "created_at": true,
+            "updated_at": true,
+            "permissions": true,
+            "role_name": true,
+            "temp_clone_token": true,
+            "delete_branch_on_merge": true,
+            "subscribers_count": true,
+            "network_count": true,
+            "code_of_conduct": true,
+            "license": true,
+            "forks": true,
+            "open_issues": true,
+            "watchers": true,
+            "allow_forking": true,
+            "web_commit_signoff_required": true,
+            "security_and_analysis": true
+          },
+          "description": "All typed repository envelope metadata except arbitrary custom_properties, whose dynamic values remain uncovered."
+        },
+        {
+          "name": "commit_url",
+          "path": [
+            "commit_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        }
+      ],
+      "grain": [
+        "commit_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-combined-status-for-ref",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "ref": {
+            "argument": "commit_ref"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none",
+          "unselected_collection_path": [
+            "statuses"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_repository_id",
+            "argument": "expected_repository_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "repository_commit_status_contexts_source",
+      "description": "Pinned repos/get-combined-status-for-ref with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "commit_ref",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Commit SHA, branch or tag resolved to one canonical commit at request time.",
+          "example": "main",
+          "min_length": 1
+        },
+        {
+          "name": "commit_status_population",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "enum": [
+            "latest"
+          ],
+          "description": "Select the latest status for each context from the combined-status endpoint. Omission selects the complete status event history for the supplied ref.",
+          "example": "latest"
+        }
+      ],
+      "columns": [
+        {
+          "name": "status_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "target_url",
+          "path": [
+            "target_url"
+          ]
+        },
+        {
+          "name": "context",
+          "path": [
+            "context"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "avatar_url",
+          "path": [
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "required",
+          "path": [
+            "required"
+          ]
+        }
+      ],
+      "grain": [
+        "context"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-combined-status-for-ref",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "ref": {
+            "argument": "commit_ref"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "statuses"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "repository_rule_suite_discovery_source",
+      "description": "Pinned repos/get-repo-rule-suites with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "rule_evaluation_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Exact ref filter for rule evaluation suites; GitHub does not accept wildcard refs.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        },
+        {
+          "name": "rule_evaluation_time_period",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Rolling time window of observed rule evaluation suites; omission uses the API default day.",
+          "example": "hour",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "month"
+          ]
+        },
+        {
+          "name": "rule_evaluation_actor",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the actor whose pushes triggered rule evaluation.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        },
+        {
+          "name": "rule_evaluation_result",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Filter active-rule suite outcomes.",
+          "example": "pass",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "pass",
+            "fail",
+            "bypass",
+            "all"
+          ]
+        },
+        {
+          "name": "rule_evaluation_mode",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Filter active or evaluate-mode rule suites.",
+          "example": "all",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "all",
+            "active",
+            "evaluate"
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "name": "rule_suite_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        }
+      ],
+      "grain": [
+        "rule_suite_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-repo-rule-suites",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "rule_evaluation_ref"
+          },
+          "time_period": {
+            "argument": "rule_evaluation_time_period"
+          },
+          "actor_name": {
+            "argument": "rule_evaluation_actor"
+          },
+          "rule_suite_result": {
+            "argument": "rule_evaluation_result"
+          },
+          "evaluate_status": {
+            "argument": "rule_evaluation_mode"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "rule_suite_id"
+        ]
+      }
+    },
+    {
+      "name": "repository_rule_suite_lookup_source",
+      "description": "Pinned repos/get-repo-rule-suite with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm",
+          "default": null
+        },
+        {
+          "name": "rule_suite_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact rule evaluation suite identifier.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "rule_suite_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor_id"
+          ]
+        },
+        {
+          "name": "actor_name",
+          "path": [
+            "actor_name"
+          ]
+        },
+        {
+          "name": "before_sha",
+          "path": [
+            "before_sha"
+          ]
+        },
+        {
+          "name": "after_sha",
+          "path": [
+            "after_sha"
+          ]
+        },
+        {
+          "name": "ref",
+          "path": [
+            "ref"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository_id"
+          ]
+        },
+        {
+          "name": "pushed_at",
+          "path": [
+            "pushed_at"
+          ]
+        },
+        {
+          "name": "result",
+          "path": [
+            "result"
+          ]
+        },
+        {
+          "name": "evaluation_result",
+          "path": [
+            "evaluation_result"
+          ]
+        },
+        {
+          "name": "rule_evaluations",
+          "path": [
+            "rule_evaluations"
+          ]
+        },
+        {
+          "name": "reported_repository_name",
+          "path": [
+            "repository_name"
+          ]
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "organization",
+          "source_argument": "organization"
+        }
+      ],
+      "grain": [
+        "rule_suite_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-repo-rule-suite",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "rule_suite_id": {
+            "argument": "rule_suite_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "rule_suite_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "rule_suite_id",
+            "argument": "rule_suite_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_rule_suite_discovery_source",
+      "description": "Pinned repos/get-org-rule-suites with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "rule_evaluation_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Exact ref filter for rule evaluation suites; GitHub does not accept wildcard refs.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        },
+        {
+          "name": "rule_evaluation_time_period",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Rolling time window of observed rule evaluation suites; omission uses the API default day.",
+          "example": "hour",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "month"
+          ]
+        },
+        {
+          "name": "rule_evaluation_actor",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the actor whose pushes triggered rule evaluation.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        },
+        {
+          "name": "rule_evaluation_result",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Filter active-rule suite outcomes.",
+          "example": "pass",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "pass",
+            "fail",
+            "bypass",
+            "all"
+          ]
+        },
+        {
+          "name": "rule_evaluation_mode",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Filter active or evaluate-mode rule suites.",
+          "example": "all",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "all",
+            "active",
+            "evaluate"
+          ]
+        },
+        {
+          "name": "rule_evaluation_repository",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository name filter within the selected organization rule-suite population.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "rule_suite_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "organization",
+          "source_argument": "organization"
+        }
+      ],
+      "grain": [
+        "rule_suite_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-org-rule-suites",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "rule_evaluation_ref"
+          },
+          "time_period": {
+            "argument": "rule_evaluation_time_period"
+          },
+          "actor_name": {
+            "argument": "rule_evaluation_actor"
+          },
+          "rule_suite_result": {
+            "argument": "rule_evaluation_result"
+          },
+          "evaluate_status": {
+            "argument": "rule_evaluation_mode"
+          },
+          "repository_name": {
+            "argument": "rule_evaluation_repository"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "rule_suite_id"
+        ]
+      }
+    },
+    {
+      "name": "organization_rule_suite_lookup_source",
+      "description": "Pinned repos/get-org-rule-suite with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield",
+          "default": null
+        },
+        {
+          "name": "rule_suite_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact rule evaluation suite identifier.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "rule_suite_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor_id"
+          ]
+        },
+        {
+          "name": "actor_name",
+          "path": [
+            "actor_name"
+          ]
+        },
+        {
+          "name": "before_sha",
+          "path": [
+            "before_sha"
+          ]
+        },
+        {
+          "name": "after_sha",
+          "path": [
+            "after_sha"
+          ]
+        },
+        {
+          "name": "ref",
+          "path": [
+            "ref"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository_id"
+          ]
+        },
+        {
+          "name": "pushed_at",
+          "path": [
+            "pushed_at"
+          ]
+        },
+        {
+          "name": "result",
+          "path": [
+            "result"
+          ]
+        },
+        {
+          "name": "evaluation_result",
+          "path": [
+            "evaluation_result"
+          ]
+        },
+        {
+          "name": "rule_evaluations",
+          "path": [
+            "rule_evaluations"
+          ]
+        },
+        {
+          "name": "reported_repository_name",
+          "path": [
+            "repository_name"
+          ]
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "organization",
+          "source_argument": "organization"
+        }
+      ],
+      "grain": [
+        "rule_suite_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-org-rule-suite",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          },
+          "rule_suite_id": {
+            "argument": "rule_suite_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "rule_suite_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "rule_suite_id",
+            "argument": "rule_suite_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "repository_push_bypass_requests_source",
+      "description": "Pinned repos/list-repo-push-bypass-requests with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "bypass_reviewer",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of a delegated reviewer who responded to the bypass request.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        },
+        {
+          "name": "bypass_requester",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the user who requested the push-rule bypass.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        },
+        {
+          "name": "bypass_time_period",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Rolling time window of bypass requests; omission uses the API default day.",
+          "example": "hour",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "month"
+          ]
+        },
+        {
+          "name": "bypass_request_status",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Requested API status filter; response statuses are preserved independently.",
+          "example": "completed",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "completed",
+            "cancelled",
+            "approved",
+            "expired",
+            "deleted",
+            "denied",
+            "open",
+            "all"
+          ]
+        },
+        {
+          "name": "expected_repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Canonical repository ID hydrated from the selected parent."
+        }
+      ],
+      "columns": [
+        {
+          "name": "bypass_request_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "request_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "repository_details",
+          "path": [
+            "repository"
+          ]
+        },
+        {
+          "name": "organization_details",
+          "path": [
+            "organization"
+          ]
+        },
+        {
+          "name": "requester_id",
+          "path": [
+            "requester",
+            "actor_id"
+          ]
+        },
+        {
+          "name": "requester_login",
+          "path": [
+            "requester",
+            "actor_name"
+          ]
+        },
+        {
+          "name": "requester",
+          "path": [
+            "requester"
+          ]
+        },
+        {
+          "name": "request_type",
+          "path": [
+            "request_type"
+          ]
+        },
+        {
+          "name": "data",
+          "path": [
+            "data"
+          ]
+        },
+        {
+          "name": "resource_identifier",
+          "path": [
+            "resource_identifier"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "requester_comment",
+          "path": [
+            "requester_comment"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "responses",
+          "path": [
+            "responses"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        }
+      ],
+      "grain": [
+        "bypass_request_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "ghec",
+        "operation_id": "repos/list-repo-push-bypass-requests",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "reviewer": {
+            "argument": "bypass_reviewer"
+          },
+          "requester": {
+            "argument": "bypass_requester"
+          },
+          "time_period": {
+            "argument": "bypass_time_period"
+          },
+          "request_status": {
+            "argument": "bypass_request_status"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "bypass_request_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "repository_id",
+            "argument": "expected_repository_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "repository_push_bypass_lookup_source",
+      "description": "Pinned repos/get-repo-push-bypass-request with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "bypass_request_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Repository-local number of one push rule bypass request.",
+          "example": 1
+        },
+        {
+          "name": "expected_repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Canonical repository ID hydrated from the selected parent."
+        }
+      ],
+      "columns": [
+        {
+          "name": "bypass_request_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "request_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "repository_details",
+          "path": [
+            "repository"
+          ]
+        },
+        {
+          "name": "organization_details",
+          "path": [
+            "organization"
+          ]
+        },
+        {
+          "name": "requester_id",
+          "path": [
+            "requester",
+            "actor_id"
+          ]
+        },
+        {
+          "name": "requester_login",
+          "path": [
+            "requester",
+            "actor_name"
+          ]
+        },
+        {
+          "name": "requester",
+          "path": [
+            "requester"
+          ]
+        },
+        {
+          "name": "request_type",
+          "path": [
+            "request_type"
+          ]
+        },
+        {
+          "name": "data",
+          "path": [
+            "data"
+          ]
+        },
+        {
+          "name": "resource_identifier",
+          "path": [
+            "resource_identifier"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "requester_comment",
+          "path": [
+            "requester_comment"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "responses",
+          "path": [
+            "responses"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        }
+      ],
+      "grain": [
+        "bypass_request_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "ghec",
+        "operation_id": "repos/get-repo-push-bypass-request",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "bypass_request_number": {
+            "argument": "bypass_request_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "bypass_request_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "request_number",
+            "argument": "bypass_request_number",
+            "comparison": "equal"
+          },
+          {
+            "column": "repository_id",
+            "argument": "expected_repository_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "rest_repository_commit_comments_source",
+      "description": "Pinned repos/list-commit-comments-for-repo with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "comment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "comment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "author_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "commit_id"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "position",
+          "path": [
+            "position"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-commit-comments-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "rest_commit_comments_source",
+      "description": "Pinned repos/list-comments-for-commit with complete declared pagination and explicit business identity.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "commit_comment_sha",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact commit SHA whose comments are selected; distinct from author or committer identity.",
+          "example": "main",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "comment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "comment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "author_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "author_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "commit_id"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "position",
+          "path": [
+            "position"
+          ]
+        },
+        {
+          "name": "author_association",
+          "path": [
+            "author_association"
+          ]
+        }
+      ],
+      "grain": [
+        "comment_node_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-comments-for-commit",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "commit_sha": {
+            "argument": "commit_comment_sha"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_push_bypass_requests_source",
+      "description": "Pinned organization push-rule bypass request retrieval; optional repository metadata remains unknown rather than dropping a request.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "bypass_repository_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "description": "Optional repository name within the selected organization when listing push-rule bypass requests.",
+          "example": "crossfield"
+        },
+        {
+          "name": "bypass_reviewer",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of a delegated reviewer who responded to the bypass request.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        },
+        {
+          "name": "bypass_requester",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Login of the user who requested the push-rule bypass.",
+          "example": "main",
+          "default": null,
+          "min_length": 1
+        },
+        {
+          "name": "bypass_time_period",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Rolling time window of bypass requests; omission uses the API default day.",
+          "example": "hour",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "hour",
+            "day",
+            "week",
+            "month"
+          ]
+        },
+        {
+          "name": "bypass_request_status",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Requested API status filter; response statuses are preserved independently.",
+          "example": "completed",
+          "default": null,
+          "min_length": 1,
+          "enum": [
+            "completed",
+            "cancelled",
+            "approved",
+            "expired",
+            "deleted",
+            "denied",
+            "open",
+            "all"
+          ]
+        },
+        {
+          "name": "expected_bypass_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization ID for checking optional response organization evidence."
+        }
+      ],
+      "columns": [
+        {
+          "name": "bypass_request_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "request_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "repository_details",
+          "path": [
+            "repository"
+          ]
+        },
+        {
+          "name": "organization_details",
+          "path": [
+            "organization"
+          ]
+        },
+        {
+          "name": "requester_id",
+          "path": [
+            "requester",
+            "actor_id"
+          ]
+        },
+        {
+          "name": "requester_login",
+          "path": [
+            "requester",
+            "actor_name"
+          ]
+        },
+        {
+          "name": "requester",
+          "path": [
+            "requester"
+          ]
+        },
+        {
+          "name": "request_type",
+          "path": [
+            "request_type"
+          ]
+        },
+        {
+          "name": "data",
+          "path": [
+            "data"
+          ]
+        },
+        {
+          "name": "resource_identifier",
+          "path": [
+            "resource_identifier"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "requester_comment",
+          "path": [
+            "requester_comment"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "responses",
+          "path": [
+            "responses"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "reported_organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        }
+      ],
+      "grain": [
+        "bypass_request_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "ghec",
+        "operation_id": "orgs/list-push-bypass-requests",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "reviewer": {
+            "argument": "bypass_reviewer"
+          },
+          "requester": {
+            "argument": "bypass_requester"
+          },
+          "time_period": {
+            "argument": "bypass_time_period"
+          },
+          "request_status": {
+            "argument": "bypass_request_status"
+          },
+          "repository_name": {
+            "argument": "bypass_repository_name"
+          },
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "bypass_request_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "reported_organization_id",
+            "argument": "expected_bypass_organization_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "commit_statuses",
+      "description": "Canonical commit status events keyed by repository and status ID. History lists every event for a ref; latest retrieves only the current event for each context across every combined-status page. Latest retrieval resolves the ref through a retained aggregate parent, preserving empty commits. Timestamp strings from history remain created_at_raw/updated_at_raw VARCHAR; latest typed date-time values populate created_at/updated_at only. Fields absent from a selected API schema remain NULL, including creator in latest and required in history. No timestamp parsing or fabricated creators are applied.",
+      "grain": [
+        "repository_id",
+        "status_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "commit_sha",
+          "status_id",
+          "node_id",
+          "state",
+          "description",
+          "target_url",
+          "context",
+          "created_at",
+          "updated_at",
+          "avatar_url",
+          "url",
+          "required",
+          "created_at_raw",
+          "updated_at_raw",
+          "creator",
+          "creator_id",
+          "creator_login"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "state",
+          "context",
+          "creator_id",
+          "creator_login"
+        ],
+        "sql_names": {
+          "repository_id": "commit_statuses_repository_id",
+          "repository": "commit_statuses_repository",
+          "state": "commit_statuses_state",
+          "context": "commit_statuses_context",
+          "creator_id": "commit_statuses_creator_id",
+          "creator_login": "commit_statuses_creator_login"
+        },
+        "metrics": [
+          {
+            "name": "commit_statuses_count",
+            "kind": "count",
+            "comment": "Commit statuses count. Counts the declared entity grain."
+          },
+          {
+            "name": "commit_statuses_success_count",
+            "kind": "count",
+            "comment": "Commit statuses success count. Counts the declared entity grain.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "success"
+            }
+          },
+          {
+            "name": "commit_statuses_failure_count",
+            "kind": "count",
+            "comment": "Commit statuses failure count. Counts the declared entity grain.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "failure"
+            }
+          },
+          {
+            "name": "commit_statuses_error_count",
+            "kind": "count",
+            "comment": "Commit statuses error count. Counts the declared entity grain.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "error"
+            }
+          },
+          {
+            "name": "commit_statuses_pending_count",
+            "kind": "count",
+            "comment": "Commit statuses pending count. Counts the declared entity grain.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "pending"
+            }
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "latest",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield",
+              "default": null
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "commit_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Commit SHA, branch or tag resolved to one canonical commit at request time.",
+              "example": "main",
+              "min_length": 1
+            },
+            {
+              "name": "commit_status_population",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "latest"
+              ],
+              "description": "Select the latest status for each context from the combined-status endpoint. Omission selects the complete status event history for the supplied ref.",
+              "example": "latest"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "summary",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "status_id",
+              "source_stage": "records",
+              "source_column": "status_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "target_url",
+              "source_stage": "records",
+              "source_column": "target_url"
+            },
+            {
+              "name": "context",
+              "source_stage": "records",
+              "source_column": "context"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "avatar_url",
+              "source_stage": "records",
+              "source_column": "avatar_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "required",
+              "source_stage": "records",
+              "source_column": "required"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "summary",
+                "entity": "repository_commit_status_summary_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "commit_ref": {
+                    "parameter": "commit_ref"
+                  },
+                  "expected_repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "repository_commit_status_contexts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "commit_ref": {
+                    "stage": "summary",
+                    "column": "commit_sha"
+                  },
+                  "commit_status_population": {
+                    "parameter": "commit_status_population"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "select": [
+            "commit_status_population"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield",
+              "default": null
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "commit_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Commit SHA, branch or tag resolved to one canonical commit at request time.",
+              "example": "main",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "status_id",
+              "source_stage": "records",
+              "source_column": "status_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "target_url",
+              "source_stage": "records",
+              "source_column": "target_url"
+            },
+            {
+              "name": "context",
+              "source_stage": "records",
+              "source_column": "context"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "records",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "records",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "avatar_url",
+              "source_stage": "records",
+              "source_column": "avatar_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "creator",
+              "source_stage": "records",
+              "source_column": "creator"
+            },
+            {
+              "name": "creator_id",
+              "source_stage": "records",
+              "source_column": "creator_id"
+            },
+            {
+              "name": "creator_login",
+              "source_stage": "records",
+              "source_column": "creator_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_commit_statuses_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "commit_ref": {
+                    "parameter": "commit_ref"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          }
+        }
+      ],
+      "nullable_route_fields": [
+        "created_at_raw",
+        "updated_at_raw",
+        "creator",
+        "creator_id",
+        "creator_login",
+        "created_at",
+        "updated_at",
+        "required",
+        "commit_sha"
+      ]
+    },
+    {
+      "name": "commit_status_summaries",
+      "description": "Combined latest-context state observations. References resolve at request time. Historical status timestamps remain VARCHAR because the pinned status schema does not declare date-time format; combined context timestamps have their own typed schema.",
+      "grain": [
+        "repository_id",
+        "commit_sha"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "commit_sha",
+          "state",
+          "total_count",
+          "reported_repository_id",
+          "reported_repository",
+          "repository_details",
+          "commit_url",
+          "url"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "commit_sha",
+          "state"
+        ],
+        "sql_names": {
+          "repository_id": "commit_status_summaries_repository_id",
+          "repository": "commit_status_summaries_repository",
+          "commit_sha": "commit_status_summaries_commit_sha",
+          "state": "commit_status_summaries_state"
+        },
+        "metrics": [
+          {
+            "name": "commit_status_summaries_count",
+            "kind": "count",
+            "comment": "Commit status summaries count. Counts the declared entity grain."
+          },
+          {
+            "name": "commit_status_summaries_success_count",
+            "kind": "count",
+            "comment": "Commit status summaries success count. Counts the declared entity grain.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "success"
+            }
+          },
+          {
+            "name": "commit_status_summaries_failure_count",
+            "kind": "count",
+            "comment": "Commit status summaries failure count. Counts the declared entity grain.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "failure"
+            }
+          },
+          {
+            "name": "commit_status_summaries_error_count",
+            "kind": "count",
+            "comment": "Commit status summaries error count. Counts the declared entity grain.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "error"
+            }
+          },
+          {
+            "name": "commit_status_summaries_pending_count",
+            "kind": "count",
+            "comment": "Commit status summaries pending count. Counts the declared entity grain.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "pending"
+            }
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "commit_status_reported_context_count": {
+              "expression": "SUM(commit_status_summaries.total_count)"
+            }
+          },
+          "metric_semantics": {
+            "commit_status_reported_context_count": {
+              "dataset": "commit_status_summaries",
+              "comment": "Sum of API-reported latest context counts, including zero-context commit summaries; not historical event counts.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield",
+              "default": null
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "commit_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Commit SHA, branch or tag resolved to one canonical commit at request time.",
+              "example": "main",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "records",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "total_count",
+              "source_stage": "records",
+              "source_column": "total_count"
+            },
+            {
+              "name": "reported_repository_id",
+              "source_stage": "records",
+              "source_column": "reported_repository_id"
+            },
+            {
+              "name": "reported_repository",
+              "source_stage": "records",
+              "source_column": "reported_repository"
+            },
+            {
+              "name": "repository_details",
+              "source_stage": "records",
+              "source_column": "repository_details"
+            },
+            {
+              "name": "commit_url",
+              "source_stage": "records",
+              "source_column": "commit_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_commit_status_summary_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "commit_ref": {
+                    "parameter": "commit_ref"
+                  },
+                  "expected_repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          }
+        }
+      ]
+    },
+    {
+      "name": "rule_suites",
+      "description": "Observed rule evaluation suites across organization and repository collections or direct IDs. Complete list pages hydrate full rule details; no ruleset configuration is retrieved. Pinned optional IDs must be non-null to establish the canonical grain. Unknown actors and absent evaluation results remain NULL. Repository full name is unavailable on organization responses; repository_id remains independent association evidence.",
+      "grain": [
+        "rule_suite_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "rule_suite_id",
+          "actor_id",
+          "actor_name",
+          "before_sha",
+          "after_sha",
+          "ref",
+          "repository_id",
+          "pushed_at",
+          "result",
+          "evaluation_result",
+          "rule_evaluations",
+          "reported_repository_name",
+          "repository",
+          "organization"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "organization",
+          "actor_id",
+          "actor_name",
+          "ref",
+          "result",
+          "evaluation_result",
+          "pushed_at"
+        ],
+        "sql_names": {
+          "repository_id": "rule_suites_repository_id",
+          "repository": "rule_suites_repository",
+          "organization": "rule_suites_organization",
+          "actor_id": "rule_suites_actor_id",
+          "actor_name": "rule_suites_actor_name",
+          "ref": "rule_suites_ref",
+          "result": "rule_suites_result",
+          "evaluation_result": "rule_suites_evaluation_result",
+          "pushed_at": "rule_suites_pushed_at"
+        },
+        "metrics": [
+          {
+            "name": "rule_suite_count",
+            "kind": "count",
+            "comment": "Rule suite count. Counts the declared entity grain."
+          },
+          {
+            "name": "rule_suite_pass_count",
+            "kind": "count",
+            "comment": "Rule suite pass count. Counts the declared entity grain.",
+            "where": {
+              "field": "result",
+              "op": "eq",
+              "value": "pass"
+            }
+          },
+          {
+            "name": "rule_suite_fail_count",
+            "kind": "count",
+            "comment": "Rule suite fail count. Counts the declared entity grain.",
+            "where": {
+              "field": "result",
+              "op": "eq",
+              "value": "fail"
+            }
+          },
+          {
+            "name": "rule_suite_bypass_count",
+            "kind": "count",
+            "comment": "Rule suite bypass count. Counts the declared entity grain.",
+            "where": {
+              "field": "result",
+              "op": "eq",
+              "value": "bypass"
+            }
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "rule_evaluation_count": {
+              "expression": "COALESCE(SUM(length(rule_suites.rule_evaluations)), 0)"
+            }
+          },
+          "metric_semantics": {
+            "rule_evaluation_count": {
+              "dataset": "rule_suites",
+              "comment": "Count of observed typed rule evaluations; a missing list provides no observed evaluations.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield",
+              "default": null
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "rule_suite_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact rule evaluation suite identifier.",
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "rule_suite_id",
+              "source_stage": "records",
+              "source_column": "rule_suite_id"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "records",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_name",
+              "source_stage": "records",
+              "source_column": "actor_name"
+            },
+            {
+              "name": "before_sha",
+              "source_stage": "records",
+              "source_column": "before_sha"
+            },
+            {
+              "name": "after_sha",
+              "source_stage": "records",
+              "source_column": "after_sha"
+            },
+            {
+              "name": "ref",
+              "source_stage": "records",
+              "source_column": "ref"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "pushed_at",
+              "source_stage": "records",
+              "source_column": "pushed_at"
+            },
+            {
+              "name": "result",
+              "source_stage": "records",
+              "source_column": "result"
+            },
+            {
+              "name": "evaluation_result",
+              "source_stage": "records",
+              "source_column": "evaluation_result"
+            },
+            {
+              "name": "rule_evaluations",
+              "source_stage": "records",
+              "source_column": "rule_evaluations"
+            },
+            {
+              "name": "reported_repository_name",
+              "source_stage": "records",
+              "source_column": "reported_repository_name"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "organization",
+              "source_stage": "records",
+              "source_column": "organization"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "scope": "rule_suite_lookup"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "select": [
+            "rule_suite_id"
+          ]
+        },
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "rule_evaluation_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Exact ref filter for rule evaluation suites; GitHub does not accept wildcard refs.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            },
+            {
+              "name": "rule_evaluation_time_period",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Rolling time window of observed rule evaluation suites; omission uses the API default day.",
+              "example": "hour",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month"
+              ]
+            },
+            {
+              "name": "rule_evaluation_actor",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Login of the actor whose pushes triggered rule evaluation.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            },
+            {
+              "name": "rule_evaluation_result",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Filter active-rule suite outcomes.",
+              "example": "pass",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "pass",
+                "fail",
+                "bypass",
+                "all"
+              ]
+            },
+            {
+              "name": "rule_evaluation_mode",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Filter active or evaluate-mode rule suites.",
+              "example": "all",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "all",
+                "active",
+                "evaluate"
+              ]
+            },
+            {
+              "name": "rule_evaluation_repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Repository name filter within the selected organization rule-suite population.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "rule_suite_id",
+              "source_stage": "records",
+              "source_column": "rule_suite_id"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "records",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_name",
+              "source_stage": "records",
+              "source_column": "actor_name"
+            },
+            {
+              "name": "before_sha",
+              "source_stage": "records",
+              "source_column": "before_sha"
+            },
+            {
+              "name": "after_sha",
+              "source_stage": "records",
+              "source_column": "after_sha"
+            },
+            {
+              "name": "ref",
+              "source_stage": "records",
+              "source_column": "ref"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "pushed_at",
+              "source_stage": "records",
+              "source_column": "pushed_at"
+            },
+            {
+              "name": "result",
+              "source_stage": "records",
+              "source_column": "result"
+            },
+            {
+              "name": "evaluation_result",
+              "source_stage": "records",
+              "source_column": "evaluation_result"
+            },
+            {
+              "name": "rule_evaluations",
+              "source_stage": "records",
+              "source_column": "rule_evaluations"
+            },
+            {
+              "name": "reported_repository_name",
+              "source_stage": "records",
+              "source_column": "reported_repository_name"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "organization",
+              "source_stage": "records",
+              "source_column": "organization"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "discovered",
+                "entity": "organization_rule_suite_discovery_source",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  },
+                  "rule_evaluation_ref": {
+                    "parameter": "rule_evaluation_ref"
+                  },
+                  "rule_evaluation_time_period": {
+                    "parameter": "rule_evaluation_time_period"
+                  },
+                  "rule_evaluation_actor": {
+                    "parameter": "rule_evaluation_actor"
+                  },
+                  "rule_evaluation_result": {
+                    "parameter": "rule_evaluation_result"
+                  },
+                  "rule_evaluation_mode": {
+                    "parameter": "rule_evaluation_mode"
+                  },
+                  "rule_evaluation_repository": {
+                    "parameter": "rule_evaluation_repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_rule_suite_lookup_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "discovered",
+                    "column": "organization"
+                  },
+                  "repository": {
+                    "literal": null
+                  },
+                  "rule_suite_id": {
+                    "stage": "discovered",
+                    "column": "rule_suite_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "select": [
+            "organization"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield",
+              "default": null
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "rule_evaluation_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Exact ref filter for rule evaluation suites; GitHub does not accept wildcard refs.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            },
+            {
+              "name": "rule_evaluation_time_period",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Rolling time window of observed rule evaluation suites; omission uses the API default day.",
+              "example": "hour",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month"
+              ]
+            },
+            {
+              "name": "rule_evaluation_actor",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Login of the actor whose pushes triggered rule evaluation.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            },
+            {
+              "name": "rule_evaluation_result",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Filter active-rule suite outcomes.",
+              "example": "pass",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "pass",
+                "fail",
+                "bypass",
+                "all"
+              ]
+            },
+            {
+              "name": "rule_evaluation_mode",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Filter active or evaluate-mode rule suites.",
+              "example": "all",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "all",
+                "active",
+                "evaluate"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "rule_suite_id",
+              "source_stage": "records",
+              "source_column": "rule_suite_id"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "records",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_name",
+              "source_stage": "records",
+              "source_column": "actor_name"
+            },
+            {
+              "name": "before_sha",
+              "source_stage": "records",
+              "source_column": "before_sha"
+            },
+            {
+              "name": "after_sha",
+              "source_stage": "records",
+              "source_column": "after_sha"
+            },
+            {
+              "name": "ref",
+              "source_stage": "records",
+              "source_column": "ref"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "pushed_at",
+              "source_stage": "records",
+              "source_column": "pushed_at"
+            },
+            {
+              "name": "result",
+              "source_stage": "records",
+              "source_column": "result"
+            },
+            {
+              "name": "evaluation_result",
+              "source_stage": "records",
+              "source_column": "evaluation_result"
+            },
+            {
+              "name": "rule_evaluations",
+              "source_stage": "records",
+              "source_column": "rule_evaluations"
+            },
+            {
+              "name": "reported_repository_name",
+              "source_stage": "records",
+              "source_column": "reported_repository_name"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "organization",
+              "source_stage": "records",
+              "source_column": "organization"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "discovered",
+                "entity": "repository_rule_suite_discovery_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "rule_evaluation_ref": {
+                    "parameter": "rule_evaluation_ref"
+                  },
+                  "rule_evaluation_time_period": {
+                    "parameter": "rule_evaluation_time_period"
+                  },
+                  "rule_evaluation_actor": {
+                    "parameter": "rule_evaluation_actor"
+                  },
+                  "rule_evaluation_result": {
+                    "parameter": "rule_evaluation_result"
+                  },
+                  "rule_evaluation_mode": {
+                    "parameter": "rule_evaluation_mode"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "repository_rule_suite_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "discovered",
+                    "column": "repository"
+                  },
+                  "organization": {
+                    "literal": null
+                  },
+                  "rule_suite_id": {
+                    "stage": "discovered",
+                    "column": "rule_suite_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          }
+        }
+      ]
+    },
+    {
+      "name": "push_bypass_requests",
+      "description": "Push-rule bypass requests identified globally by request ID, with repository-local request numbers for lookup. Requester and delegated-reviewer roles remain separate; all typed violation summaries and responses are retained. The pinned GET operations are available in the ghec product contract. Optional IDs are explicitly required at emission; absent nested metadata remains unknown. Organization retrieval retains requests with missing repository evidence; reported repository identity remains nullable.",
+      "grain": [
+        "bypass_request_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "bypass_request_id",
+          "request_number",
+          "repository_id",
+          "repository",
+          "repository_details",
+          "organization_details",
+          "requester_id",
+          "requester_login",
+          "requester",
+          "request_type",
+          "data",
+          "resource_identifier",
+          "status",
+          "requester_comment",
+          "expires_at",
+          "created_at",
+          "responses",
+          "url",
+          "html_url"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "requester_id",
+          "requester_login",
+          "request_type",
+          "status",
+          "created_at",
+          "expires_at"
+        ],
+        "sql_names": {
+          "repository_id": "push_bypass_requests_repository_id",
+          "repository": "push_bypass_requests_repository",
+          "requester_id": "push_bypass_requests_requester_id",
+          "requester_login": "push_bypass_requests_requester_login",
+          "request_type": "push_bypass_requests_request_type",
+          "status": "push_bypass_requests_status",
+          "created_at": "push_bypass_requests_created_at",
+          "expires_at": "push_bypass_requests_expires_at"
+        },
+        "metrics": [
+          {
+            "name": "push_bypass_request_count",
+            "kind": "count",
+            "comment": "Push bypass request count. Counts the declared entity grain."
+          },
+          {
+            "name": "push_bypass_pending_count",
+            "kind": "count",
+            "comment": "Push bypass pending count. Counts the declared entity grain.",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "pending"
+            }
+          },
+          {
+            "name": "push_bypass_denied_count",
+            "kind": "count",
+            "comment": "Push bypass denied count. Counts the declared entity grain.",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "denied"
+            }
+          },
+          {
+            "name": "push_bypass_approved_count",
+            "kind": "count",
+            "comment": "Push bypass approved count. Counts the declared entity grain.",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "approved"
+            }
+          },
+          {
+            "name": "push_bypass_cancelled_count",
+            "kind": "count",
+            "comment": "Push bypass cancelled count. Counts the declared entity grain.",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "cancelled"
+            }
+          },
+          {
+            "name": "push_bypass_completed_count",
+            "kind": "count",
+            "comment": "Push bypass completed count. Counts the declared entity grain.",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "completed"
+            }
+          },
+          {
+            "name": "push_bypass_expired_count",
+            "kind": "count",
+            "comment": "Push bypass expired count. Counts the declared entity grain.",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "expired"
+            }
+          },
+          {
+            "name": "push_bypass_deleted_count",
+            "kind": "count",
+            "comment": "Push bypass deleted count. Counts the declared entity grain.",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "deleted"
+            }
+          },
+          {
+            "name": "push_bypass_open_count",
+            "kind": "count",
+            "comment": "Push bypass open count. Counts the declared entity grain.",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "open"
+            }
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "push_bypass_response_count": {
+              "expression": "COALESCE(SUM(length(push_bypass_requests.responses)), 0)"
+            }
+          },
+          "metric_semantics": {
+            "push_bypass_response_count": {
+              "dataset": "push_bypass_requests",
+              "comment": "Count of observed reviewer responses; requester and reviewer roles remain distinct.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "bypass_request_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Repository-local number of one push rule bypass request.",
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "bypass_request_id",
+              "source_stage": "records",
+              "source_column": "bypass_request_id"
+            },
+            {
+              "name": "request_number",
+              "source_stage": "records",
+              "source_column": "request_number"
+            },
+            {
+              "name": "repository_details",
+              "source_stage": "records",
+              "source_column": "repository_details"
+            },
+            {
+              "name": "organization_details",
+              "source_stage": "records",
+              "source_column": "organization_details"
+            },
+            {
+              "name": "requester_id",
+              "source_stage": "records",
+              "source_column": "requester_id"
+            },
+            {
+              "name": "requester_login",
+              "source_stage": "records",
+              "source_column": "requester_login"
+            },
+            {
+              "name": "requester",
+              "source_stage": "records",
+              "source_column": "requester"
+            },
+            {
+              "name": "request_type",
+              "source_stage": "records",
+              "source_column": "request_type"
+            },
+            {
+              "name": "data",
+              "source_stage": "records",
+              "source_column": "data"
+            },
+            {
+              "name": "resource_identifier",
+              "source_stage": "records",
+              "source_column": "resource_identifier"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "requester_comment",
+              "source_stage": "records",
+              "source_column": "requester_comment"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "responses",
+              "source_stage": "records",
+              "source_column": "responses"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "repository_push_bypass_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "bypass_request_number": {
+                    "parameter": "bypass_request_number"
+                  },
+                  "expected_repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "select": [
+            "bypass_request_number"
+          ]
+        },
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "bypass_repository_name",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Optional repository name within the selected organization when listing push-rule bypass requests.",
+              "example": "crossfield"
+            },
+            {
+              "name": "bypass_reviewer",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Login of a delegated reviewer who responded to the bypass request.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            },
+            {
+              "name": "bypass_requester",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Login of the user who requested the push-rule bypass.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            },
+            {
+              "name": "bypass_time_period",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Rolling time window of bypass requests; omission uses the API default day.",
+              "example": "hour",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month"
+              ]
+            },
+            {
+              "name": "bypass_request_status",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Requested API status filter; response statuses are preserved independently.",
+              "example": "completed",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "completed",
+                "cancelled",
+                "approved",
+                "expired",
+                "deleted",
+                "denied",
+                "open",
+                "all"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "bypass_request_id",
+              "source_stage": "records",
+              "source_column": "bypass_request_id"
+            },
+            {
+              "name": "request_number",
+              "source_stage": "records",
+              "source_column": "request_number"
+            },
+            {
+              "name": "repository_details",
+              "source_stage": "records",
+              "source_column": "repository_details"
+            },
+            {
+              "name": "organization_details",
+              "source_stage": "records",
+              "source_column": "organization_details"
+            },
+            {
+              "name": "requester_id",
+              "source_stage": "records",
+              "source_column": "requester_id"
+            },
+            {
+              "name": "requester_login",
+              "source_stage": "records",
+              "source_column": "requester_login"
+            },
+            {
+              "name": "requester",
+              "source_stage": "records",
+              "source_column": "requester"
+            },
+            {
+              "name": "request_type",
+              "source_stage": "records",
+              "source_column": "request_type"
+            },
+            {
+              "name": "data",
+              "source_stage": "records",
+              "source_column": "data"
+            },
+            {
+              "name": "resource_identifier",
+              "source_stage": "records",
+              "source_column": "resource_identifier"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "requester_comment",
+              "source_stage": "records",
+              "source_column": "requester_comment"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "responses",
+              "source_stage": "records",
+              "source_column": "responses"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_push_bypass_requests_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "bypass_repository_name": {
+                    "parameter": "bypass_repository_name"
+                  },
+                  "bypass_reviewer": {
+                    "parameter": "bypass_reviewer"
+                  },
+                  "bypass_requester": {
+                    "parameter": "bypass_requester"
+                  },
+                  "bypass_time_period": {
+                    "parameter": "bypass_time_period"
+                  },
+                  "bypass_request_status": {
+                    "parameter": "bypass_request_status"
+                  },
+                  "expected_bypass_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "select": [
+            "organization"
+          ],
+          "population": "All advertised pages of credential-visible organization push-rule bypass requests in the selected rolling time window (API default day), optional repository/requester/reviewer/status filters; not complete historical requests."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield",
+              "default": null
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "bypass_reviewer",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Login of a delegated reviewer who responded to the bypass request.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            },
+            {
+              "name": "bypass_requester",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Login of the user who requested the push-rule bypass.",
+              "example": "main",
+              "default": null,
+              "min_length": 1
+            },
+            {
+              "name": "bypass_time_period",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Rolling time window of bypass requests; omission uses the API default day.",
+              "example": "hour",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "hour",
+                "day",
+                "week",
+                "month"
+              ]
+            },
+            {
+              "name": "bypass_request_status",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Requested API status filter; response statuses are preserved independently.",
+              "example": "completed",
+              "default": null,
+              "min_length": 1,
+              "enum": [
+                "completed",
+                "cancelled",
+                "approved",
+                "expired",
+                "deleted",
+                "denied",
+                "open",
+                "all"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "bypass_request_id",
+              "source_stage": "records",
+              "source_column": "bypass_request_id"
+            },
+            {
+              "name": "request_number",
+              "source_stage": "records",
+              "source_column": "request_number"
+            },
+            {
+              "name": "repository_details",
+              "source_stage": "records",
+              "source_column": "repository_details"
+            },
+            {
+              "name": "organization_details",
+              "source_stage": "records",
+              "source_column": "organization_details"
+            },
+            {
+              "name": "requester_id",
+              "source_stage": "records",
+              "source_column": "requester_id"
+            },
+            {
+              "name": "requester_login",
+              "source_stage": "records",
+              "source_column": "requester_login"
+            },
+            {
+              "name": "requester",
+              "source_stage": "records",
+              "source_column": "requester"
+            },
+            {
+              "name": "request_type",
+              "source_stage": "records",
+              "source_column": "request_type"
+            },
+            {
+              "name": "data",
+              "source_stage": "records",
+              "source_column": "data"
+            },
+            {
+              "name": "resource_identifier",
+              "source_stage": "records",
+              "source_column": "resource_identifier"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "requester_comment",
+              "source_stage": "records",
+              "source_column": "requester_comment"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "responses",
+              "source_stage": "records",
+              "source_column": "responses"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_push_bypass_requests_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "bypass_reviewer": {
+                    "parameter": "bypass_reviewer"
+                  },
+                  "bypass_requester": {
+                    "parameter": "bypass_requester"
+                  },
+                  "bypass_time_period": {
+                    "parameter": "bypass_time_period"
+                  },
+                  "bypass_request_status": {
+                    "parameter": "bypass_request_status"
+                  },
+                  "expected_repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          }
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "commit_statuses_to_repositories",
+      "from": "commit_statuses",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "commit_status_summaries_to_repositories",
+      "from": "commit_status_summaries",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "rule_suites_to_repositories",
+      "from": "rule_suites",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "push_bypass_requests_to_repositories",
+      "from": "push_bypass_requests",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "commit_statuses_to_summaries",
+      "from": "commit_statuses",
+      "to": "commit_status_summaries",
+      "from_columns": [
+        "repository_id",
+        "commit_sha"
+      ],
+      "to_columns": [
+        "repository_id",
+        "commit_sha"
+      ],
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository",
+            "commit_ref": "commit_sha"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "latest",
+          "bindings": {
+            "repository": "repository",
+            "commit_ref": "commit_sha",
+            "commit_status_population": {
+              "literal": "latest"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "scopes": {
+    "rule_suite_lookup": {
+      "exclusive_parameters": [
+        "repository",
+        "organization"
+      ],
+      "comment": "Exactly one repository or organization lookup scope, with the same canonical suite identity.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "organization_rule_suite_lookup_source",
+          "arguments": {
+            "repository": {
+              "literal": null
+            },
+            "organization": {
+              "parameter": "organization"
+            },
+            "rule_suite_id": {
+              "parameter": "rule_suite_id"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "repository_rule_suite_lookup_source",
+          "arguments": {
+            "repository": {
+              "parameter": "repository"
+            },
+            "organization": {
+              "literal": null
+            },
+            "rule_suite_id": {
+              "parameter": "rule_suite_id"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,232 @@
+# Organization definitions, canonical assignments and bidirectional invitation/team relationships.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT repository_property_definition_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture');
+----
+4
+
+query I
+SELECT repository_property_definition_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',custom_property_name=>'risk');
+----
+1
+
+statement ok
+CREATE TEMP TABLE property_definition_detail AS SELECT * FROM engineering.detail.repository_property_definitions(organization=>'organization-metadata-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTT
+SELECT property_name,default_value.variant_1,default_value.variant_2[1] FROM property_definition_detail ORDER BY property_name;
+----
+flag	false	NULL
+labels	NULL	reviewed
+risk	medium	NULL
+unset	NULL	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT repository_property_value_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture');
+----
+5
+
+query I
+SELECT repository_property_value_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',property_repository_query=>'name:alpha');
+----
+3
+
+query I
+SELECT repository_property_value_count FROM engineering.semantic.github(repository=>'organization-metadata-fixture/empty');
+----
+0
+
+statement ok
+CREATE TEMP TABLE property_value_detail AS SELECT * FROM engineering.detail.repository_property_values(organization=>'organization-metadata-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query ITTT
+SELECT repository_id,property_name,value.variant_1,value.variant_2[1] FROM property_value_detail ORDER BY repository_id,property_name;
+----
+3711	labels	NULL	critical
+3711	risk	high	NULL
+3711	unset	NULL	NULL
+3712	flag	false	NULL
+3712	risk	low	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT issue_type_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture');
+----
+2
+
+query I
+SELECT issue_type_count FROM engineering.semantic.github(repository=>'organization-metadata-fixture/alpha');
+----
+1
+
+query IITT
+SELECT organization_id,issue_type_id,name,is_enabled FROM engineering.detail.issue_types(repository=>'organization-metadata-fixture/beta') ORDER BY issue_type_id;
+----
+3700	3801	Bug	true
+3700	3802	Task	false
+
+query I
+SELECT issue_field_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture');
+----
+2
+
+statement ok
+CREATE TEMP TABLE issue_field_detail AS SELECT * FROM engineering.detail.issue_fields(organization=>'organization-metadata-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query ITIT
+SELECT issue_field_id,data_type,options[2].id,options[2].color FROM issue_field_detail ORDER BY issue_field_id;
+----
+3901	single_select	3912	yellow
+3902	number	NULL	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT organization_outside_collaborator_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture');
+----
+2
+
+query TI
+SELECT organization_outside_collaborators_account_type,organization_outside_collaborator_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture') GROUP BY organization_outside_collaborators_account_type ORDER BY organization_outside_collaborators_account_type;
+----
+Bot	1
+User	1
+
+query I
+SELECT organization_outside_collaborator_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',outside_collaborator_filter=>'2fa_disabled');
+----
+1
+
+query III
+SELECT organization_invitation_count,pending_organization_invitation_count,failed_organization_invitation_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',organization_invitation_population=>'pending');
+----
+2	2	0
+
+query III
+SELECT organization_invitation_count,pending_organization_invitation_count,failed_organization_invitation_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',organization_invitation_population=>'failed');
+----
+1	0	1
+
+statement error
+DESCRIBE SELECT * FROM engineering.detail.organization_invitations(organization_invitation_population=>'pending');
+----
+Parameter 'organization_invitation_population' requires non-NULL organization
+
+query III
+SELECT organization_invitation_count,pending_organization_invitation_count,failed_organization_invitation_count FROM engineering.semantic.github(team_numeric_id=>4201);
+----
+2	2	0
+
+query I
+SELECT organization_invitation_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',organization_invitation_population=>'pending',organization_invitation_role=>'admin');
+----
+0
+
+query I
+SELECT organization_invitation_team_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',organization_invitation_id=>4102);
+----
+2
+
+query I
+SELECT organization_invitation_team_count FROM engineering.semantic.github(team_numeric_id=>4201);
+----
+2
+
+query II
+SELECT invitation_id,team_id FROM engineering.detail.organization_invitation_teams(organization=>'organization-metadata-fixture',team_slug=>'ui');
+----
+4102	4202
+
+query I
+SELECT team_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',organization_invitation_id=>4102);
+----
+2
+
+statement error
+SELECT repository_property_definition_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',custom_property_name=>'missing');
+----
+404
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT issue_type_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',repository=>'organization-metadata-fixture/alpha');
+----
+arguments do not apply
+
+statement error
+SELECT repository_property_value_count FROM engineering.semantic.github(repository=>'organization-metadata-fixture/alpha',property_repository_query=>'name:alpha');
+----
+arguments do not apply
+
+statement error
+SELECT organization_invitation_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',organization_invitation_population=>'failed',organization_invitation_role=>'admin');
+----
+arguments do not apply
+
+statement error
+SELECT organization_invitation_team_count FROM engineering.semantic.github(organization=>'organization-metadata-fixture',organization_invitation_id=>4102,team_numeric_id=>4201);
+----
+arguments do not apply
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

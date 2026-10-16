@@ -2,59 +2,6 @@
   "crossfield": {
     "invocations": {
       "derived_datasets": {
-        "repository_topics": {
-          "id": "queryfarm.github/derived/repository_topics",
-          "from": "repositories",
-          "dataset": {
-            "name": "repository_topics",
-            "id": "queryfarm.github/repository_topics",
-            "grain": [
-              "repository_id",
-              "topic"
-            ],
-            "fields": {
-              "repository_id": {
-                "source_column": "repository_id",
-                "dimension": true
-              },
-              "repository_name": {
-                "source_column": "repository_name",
-                "dimension": true
-              },
-              "topic": {
-                "source_column": "topic",
-                "dimension": true
-              }
-            }
-          },
-          "columns": [
-            {
-              "name": "repository_id",
-              "type": "BIGINT",
-              "nullable": false
-            },
-            {
-              "name": "repository_name",
-              "type": "VARCHAR",
-              "nullable": false
-            },
-            {
-              "name": "topic",
-              "type": "VARCHAR",
-              "nullable": false
-            }
-          ],
-          "parent_fields": {
-            "repository_id": "repositories.repository_id",
-            "repository_name": "repositories.repository"
-          },
-          "expand": {
-            "member": "repositories.topic_names",
-            "element_columns": {
-              "topic": []
-            }
-          }
-        },
         "pull_request_labels": {
           "id": "queryfarm.github/derived/pull_request_labels",
           "from": "pull_requests",
@@ -254,14 +201,6 @@
       }
     },
     "metrics": {
-      "repository_topic_membership_count": {
-        "expression": "COUNT(*)",
-        "type": "BIGINT"
-      },
-      "repositories_with_topic_count": {
-        "expression": "COUNT(DISTINCT repository_topics.repository_id)",
-        "type": "BIGINT"
-      },
       "pull_request_label_membership_count": {
         "expression": "COUNT(*)",
         "type": "BIGINT"
@@ -281,17 +220,12 @@
     },
     "policy": {
       "metrics": [
-        "repository_topic_membership_count",
-        "repositories_with_topic_count",
         "pull_request_label_membership_count",
         "labeled_pull_request_count",
         "pull_request_assignee_membership_count",
         "assigned_pull_request_count"
       ],
       "dimensions": [
-        "repository_topics.repository_id",
-        "repository_topics.repository_name",
-        "repository_topics.topic",
         "pull_request_labels.repository_id",
         "pull_request_labels.repository_name",
         "pull_request_labels.pull_request_number",
@@ -308,9 +242,6 @@
         "pull_request_assignees.assignee_login"
       ],
       "filter_dimensions": [
-        "repository_topics.repository_id",
-        "repository_topics.repository_name",
-        "repository_topics.topic",
         "pull_request_labels.repository_id",
         "pull_request_labels.repository_name",
         "pull_request_labels.pull_request_number",
@@ -327,9 +258,6 @@
         "pull_request_assignees.assignee_login"
       ],
       "detail_fields": [
-        "repository_topics.repository_id",
-        "repository_topics.repository_name",
-        "repository_topics.topic",
         "pull_request_labels.repository_id",
         "pull_request_labels.repository_name",
         "pull_request_labels.pull_request_number",
@@ -346,18 +274,6 @@
         "pull_request_assignees.assignee_login"
       ],
       "metric_semantics": {
-        "repository_topic_membership_count": {
-          "dataset": "repository_topics",
-          "additivity": "additive",
-          "missing": "zero",
-          "comment": "Current repository-topic memberships in the selected repository/owner/organization population. Counts membership pairs; one parent can contribute to several memberships."
-        },
-        "repositories_with_topic_count": {
-          "dataset": "repository_topics",
-          "additivity": "non_additive",
-          "missing": "zero",
-          "comment": "Current repository-topic memberships in the selected repository/owner/organization population. Distinct parents represented by the selected memberships; excludes parents with no returned memberships. Never sum this count across membership groups."
-        },
         "pull_request_label_membership_count": {
           "dataset": "pull_request_labels",
           "additivity": "additive",
@@ -384,10 +300,6 @@
         }
       },
       "field_semantics": {
-        "repository_topics.topic": {
-          "sql_name": "repository_topic",
-          "comment": "Current topic string; a repository can have multiple topics."
-        },
         "pull_request_labels.label_id": {
           "sql_name": "pr_label_id",
           "comment": "Stable identity of an assigned repository label."

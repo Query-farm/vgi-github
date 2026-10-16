@@ -1,0 +1,231 @@
+# Independent numerical answers for dependency, security and SPDX populations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Organization alerts include five pages and overlapping repository-local alert numbers.
+query IIIII
+SELECT dependabot_alert_count,open_dependabot_alert_count,fixed_dependabot_alert_count,dismissed_dependabot_alert_count,critical_dependabot_alert_count FROM engineering.semantic.github(organization=>'dependency-fixture');
+----
+5	2	1	2	1
+
+query IIIII
+SELECT dependabot_alert_count,open_dependabot_alert_count,fixed_dependabot_alert_count,dismissed_dependabot_alert_count,critical_dependabot_alert_count FROM engineering.semantic.github(repository=>'dependency-fixture/alpha');
+----
+4	1	1	2	1
+
+query II
+SELECT dependabot_alert_count,fixed_dependabot_alert_count FROM engineering.semantic.github(repository=>'dependency-fixture/alpha',dependabot_alert_number=>2);
+----
+1	1
+
+query II
+SELECT dependabot_alert_count,open_dependabot_alert_count FROM engineering.semantic.github(organization=>'dependency-fixture',dependabot_state=>'open',dependabot_severity=>'high,critical',dependabot_ecosystem=>'npm',dependabot_scope=>'runtime');
+----
+2	2
+
+query IIT
+SELECT repository_id,alert_number,state FROM engineering.detail.dependabot_alerts(organization=>'dependency-fixture') ORDER BY repository_id,alert_number;
+----
+1101	1	open
+1101	2	fixed
+1101	3	dismissed
+1101	4	auto_dismissed
+1102	1	open
+
+query TI
+SELECT dependabot_alerts_dependabot_created_day,dependabot_alert_count FROM engineering.semantic.github(organization=>'dependency-fixture') GROUP BY dependabot_alerts_dependabot_created_day;
+----
+2026-08-01	5
+
+# Known repository context has one analytical path; empty repositories retain their SBOM snapshot.
+query TIII
+SELECT repository_name,dependabot_alert_count,dependency_sbom_count,sbom_package_entry_count FROM engineering.semantic.github(organization=>'dependency-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+dependency-fixture/alpha	4	1	2
+dependency-fixture/beta	1	1	2
+dependency-fixture/empty	0	1	0
+
+query III
+SELECT security_advisory_count,critical_security_advisory_count,draft_security_advisory_count FROM engineering.semantic.github(repository=>'dependency-fixture/alpha');
+----
+2	1	1
+
+# Draft publication time stays NULL rather than becoming a fabricated date.
+query TI
+SELECT security_advisories_security_advisory_published_day,security_advisory_count FROM engineering.semantic.github(repository=>'dependency-fixture/alpha') GROUP BY security_advisories_security_advisory_published_day ORDER BY security_advisories_security_advisory_published_day NULLS LAST;
+----
+2026-08-02	1
+NULL	1
+
+# Organization advisory records omit owner repository identity; URL text is not a foreign key.
+query III
+SELECT security_advisory_count,critical_security_advisory_count,draft_security_advisory_count FROM engineering.semantic.github(organization=>'dependency-fixture');
+----
+3	1	1
+
+query ITT
+SELECT repository_id,repository,ghsa_id FROM engineering.detail.security_advisories(organization=>'dependency-fixture') ORDER BY ghsa_id;
+----
+NULL	NULL	GHSA-deps-aaaa-0001
+NULL	NULL	GHSA-deps-aaaa-0002
+NULL	NULL	GHSA-deps-aaaa-0005
+
+query II
+SELECT security_advisory_count,draft_security_advisory_count FROM engineering.semantic.github(organization=>'dependency-fixture',advisory_state=>'draft');
+----
+1	1
+
+query III
+SELECT security_advisory_count,critical_security_advisory_count,draft_security_advisory_count FROM engineering.semantic.github(advisory_type=>'reviewed');
+----
+2	1	0
+
+query II
+SELECT security_advisory_count,malware_security_advisory_count FROM engineering.semantic.github(advisory_type=>'malware');
+----
+1	1
+
+query TI
+SELECT security_advisories_severity,security_advisory_count FROM engineering.semantic.github(advisory_type=>'unreviewed') GROUP BY security_advisories_severity;
+----
+unknown	1
+
+# Shared GHSA identity does not merge first-patched-version with patched version ranges.
+statement ok
+CREATE TEMP TABLE global_security_advisory_versions AS SELECT * FROM engineering.detail.security_advisories(global_advisory_id=>'GHSA-deps-aaaa-0001');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTT
+SELECT ghsa_id,vulnerabilities[1].first_patched_version,vulnerabilities[1].patched_versions,credits[1].state FROM global_security_advisory_versions;
+----
+GHSA-deps-aaaa-0001	2.0	NULL	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE repository_security_advisory_versions AS SELECT * FROM engineering.detail.security_advisories(repository=>'dependency-fixture/alpha',ghsa_id=>'GHSA-deps-aaaa-0001');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTT
+SELECT ghsa_id,vulnerabilities[1].first_patched_version,vulnerabilities[1].patched_versions,credits[1].state FROM repository_security_advisory_versions;
+----
+GHSA-deps-aaaa-0001	NULL	>= 2.0, < 3.0	accepted
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT advisory_author_id,advisory_publisher_id FROM engineering.detail.security_advisories(repository=>'dependency-fixture/alpha',ghsa_id=>'GHSA-deps-aaaa-0001');
+----
+1201	1202
+
+# One version replacement creates two changes. Advisory associations do not multiply those rows.
+query IIII
+SELECT dependency_change_count,added_dependency_count,removed_dependency_count,dependency_change_vulnerability_count FROM engineering.semantic.github(repository=>'dependency-fixture/alpha',dependency_compare=>'main...topic');
+----
+3	2	1	3
+
+query IIII
+SELECT dependency_change_count,added_dependency_count,removed_dependency_count,dependency_change_vulnerability_count FROM engineering.semantic.github(organization=>'dependency-fixture',dependency_compare=>'main...topic');
+----
+3	2	1	3
+
+query I
+SELECT dependency_change_count FROM engineering.semantic.github(repository=>'dependency-fixture/alpha',dependency_compare=>'main...topic',dependency_manifest=>'missing.lock');
+----
+0
+
+query I
+SELECT dependency_change_count FROM engineering.semantic.github(repositories=>[],dependency_compare=>'main...topic');
+----
+0
+
+query III
+SELECT dependency_sbom_count,sbom_package_entry_count,sbom_relationship_entry_count FROM engineering.semantic.github(repository=>'dependency-fixture/alpha');
+----
+1	2	1
+
+# Missing optional relationships remain unknown; explicit empty lists are zero.
+query III
+SELECT dependency_sbom_count,sbom_package_entry_count,sbom_relationship_entry_count FROM engineering.semantic.github(repository=>'dependency-fixture/beta');
+----
+1	2	NULL
+
+query III
+SELECT dependency_sbom_count,sbom_package_entry_count,sbom_relationship_entry_count FROM engineering.semantic.github(repository=>'dependency-fixture/empty');
+----
+1	0	0
+
+query TT
+SELECT document_namespace,created_text FROM engineering.detail.dependency_sboms(repository=>'dependency-fixture/alpha');
+----
+https://spdx.example/alpha/snapshot-1	2026-09-01T00:00:00Z
+
+query II
+SELECT dependabot_alert_count,security_advisory_count FROM engineering.semantic.github(repository=>'dependency-fixture/empty');
+----
+0	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT security_advisory_count FROM engineering.semantic.github(advisory_type=>'all');
+----
+advisory_type
+
+statement error
+SELECT security_advisory_count FROM engineering.semantic.github(global_advisory_id=>'GHSA-deps-aaaa-0001',repository=>'dependency-fixture/alpha');
+----
+arguments do not apply
+
+statement error
+SELECT dependabot_alert_count FROM engineering.semantic.github(dependabot_alert_number=>1);
+----
+repository
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

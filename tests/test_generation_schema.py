@@ -114,6 +114,39 @@ type Label { id: ID!, name: String!, description: String, createdAt: DateTime!, 
 """
 
 
+def test_rest_input_scalar_variant_is_selected_by_declared_argument_type():
+    document, entity = rest_spec(), rest_entity()
+    parameter = document["paths"]["/repos/{owner}/{repo}/pulls/{pull_number}/reviews"]["get"]["parameters"][2]
+    parameter["schema"] = {"oneOf": [{"type": "integer"}, {"type": "string"}]}
+    assert compile_rest_entity(document, entity)["arguments"][1]["type"] == "BIGINT"
+    entity["arguments"][1]["type"] = "BOOLEAN"
+    with pytest.raises(SchemaError, match="exactly one scalar parameter variant"):
+        compile_rest_entity(document, entity)
+
+
+def test_source_ordinal_is_explicit_required_and_not_a_response_field():
+    entity = rest_entity()
+    entity["columns"].append({"name": "position", "source_ordinal": True})
+    entity["grain"] = ["repository", "position"]
+    column = compile_rest_entity(rest_spec(), entity)["columns"][-1]
+    assert column["type"] == "BIGINT" and column["required"] and not column["nullable"]
+    entity["columns"][-1]["path"] = ["id"]
+    with pytest.raises(SchemaError, match="exactly one"):
+        compile_rest_entity(rest_spec(), entity)
+
+
+def test_argument_enum_rejects_invalid_definitions_and_examples():
+    entity = rest_entity()
+    entity["arguments"][0].update(enum=["example/alpha"], example="example/alpha")
+    assert compile_rest_entity(rest_spec(), entity)["arguments"][0]["enum"] == ["example/alpha"]
+    entity["arguments"][0]["example"] = "example/beta"
+    with pytest.raises(SchemaError, match="example must satisfy enum"):
+        compile_rest_entity(rest_spec(), entity)
+    entity["arguments"][0]["enum"] = [1]
+    with pytest.raises(SchemaError, match="enum requires distinct"):
+        compile_rest_entity(rest_spec(), entity)
+
+
 def graphql_entity():
     return {
         "name": "labels",
@@ -224,7 +257,7 @@ input NestedFilter { enabled: Boolean!, mode: FilterMode!, note: String, next: N
 
 def input_object_entity():
     return {
-        "name": "authored_issues",
+        "name": "issues",
         "arguments": [{"name": "user", "type": "VARCHAR", "nullable": False}],
         "columns": [{"name": "id", "path": ["id"]}, {"name": "title", "path": ["title"]}],
         "grain": ["id"],
@@ -588,16 +621,32 @@ def test_graphql_common_interface_scalar_is_nullable_and_retains_population_asse
     "path,error",
     [
         (["author", "email"], "unknown GraphQL selected field"),
-        (["author", "profile", "name"], "common scalar field"),
-        (["author", "aliases"], "common scalar field"),
-        (["account", "login"], "unknown GraphQL selected field"),
+        (["author", "aliases"], "VARCHAR column"),
     ],
 )
-def test_graphql_interface_support_does_not_allow_subtype_or_union_fields(path, error):
+def test_graphql_interface_support_rejects_undeclared_fields_and_incompatible_actor_assertions(path, error):
     entity = actor_entity()
     entity["columns"][-1]["path"] = path
     with pytest.raises(SchemaError, match=error):
         compile_graphql_entity(ACTOR_SDL, entity)
+
+
+@pytest.mark.parametrize(
+    "path,expected",
+    [
+        (["author", "profile", "name"], "VARCHAR"),
+        (["author", "aliases"], "VARCHAR[]"),
+        (["account", "login"], "VARCHAR"),
+    ],
+)
+def test_graphql_common_abstract_paths_keep_exact_types_and_parent_nullability(path, expected):
+    entity = actor_entity()
+    entity.pop("policy")
+    entity["columns"][-1]["path"] = path
+    compiled = compile_graphql_entity(ACTOR_SDL, entity)
+    assert compiled["columns"][-1]["type"] == expected
+    assert compiled["columns"][-1]["nullable"]
+    assert validate(build_schema(ACTOR_SDL), parse(compiled["transport"]["document"])) == []
 
 
 @pytest.mark.parametrize(

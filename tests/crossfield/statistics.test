@@ -1,0 +1,125 @@
+# Typed repository statistics, signed tuple values and nullable contributor observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIIIIIIIII
+SELECT repository_code_frequency_week_count,repository_code_frequency_additions,repository_code_frequency_signed_deletions,repository_commit_activity_week_count,repository_commit_activity_commit_count,repository_contributor_statistics_observation_count,repository_contributor_statistics_commit_count,repository_participation_observation_count,repository_commit_punch_card_bucket_count,repository_commit_punch_card_commit_count FROM engineering.semantic.github(organization=>'statistics-fixture');
+----
+2	20	-7	3	9	3	12	2	3	10
+
+query TIIIIII
+SELECT repository_name,repository_code_frequency_week_count,repository_code_frequency_additions,repository_commit_activity_commit_count,repository_contributor_statistics_commit_count,repository_participation_observation_count,repository_commit_punch_card_commit_count FROM engineering.semantic.github(owner=>'statistics-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+statistics-fixture/alpha	2	20	7	9	1	7
+statistics-fixture/beta	0	0	2	3	1	3
+
+query IIIII
+SELECT repository_code_frequency_week_count,repository_commit_activity_week_count,repository_contributor_statistics_observation_count,repository_participation_observation_count,repository_commit_punch_card_bucket_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0	0	0	0
+
+query II
+SELECT repository_commit_punch_card_day_of_week,repository_commit_punch_card_commit_count FROM engineering.semantic.github(organization=>'statistics-fixture') GROUP BY repository_commit_punch_card_day_of_week ORDER BY repository_commit_punch_card_day_of_week;
+----
+0	2
+2	5
+6	3
+
+statement ok
+CREATE TEMP TABLE statistics_code_frequency AS SELECT * FROM engineering.detail.repository_code_frequency(organization=>'statistics-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query III
+SELECT week_epoch,additions,deletions FROM statistics_code_frequency ORDER BY week_epoch;
+----
+1704585600	12	-4
+1705190400	8	-3
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE statistics_commit_activity AS SELECT * FROM engineering.detail.repository_commit_activity(repository=>'statistics-fixture/alpha');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIII
+SELECT week_epoch,commit_count,daily_commits[1],daily_commits[7] FROM statistics_commit_activity ORDER BY week_epoch;
+----
+1704585600	4	0	0
+1705190400	3	1	2
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE statistics_contributors AS SELECT * FROM engineering.detail.repository_contributor_statistics(organization=>'statistics-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIIIII
+SELECT repository,response_position,author_id,total_commits,weeks[1].a,weeks[1].d FROM statistics_contributors ORDER BY repository,response_position;
+----
+statistics-fixture/alpha	1	6650	7	12	4
+statistics-fixture/alpha	2	NULL	2	0	0
+statistics-fixture/beta	1	6651	3	5	1
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query I
+SELECT count(*) FROM statistics_contributors WHERE author IS NULL AND author_id IS NULL;
+----
+1
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE statistics_participation AS SELECT * FROM engineering.detail.repository_participation_statistics(organization=>'statistics-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIIII
+SELECT repository,len(all_commits),len(owner_commits),all_commits[52],owner_commits[52] FROM statistics_participation ORDER BY repository;
+----
+statistics-fixture/alpha	52	52	3	1
+statistics-fixture/beta	52	52	2	0
+
+
+statement ok
+SET crossfield_mode='strict';

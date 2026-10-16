@@ -71,6 +71,7 @@ def repository(name, identity):
         "fork": False,
         "description": "Independent fixture repository",
         "default_branch": "main",
+        "language": None,
         "html_url": f"https://github.example/example/{name}",
         "created_at": "2026-01-01T00:00:00Z",
         "updated_at": "2026-09-05T00:00:00Z",
@@ -78,8 +79,8 @@ def repository(name, identity):
     }
 
 
-def pull(number, identity, author, created, merged):
-    return {
+def pull(number, identity, author, created, merged, *, repository_name="example/alpha", repository_id=101):
+    value = {
         "id": identity,
         "node_id": f"PR{identity}",
         "number": number,
@@ -93,6 +94,36 @@ def pull(number, identity, author, created, merged):
         "closed_at": merged,
         "updated_at": "2026-09-05T00:00:00Z",
         "html_url": f"https://github.example/pull/{identity}",
+        "locked": False,
+        "active_lock_reason": None,
+        "author_association": "CONTRIBUTOR",
+        "merge_commit_sha": f"{identity:040x}" if merged else None,
+        "base": {
+            "label": "example:main",
+            "ref": "main",
+            "sha": "a" * 40,
+            "repo": {"id": repository_id, "node_id": f"REPO{repository_id}", "full_name": repository_name},
+        },
+        "head": {
+            "label": f"{author}:change-{number}",
+            "ref": f"change-{number}",
+            "sha": f"{identity:040x}",
+            "repo": {"id": repository_id, "node_id": f"REPO{repository_id}", "full_name": repository_name},
+        },
+        "milestone": None,
+        "auto_merge": None,
+        "merged": bool(merged),
+        "mergeable": False if merged else None,
+        "rebaseable": None,
+        "mergeable_state": "unknown",
+        "maintainer_can_modify": True,
+        "merged_by": user("carol", 203) if merged else None,
+        "comments": 0,
+        "review_comments": 0,
+        "commits": 0,
+        "additions": 0,
+        "deletions": 0,
+        "changed_files": 0,
         "labels": {
             1001: [{"id": 501, "name": "bug"}, {"id": 502, "name": "docs"}],
             1002: [{"id": 501, "name": "bug"}],
@@ -104,6 +135,19 @@ def pull(number, identity, author, created, merged):
             2001: [user("carol", 203)],
         }.get(identity, []),
     }
+    for field in (
+        "url",
+        "diff_url",
+        "patch_url",
+        "issue_url",
+        "commits_url",
+        "review_comments_url",
+        "review_comment_url",
+        "comments_url",
+        "statuses_url",
+    ):
+        value[field] = f"https://github.example/{repository_name}/pull/{number}/{field}"
+    return value
 
 
 REPOSITORIES = [repository("alpha", 101), repository("beta", 102), repository("empty", 103)]
@@ -113,7 +157,17 @@ PULLS = {
         pull(2, 1002, "bob", "2026-09-02T00:00:00Z", "2026-09-02T12:00:00Z"),
         pull(3, 1003, "alice", "2026-09-04T00:00:00Z", None),
     ],
-    "beta": [pull(1, 2001, "alice", "2026-09-03T00:00:00Z", "2026-09-03T06:00:00Z")],
+    "beta": [
+        pull(
+            1,
+            2001,
+            "alice",
+            "2026-09-03T00:00:00Z",
+            "2026-09-03T06:00:00Z",
+            repository_name="example/beta",
+            repository_id=102,
+        )
+    ],
     "empty": [],
 }
 
@@ -214,6 +268,7 @@ def authored_pull(row, repo_name, repo_id):
         "merged": bool(row["merged_at"]),
         "url": row["html_url"],
         "author": {
+            "__typename": "User",
             "login": row["user"]["login"],
             "id": row["user"]["node_id"],
             "databaseId": row["user"]["id"],
@@ -242,6 +297,44 @@ AUTHORED_PULLS = {
     "carol": [],
     "empty-user": [],
 }
+
+EXTRA_REPOSITORIES = {}
+EXTRA_PULLS = {}
+
+
+def register_pull_details(row, author_id, repository_id):
+    """Serve both transports from the same independently authored fixture PR."""
+    full_name = row["repository"]["nameWithOwner"]
+    repo = repository(full_name.split("/")[1], repository_id)
+    repo.update(
+        full_name=full_name,
+        node_id=row["repository"]["id"],
+        language=(row["repository"].get("primaryLanguage") or {}).get("name"),
+    )
+    EXTRA_REPOSITORIES[full_name] = repo
+    value = pull(
+        row["number"],
+        int(row["id"][2:]),
+        row["author"]["login"],
+        row["createdAt"],
+        row["mergedAt"],
+        repository_name=full_name,
+        repository_id=repository_id,
+    )
+    value.update(
+        node_id=row["id"],
+        title=row["title"],
+        body=row["body"],
+        updated_at=row["updatedAt"],
+        html_url=row["url"],
+        user=user(row["author"]["login"], author_id),
+    )
+    for side in ("base", "head"):
+        value[side]["repo"] = {"id": repository_id, "node_id": repo["node_id"], "full_name": full_name}
+    EXTRA_PULLS[full_name, row["number"]] = value
+
+
+register_pull_details(AUTHORED_PULLS["alice"][-1], 201, 301)
 
 # The associated-PR endpoint is not itself proof of authorship. A valid first
 # page followed by an unverifiable author must fail, never silently drop a row.
@@ -289,6 +382,32 @@ def respond(request):
             row["owner"] = user("public-user", 100)
             return pages([row])
         pieces = path.strip("/").split("/")
+        full_name = "/".join(pieces[1:3])
+        if len(pieces) == 4 and pieces[0] == "repos" and pieces[3] == "topics":
+            repository = EXTRA_REPOSITORIES.get(full_name) or next(
+                (row for row in REPOSITORIES if row["full_name"] == full_name), None
+            )
+            if repository is None and full_name == "public-user/alpha":
+                repository = REPOSITORIES[0]
+            if repository is not None:
+                topics = repository["topics"]
+                page = int(request.url.params.get("page", "1"))
+                if page < len(topics):
+                    headers["Link"] = f'<{request.url.copy_set_param("page", str(page + 1))}>; rel="next"'
+                return result({"names": topics[page - 1 : page]})
+        if pieces[0] == "repos" and full_name in EXTRA_REPOSITORIES:
+            if len(pieces) == 3:
+                return result(copy.deepcopy(EXTRA_REPOSITORIES[full_name]))
+            if len(pieces) == 4 and pieces[3] == "pulls":
+                return pages(
+                    [copy.deepcopy(row) for (repo, _), row in EXTRA_PULLS.items() if repo == full_name]
+                )
+            if len(pieces) >= 5 and pieces[3] == "pulls":
+                row = EXTRA_PULLS.get((full_name, int(pieces[4])))
+                if len(pieces) == 5:
+                    return result(copy.deepcopy(row)) if row else result({"message": "Not Found"}, 404)
+                if len(pieces) == 6 and pieces[5] == "reviews":
+                    return pages([])
         if len(pieces) >= 2 and pieces[0] == "orgs" and pieces[1] in ORGANIZATIONS:
             org = pieces[1]
             if len(pieces) == 2:

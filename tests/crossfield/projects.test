@@ -1,0 +1,363 @@
+# Independent Projects graph: two organization projects, one personal project,
+# four visible item identities, fourteen field values and paginated members.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT project_count,closed_project_count FROM engineering.semantic.github(organization=>'example');
+----
+2	1
+
+query I
+SELECT project_count FROM engineering.semantic.github(user=>'alice');
+----
+1
+
+query II
+SELECT project_count,project_item_count FROM engineering.semantic.github(project_owners=>[{'login':'example'},{'login':'alice'}]);
+----
+3	5
+
+query I
+SELECT project_count FROM engineering.semantic.github(project_owners=>[]);
+----
+0
+
+query II
+SELECT project_field_count,project_item_count FROM engineering.semantic.github(owner=>'example');
+----
+11	4
+
+query IIII
+SELECT project_item_count,project_issue_item_count,project_pull_request_item_count,project_draft_item_count FROM engineering.semantic.github(organization=>'example',project_number=>1);
+----
+4	1	1	1
+
+# The redacted item remains a fact with NULL content; archived items remain too.
+statement ok
+CREATE TEMP TABLE project_item_content_types AS SELECT * FROM engineering.detail.project_items(organization=>'example',project_number=>1);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TT
+SELECT item_type,content."__typename" FROM project_item_content_types ORDER BY project_item_node_id;
+----
+ISSUE	Issue
+PULL_REQUEST	PullRequest
+DRAFT_ISSUE	DraftIssue
+REDACTED	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE project_item_node_content AS SELECT * FROM engineering.detail.project_items(project_item_node_id=>'PVTI1');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query T
+SELECT content.Issue.title FROM project_item_node_content;
+----
+One issue in two projects
+
+statement ok
+SET crossfield_mode='strict';
+
+query TT
+SELECT project_node_id,project_owner_login FROM engineering.detail.project_items(project_item_node_id=>'PVTI5');
+----
+PVT3	alice
+
+query II
+SELECT project_field_value_count,numeric_project_field_value_count FROM engineering.semantic.github(organization=>'example');
+----
+14	2
+
+query I
+SELECT project_field_value_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_field_id=>10);
+----
+2
+
+query T
+SELECT date_value FROM engineering.detail.project_field_values(project_item_node_id=>'PVTI1',project_field_node_id=>'PVTF1-12');
+----
+2026-11-01
+
+query R
+SELECT number_value FROM engineering.detail.project_field_values(project_item_node_id=>'PVTI1',project_field_id=>11);
+----
+3.5
+
+statement ok
+CREATE TEMP TABLE project_single_select_value AS SELECT * FROM engineering.detail.project_field_values(project_item_node_id=>'PVTI1',project_field_id=>10);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query T
+SELECT value.ProjectV2ItemFieldSingleSelectValue.name FROM project_single_select_value;
+----
+Done
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE project_single_select_options AS SELECT * FROM engineering.detail.project_fields(owner=>'example',project_number=>1,project_field_id=>10);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query T
+SELECT options[1].name.raw FROM project_single_select_options;
+----
+Done
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE project_iteration_configuration AS SELECT * FROM engineering.detail.project_fields(owner=>'example',project_number=>1,project_field_id=>18);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TI
+SELECT configuration.iterations[1].start_date,configuration.iterations[1].duration FROM project_iteration_configuration;
+----
+2026-10-01	14
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIII
+SELECT project_field_label_count,project_field_user_count,project_field_pull_request_count,project_field_reviewer_count FROM engineering.semantic.github(organization=>'example');
+----
+3	2	2	2
+
+statement ok
+CREATE TEMP TABLE project_typed_reviewers AS SELECT * FROM engineering.detail.project_field_reviewers(project_item_node_id=>'PVTI1');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TT
+SELECT reviewer_type,reviewer.Team.slug FROM project_typed_reviewers ORDER BY member_node_id;
+----
+Team	core
+User	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+# All measures retain their own grain across parent and member joins.
+query TIIII
+SELECT project_title,project_count,project_item_count,project_field_value_count,project_field_label_count FROM engineering.semantic.github(owner=>'example') GROUP BY project_title ORDER BY project_title;
+----
+example project 1	1	4	14	3
+example project 2	1	0	0	0
+
+query I
+SELECT project_field_value_count FROM engineering.semantic.github(project_item_node_id=>'PVTI4');
+----
+0
+
+query I
+SELECT project_item_count FROM engineering.semantic.github(organization=>'empty-org');
+----
+0
+
+statement error
+SELECT project_field_count FROM engineering.semantic.github(owner=>'example',project_field_id=>10);
+----
+project_number
+
+statement error
+SELECT project_count FROM engineering.semantic.github(organization=>'private-owner');
+----
+403
+
+statement error
+SELECT project_field_value_count FROM engineering.semantic.github(project_item_node_id=>'PVTI-LATE');
+----
+503
+
+# REST discovery retains the same four canonical items, including archived and redacted rows.
+query IIII
+SELECT project_item_count,project_issue_item_count,project_pull_request_item_count,project_draft_item_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_items_rest=>true);
+----
+4	1	1	1
+
+query I
+SELECT project_item_count FROM engineering.semantic.github(project_owners=>[{'login':'example'},{'login':'alice'}],project_items_rest=>true);
+----
+5
+
+query I
+SELECT project_item_count FROM engineering.semantic.github(user=>'alice',project_items_rest=>true);
+----
+1
+
+query TTT
+SELECT project_item_node_id,project_node_id,project_owner_login FROM engineering.detail.project_items(organization=>'example',project_number=>1,project_item_id=>1001);
+----
+PVTI1	PVT1	example
+
+query TTT
+SELECT project_item_node_id,project_node_id,project_owner_login FROM engineering.detail.project_items(user=>'alice',project_number=>1,project_item_id=>1005);
+----
+PVTI5	PVT3	alice
+
+statement ok
+CREATE TEMP TABLE project_rest_item_content AS SELECT * FROM engineering.detail.project_items(organization=>'example',project_number=>1,project_item_id=>1001);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query T
+SELECT content.Issue.title FROM project_rest_item_content;
+----
+One issue in two projects
+
+statement ok
+SET crossfield_mode='strict';
+
+# View 1 contains the issue and archived PR; view 2 contains the draft and redacted item.
+query III
+SELECT project_item_count,project_issue_item_count,project_pull_request_item_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_view_number=>1);
+----
+2	1	1
+
+query TT
+SELECT project_item_node_id,item_type FROM engineering.detail.project_items(organization=>'example',project_number=>1,project_view_number=>2) ORDER BY project_item_node_id;
+----
+PVTI3	DRAFT_ISSUE
+PVTI4	REDACTED
+
+query I
+SELECT project_item_count FROM engineering.semantic.github(project_owners=>[{'login':'example'},{'login':'alice'}],project_number=>1,project_view_number=>1);
+----
+3
+
+query I
+SELECT project_item_count FROM engineering.semantic.github(organization=>'example',project_number=>2,project_view_number=>1);
+----
+0
+
+query II
+SELECT project_item_count,project_pull_request_item_count FROM engineering.semantic.github(organization=>'example',project_item_query=>'is:pr');
+----
+1	1
+
+query II
+SELECT project_item_count,project_issue_item_count FROM engineering.semantic.github(user=>'alice',project_item_query=>'is:issue');
+----
+1	1
+
+# Field values and collection members retain their independent pagination within the view population.
+query II
+SELECT project_field_value_count,numeric_project_field_value_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_view_number=>1);
+----
+13	2
+
+query IIII
+SELECT project_field_label_count,project_field_user_count,project_field_pull_request_count,project_field_reviewer_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_view_number=>1);
+----
+3	2	2	2
+
+query I
+SELECT project_field_value_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_item_id=>1001);
+----
+10
+
+query R
+SELECT number_value FROM engineering.detail.project_field_values(organization=>'example',project_number=>1,project_item_id=>1001,project_field_id=>11);
+----
+3.5
+
+query TR
+SELECT project_item_node_id,number_value FROM engineering.detail.project_field_values(organization=>'example',project_number=>1,project_view_number=>1,project_field_id=>11) ORDER BY project_item_node_id;
+----
+PVTI1	3.5
+PVTI2	8.0
+
+query I
+SELECT project_field_value_count FROM engineering.semantic.github(organization=>'example',project_item_query=>'is:pr');
+----
+3
+
+# REST 404 is an unavailable record/view, not a successful empty population.
+statement error
+SELECT project_item_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_item_id=>999);
+----
+404
+
+statement error
+SELECT project_item_count FROM engineering.semantic.github(user=>'alice',project_number=>1,project_item_id=>1001);
+----
+404
+
+statement error
+SELECT project_item_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_view_number=>999);
+----
+404
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT project_item_count FROM engineering.semantic.github(organization=>'example',project_item_id=>1001);
+----
+project_number
+
+statement error
+SELECT project_item_count FROM engineering.semantic.github(organization=>'example',project_number=>1,project_view_number=>1,project_item_query=>'is:issue');
+----
+arguments do not apply
+
+statement error
+SELECT project_item_count FROM engineering.semantic.github(organization=>'example',project_items_rest=>true,project_item_query=>'is:issue');
+----
+arguments do not apply
+
+query I
+SELECT project_item_count FROM engineering.semantic.github(project_owners=>[],project_items_rest=>true);
+----
+0
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0

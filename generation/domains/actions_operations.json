@@ -1,0 +1,3499 @@
+{
+  "entities": [
+    {
+      "name": "actions_caches_source",
+      "description": "actions/get-actions-cache-list pinned operational read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "cache_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Optional full Git reference selecting Actions cache entries.",
+          "example": "refs/heads/main",
+          "default": null
+        },
+        {
+          "name": "cache_key",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Optional cache key or key prefix, using the API key filter.",
+          "example": "linux-",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "cache_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "git_ref",
+          "path": [
+            "ref"
+          ]
+        },
+        {
+          "name": "cache_key",
+          "path": [
+            "key"
+          ]
+        },
+        {
+          "name": "cache_version",
+          "path": [
+            "version"
+          ]
+        },
+        {
+          "name": "last_accessed_at",
+          "path": [
+            "last_accessed_at"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "size_in_bytes",
+          "path": [
+            "size_in_bytes"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "cache_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-actions-cache-list",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "ref": {
+            "argument": "cache_ref"
+          },
+          "key": {
+            "argument": "cache_key"
+          }
+        },
+        "result_path": [
+          "actions_caches"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "cache_id"
+        ]
+      }
+    },
+    {
+      "name": "actions_cache_usage_source",
+      "description": "actions/get-actions-cache-usage pinned operational read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "reported_repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "active_caches_size_in_bytes",
+          "path": [
+            "active_caches_size_in_bytes"
+          ]
+        },
+        {
+          "name": "active_caches_count",
+          "path": [
+            "active_caches_count"
+          ]
+        }
+      ],
+      "grain": [
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-actions-cache-usage",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_repository",
+            "argument": "repository",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_organization_cache_usage_source",
+      "description": "actions/get-actions-cache-usage-by-repo-for-org pinned operational read source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "reported_repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "active_caches_size_in_bytes",
+          "path": [
+            "active_caches_size_in_bytes"
+          ]
+        },
+        {
+          "name": "active_caches_count",
+          "path": [
+            "active_caches_count"
+          ]
+        }
+      ],
+      "grain": [
+        "reported_repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-actions-cache-usage-by-repo-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "repository_cache_usages"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "actions_organization_cache_total_source",
+      "description": "actions/get-actions-cache-usage-for-org pinned operational read source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization",
+          "source_argument": "organization"
+        },
+        {
+          "name": "total_active_caches_count",
+          "path": [
+            "total_active_caches_count"
+          ]
+        },
+        {
+          "name": "total_active_caches_size_in_bytes",
+          "path": [
+            "total_active_caches_size_in_bytes"
+          ]
+        }
+      ],
+      "grain": [
+        "organization"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-actions-cache-usage-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "actions_concurrency_groups_source",
+      "description": "actions/list-concurrency-groups-for-repository pinned operational read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "concurrency_group",
+          "path": [
+            "group_name"
+          ]
+        },
+        {
+          "name": "group_url",
+          "path": [
+            "group_url"
+          ]
+        },
+        {
+          "name": "last_acquired_at",
+          "path": [
+            "last_acquired_at"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "concurrency_group"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-concurrency-groups-for-repository",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "concurrency_groups"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "actions_concurrency_group_lookup_source",
+      "description": "actions/get-concurrency-group-for-repository pinned operational read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "concurrency_group",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Exact concurrency group name within one repository; names are mutable operational identifiers.",
+          "example": "deploy-main"
+        },
+        {
+          "name": "ahead_of_run_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "minimum": 1,
+          "description": "Queue prefix through this workflow run, including the selected run; requires repository and concurrency_group. Mutually exclusive with ahead_of_job_id.",
+          "example": 1,
+          "default": null
+        },
+        {
+          "name": "ahead_of_job_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "minimum": 1,
+          "description": "Queue prefix through this workflow job, including the selected job; requires repository and concurrency_group. Mutually exclusive with ahead_of_run_id.",
+          "example": 1,
+          "default": null
+        },
+        {
+          "name": "last_acquired_at",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "concurrency_group",
+          "path": [
+            "group_name"
+          ]
+        },
+        {
+          "name": "group_url",
+          "path": [
+            "group_url"
+          ]
+        },
+        {
+          "name": "reported_member_count",
+          "path": [
+            "total_count"
+          ]
+        },
+        {
+          "name": "group_members",
+          "path": [
+            "group_members"
+          ]
+        },
+        {
+          "name": "last_acquired_at",
+          "source_argument": "last_acquired_at"
+        },
+        {
+          "name": "ahead_of_run_id",
+          "source_argument": "ahead_of_run_id"
+        },
+        {
+          "name": "ahead_of_job_id",
+          "source_argument": "ahead_of_job_id"
+        }
+      ],
+      "grain": [
+        "repository",
+        "concurrency_group"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-concurrency-group-for-repository",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "concurrency_group_name": {
+            "argument": "concurrency_group"
+          }
+        },
+        "query_bindings": {
+          "ahead_of_run": {
+            "argument": "ahead_of_run_id"
+          },
+          "ahead_of_job": {
+            "argument": "ahead_of_job_id"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "concurrency_group",
+            "argument": "concurrency_group",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_run_concurrency_groups_source",
+      "description": "actions/list-concurrency-groups-for-workflow-run pinned operational read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Workflow run identity; a rerun retains this identity.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "run_id",
+          "source_argument": "run_id"
+        },
+        {
+          "name": "concurrency_group",
+          "path": [
+            "group_name"
+          ]
+        },
+        {
+          "name": "group_url",
+          "path": [
+            "group_url"
+          ]
+        },
+        {
+          "name": "run_group_members",
+          "path": [
+            "group_members"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "run_id",
+        "concurrency_group"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-concurrency-groups-for-workflow-run",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "concurrency_groups"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "actions_pending_deployments_source",
+      "description": "actions/get-pending-deployments-for-run pinned operational read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Workflow run identity; a rerun retains this identity.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "run_id",
+          "source_argument": "run_id"
+        },
+        {
+          "name": "environment_id",
+          "path": [
+            "environment",
+            "id"
+          ]
+        },
+        {
+          "name": "environment_node_id",
+          "path": [
+            "environment",
+            "node_id"
+          ]
+        },
+        {
+          "name": "environment_name",
+          "path": [
+            "environment",
+            "name"
+          ]
+        },
+        {
+          "name": "environment_url",
+          "path": [
+            "environment",
+            "url"
+          ]
+        },
+        {
+          "name": "environment_html_url",
+          "path": [
+            "environment",
+            "html_url"
+          ]
+        },
+        {
+          "name": "wait_timer",
+          "path": [
+            "wait_timer"
+          ]
+        },
+        {
+          "name": "wait_timer_started_at",
+          "path": [
+            "wait_timer_started_at"
+          ]
+        },
+        {
+          "name": "current_user_can_approve",
+          "path": [
+            "current_user_can_approve"
+          ]
+        },
+        {
+          "name": "reviewers",
+          "path": [
+            "reviewers"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "type": true,
+            "reviewer": {
+              "variant_1": true,
+              "variant_2": true
+            }
+          }
+        }
+      ],
+      "grain": [
+        "repository",
+        "run_id",
+        "environment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-pending-deployments-for-run",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "environment_id"
+        ]
+      }
+    },
+    {
+      "name": "actions_deployment_reviews_source",
+      "description": "actions/get-reviews-for-run pinned operational read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Workflow run identity; a rerun retains this identity.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "run_id",
+          "source_argument": "run_id"
+        },
+        {
+          "name": "review_ordinal",
+          "source_ordinal": true
+        },
+        {
+          "name": "environments",
+          "path": [
+            "environments"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "reviewer",
+          "path": [
+            "user"
+          ]
+        },
+        {
+          "name": "reviewer_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "reviewer_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "comment",
+          "path": [
+            "comment"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "run_id",
+        "review_ordinal"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-reviews-for-run",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "actions_caches",
+      "description": "Current Actions cache inventory, distinct from artifacts. Cache keys and versions are attributes rather than identities; missing cache IDs fail explicit qualification. Cache inventories can change during pagination and do not represent historic storage usage.",
+      "grain": [
+        "repository_id",
+        "cache_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "cache_id",
+          "git_ref",
+          "cache_key",
+          "cache_version",
+          "last_accessed_at",
+          "created_at",
+          "size_in_bytes",
+          "cache_created_day"
+        ],
+        "dimensions": [
+          "repository",
+          "cache_id",
+          "git_ref",
+          "cache_key",
+          "cache_version",
+          "created_at",
+          "last_accessed_at",
+          "cache_created_day"
+        ],
+        "metrics": [
+          {
+            "name": "actions_cache_count",
+            "kind": "count",
+            "comment": "Enumerated selected cache records."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "cache_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC date of the returned created_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "actions_caches_repository",
+          "cache_id": "actions_caches_cache_id",
+          "git_ref": "actions_caches_git_ref",
+          "cache_key": "actions_caches_cache_key",
+          "cache_version": "actions_caches_cache_version",
+          "created_at": "actions_caches_created_at",
+          "last_accessed_at": "actions_caches_last_accessed_at",
+          "cache_created_day": "actions_caches_cache_created_day"
+        },
+        "crossfield": {
+          "metrics": {
+            "actions_cache_bytes": {
+              "expression": "SUM(actions_caches.size_in_bytes)"
+            }
+          },
+          "metric_semantics": {
+            "actions_cache_bytes": {
+              "dataset": "actions_caches",
+              "comment": "Sum of returned cache entry sizes; missing sizes stay unknown within observed rows.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "cache_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Optional full Git reference selecting Actions cache entries.",
+              "example": "refs/heads/main",
+              "default": null
+            },
+            {
+              "name": "cache_key",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Optional cache key or key prefix, using the API key filter.",
+              "example": "linux-",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "cache_id",
+              "source_stage": "records",
+              "source_column": "cache_id"
+            },
+            {
+              "name": "git_ref",
+              "source_stage": "records",
+              "source_column": "git_ref"
+            },
+            {
+              "name": "cache_key",
+              "source_stage": "records",
+              "source_column": "cache_key"
+            },
+            {
+              "name": "cache_version",
+              "source_stage": "records",
+              "source_column": "cache_version"
+            },
+            {
+              "name": "last_accessed_at",
+              "source_stage": "records",
+              "source_column": "last_accessed_at"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "size_in_bytes",
+              "source_stage": "records",
+              "source_column": "size_in_bytes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "actions_caches_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "cache_ref": {
+                    "parameter": "cache_ref"
+                  },
+                  "cache_key": {
+                    "parameter": "cache_key"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible rows in the selected repository or repository cohort, preserving all Link pages."
+        }
+      ]
+    },
+    {
+      "name": "actions_cache_usage",
+      "description": "One current repository cache-usage observation. Organization listing and repository lookup share repository identity. Counters refresh about every five minutes and may differ from a separately enumerated live cache inventory.",
+      "grain": [
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "reported_repository",
+          "active_caches_size_in_bytes",
+          "active_caches_count"
+        ],
+        "dimensions": [
+          "repository"
+        ],
+        "metrics": [
+          {
+            "name": "actions_cache_usage_observation_count",
+            "kind": "count",
+            "comment": "Repository usage observations, including reported zero usage."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "actions_cache_usage_repository"
+        },
+        "crossfield": {
+          "metrics": {
+            "reported_active_cache_count": {
+              "expression": "SUM(actions_cache_usage.active_caches_count)"
+            },
+            "reported_active_cache_bytes": {
+              "expression": "SUM(actions_cache_usage.active_caches_size_in_bytes)"
+            }
+          },
+          "metric_semantics": {
+            "reported_active_cache_count": {
+              "dataset": "actions_cache_usage",
+              "comment": "Sum of API-reported active cache counters.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "reported_active_cache_bytes": {
+              "dataset": "actions_cache_usage",
+              "comment": "Sum of API-reported active cache bytes; not billing storage or retention policy.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "reported_repository",
+              "source_stage": "usages",
+              "source_column": "reported_repository"
+            },
+            {
+              "name": "active_caches_size_in_bytes",
+              "source_stage": "usages",
+              "source_column": "active_caches_size_in_bytes"
+            },
+            {
+              "name": "active_caches_count",
+              "source_stage": "usages",
+              "source_column": "active_caches_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "usages",
+                "entity": "actions_organization_cache_usage_source",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "usages",
+                    "column": "reported_repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "repositories"
+          },
+          "population": "Organization usage listing, with each returned repository hydrated to its canonical ID. Repositories absent from this API listing are not synthesized.",
+          "select": [
+            "organization"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "reported_repository",
+              "source_stage": "records",
+              "source_column": "reported_repository"
+            },
+            {
+              "name": "active_caches_size_in_bytes",
+              "source_stage": "records",
+              "source_column": "active_caches_size_in_bytes"
+            },
+            {
+              "name": "active_caches_count",
+              "source_stage": "records",
+              "source_column": "active_caches_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "actions_cache_usage_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible rows in the selected repository or repository cohort, preserving all Link pages."
+        }
+      ]
+    },
+    {
+      "name": "organization_actions_cache_usage",
+      "description": "Organization-level cache usage observation refreshed approximately every five minutes. This summary is its own population and is not repeated once per repository.",
+      "grain": [
+        "organization_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "total_active_caches_count",
+          "total_active_caches_size_in_bytes"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login"
+        ],
+        "metrics": [
+          {
+            "name": "organization_cache_usage_observation_count",
+            "kind": "count",
+            "comment": "Selected organization cache usage observations."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "organization_id": "organization_actions_cache_usage_organization_id",
+          "organization_login": "organization_actions_cache_usage_organization_login"
+        },
+        "crossfield": {
+          "metrics": {
+            "organization_reported_active_cache_count": {
+              "expression": "SUM(organization_actions_cache_usage.total_active_caches_count)"
+            },
+            "organization_reported_active_cache_bytes": {
+              "expression": "SUM(organization_actions_cache_usage.total_active_caches_size_in_bytes)"
+            }
+          },
+          "metric_semantics": {
+            "organization_reported_active_cache_count": {
+              "dataset": "organization_actions_cache_usage",
+              "comment": "Organization-reported active cache count, independent from repository inventory.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "organization_reported_active_cache_bytes": {
+              "dataset": "organization_actions_cache_usage",
+              "comment": "Organization-reported active cache bytes.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "organizations",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "organizations",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "total_active_caches_count",
+              "source_stage": "records",
+              "source_column": "total_active_caches_count"
+            },
+            {
+              "name": "total_active_caches_size_in_bytes",
+              "source_stage": "records",
+              "source_column": "total_active_caches_size_in_bytes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_organization_cache_total_source",
+                "arguments": {
+                  "organization": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One organization summary observation.",
+          "select": [
+            "organization"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "actions_concurrency_groups",
+      "description": "Current repository concurrency-group observations identified by repository and group name. Typed group_members describe repository-wide leases or the explicitly selected queue prefix. Group URLs are evidence, not followed directly. last_acquired_at is supplied only by list discovery and remains NULL on direct lookup. Inactive groups are absent from repository inventory and return 404 by name; configured run/group memberships use their own association grain.",
+      "grain": [
+        "repository_id",
+        "concurrency_group"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "concurrency_group",
+          "group_url",
+          "reported_member_count",
+          "group_members",
+          "last_acquired_at",
+          "ahead_of_run_id",
+          "ahead_of_job_id"
+        ],
+        "dimensions": [
+          "repository",
+          "concurrency_group",
+          "last_acquired_at",
+          "ahead_of_run_id",
+          "ahead_of_job_id"
+        ],
+        "metrics": [
+          {
+            "name": "actions_concurrency_group_count",
+            "kind": "count",
+            "comment": "Selected active repository concurrency groups."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "actions_concurrency_groups_repository",
+          "concurrency_group": "actions_concurrency_groups_concurrency_group",
+          "last_acquired_at": "actions_concurrency_groups_last_acquired_at",
+          "ahead_of_run_id": "actions_concurrency_groups_ahead_of_run_id",
+          "ahead_of_job_id": "actions_concurrency_groups_ahead_of_job_id"
+        },
+        "crossfield": {
+          "metrics": {
+            "actions_concurrency_member_count": {
+              "expression": "SUM(length(actions_concurrency_groups.group_members))"
+            },
+            "reported_concurrency_member_count": {
+              "expression": "SUM(actions_concurrency_groups.reported_member_count)"
+            }
+          },
+          "metric_semantics": {
+            "actions_concurrency_member_count": {
+              "dataset": "actions_concurrency_groups",
+              "comment": "Returned queue members, counting leases rather than distinct runs or jobs.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "reported_concurrency_member_count": {
+              "dataset": "actions_concurrency_groups",
+              "comment": "API-reported queue member counters for the selected observations; not inferred from nested rows.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "ahead_of_runs",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "concurrency_group",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Exact concurrency group name within one repository; names are mutable operational identifiers.",
+              "example": "deploy-main"
+            },
+            {
+              "name": "ahead_of_run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Queue prefix through this workflow run, including the selected run; requires repository and concurrency_group. Mutually exclusive with ahead_of_job_id.",
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "concurrency_group",
+              "source_stage": "records",
+              "source_column": "concurrency_group"
+            },
+            {
+              "name": "group_url",
+              "source_stage": "records",
+              "source_column": "group_url"
+            },
+            {
+              "name": "reported_member_count",
+              "source_stage": "records",
+              "source_column": "reported_member_count"
+            },
+            {
+              "name": "group_members",
+              "source_stage": "records",
+              "source_column": "group_members"
+            },
+            {
+              "name": "last_acquired_at",
+              "source_stage": "records",
+              "source_column": "last_acquired_at"
+            },
+            {
+              "name": "ahead_of_run_id",
+              "source_stage": "records",
+              "source_column": "ahead_of_run_id"
+            },
+            {
+              "name": "ahead_of_job_id",
+              "source_stage": "records",
+              "source_column": "ahead_of_job_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_concurrency_group_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "concurrency_group": {
+                    "parameter": "concurrency_group"
+                  },
+                  "ahead_of_run_id": {
+                    "parameter": "ahead_of_run_id"
+                  },
+                  "ahead_of_job_id": {
+                    "literal": null
+                  },
+                  "last_acquired_at": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Current repository-wide queue, or an explicitly requested prefix through the selected run/job. Missing or inactive groups fail with the API status.",
+          "select": [
+            "ahead_of_run_id"
+          ]
+        },
+        {
+          "name": "ahead_of_jobs",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "concurrency_group",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Exact concurrency group name within one repository; names are mutable operational identifiers.",
+              "example": "deploy-main"
+            },
+            {
+              "name": "ahead_of_job_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Queue prefix through this workflow job, including the selected job; requires repository and concurrency_group. Mutually exclusive with ahead_of_run_id.",
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "concurrency_group",
+              "source_stage": "records",
+              "source_column": "concurrency_group"
+            },
+            {
+              "name": "group_url",
+              "source_stage": "records",
+              "source_column": "group_url"
+            },
+            {
+              "name": "reported_member_count",
+              "source_stage": "records",
+              "source_column": "reported_member_count"
+            },
+            {
+              "name": "group_members",
+              "source_stage": "records",
+              "source_column": "group_members"
+            },
+            {
+              "name": "last_acquired_at",
+              "source_stage": "records",
+              "source_column": "last_acquired_at"
+            },
+            {
+              "name": "ahead_of_run_id",
+              "source_stage": "records",
+              "source_column": "ahead_of_run_id"
+            },
+            {
+              "name": "ahead_of_job_id",
+              "source_stage": "records",
+              "source_column": "ahead_of_job_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_concurrency_group_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "concurrency_group": {
+                    "parameter": "concurrency_group"
+                  },
+                  "ahead_of_run_id": {
+                    "literal": null
+                  },
+                  "ahead_of_job_id": {
+                    "parameter": "ahead_of_job_id"
+                  },
+                  "last_acquired_at": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Current repository-wide queue, or an explicitly requested prefix through the selected run/job. Missing or inactive groups fail with the API status.",
+          "select": [
+            "ahead_of_job_id"
+          ]
+        },
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "concurrency_group",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Exact concurrency group name within one repository; names are mutable operational identifiers.",
+              "example": "deploy-main"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "concurrency_group",
+              "source_stage": "records",
+              "source_column": "concurrency_group"
+            },
+            {
+              "name": "group_url",
+              "source_stage": "records",
+              "source_column": "group_url"
+            },
+            {
+              "name": "reported_member_count",
+              "source_stage": "records",
+              "source_column": "reported_member_count"
+            },
+            {
+              "name": "group_members",
+              "source_stage": "records",
+              "source_column": "group_members"
+            },
+            {
+              "name": "last_acquired_at",
+              "source_stage": "records",
+              "source_column": "last_acquired_at"
+            },
+            {
+              "name": "ahead_of_run_id",
+              "source_stage": "records",
+              "source_column": "ahead_of_run_id"
+            },
+            {
+              "name": "ahead_of_job_id",
+              "source_stage": "records",
+              "source_column": "ahead_of_job_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_concurrency_group_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "concurrency_group": {
+                    "parameter": "concurrency_group"
+                  },
+                  "ahead_of_run_id": {
+                    "literal": null
+                  },
+                  "ahead_of_job_id": {
+                    "literal": null
+                  },
+                  "last_acquired_at": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Current repository-wide queue, or an explicitly requested prefix through the selected run/job. Missing or inactive groups fail with the API status.",
+          "select": [
+            "concurrency_group"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "concurrency_group",
+              "source_stage": "records",
+              "source_column": "concurrency_group"
+            },
+            {
+              "name": "group_url",
+              "source_stage": "records",
+              "source_column": "group_url"
+            },
+            {
+              "name": "reported_member_count",
+              "source_stage": "records",
+              "source_column": "reported_member_count"
+            },
+            {
+              "name": "group_members",
+              "source_stage": "records",
+              "source_column": "group_members"
+            },
+            {
+              "name": "last_acquired_at",
+              "source_stage": "records",
+              "source_column": "last_acquired_at"
+            },
+            {
+              "name": "ahead_of_run_id",
+              "source_stage": "records",
+              "source_column": "ahead_of_run_id"
+            },
+            {
+              "name": "ahead_of_job_id",
+              "source_stage": "records",
+              "source_column": "ahead_of_job_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "groups",
+                "entity": "actions_concurrency_groups_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_concurrency_group_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "groups",
+                    "column": "repository"
+                  },
+                  "concurrency_group": {
+                    "stage": "groups",
+                    "column": "concurrency_group"
+                  },
+                  "ahead_of_run_id": {
+                    "literal": null
+                  },
+                  "ahead_of_job_id": {
+                    "literal": null
+                  },
+                  "last_acquired_at": {
+                    "stage": "groups",
+                    "column": "last_acquired_at"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All active repository groups, with queue details hydrated by name. If a group disappears during hydration the observation fails rather than silently dropping it."
+        }
+      ]
+    },
+    {
+      "name": "workflow_run_concurrency_groups",
+      "description": "Configured workflow-run/group memberships, including groups with no current leases. run_group_members contain only this run's members, with their repository-wide queue positions, and must not be confused with repository-wide group_members. Parent navigation is retained without analytical joins that would introduce competing repository paths.",
+      "grain": [
+        "repository_id",
+        "run_id",
+        "concurrency_group"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "concurrency_group",
+          "group_url",
+          "run_group_members"
+        ],
+        "dimensions": [
+          "repository",
+          "run_id",
+          "concurrency_group"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_run_concurrency_group_count",
+            "kind": "count",
+            "comment": "Run/group configuration memberships, including empty groups."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "workflow_run_concurrency_groups_repository",
+          "run_id": "workflow_run_concurrency_groups_run_id",
+          "concurrency_group": "workflow_run_concurrency_groups_concurrency_group"
+        },
+        "crossfield": {
+          "metrics": {
+            "workflow_run_concurrency_member_count": {
+              "expression": "SUM(length(workflow_run_concurrency_groups.run_group_members))"
+            }
+          },
+          "metric_semantics": {
+            "workflow_run_concurrency_member_count": {
+              "dataset": "workflow_run_concurrency_groups",
+              "comment": "Current run-scoped leases returned for configured group memberships.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "runs",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "concurrency_group",
+              "source_stage": "records",
+              "source_column": "concurrency_group"
+            },
+            {
+              "name": "group_url",
+              "source_stage": "records",
+              "source_column": "group_url"
+            },
+            {
+              "name": "run_group_members",
+              "source_stage": "records",
+              "source_column": "run_group_members"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_concurrency_groups_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "concurrency_group",
+              "source_stage": "records",
+              "source_column": "concurrency_group"
+            },
+            {
+              "name": "group_url",
+              "source_stage": "records",
+              "source_column": "group_url"
+            },
+            {
+              "name": "run_group_members",
+              "source_stage": "records",
+              "source_column": "run_group_members"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_concurrency_groups_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "concurrency_group",
+              "source_stage": "records",
+              "source_column": "concurrency_group"
+            },
+            {
+              "name": "group_url",
+              "source_stage": "records",
+              "source_column": "group_url"
+            },
+            {
+              "name": "run_group_members",
+              "source_stage": "records",
+              "source_column": "run_group_members"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "runs",
+                "entity": "actions_repository_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_concurrency_groups_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        }
+      ]
+    },
+    {
+      "name": "workflow_pending_deployments",
+      "description": "Current workflow-run/environment pairs waiting for deployment protection. This is pending-gate state, not deployment history. No deployment ID is returned or invented. The current-user approval boolean is caller-specific. Missing environment IDs fail identity qualification; parent run/environment navigation is retained without analytical diamonds.",
+      "grain": [
+        "repository_id",
+        "run_id",
+        "environment_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "environment_id",
+          "environment_node_id",
+          "environment_name",
+          "environment_url",
+          "environment_html_url",
+          "wait_timer",
+          "wait_timer_started_at",
+          "current_user_can_approve",
+          "reviewers",
+          "wait_started_day"
+        ],
+        "dimensions": [
+          "repository",
+          "run_id",
+          "environment_id",
+          "environment_name",
+          "current_user_can_approve",
+          "wait_timer_started_at",
+          "wait_started_day"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_pending_deployment_count",
+            "kind": "count",
+            "comment": "Current run/environment deployment gates."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "wait_started_day",
+            "kind": "date",
+            "source": "wait_timer_started_at",
+            "timezone": "UTC",
+            "comment": "UTC date of the returned wait_timer_started_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "workflow_pending_deployments_repository",
+          "run_id": "workflow_pending_deployments_run_id",
+          "environment_id": "workflow_pending_deployments_environment_id",
+          "environment_name": "workflow_pending_deployments_environment_name",
+          "current_user_can_approve": "workflow_pending_deployments_current_user_can_approve",
+          "wait_timer_started_at": "workflow_pending_deployments_wait_timer_started_at",
+          "wait_started_day": "workflow_pending_deployments_wait_started_day"
+        },
+        "crossfield": {
+          "metrics": {
+            "pending_deployment_wait_minutes": {
+              "expression": "SUM(workflow_pending_deployments.wait_timer)"
+            },
+            "pending_deployment_reviewer_count": {
+              "expression": "SUM(length(workflow_pending_deployments.reviewers))"
+            },
+            "approvable_pending_deployment_count": {
+              "expression": "COUNT(*) FILTER (WHERE workflow_pending_deployments.current_user_can_approve = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "pending_deployment_wait_minutes": {
+              "dataset": "workflow_pending_deployments",
+              "comment": "Sum of configured wait durations in minutes; not elapsed waiting time.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "pending_deployment_reviewer_count": {
+              "dataset": "workflow_pending_deployments",
+              "comment": "Configured user/team reviewer options, not approvals or all-required reviewers.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "approvable_pending_deployment_count": {
+              "dataset": "workflow_pending_deployments",
+              "comment": "Pending gates the current caller is explicitly allowed to approve.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "runs",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "records",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "environment_node_id",
+              "source_stage": "records",
+              "source_column": "environment_node_id"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "records",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "environment_url",
+              "source_stage": "records",
+              "source_column": "environment_url"
+            },
+            {
+              "name": "environment_html_url",
+              "source_stage": "records",
+              "source_column": "environment_html_url"
+            },
+            {
+              "name": "wait_timer",
+              "source_stage": "records",
+              "source_column": "wait_timer"
+            },
+            {
+              "name": "wait_timer_started_at",
+              "source_stage": "records",
+              "source_column": "wait_timer_started_at"
+            },
+            {
+              "name": "current_user_can_approve",
+              "source_stage": "records",
+              "source_column": "current_user_can_approve"
+            },
+            {
+              "name": "reviewers",
+              "source_stage": "records",
+              "source_column": "reviewers"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_pending_deployments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "records",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "environment_node_id",
+              "source_stage": "records",
+              "source_column": "environment_node_id"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "records",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "environment_url",
+              "source_stage": "records",
+              "source_column": "environment_url"
+            },
+            {
+              "name": "environment_html_url",
+              "source_stage": "records",
+              "source_column": "environment_html_url"
+            },
+            {
+              "name": "wait_timer",
+              "source_stage": "records",
+              "source_column": "wait_timer"
+            },
+            {
+              "name": "wait_timer_started_at",
+              "source_stage": "records",
+              "source_column": "wait_timer_started_at"
+            },
+            {
+              "name": "current_user_can_approve",
+              "source_stage": "records",
+              "source_column": "current_user_can_approve"
+            },
+            {
+              "name": "reviewers",
+              "source_stage": "records",
+              "source_column": "reviewers"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_pending_deployments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "records",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "environment_node_id",
+              "source_stage": "records",
+              "source_column": "environment_node_id"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "records",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "environment_url",
+              "source_stage": "records",
+              "source_column": "environment_url"
+            },
+            {
+              "name": "environment_html_url",
+              "source_stage": "records",
+              "source_column": "environment_html_url"
+            },
+            {
+              "name": "wait_timer",
+              "source_stage": "records",
+              "source_column": "wait_timer"
+            },
+            {
+              "name": "wait_timer_started_at",
+              "source_stage": "records",
+              "source_column": "wait_timer_started_at"
+            },
+            {
+              "name": "current_user_can_approve",
+              "source_stage": "records",
+              "source_column": "current_user_can_approve"
+            },
+            {
+              "name": "reviewers",
+              "source_stage": "records",
+              "source_column": "reviewers"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "runs",
+                "entity": "actions_repository_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_pending_deployments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        }
+      ]
+    },
+    {
+      "name": "workflow_deployment_reviews",
+      "description": "Environment-deployment review log occurrences for selected runs. The API supplies no durable review ID or review timestamp; review_ordinal preserves distinct returned occurrences within this retrieval and is not a stable identifier across snapshots. Environment creation/update timestamps describe environments, not review events. Reviewer identity is separate from workflow initiating/triggering actors. Parent run navigation is retained without analytical diamonds.",
+      "grain": [
+        "repository_id",
+        "run_id",
+        "review_ordinal"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "review_ordinal",
+          "environments",
+          "state",
+          "reviewer",
+          "reviewer_id",
+          "reviewer_login",
+          "comment"
+        ],
+        "dimensions": [
+          "repository",
+          "run_id",
+          "review_ordinal",
+          "state",
+          "reviewer_id",
+          "reviewer_login"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_deployment_review_count",
+            "kind": "count",
+            "comment": "Returned review-log occurrences; repeated identical reviews remain distinct."
+          },
+          {
+            "name": "approved_deployment_review_count",
+            "kind": "count",
+            "comment": "Review occurrences reporting approved.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "approved"
+            }
+          },
+          {
+            "name": "rejected_deployment_review_count",
+            "kind": "count",
+            "comment": "Review occurrences reporting rejected.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "rejected"
+            }
+          },
+          {
+            "name": "pending_deployment_review_count",
+            "kind": "count",
+            "comment": "Review occurrences reporting pending with comments.",
+            "where": {
+              "field": "state",
+              "op": "eq",
+              "value": "pending"
+            }
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "workflow_deployment_reviews_repository",
+          "run_id": "workflow_deployment_reviews_run_id",
+          "review_ordinal": "workflow_deployment_reviews_review_ordinal",
+          "state": "workflow_deployment_reviews_state",
+          "reviewer_id": "workflow_deployment_reviews_reviewer_id",
+          "reviewer_login": "workflow_deployment_reviews_reviewer_login"
+        },
+        "crossfield": {
+          "metrics": {
+            "reviewed_environment_association_count": {
+              "expression": "SUM(length(workflow_deployment_reviews.environments))"
+            }
+          },
+          "metric_semantics": {
+            "reviewed_environment_association_count": {
+              "dataset": "workflow_deployment_reviews",
+              "comment": "Review/environment associations; one review can refer to multiple environments.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "runs",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "review_ordinal",
+              "source_stage": "records",
+              "source_column": "review_ordinal"
+            },
+            {
+              "name": "environments",
+              "source_stage": "records",
+              "source_column": "environments"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "reviewer",
+              "source_stage": "records",
+              "source_column": "reviewer"
+            },
+            {
+              "name": "reviewer_id",
+              "source_stage": "records",
+              "source_column": "reviewer_id"
+            },
+            {
+              "name": "reviewer_login",
+              "source_stage": "records",
+              "source_column": "reviewer_login"
+            },
+            {
+              "name": "comment",
+              "source_stage": "records",
+              "source_column": "comment"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_deployment_reviews_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "review_ordinal",
+              "source_stage": "records",
+              "source_column": "review_ordinal"
+            },
+            {
+              "name": "environments",
+              "source_stage": "records",
+              "source_column": "environments"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "reviewer",
+              "source_stage": "records",
+              "source_column": "reviewer"
+            },
+            {
+              "name": "reviewer_id",
+              "source_stage": "records",
+              "source_column": "reviewer_id"
+            },
+            {
+              "name": "reviewer_login",
+              "source_stage": "records",
+              "source_column": "reviewer_login"
+            },
+            {
+              "name": "comment",
+              "source_stage": "records",
+              "source_column": "comment"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_deployment_reviews_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "review_ordinal",
+              "source_stage": "records",
+              "source_column": "review_ordinal"
+            },
+            {
+              "name": "environments",
+              "source_stage": "records",
+              "source_column": "environments"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "reviewer",
+              "source_stage": "records",
+              "source_column": "reviewer"
+            },
+            {
+              "name": "reviewer_id",
+              "source_stage": "records",
+              "source_column": "reviewer_id"
+            },
+            {
+              "name": "reviewer_login",
+              "source_stage": "records",
+              "source_column": "reviewer_login"
+            },
+            {
+              "name": "comment",
+              "source_stage": "records",
+              "source_column": "comment"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "runs",
+                "entity": "actions_repository_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_deployment_reviews_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible selected run observations, preserving complete pagination and empty nested arrays."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "actions_caches_to_repositories",
+      "from": "actions_caches",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "actions_cache_usage_to_repositories",
+      "from": "actions_cache_usage",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "actions_concurrency_groups_to_repositories",
+      "from": "actions_concurrency_groups",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_run_concurrency_groups_to_repositories",
+      "from": "workflow_run_concurrency_groups",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_pending_deployments_to_repositories",
+      "from": "workflow_pending_deployments",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_deployment_reviews_to_repositories",
+      "from": "workflow_deployment_reviews",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_run_concurrency_groups_to_runs",
+      "from": "workflow_run_concurrency_groups",
+      "to": "workflow_runs",
+      "from_columns": [
+        "run_id"
+      ],
+      "to_columns": [
+        "run_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "runs",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "workflow_pending_deployments_to_runs",
+      "from": "workflow_pending_deployments",
+      "to": "workflow_runs",
+      "from_columns": [
+        "run_id"
+      ],
+      "to_columns": [
+        "run_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "runs",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "workflow_deployment_reviews_to_runs",
+      "from": "workflow_deployment_reviews",
+      "to": "workflow_runs",
+      "from_columns": [
+        "run_id"
+      ],
+      "to_columns": [
+        "run_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "runs",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "run_concurrency_groups_to_groups",
+      "from": "workflow_run_concurrency_groups",
+      "to": "actions_concurrency_groups",
+      "from_columns": [
+        "repository_id",
+        "concurrency_group"
+      ],
+      "to_columns": [
+        "repository_id",
+        "concurrency_group"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "concurrency_group": "concurrency_group"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "pending_deployments_to_environments",
+      "from": "workflow_pending_deployments",
+      "to": "environments",
+      "from_columns": [
+        "repository_id",
+        "environment_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "environment_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "environment_name": "environment_name"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    },
+    {
+      "name": "deployment_reviews_to_reviewers",
+      "from": "workflow_deployment_reviews",
+      "to": "users",
+      "from_columns": [
+        "reviewer_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "reviewer_login"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "organization_cache_usage_to_organizations",
+      "from": "organization_actions_cache_usage",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    }
+  ]
+}

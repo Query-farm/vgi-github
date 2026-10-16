@@ -1,0 +1,1685 @@
+{
+  "entities": [
+    {
+      "name": "artifact_deployment_records_source",
+      "description": "Pinned orgs/list-artifact-deployment-records read with explicit occurrence or job identity.",
+      "arguments": [
+        {
+          "name": "selected_artifact_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for artifact metadata.",
+          "minimum": 1,
+          "example": 54000
+        },
+        {
+          "name": "selected_artifact_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for artifact metadata.",
+          "min_length": 1,
+          "example": "provenance-fixture"
+        },
+        {
+          "name": "artifact_subject_digest",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "SHA256 artifact metadata subject digest in sha256: followed by64lowercase hexadecimal digits.",
+          "min_length": 71,
+          "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "max_length": 71,
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_artifact_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_artifact_organization_login"
+        },
+        {
+          "name": "artifact_subject_digest",
+          "source_argument": "artifact_subject_digest"
+        },
+        {
+          "name": "record_ordinal",
+          "source_ordinal": true
+        },
+        {
+          "name": "record_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "reported_digest",
+          "path": [
+            "digest"
+          ]
+        },
+        {
+          "name": "logical_environment",
+          "path": [
+            "logical_environment"
+          ]
+        },
+        {
+          "name": "physical_environment",
+          "path": [
+            "physical_environment"
+          ]
+        },
+        {
+          "name": "cluster",
+          "path": [
+            "cluster"
+          ]
+        },
+        {
+          "name": "deployment_name",
+          "path": [
+            "deployment_name"
+          ]
+        },
+        {
+          "name": "tags",
+          "path": [
+            "tags"
+          ]
+        },
+        {
+          "name": "runtime_risks",
+          "path": [
+            "runtime_risks"
+          ]
+        },
+        {
+          "name": "created_at_raw",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at_raw",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "attestation_id",
+          "path": [
+            "attestation_id"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "artifact_subject_digest",
+        "record_ordinal"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-artifact-deployment-records",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_artifact_organization_login"
+          },
+          "subject_digest": {
+            "argument": "artifact_subject_digest"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "deployment_records"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_digest",
+            "argument": "artifact_subject_digest",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact_storage_records_source",
+      "description": "Pinned orgs/list-artifact-storage-records read with explicit occurrence or job identity.",
+      "arguments": [
+        {
+          "name": "selected_artifact_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for artifact metadata.",
+          "minimum": 1,
+          "example": 54000
+        },
+        {
+          "name": "selected_artifact_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for artifact metadata.",
+          "min_length": 1,
+          "example": "provenance-fixture"
+        },
+        {
+          "name": "artifact_subject_digest",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "SHA256 artifact metadata subject digest in sha256: followed by64lowercase hexadecimal digits.",
+          "min_length": 71,
+          "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "max_length": 71,
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_artifact_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_artifact_organization_login"
+        },
+        {
+          "name": "artifact_subject_digest",
+          "source_argument": "artifact_subject_digest"
+        },
+        {
+          "name": "record_ordinal",
+          "source_ordinal": true
+        },
+        {
+          "name": "record_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "reported_digest",
+          "path": [
+            "digest"
+          ]
+        },
+        {
+          "name": "artifact_url",
+          "path": [
+            "artifact_url"
+          ]
+        },
+        {
+          "name": "registry_url",
+          "path": [
+            "registry_url"
+          ]
+        },
+        {
+          "name": "registry_repository",
+          "path": [
+            "repository"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "created_at_raw",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at_raw",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "artifact_subject_digest",
+        "record_ordinal"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-artifact-storage-records",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_artifact_organization_login"
+          },
+          "subject_digest": {
+            "argument": "artifact_subject_digest"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "storage_records"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "reported_digest",
+            "argument": "artifact_subject_digest",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifact_metadata_jobs_source",
+      "description": "Pinned orgs/get-cluster-deployment-records-job read with explicit occurrence or job identity.",
+      "arguments": [
+        {
+          "name": "selected_artifact_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for artifact metadata.",
+          "minimum": 1,
+          "example": 54000
+        },
+        {
+          "name": "selected_artifact_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for artifact metadata.",
+          "min_length": 1,
+          "example": "provenance-fixture"
+        },
+        {
+          "name": "artifact_cluster",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Artifact-metadata cluster identifier; the pinned API accepts letters, digits, dots, underscores and hyphens.",
+          "min_length": 1,
+          "example": "production"
+        },
+        {
+          "name": "artifact_metadata_job_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact previously-created artifact metadata cluster job ID; this route only observes the job.",
+          "minimum": 1,
+          "example": 57001
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_artifact_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_artifact_organization_login"
+        },
+        {
+          "name": "cluster",
+          "source_argument": "artifact_cluster"
+        },
+        {
+          "name": "job_id",
+          "path": [
+            "job_id"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "started_at",
+          "path": [
+            "started_at"
+          ]
+        },
+        {
+          "name": "mutated_record_count",
+          "path": [
+            "total_count"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "cluster",
+        "job_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/get-cluster-deployment-records-job",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_artifact_organization_login"
+          },
+          "cluster": {
+            "argument": "artifact_cluster"
+          },
+          "job_id": {
+            "argument": "artifact_metadata_job_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "job_id",
+            "argument": "artifact_metadata_job_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_attested_repositories_source",
+      "description": "Pinned orgs/list-attestation-repositories read with explicit occurrence or job identity.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "attestation_predicate_type",
+          "type": "VARCHAR",
+          "description": "Optional attestation predicate filter: provenance, sbom, release or a custom predicate type.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "provenance"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository_name",
+          "path": [
+            "name"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-attestation-repositories",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "predicate_type": {
+            "argument": "attestation_predicate_type"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "repository_id",
+          "repository_name"
+        ]
+      }
+    },
+    {
+      "name": "attested_repository_lookup_source",
+      "description": "repos/get schema-derived source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "discovered_attestation_repository_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Unqualified repository name from organization attestation discovery.",
+          "min_length": 1,
+          "example": "alpha"
+        },
+        {
+          "name": "expected_attested_repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository ID from attestation directory discovery.",
+          "minimum": 1,
+          "example": 54101
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "private",
+          "path": [
+            "private"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "owner_account_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_account_type",
+          "path": [
+            "owner",
+            "type"
+          ]
+        },
+        {
+          "name": "topic_names",
+          "path": [
+            "topics"
+          ],
+          "description": "Complete topic names returned by this repository REST response; no nested connection or membership cap."
+        },
+        {
+          "name": "repository_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "repository_language",
+          "path": [
+            "language"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get",
+        "path_bindings": {
+          "owner": {
+            "argument": "organization"
+          },
+          "repo": {
+            "argument": "discovered_attestation_repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "repository_id",
+            "argument": "expected_attested_repository_id",
+            "comparison": "equal"
+          }
+        ],
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "organization_attestation_envelopes_source",
+      "description": "Pinned orgs/list-attestations read with explicit occurrence or job identity.",
+      "arguments": [
+        {
+          "name": "selected_attestation_scope_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved stable account identity qualifying this attestation occurrence population.",
+          "minimum": 1,
+          "example": 54000
+        },
+        {
+          "name": "selected_attestation_scope_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical owner login defining this attestation retrieval scope.",
+          "min_length": 1,
+          "example": "provenance-fixture"
+        },
+        {
+          "name": "selected_attestation_scope_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Kind of resource whose selected retrieval defines attestation occurrence positions.",
+          "enum": [
+            "organization"
+          ],
+          "example": "organization"
+        },
+        {
+          "name": "unknown_attestation_repository",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository locator is not provided by organization/user attestation responses.",
+          "default": null
+        },
+        {
+          "name": "attestation_subject_digest",
+          "type": "VARCHAR",
+          "description": "Attestation subject SHA256 digest in sha256:HEX_DIGEST form.",
+          "nullable": false,
+          "min_length": 1,
+          "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "name": "attestation_predicate_type",
+          "type": "VARCHAR",
+          "description": "Optional attestation predicate filter: provenance, sbom, release or a custom predicate type.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "provenance"
+        },
+        {
+          "name": "unknown_retrieval_user_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable retrieval-owner role for this scope.",
+          "default": null
+        },
+        {
+          "name": "unknown_retrieval_user_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable retrieval-owner role for this scope.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "retrieval_scope_type",
+          "source_argument": "selected_attestation_scope_type"
+        },
+        {
+          "name": "retrieval_scope_id",
+          "source_argument": "selected_attestation_scope_id"
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository_id"
+          ]
+        },
+        {
+          "name": "repository",
+          "source_argument": "unknown_attestation_repository"
+        },
+        {
+          "name": "attestation_subject_digest",
+          "source_argument": "attestation_subject_digest"
+        },
+        {
+          "name": "attestation_predicate_type",
+          "source_argument": "attestation_predicate_type"
+        },
+        {
+          "name": "attestation_ordinal",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_repository_id",
+          "path": [
+            "repository_id"
+          ]
+        },
+        {
+          "name": "bundle_media_type",
+          "path": [
+            "bundle",
+            "mediaType"
+          ]
+        },
+        {
+          "name": "bundle_url",
+          "path": [
+            "bundle_url"
+          ]
+        },
+        {
+          "name": "initiator",
+          "path": [
+            "initiator"
+          ]
+        },
+        {
+          "name": "retrieval_organization_id",
+          "source_argument": "selected_attestation_scope_id"
+        },
+        {
+          "name": "retrieval_organization_login",
+          "source_argument": "selected_attestation_scope_login"
+        },
+        {
+          "name": "retrieval_user_id",
+          "source_argument": "unknown_retrieval_user_id"
+        },
+        {
+          "name": "retrieval_user_login",
+          "source_argument": "unknown_retrieval_user_login"
+        }
+      ],
+      "grain": [
+        "retrieval_scope_type",
+        "retrieval_scope_id",
+        "attestation_subject_digest",
+        "attestation_ordinal"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-attestations",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_attestation_scope_login"
+          },
+          "subject_digest": {
+            "argument": "attestation_subject_digest"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "predicate_type": {
+            "argument": "attestation_predicate_type"
+          }
+        },
+        "result_path": [
+          "attestations"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_attestation_envelopes_source",
+      "description": "Pinned users/list-attestations read with explicit occurrence or job identity.",
+      "arguments": [
+        {
+          "name": "selected_attestation_scope_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved stable account identity qualifying this attestation occurrence population.",
+          "minimum": 1,
+          "example": 54000
+        },
+        {
+          "name": "selected_attestation_scope_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical owner login defining this attestation retrieval scope.",
+          "min_length": 1,
+          "example": "provenance-fixture"
+        },
+        {
+          "name": "selected_attestation_scope_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Kind of resource whose selected retrieval defines attestation occurrence positions.",
+          "enum": [
+            "user"
+          ],
+          "example": "user"
+        },
+        {
+          "name": "unknown_attestation_repository",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Repository locator is not provided by organization/user attestation responses.",
+          "default": null
+        },
+        {
+          "name": "attestation_subject_digest",
+          "type": "VARCHAR",
+          "description": "Attestation subject SHA256 digest in sha256:HEX_DIGEST form.",
+          "nullable": false,
+          "min_length": 1,
+          "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "name": "attestation_predicate_type",
+          "type": "VARCHAR",
+          "description": "Optional attestation predicate filter: provenance, sbom, release or a custom predicate type.",
+          "nullable": true,
+          "default": null,
+          "min_length": 1,
+          "example": "provenance"
+        },
+        {
+          "name": "unknown_retrieval_organization_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable retrieval-owner role for this scope.",
+          "default": null
+        },
+        {
+          "name": "unknown_retrieval_organization_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable retrieval-owner role for this scope.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "retrieval_scope_type",
+          "source_argument": "selected_attestation_scope_type"
+        },
+        {
+          "name": "retrieval_scope_id",
+          "source_argument": "selected_attestation_scope_id"
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository_id"
+          ]
+        },
+        {
+          "name": "repository",
+          "source_argument": "unknown_attestation_repository"
+        },
+        {
+          "name": "attestation_subject_digest",
+          "source_argument": "attestation_subject_digest"
+        },
+        {
+          "name": "attestation_predicate_type",
+          "source_argument": "attestation_predicate_type"
+        },
+        {
+          "name": "attestation_ordinal",
+          "source_ordinal": true
+        },
+        {
+          "name": "reported_repository_id",
+          "path": [
+            "repository_id"
+          ]
+        },
+        {
+          "name": "bundle_media_type",
+          "path": [
+            "bundle",
+            "mediaType"
+          ]
+        },
+        {
+          "name": "bundle_url",
+          "path": [
+            "bundle_url"
+          ]
+        },
+        {
+          "name": "initiator",
+          "path": [
+            "initiator"
+          ]
+        },
+        {
+          "name": "retrieval_organization_id",
+          "source_argument": "unknown_retrieval_organization_id"
+        },
+        {
+          "name": "retrieval_organization_login",
+          "source_argument": "unknown_retrieval_organization_login"
+        },
+        {
+          "name": "retrieval_user_id",
+          "source_argument": "selected_attestation_scope_id"
+        },
+        {
+          "name": "retrieval_user_login",
+          "source_argument": "selected_attestation_scope_login"
+        }
+      ],
+      "grain": [
+        "retrieval_scope_type",
+        "retrieval_scope_id",
+        "attestation_subject_digest",
+        "attestation_ordinal"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/list-attestations",
+        "path_bindings": {
+          "username": {
+            "argument": "selected_attestation_scope_login"
+          },
+          "subject_digest": {
+            "argument": "attestation_subject_digest"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "predicate_type": {
+            "argument": "attestation_predicate_type"
+          }
+        },
+        "result_path": [
+          "attestations"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        },
+        "empty_response_statuses": [
+          "204"
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "artifact_deployment_records",
+      "description": "Artifact metadata deployment record occurrences for an organization and requested digest. Optional upstream IDs remain observations; ordinal identity exists only within this retrieval. All advertised Link pages are consumed. The optional total_count is not independently asserted; count measures returned occurrences. Raw timestamps remain strings because the pinned schema gives no date-time format. Attestation IDs are reported evidence, not joined to positional attestation envelope occurrences.",
+      "grain": [
+        "organization_id",
+        "artifact_subject_digest",
+        "record_ordinal"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "artifact_subject_digest",
+          "record_ordinal",
+          "record_id",
+          "reported_digest",
+          "logical_environment",
+          "physical_environment",
+          "cluster",
+          "deployment_name",
+          "tags",
+          "runtime_risks",
+          "created_at_raw",
+          "updated_at_raw",
+          "attestation_id"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "artifact_subject_digest",
+          "record_ordinal",
+          "record_id",
+          "reported_digest",
+          "logical_environment",
+          "physical_environment",
+          "cluster",
+          "deployment_name",
+          "created_at_raw",
+          "updated_at_raw",
+          "attestation_id"
+        ],
+        "sql_names": {
+          "organization_id": "artifact_deployment_records_organization_id",
+          "organization_login": "artifact_deployment_records_organization_login",
+          "artifact_subject_digest": "artifact_deployment_records_artifact_subject_digest",
+          "record_ordinal": "artifact_deployment_records_record_ordinal",
+          "record_id": "artifact_deployment_records_record_id",
+          "reported_digest": "artifact_deployment_records_reported_digest",
+          "logical_environment": "artifact_deployment_records_logical_environment",
+          "physical_environment": "artifact_deployment_records_physical_environment",
+          "cluster": "artifact_deployment_records_cluster",
+          "deployment_name": "artifact_deployment_records_deployment_name",
+          "created_at_raw": "artifact_deployment_records_created_at_raw",
+          "updated_at_raw": "artifact_deployment_records_updated_at_raw",
+          "attestation_id": "artifact_deployment_records_attestation_id"
+        },
+        "metrics": [
+          {
+            "name": "artifact_deployment_record_count",
+            "kind": "count",
+            "comment": "Returned artifact_deployment_records rows at the declared retrieval-qualified occurrence grain."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "artifact_subject_digest",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "SHA256 artifact metadata subject digest in sha256: followed by64lowercase hexadecimal digits.",
+              "min_length": 71,
+              "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "max_length": 71,
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "artifact_deployment_records_source",
+                "arguments": {
+                  "selected_artifact_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_artifact_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "artifact_subject_digest": {
+                    "parameter": "artifact_subject_digest"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "artifact_subject_digest",
+              "source_stage": "records",
+              "source_column": "artifact_subject_digest"
+            },
+            {
+              "name": "record_ordinal",
+              "source_stage": "records",
+              "source_column": "record_ordinal"
+            },
+            {
+              "name": "record_id",
+              "source_stage": "records",
+              "source_column": "record_id"
+            },
+            {
+              "name": "reported_digest",
+              "source_stage": "records",
+              "source_column": "reported_digest"
+            },
+            {
+              "name": "logical_environment",
+              "source_stage": "records",
+              "source_column": "logical_environment"
+            },
+            {
+              "name": "physical_environment",
+              "source_stage": "records",
+              "source_column": "physical_environment"
+            },
+            {
+              "name": "cluster",
+              "source_stage": "records",
+              "source_column": "cluster"
+            },
+            {
+              "name": "deployment_name",
+              "source_stage": "records",
+              "source_column": "deployment_name"
+            },
+            {
+              "name": "tags",
+              "source_stage": "records",
+              "source_column": "tags"
+            },
+            {
+              "name": "runtime_risks",
+              "source_stage": "records",
+              "source_column": "runtime_risks"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "records",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "records",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "attestation_id",
+              "source_stage": "records",
+              "source_column": "attestation_id"
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "population": "Returned record occurrences in all advertised pages for the selected organization and digest; missing optional record IDs do not erase rows."
+        }
+      ]
+    },
+    {
+      "name": "artifact_storage_records",
+      "description": "Artifact metadata storage record occurrences for an organization and requested digest. Optional upstream IDs remain observations; ordinal identity exists only within this retrieval. All advertised Link pages are consumed. The optional total_count is not independently asserted; count measures returned occurrences. Raw timestamps remain strings because the pinned schema gives no date-time format. The repository field identifies a registry repository, not a GitHub repository relationship.",
+      "grain": [
+        "organization_id",
+        "artifact_subject_digest",
+        "record_ordinal"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "artifact_subject_digest",
+          "record_ordinal",
+          "record_id",
+          "name",
+          "reported_digest",
+          "artifact_url",
+          "registry_url",
+          "registry_repository",
+          "status",
+          "created_at_raw",
+          "updated_at_raw"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "artifact_subject_digest",
+          "record_ordinal",
+          "record_id",
+          "name",
+          "reported_digest",
+          "artifact_url",
+          "registry_url",
+          "registry_repository",
+          "status",
+          "created_at_raw",
+          "updated_at_raw"
+        ],
+        "sql_names": {
+          "organization_id": "artifact_storage_records_organization_id",
+          "organization_login": "artifact_storage_records_organization_login",
+          "artifact_subject_digest": "artifact_storage_records_artifact_subject_digest",
+          "record_ordinal": "artifact_storage_records_record_ordinal",
+          "record_id": "artifact_storage_records_record_id",
+          "name": "artifact_storage_records_name",
+          "reported_digest": "artifact_storage_records_reported_digest",
+          "artifact_url": "artifact_storage_records_artifact_url",
+          "registry_url": "artifact_storage_records_registry_url",
+          "registry_repository": "artifact_storage_records_registry_repository",
+          "status": "artifact_storage_records_status",
+          "created_at_raw": "artifact_storage_records_created_at_raw",
+          "updated_at_raw": "artifact_storage_records_updated_at_raw"
+        },
+        "metrics": [
+          {
+            "name": "artifact_storage_record_count",
+            "kind": "count",
+            "comment": "Returned artifact_storage_records rows at the declared retrieval-qualified occurrence grain."
+          },
+          {
+            "name": "active_artifact_storage_record_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "active"
+            },
+            "comment": "Returned storage record occurrences explicitly marked active."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "artifact_subject_digest",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "SHA256 artifact metadata subject digest in sha256: followed by64lowercase hexadecimal digits.",
+              "min_length": 71,
+              "example": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "max_length": 71,
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "artifact_storage_records_source",
+                "arguments": {
+                  "selected_artifact_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_artifact_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "artifact_subject_digest": {
+                    "parameter": "artifact_subject_digest"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "artifact_subject_digest",
+              "source_stage": "records",
+              "source_column": "artifact_subject_digest"
+            },
+            {
+              "name": "record_ordinal",
+              "source_stage": "records",
+              "source_column": "record_ordinal"
+            },
+            {
+              "name": "record_id",
+              "source_stage": "records",
+              "source_column": "record_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "reported_digest",
+              "source_stage": "records",
+              "source_column": "reported_digest"
+            },
+            {
+              "name": "artifact_url",
+              "source_stage": "records",
+              "source_column": "artifact_url"
+            },
+            {
+              "name": "registry_url",
+              "source_stage": "records",
+              "source_column": "registry_url"
+            },
+            {
+              "name": "registry_repository",
+              "source_stage": "records",
+              "source_column": "registry_repository"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "created_at_raw",
+              "source_stage": "records",
+              "source_column": "created_at_raw"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "records",
+              "source_column": "updated_at_raw"
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "population": "Returned record occurrences in all advertised pages for the selected organization and digest; missing optional record IDs do not erase rows."
+        }
+      ]
+    },
+    {
+      "name": "artifact_metadata_jobs",
+      "description": "Status observations of previously created artifact metadata cluster jobs, qualified by organization, cluster and job ID. Missing started_at and successful-mutation counts remain unknown. The pinned errors field is an array of arbitrary objects with no typed fields and is explicitly uncovered.",
+      "grain": [
+        "organization_id",
+        "cluster",
+        "job_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "cluster",
+          "job_id",
+          "status",
+          "started_at",
+          "mutated_record_count"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "cluster",
+          "job_id",
+          "status",
+          "started_at",
+          "mutated_record_count"
+        ],
+        "sql_names": {
+          "organization_id": "artifact_metadata_jobs_organization_id",
+          "organization_login": "artifact_metadata_jobs_organization_login",
+          "cluster": "artifact_metadata_jobs_cluster",
+          "job_id": "artifact_metadata_jobs_job_id",
+          "status": "artifact_metadata_jobs_status",
+          "started_at": "artifact_metadata_jobs_started_at",
+          "mutated_record_count": "artifact_metadata_jobs_mutated_record_count"
+        },
+        "metrics": [
+          {
+            "name": "artifact_metadata_job_count",
+            "kind": "count",
+            "comment": "Returned artifact_metadata_jobs rows at the declared retrieval-qualified occurrence grain."
+          },
+          {
+            "name": "pending_artifact_metadata_job_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "pending"
+            },
+            "comment": "Selected artifact metadata jobs whose observed lifecycle status is pending."
+          },
+          {
+            "name": "processing_artifact_metadata_job_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "processing"
+            },
+            "comment": "Selected artifact metadata jobs whose observed lifecycle status is processing."
+          },
+          {
+            "name": "completed_artifact_metadata_job_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "completed"
+            },
+            "comment": "Selected artifact metadata jobs whose observed lifecycle status is completed."
+          },
+          {
+            "name": "failed_artifact_metadata_job_count",
+            "kind": "count",
+            "where": {
+              "field": "status",
+              "op": "eq",
+              "value": "failed"
+            },
+            "comment": "Selected artifact metadata jobs whose observed lifecycle status is failed."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "artifact_metadata_mutated_record_count": {
+              "expression": "SUM(artifact_metadata_jobs.mutated_record_count)",
+              "type": "HUGEINT"
+            }
+          },
+          "metric_semantics": {
+            "artifact_metadata_mutated_record_count": {
+              "dataset": "artifact_metadata_jobs",
+              "additivity": "additive",
+              "missing": "null",
+              "unit": "records",
+              "comment": "Records successfully mutated by selected jobs as reported in total_count; absent counts on pending/failed observations remain unknown. This read does not start a mutation."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "artifact_cluster",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Artifact-metadata cluster identifier; the pinned API accepts letters, digits, dots, underscores and hyphens.",
+              "min_length": 1,
+              "example": "production"
+            },
+            {
+              "name": "artifact_metadata_job_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact previously-created artifact metadata cluster job ID; this route only observes the job.",
+              "minimum": 1,
+              "example": 57001
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "artifact_metadata_jobs_source",
+                "arguments": {
+                  "selected_artifact_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_artifact_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "artifact_cluster": {
+                    "parameter": "artifact_cluster"
+                  },
+                  "artifact_metadata_job_id": {
+                    "parameter": "artifact_metadata_job_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "cluster",
+              "source_stage": "records",
+              "source_column": "cluster"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "records",
+              "source_column": "started_at"
+            },
+            {
+              "name": "mutated_record_count",
+              "source_stage": "records",
+              "source_column": "mutated_record_count"
+            }
+          ],
+          "select": [
+            "artifact_metadata_job_id"
+          ],
+          "population": "One exact previously created cluster job; missing404 and identity mismatch fail."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "artifact_deployment_records_to_organizations",
+      "from": "artifact_deployment_records",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "artifact_storage_records_to_organizations",
+      "from": "artifact_storage_records",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "artifact_metadata_jobs_to_organizations",
+      "from": "artifact_metadata_jobs",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "attestation_envelopes_to_scope_organizations",
+      "from": "attestation_envelopes",
+      "to": "organizations",
+      "from_columns": [
+        "retrieval_organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "retrieval_organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "attestation_envelopes_to_scope_users",
+      "from": "attestation_envelopes",
+      "to": "users",
+      "from_columns": [
+        "retrieval_user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "retrieval_user_login"
+          }
+        }
+      ]
+    }
+  ]
+}

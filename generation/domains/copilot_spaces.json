@@ -1,0 +1,2747 @@
+{
+  "entities": [
+    {
+      "name": "copilot_organization_spaces_source",
+      "description": "Typed Copilot Space business read: list-for-org.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "space_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "space_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "space_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": true
+          }
+        },
+        {
+          "name": "creator_id",
+          "path": [
+            "creator",
+            "id"
+          ]
+        },
+        {
+          "name": "creator_login",
+          "path": [
+            "creator",
+            "login"
+          ]
+        },
+        {
+          "name": "creator",
+          "path": [
+            "creator"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "general_instructions",
+          "path": [
+            "general_instructions"
+          ]
+        },
+        {
+          "name": "base_role",
+          "path": [
+            "base_role"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "api_url",
+          "path": [
+            "api_url"
+          ]
+        },
+        {
+          "name": "resources_attributes",
+          "path": [
+            "resources_attributes"
+          ]
+        }
+      ],
+      "grain": [
+        "space_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/list-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "space_owner_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "spaces"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "space_owner_login",
+            "argument": "space_owner_login",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "copilot_organization_space_lookup_source",
+      "description": "Typed Copilot Space business read: get-for-org.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "copilot_space_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Copilot Space number within its explicitly selected organization or user owner.",
+          "minimum": 1,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "space_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "space_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "space_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": true
+          }
+        },
+        {
+          "name": "creator_id",
+          "path": [
+            "creator",
+            "id"
+          ]
+        },
+        {
+          "name": "creator_login",
+          "path": [
+            "creator",
+            "login"
+          ]
+        },
+        {
+          "name": "creator",
+          "path": [
+            "creator"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "general_instructions",
+          "path": [
+            "general_instructions"
+          ]
+        },
+        {
+          "name": "base_role",
+          "path": [
+            "base_role"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "api_url",
+          "path": [
+            "api_url"
+          ]
+        },
+        {
+          "name": "resources_attributes",
+          "path": [
+            "resources_attributes"
+          ]
+        }
+      ],
+      "grain": [
+        "space_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/get-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "space_owner_login"
+          },
+          "space_number": {
+            "argument": "copilot_space_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "space_owner_login",
+            "argument": "space_owner_login",
+            "comparison": "github_login"
+          },
+          {
+            "column": "space_number",
+            "argument": "copilot_space_number",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "copilot_organization_space_collaborators_source",
+      "description": "Typed Copilot Space business read: list-collaborators-for-org.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "",
+          "minimum": 1
+        },
+        {
+          "name": "copilot_space_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Copilot Space number within its explicitly selected organization or user owner.",
+          "minimum": 1,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_id",
+          "source_argument": "space_id"
+        },
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_owner_login",
+          "source_argument": "space_owner_login"
+        },
+        {
+          "name": "copilot_space_number",
+          "source_argument": "copilot_space_number"
+        },
+        {
+          "name": "collaborator_id",
+          "path": [
+            "id"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "actor_type",
+          "path": [
+            "actor_type"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "role",
+          "path": [
+            "role"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "collaborator",
+          "path": [],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": {
+              "actor_type": true,
+              "role": true,
+              "id": true,
+              "node_id": true,
+              "name": true,
+              "slug": true,
+              "type": true,
+              "description": true,
+              "privacy": true,
+              "notification_setting": true,
+              "url": true,
+              "html_url": true,
+              "members_url": true,
+              "repositories_url": true,
+              "organization_id": true
+            }
+          }
+        }
+      ],
+      "grain": [
+        "space_id",
+        "actor_type",
+        "collaborator_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/list-collaborators-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "space_owner_login"
+          },
+          "space_number": {
+            "argument": "copilot_space_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "collaborators"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "copilot_organization_space_resources_source",
+      "description": "Typed Copilot Space business read: list-resources-for-org.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "",
+          "minimum": 1
+        },
+        {
+          "name": "copilot_space_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Copilot Space number within its explicitly selected organization or user owner.",
+          "minimum": 1,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_id",
+          "source_argument": "space_id"
+        },
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_owner_login",
+          "source_argument": "space_owner_login"
+        },
+        {
+          "name": "copilot_space_number",
+          "source_argument": "copilot_space_number"
+        },
+        {
+          "name": "resource_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "resource_type",
+          "path": [
+            "resource_type"
+          ]
+        },
+        {
+          "name": "copilot_chat_attachment_id",
+          "path": [
+            "copilot_chat_attachment_id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "space_id",
+        "resource_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/list-resources-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "space_owner_login"
+          },
+          "space_number": {
+            "argument": "copilot_space_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "resources"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "copilot_organization_space_resource_lookup_source",
+      "description": "Typed Copilot Space business read: get-resource-for-org.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "",
+          "minimum": 1
+        },
+        {
+          "name": "copilot_space_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Copilot Space number within its explicitly selected organization or user owner.",
+          "minimum": 1,
+          "example": 1
+        },
+        {
+          "name": "copilot_space_resource_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact resource identity within the selected Copilot Space.",
+          "minimum": 1,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_id",
+          "source_argument": "space_id"
+        },
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_owner_login",
+          "source_argument": "space_owner_login"
+        },
+        {
+          "name": "copilot_space_number",
+          "source_argument": "copilot_space_number"
+        },
+        {
+          "name": "resource_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "resource_type",
+          "path": [
+            "resource_type"
+          ]
+        },
+        {
+          "name": "copilot_chat_attachment_id",
+          "path": [
+            "copilot_chat_attachment_id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "space_id",
+        "resource_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/get-resource-for-org",
+        "path_bindings": {
+          "org": {
+            "argument": "space_owner_login"
+          },
+          "space_number": {
+            "argument": "copilot_space_number"
+          },
+          "space_resource_id": {
+            "argument": "copilot_space_resource_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "resource_id",
+            "argument": "copilot_space_resource_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "copilot_user_spaces_source",
+      "description": "Typed Copilot Space business read: list-for-user.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "space_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "space_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "space_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": true
+          }
+        },
+        {
+          "name": "creator_id",
+          "path": [
+            "creator",
+            "id"
+          ]
+        },
+        {
+          "name": "creator_login",
+          "path": [
+            "creator",
+            "login"
+          ]
+        },
+        {
+          "name": "creator",
+          "path": [
+            "creator"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "general_instructions",
+          "path": [
+            "general_instructions"
+          ]
+        },
+        {
+          "name": "base_role",
+          "path": [
+            "base_role"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "api_url",
+          "path": [
+            "api_url"
+          ]
+        },
+        {
+          "name": "resources_attributes",
+          "path": [
+            "resources_attributes"
+          ]
+        }
+      ],
+      "grain": [
+        "space_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/list-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "space_owner_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "spaces"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "space_owner_login",
+            "argument": "space_owner_login",
+            "comparison": "github_login"
+          }
+        ]
+      }
+    },
+    {
+      "name": "copilot_user_space_lookup_source",
+      "description": "Typed Copilot Space business read: get-for-user.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "copilot_space_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Copilot Space number within its explicitly selected organization or user owner.",
+          "minimum": 1,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "space_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "space_owner_id",
+          "path": [
+            "owner",
+            "id"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "space_owner_login",
+          "path": [
+            "owner",
+            "login"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "owner",
+          "path": [
+            "owner"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": true
+          }
+        },
+        {
+          "name": "creator_id",
+          "path": [
+            "creator",
+            "id"
+          ]
+        },
+        {
+          "name": "creator_login",
+          "path": [
+            "creator",
+            "login"
+          ]
+        },
+        {
+          "name": "creator",
+          "path": [
+            "creator"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "general_instructions",
+          "path": [
+            "general_instructions"
+          ]
+        },
+        {
+          "name": "base_role",
+          "path": [
+            "base_role"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "api_url",
+          "path": [
+            "api_url"
+          ]
+        },
+        {
+          "name": "resources_attributes",
+          "path": [
+            "resources_attributes"
+          ]
+        }
+      ],
+      "grain": [
+        "space_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/get-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "space_owner_login"
+          },
+          "space_number": {
+            "argument": "copilot_space_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "space_owner_login",
+            "argument": "space_owner_login",
+            "comparison": "github_login"
+          },
+          {
+            "column": "space_number",
+            "argument": "copilot_space_number",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "copilot_user_space_collaborators_source",
+      "description": "Typed Copilot Space business read: list-collaborators-for-user.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "",
+          "minimum": 1
+        },
+        {
+          "name": "copilot_space_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Copilot Space number within its explicitly selected organization or user owner.",
+          "minimum": 1,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_id",
+          "source_argument": "space_id"
+        },
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_owner_login",
+          "source_argument": "space_owner_login"
+        },
+        {
+          "name": "copilot_space_number",
+          "source_argument": "copilot_space_number"
+        },
+        {
+          "name": "collaborator_id",
+          "path": [
+            "id"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "actor_type",
+          "path": [
+            "actor_type"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "role",
+          "path": [
+            "role"
+          ],
+          "variant_paths": true
+        },
+        {
+          "name": "collaborator",
+          "path": [],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": {
+              "actor_type": true,
+              "role": true,
+              "id": true,
+              "node_id": true,
+              "name": true,
+              "slug": true,
+              "type": true,
+              "description": true,
+              "privacy": true,
+              "notification_setting": true,
+              "url": true,
+              "html_url": true,
+              "members_url": true,
+              "repositories_url": true,
+              "organization_id": true
+            }
+          }
+        }
+      ],
+      "grain": [
+        "space_id",
+        "actor_type",
+        "collaborator_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/list-collaborators-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "space_owner_login"
+          },
+          "space_number": {
+            "argument": "copilot_space_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "collaborators"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "copilot_user_space_resources_source",
+      "description": "Typed Copilot Space business read: list-resources-for-user.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "",
+          "minimum": 1
+        },
+        {
+          "name": "copilot_space_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Copilot Space number within its explicitly selected organization or user owner.",
+          "minimum": 1,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_id",
+          "source_argument": "space_id"
+        },
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_owner_login",
+          "source_argument": "space_owner_login"
+        },
+        {
+          "name": "copilot_space_number",
+          "source_argument": "copilot_space_number"
+        },
+        {
+          "name": "resource_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "resource_type",
+          "path": [
+            "resource_type"
+          ]
+        },
+        {
+          "name": "copilot_chat_attachment_id",
+          "path": [
+            "copilot_chat_attachment_id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "space_id",
+        "resource_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/list-resources-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "space_owner_login"
+          },
+          "space_number": {
+            "argument": "copilot_space_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "resources"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "copilot_user_space_resource_lookup_source",
+      "description": "Typed Copilot Space business read: get-resource-for-user.",
+      "arguments": [
+        {
+          "name": "space_owner_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_owner_kind",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "",
+          "min_length": 1
+        },
+        {
+          "name": "space_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "",
+          "minimum": 1
+        },
+        {
+          "name": "copilot_space_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Copilot Space number within its explicitly selected organization or user owner.",
+          "minimum": 1,
+          "example": 1
+        },
+        {
+          "name": "copilot_space_resource_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact resource identity within the selected Copilot Space.",
+          "minimum": 1,
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "space_id",
+          "source_argument": "space_id"
+        },
+        {
+          "name": "space_owner_kind",
+          "source_argument": "space_owner_kind"
+        },
+        {
+          "name": "space_owner_login",
+          "source_argument": "space_owner_login"
+        },
+        {
+          "name": "copilot_space_number",
+          "source_argument": "copilot_space_number"
+        },
+        {
+          "name": "resource_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "resource_type",
+          "path": [
+            "resource_type"
+          ]
+        },
+        {
+          "name": "copilot_chat_attachment_id",
+          "path": [
+            "copilot_chat_attachment_id"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "space_id",
+        "resource_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "copilot-spaces/get-resource-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "space_owner_login"
+          },
+          "space_number": {
+            "argument": "copilot_space_number"
+          },
+          "space_resource_id": {
+            "argument": "copilot_space_resource_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "resource_id",
+            "argument": "copilot_space_resource_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "copilot_spaces",
+      "description": "Canonical Copilot Spaces across organization and user ownership, keyed by global Space ID. Owner kind/login/number preserve the supported retrieval direction; creator is a separate user role. Typed owner anyOf branches retain every matching alternative. resources_attributes retains every schema-declared inline resource metadata field; standalone resource metadata has a broader unbounded contract.",
+      "grain": [
+        "space_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "space_owner_kind",
+          "space_id",
+          "space_number",
+          "space_owner_id",
+          "space_owner_login",
+          "owner",
+          "creator_id",
+          "creator_login",
+          "creator",
+          "name",
+          "description",
+          "general_instructions",
+          "base_role",
+          "created_at",
+          "updated_at",
+          "html_url",
+          "api_url",
+          "resources_attributes"
+        ],
+        "dimensions": [
+          "space_id",
+          "space_number",
+          "space_owner_kind",
+          "space_owner_id",
+          "space_owner_login",
+          "creator_id",
+          "creator_login",
+          "name",
+          "base_role",
+          "created_at",
+          "updated_at"
+        ],
+        "sql_names": {
+          "space_id": "copilot_spaces_space_id",
+          "space_number": "copilot_spaces_space_number",
+          "space_owner_kind": "copilot_spaces_space_owner_kind",
+          "space_owner_id": "copilot_spaces_space_owner_id",
+          "space_owner_login": "copilot_spaces_space_owner_login",
+          "creator_id": "copilot_spaces_creator_id",
+          "creator_login": "copilot_spaces_creator_login",
+          "name": "copilot_spaces_name",
+          "base_role": "copilot_spaces_base_role",
+          "created_at": "copilot_spaces_created_at",
+          "updated_at": "copilot_spaces_updated_at"
+        },
+        "metrics": [
+          {
+            "name": "copilot_space_count",
+            "kind": "count",
+            "comment": "Enumerated Copilot Space identities."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "copilot_inline_resource_count": {
+              "expression": "SUM(length(copilot_spaces.resources_attributes))"
+            }
+          },
+          "metric_semantics": {
+            "copilot_inline_resource_count": {
+              "dataset": "copilot_spaces",
+              "comment": "Inline resource attribute observations, independently reported from standalone resource listing.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "copilot_space_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Copilot Space number within its explicitly selected organization or user owner.",
+              "minimum": 1,
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "space_owner_kind",
+              "source_stage": "records",
+              "source_column": "space_owner_kind"
+            },
+            {
+              "name": "space_id",
+              "source_stage": "records",
+              "source_column": "space_id"
+            },
+            {
+              "name": "space_number",
+              "source_stage": "records",
+              "source_column": "space_number"
+            },
+            {
+              "name": "space_owner_id",
+              "source_stage": "records",
+              "source_column": "space_owner_id"
+            },
+            {
+              "name": "space_owner_login",
+              "source_stage": "records",
+              "source_column": "space_owner_login"
+            },
+            {
+              "name": "owner",
+              "source_stage": "records",
+              "source_column": "owner"
+            },
+            {
+              "name": "creator_id",
+              "source_stage": "records",
+              "source_column": "creator_id"
+            },
+            {
+              "name": "creator_login",
+              "source_stage": "records",
+              "source_column": "creator_login"
+            },
+            {
+              "name": "creator",
+              "source_stage": "records",
+              "source_column": "creator"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "general_instructions",
+              "source_stage": "records",
+              "source_column": "general_instructions"
+            },
+            {
+              "name": "base_role",
+              "source_stage": "records",
+              "source_column": "base_role"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "api_url",
+              "source_stage": "records",
+              "source_column": "api_url"
+            },
+            {
+              "name": "resources_attributes",
+              "source_stage": "records",
+              "source_column": "resources_attributes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "scope": "copilot_space_lookup"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected owner and space population; preserve every advertised cursor/Link page and empty spaces.",
+          "select": [
+            "copilot_space_number"
+          ]
+        },
+        {
+          "name": "owners",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "space_owner_kind",
+              "source_stage": "records",
+              "source_column": "space_owner_kind"
+            },
+            {
+              "name": "space_id",
+              "source_stage": "records",
+              "source_column": "space_id"
+            },
+            {
+              "name": "space_number",
+              "source_stage": "records",
+              "source_column": "space_number"
+            },
+            {
+              "name": "space_owner_id",
+              "source_stage": "records",
+              "source_column": "space_owner_id"
+            },
+            {
+              "name": "space_owner_login",
+              "source_stage": "records",
+              "source_column": "space_owner_login"
+            },
+            {
+              "name": "owner",
+              "source_stage": "records",
+              "source_column": "owner"
+            },
+            {
+              "name": "creator_id",
+              "source_stage": "records",
+              "source_column": "creator_id"
+            },
+            {
+              "name": "creator_login",
+              "source_stage": "records",
+              "source_column": "creator_login"
+            },
+            {
+              "name": "creator",
+              "source_stage": "records",
+              "source_column": "creator"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "general_instructions",
+              "source_stage": "records",
+              "source_column": "general_instructions"
+            },
+            {
+              "name": "base_role",
+              "source_stage": "records",
+              "source_column": "base_role"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "api_url",
+              "source_stage": "records",
+              "source_column": "api_url"
+            },
+            {
+              "name": "resources_attributes",
+              "source_stage": "records",
+              "source_column": "resources_attributes"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "scope": "copilot_space_list"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected owner and space population; preserve every advertised cursor/Link page and empty spaces.",
+          "select": [
+            "organization",
+            "user"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "copilot_space_resources",
+      "description": "Resource identity and status envelopes attached to canonical Copilot Spaces. The standalone metadata object permits arbitrary keys and values without a pinned typed schema, so full dynamic metadata remains an explicit coverage gap; it is neither stringified nor guessed. The parent Space retains its schema-declared typed inline resources_attributes metadata. Resource types are classifications, not invented PR/repository identity relationships.",
+      "grain": [
+        "space_id",
+        "resource_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "space_id",
+          "space_owner_kind",
+          "space_owner_login",
+          "copilot_space_number",
+          "resource_id",
+          "resource_type",
+          "copilot_chat_attachment_id",
+          "created_at",
+          "updated_at"
+        ],
+        "dimensions": [
+          "space_id",
+          "space_owner_kind",
+          "space_owner_login",
+          "copilot_space_number",
+          "resource_id",
+          "resource_type",
+          "created_at",
+          "updated_at"
+        ],
+        "sql_names": {
+          "space_id": "copilot_space_resources_space_id",
+          "space_owner_kind": "copilot_space_resources_space_owner_kind",
+          "space_owner_login": "copilot_space_resources_space_owner_login",
+          "copilot_space_number": "copilot_space_resources_copilot_space_number",
+          "resource_id": "copilot_space_resources_resource_id",
+          "resource_type": "copilot_space_resources_resource_type",
+          "created_at": "copilot_space_resources_created_at",
+          "updated_at": "copilot_space_resources_updated_at"
+        },
+        "metrics": [
+          {
+            "name": "copilot_space_resource_count",
+            "kind": "count",
+            "comment": "Enumerated Space/resource identities."
+          },
+          {
+            "name": "copilot_repository_resource_count",
+            "kind": "count",
+            "comment": "Resources declared as repository references.",
+            "where": {
+              "field": "resource_type",
+              "op": "eq",
+              "value": "repository"
+            }
+          },
+          {
+            "name": "copilot_text_resource_count",
+            "kind": "count",
+            "comment": "Resources declared as free text.",
+            "where": {
+              "field": "resource_type",
+              "op": "eq",
+              "value": "free_text"
+            }
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "copilot_space_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Copilot Space number within its explicitly selected organization or user owner.",
+              "minimum": 1,
+              "example": 1
+            },
+            {
+              "name": "copilot_space_resource_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact resource identity within the selected Copilot Space.",
+              "minimum": 1,
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "space_id",
+              "source_stage": "records",
+              "source_column": "space_id"
+            },
+            {
+              "name": "space_owner_kind",
+              "source_stage": "records",
+              "source_column": "space_owner_kind"
+            },
+            {
+              "name": "space_owner_login",
+              "source_stage": "records",
+              "source_column": "space_owner_login"
+            },
+            {
+              "name": "copilot_space_number",
+              "source_stage": "records",
+              "source_column": "copilot_space_number"
+            },
+            {
+              "name": "resource_id",
+              "source_stage": "records",
+              "source_column": "resource_id"
+            },
+            {
+              "name": "resource_type",
+              "source_stage": "records",
+              "source_column": "resource_type"
+            },
+            {
+              "name": "copilot_chat_attachment_id",
+              "source_stage": "records",
+              "source_column": "copilot_chat_attachment_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "spaces",
+                "scope": "copilot_space_lookup"
+              },
+              {
+                "name": "records",
+                "scope": "copilot_space_resource_lookup"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected owner and space population; preserve every advertised cursor/Link page and empty spaces.",
+          "select": [
+            "copilot_space_resource_id"
+          ]
+        },
+        {
+          "name": "spaces",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "copilot_space_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Copilot Space number within its explicitly selected organization or user owner.",
+              "minimum": 1,
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "space_id",
+              "source_stage": "records",
+              "source_column": "space_id"
+            },
+            {
+              "name": "space_owner_kind",
+              "source_stage": "records",
+              "source_column": "space_owner_kind"
+            },
+            {
+              "name": "space_owner_login",
+              "source_stage": "records",
+              "source_column": "space_owner_login"
+            },
+            {
+              "name": "copilot_space_number",
+              "source_stage": "records",
+              "source_column": "copilot_space_number"
+            },
+            {
+              "name": "resource_id",
+              "source_stage": "records",
+              "source_column": "resource_id"
+            },
+            {
+              "name": "resource_type",
+              "source_stage": "records",
+              "source_column": "resource_type"
+            },
+            {
+              "name": "copilot_chat_attachment_id",
+              "source_stage": "records",
+              "source_column": "copilot_chat_attachment_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "spaces",
+                "scope": "copilot_space_lookup"
+              },
+              {
+                "name": "records",
+                "scope": "copilot_space_resources"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected owner and space population; preserve every advertised cursor/Link page and empty spaces.",
+          "select": [
+            "copilot_space_number"
+          ]
+        },
+        {
+          "name": "owners",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "space_id",
+              "source_stage": "records",
+              "source_column": "space_id"
+            },
+            {
+              "name": "space_owner_kind",
+              "source_stage": "records",
+              "source_column": "space_owner_kind"
+            },
+            {
+              "name": "space_owner_login",
+              "source_stage": "records",
+              "source_column": "space_owner_login"
+            },
+            {
+              "name": "copilot_space_number",
+              "source_stage": "records",
+              "source_column": "copilot_space_number"
+            },
+            {
+              "name": "resource_id",
+              "source_stage": "records",
+              "source_column": "resource_id"
+            },
+            {
+              "name": "resource_type",
+              "source_stage": "records",
+              "source_column": "resource_type"
+            },
+            {
+              "name": "copilot_chat_attachment_id",
+              "source_stage": "records",
+              "source_column": "copilot_chat_attachment_id"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "spaces",
+                "scope": "copilot_space_list"
+              },
+              {
+                "name": "records",
+                "scope": "copilot_space_resources"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected owner and space population; preserve every advertised cursor/Link page and empty spaces.",
+          "select": [
+            "organization",
+            "user"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "copilot_space_collaborators",
+      "description": "Copilot Space collaborator memberships qualified by actor type and actor ID. Typed user/team branches preserve business membership roles; team membership is not expanded into individual users. The pinned Team parent property supplies no value type and remains an explicit dynamic-value coverage gap.",
+      "grain": [
+        "space_id",
+        "actor_type",
+        "collaborator_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "space_id",
+          "space_owner_kind",
+          "space_owner_login",
+          "copilot_space_number",
+          "collaborator_id",
+          "actor_type",
+          "role",
+          "collaborator"
+        ],
+        "dimensions": [
+          "space_id",
+          "space_owner_kind",
+          "space_owner_login",
+          "copilot_space_number",
+          "collaborator_id",
+          "actor_type",
+          "role"
+        ],
+        "sql_names": {
+          "space_id": "copilot_space_collaborators_space_id",
+          "space_owner_kind": "copilot_space_collaborators_space_owner_kind",
+          "space_owner_login": "copilot_space_collaborators_space_owner_login",
+          "copilot_space_number": "copilot_space_collaborators_copilot_space_number",
+          "collaborator_id": "copilot_space_collaborators_collaborator_id",
+          "actor_type": "copilot_space_collaborators_actor_type",
+          "role": "copilot_space_collaborators_role"
+        },
+        "metrics": [
+          {
+            "name": "copilot_space_collaborator_count",
+            "kind": "count",
+            "comment": "Space/actor memberships; user and team IDs are separate domains."
+          },
+          {
+            "name": "copilot_user_collaborator_count",
+            "kind": "count",
+            "comment": "Collaborator memberships declared User.",
+            "where": {
+              "field": "actor_type",
+              "op": "eq",
+              "value": "User"
+            }
+          },
+          {
+            "name": "copilot_team_collaborator_count",
+            "kind": "count",
+            "comment": "Collaborator memberships declared Team.",
+            "where": {
+              "field": "actor_type",
+              "op": "eq",
+              "value": "Team"
+            }
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "spaces",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            },
+            {
+              "name": "copilot_space_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Copilot Space number within its explicitly selected organization or user owner.",
+              "minimum": 1,
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "space_id",
+              "source_stage": "records",
+              "source_column": "space_id"
+            },
+            {
+              "name": "space_owner_kind",
+              "source_stage": "records",
+              "source_column": "space_owner_kind"
+            },
+            {
+              "name": "space_owner_login",
+              "source_stage": "records",
+              "source_column": "space_owner_login"
+            },
+            {
+              "name": "copilot_space_number",
+              "source_stage": "records",
+              "source_column": "copilot_space_number"
+            },
+            {
+              "name": "collaborator_id",
+              "source_stage": "records",
+              "source_column": "collaborator_id"
+            },
+            {
+              "name": "actor_type",
+              "source_stage": "records",
+              "source_column": "actor_type"
+            },
+            {
+              "name": "role",
+              "source_stage": "records",
+              "source_column": "role"
+            },
+            {
+              "name": "collaborator",
+              "source_stage": "records",
+              "source_column": "collaborator"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "spaces",
+                "scope": "copilot_space_lookup"
+              },
+              {
+                "name": "records",
+                "scope": "copilot_space_collaborators"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected owner and space population; preserve every advertised cursor/Link page and empty spaces.",
+          "select": [
+            "copilot_space_number"
+          ]
+        },
+        {
+          "name": "owners",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm",
+              "default": null
+            },
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "space_id",
+              "source_stage": "records",
+              "source_column": "space_id"
+            },
+            {
+              "name": "space_owner_kind",
+              "source_stage": "records",
+              "source_column": "space_owner_kind"
+            },
+            {
+              "name": "space_owner_login",
+              "source_stage": "records",
+              "source_column": "space_owner_login"
+            },
+            {
+              "name": "copilot_space_number",
+              "source_stage": "records",
+              "source_column": "copilot_space_number"
+            },
+            {
+              "name": "collaborator_id",
+              "source_stage": "records",
+              "source_column": "collaborator_id"
+            },
+            {
+              "name": "actor_type",
+              "source_stage": "records",
+              "source_column": "actor_type"
+            },
+            {
+              "name": "role",
+              "source_stage": "records",
+              "source_column": "role"
+            },
+            {
+              "name": "collaborator",
+              "source_stage": "records",
+              "source_column": "collaborator"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "spaces",
+                "scope": "copilot_space_list"
+              },
+              {
+                "name": "records",
+                "scope": "copilot_space_collaborators"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Selected owner and space population; preserve every advertised cursor/Link page and empty spaces.",
+          "select": [
+            "organization",
+            "user"
+          ]
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "copilot_space_resources_to_spaces",
+      "from": "copilot_space_resources",
+      "to": "copilot_spaces",
+      "from_columns": [
+        "space_id"
+      ],
+      "to_columns": [
+        "space_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "space_owner_login",
+            "copilot_space_number": "copilot_space_number"
+          },
+          "when": {
+            "space_owner_kind": "organization"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "spaces",
+          "bindings": {
+            "organization": "space_owner_login",
+            "copilot_space_number": "space_number"
+          },
+          "when": {
+            "space_owner_kind": "organization"
+          }
+        },
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "space_owner_login",
+            "copilot_space_number": "copilot_space_number"
+          },
+          "when": {
+            "space_owner_kind": "user"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "spaces",
+          "bindings": {
+            "user": "space_owner_login",
+            "copilot_space_number": "space_number"
+          },
+          "when": {
+            "space_owner_kind": "user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "copilot_space_collaborators_to_spaces",
+      "from": "copilot_space_collaborators",
+      "to": "copilot_spaces",
+      "from_columns": [
+        "space_id"
+      ],
+      "to_columns": [
+        "space_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "space_owner_login",
+            "copilot_space_number": "copilot_space_number"
+          },
+          "when": {
+            "space_owner_kind": "organization"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "spaces",
+          "bindings": {
+            "organization": "space_owner_login",
+            "copilot_space_number": "space_number"
+          },
+          "when": {
+            "space_owner_kind": "organization"
+          }
+        },
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "space_owner_login",
+            "copilot_space_number": "copilot_space_number"
+          },
+          "when": {
+            "space_owner_kind": "user"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "spaces",
+          "bindings": {
+            "user": "space_owner_login",
+            "copilot_space_number": "space_number"
+          },
+          "when": {
+            "space_owner_kind": "user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "copilot_spaces_to_creators",
+      "from": "copilot_spaces",
+      "to": "users",
+      "from_columns": [
+        "creator_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "creator_login"
+          }
+        }
+      ]
+    }
+  ],
+  "scopes": {
+    "copilot_space_list": {
+      "exclusive_parameters": [
+        "organization",
+        "user"
+      ],
+      "comment": "Select exactly one explicit owner population; owner kind remains part of navigation provenance.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "copilot_organization_spaces_source",
+          "arguments": {
+            "space_owner_login": {
+              "parameter": "organization"
+            },
+            "space_owner_kind": {
+              "literal": "organization"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "copilot_user_spaces_source",
+          "arguments": {
+            "space_owner_login": {
+              "parameter": "user"
+            },
+            "space_owner_kind": {
+              "literal": "user"
+            }
+          }
+        }
+      }
+    },
+    "copilot_space_lookup": {
+      "exclusive_parameters": [
+        "organization",
+        "user"
+      ],
+      "comment": "Select exactly one explicit owner population; owner kind remains part of navigation provenance.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "copilot_organization_space_lookup_source",
+          "arguments": {
+            "space_owner_login": {
+              "parameter": "organization"
+            },
+            "space_owner_kind": {
+              "literal": "organization"
+            },
+            "copilot_space_number": {
+              "parameter": "copilot_space_number"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "copilot_user_space_lookup_source",
+          "arguments": {
+            "space_owner_login": {
+              "parameter": "user"
+            },
+            "space_owner_kind": {
+              "literal": "user"
+            },
+            "copilot_space_number": {
+              "parameter": "copilot_space_number"
+            }
+          }
+        }
+      }
+    },
+    "copilot_space_collaborators": {
+      "exclusive_parameters": [
+        "organization",
+        "user"
+      ],
+      "comment": "Select exactly one explicit owner population; owner kind remains part of navigation provenance.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "copilot_organization_space_collaborators_source",
+          "arguments": {
+            "space_owner_login": {
+              "stage": "spaces",
+              "column": "space_owner_login"
+            },
+            "space_owner_kind": {
+              "stage": "spaces",
+              "column": "space_owner_kind"
+            },
+            "space_id": {
+              "stage": "spaces",
+              "column": "space_id"
+            },
+            "copilot_space_number": {
+              "stage": "spaces",
+              "column": "space_number"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "copilot_user_space_collaborators_source",
+          "arguments": {
+            "space_owner_login": {
+              "stage": "spaces",
+              "column": "space_owner_login"
+            },
+            "space_owner_kind": {
+              "stage": "spaces",
+              "column": "space_owner_kind"
+            },
+            "space_id": {
+              "stage": "spaces",
+              "column": "space_id"
+            },
+            "copilot_space_number": {
+              "stage": "spaces",
+              "column": "space_number"
+            }
+          }
+        }
+      }
+    },
+    "copilot_space_resources": {
+      "exclusive_parameters": [
+        "organization",
+        "user"
+      ],
+      "comment": "Select exactly one explicit owner population; owner kind remains part of navigation provenance.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "copilot_organization_space_resources_source",
+          "arguments": {
+            "space_owner_login": {
+              "stage": "spaces",
+              "column": "space_owner_login"
+            },
+            "space_owner_kind": {
+              "stage": "spaces",
+              "column": "space_owner_kind"
+            },
+            "space_id": {
+              "stage": "spaces",
+              "column": "space_id"
+            },
+            "copilot_space_number": {
+              "stage": "spaces",
+              "column": "space_number"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "copilot_user_space_resources_source",
+          "arguments": {
+            "space_owner_login": {
+              "stage": "spaces",
+              "column": "space_owner_login"
+            },
+            "space_owner_kind": {
+              "stage": "spaces",
+              "column": "space_owner_kind"
+            },
+            "space_id": {
+              "stage": "spaces",
+              "column": "space_id"
+            },
+            "copilot_space_number": {
+              "stage": "spaces",
+              "column": "space_number"
+            }
+          }
+        }
+      }
+    },
+    "copilot_space_resource_lookup": {
+      "exclusive_parameters": [
+        "organization",
+        "user"
+      ],
+      "comment": "Select exactly one explicit owner population; owner kind remains part of navigation provenance.",
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "copilot_organization_space_resource_lookup_source",
+          "arguments": {
+            "space_owner_login": {
+              "stage": "spaces",
+              "column": "space_owner_login"
+            },
+            "space_owner_kind": {
+              "stage": "spaces",
+              "column": "space_owner_kind"
+            },
+            "space_id": {
+              "stage": "spaces",
+              "column": "space_id"
+            },
+            "copilot_space_number": {
+              "stage": "spaces",
+              "column": "space_number"
+            },
+            "copilot_space_resource_id": {
+              "parameter": "copilot_space_resource_id"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "copilot_user_space_resource_lookup_source",
+          "arguments": {
+            "space_owner_login": {
+              "stage": "spaces",
+              "column": "space_owner_login"
+            },
+            "space_owner_kind": {
+              "stage": "spaces",
+              "column": "space_owner_kind"
+            },
+            "space_id": {
+              "stage": "spaces",
+              "column": "space_id"
+            },
+            "copilot_space_number": {
+              "stage": "spaces",
+              "column": "space_number"
+            },
+            "copilot_space_resource_id": {
+              "parameter": "copilot_space_resource_id"
+            }
+          }
+        }
+      }
+    }
+  }
+}

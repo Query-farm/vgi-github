@@ -1,11 +1,11 @@
 # GitHub reporting with Crossfield
 
 For connected organization, user and repository analysis, start with the
-[generated model guide](generated-pilot/README.md). It offers 15 freely selected
-measures across 10 entities, including organization inventory, members, teams
-and user-authored PRs across repositories. Use `organization => ...` or
-`user => ...` without supplying a repository. The broad package described below
-retains its wider endpoint coverage; these remain separate packages/workers.
+[generated model guide](generated-pilot/README.md). Its generated
+[coverage ledger](generated-pilot/coverage.json) records the selected entities,
+retrieval routes and gaps against the full pinned read API. The broad package
+described below retains its wider endpoint coverage; these remain separate
+packages/workers.
 
 This model covers the worker's 21 typed `main` functions, all 780 pinned REST GET
 operations, GraphQL queries and endpoint discovery: 24 sources, 51 approved

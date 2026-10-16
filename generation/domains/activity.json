@@ -1,0 +1,6322 @@
+{
+  "entities": [
+    {
+      "name": "activity_repository_caller_source",
+      "description": "users/get-authenticated pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub repository numeric identity resolved before child retrieval.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "caller_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "caller_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        }
+      ],
+      "grain": [
+        "caller_id",
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-authenticated",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "repository_stars_by_repository_source",
+      "description": "activity/list-stargazers-for-repo pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub repository numeric identity resolved before child retrieval.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "stargazer_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "stargazer_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "starred_at",
+          "path": [
+            "starred_at"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "stargazer_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-stargazers-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        },
+        "accept": "application/vnd.github.star+json",
+        "response_variant": {
+          "kind": "anyOf",
+          "index": 1,
+          "comment": "Pinned operation documentation associates star media with timestamped stargazer objects."
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "stargazer_id",
+          "stargazer_login"
+        ]
+      }
+    },
+    {
+      "name": "repository_stars_user_source",
+      "description": "activity/list-repos-starred-by-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub account numeric identity resolved before child retrieval.",
+          "example": 1
+        },
+        {
+          "name": "account_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "full_name"
+          ]
+        },
+        {
+          "name": "stargazer_id",
+          "source_argument": "account_id"
+        },
+        {
+          "name": "stargazer_login",
+          "source_argument": "account_login"
+        },
+        {
+          "name": "starred_at",
+          "path": [
+            "starred_at"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "stargazer_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-repos-starred-by-user",
+        "path_bindings": {
+          "username": {
+            "argument": "account_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        },
+        "accept": "application/vnd.github.star+json",
+        "response_variant": {
+          "kind": "anyOf",
+          "index": 0,
+          "comment": "Pinned operation documentation associates star media with timestamped repository objects."
+        }
+      }
+    },
+    {
+      "name": "repository_stars_authenticated_source",
+      "description": "activity/list-repos-starred-by-authenticated-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub account numeric identity resolved before child retrieval.",
+          "example": 1
+        },
+        {
+          "name": "account_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "full_name"
+          ]
+        },
+        {
+          "name": "stargazer_id",
+          "source_argument": "account_id"
+        },
+        {
+          "name": "stargazer_login",
+          "source_argument": "account_login"
+        },
+        {
+          "name": "starred_at",
+          "path": [
+            "starred_at"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "stargazer_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-repos-starred-by-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        },
+        "response_media_type": "application/vnd.github.v3.star+json"
+      }
+    },
+    {
+      "name": "repository_watchers_by_repository_source",
+      "description": "activity/list-watchers-for-repo pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub repository numeric identity resolved before child retrieval.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "watcher_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "watcher_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "watcher_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-watchers-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "watcher_id",
+          "watcher_login"
+        ]
+      }
+    },
+    {
+      "name": "repository_watchers_user_source",
+      "description": "activity/list-repos-watched-by-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub account numeric identity resolved before child retrieval.",
+          "example": 1
+        },
+        {
+          "name": "account_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "watcher_id",
+          "source_argument": "account_id"
+        },
+        {
+          "name": "watcher_login",
+          "source_argument": "account_login"
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "watcher_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-repos-watched-by-user",
+        "path_bindings": {
+          "username": {
+            "argument": "account_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_watchers_authenticated_source",
+      "description": "activity/list-watched-repos-for-authenticated-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub account numeric identity resolved before child retrieval.",
+          "example": 1
+        },
+        {
+          "name": "account_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "watcher_id",
+          "source_argument": "account_id"
+        },
+        {
+          "name": "watcher_login",
+          "source_argument": "account_login"
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "watcher_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-watched-repos-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "repository_star_counts_source",
+      "description": "activity/get-stargazer-count-for-repo pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub repository numeric identity resolved before child retrieval.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "current_count",
+          "path": [
+            "count"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/get-stargazer-count-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "repository_star_history_source",
+      "description": "activity/get-stargazer-history-for-repo pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub repository numeric identity resolved before child retrieval.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "week_unix",
+          "path": [
+            "week"
+          ]
+        },
+        {
+          "name": "total",
+          "path": [
+            "total"
+          ]
+        },
+        {
+          "name": "days",
+          "path": [
+            "days"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "week_unix"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/get-stargazer-history-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 30
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 3000
+        }
+      }
+    },
+    {
+      "name": "repository_subscription_source",
+      "description": "activity/get-repo-subscription pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable GitHub repository numeric identity resolved before child retrieval.",
+          "example": 1
+        },
+        {
+          "name": "caller_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Authenticated GitHub account identity resolved before the status request.",
+          "example": 1
+        },
+        {
+          "name": "caller_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Authenticated GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "caller_id",
+          "source_argument": "caller_id"
+        },
+        {
+          "name": "caller_login",
+          "source_argument": "caller_login"
+        },
+        {
+          "name": "subscribed",
+          "path": [
+            "subscribed"
+          ]
+        },
+        {
+          "name": "ignored",
+          "path": [
+            "ignored"
+          ]
+        },
+        {
+          "name": "reason",
+          "path": [
+            "reason"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repository_url"
+          ]
+        }
+      ],
+      "grain": [
+        "caller_id",
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/get-repo-subscription",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "repository_star_status_source",
+      "description": "activity/check-repo-is-starred-by-authenticated-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "caller_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Authenticated GitHub account identity resolved before the status request.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "caller_id",
+          "source_argument": "caller_id"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "caller_id",
+        "repository"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/check-repo-is-starred-by-authenticated-user",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "pagination": {
+          "kind": "none"
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    },
+    {
+      "name": "notification_caller_source",
+      "description": "activity/list-notifications-for-authenticated-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "caller_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Authenticated GitHub account identity resolved before the status request.",
+          "example": 1
+        },
+        {
+          "name": "caller_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Authenticated GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        },
+        {
+          "name": "notification_participating",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Optional GitHub participating filter for the caller notification listing.",
+          "example": true,
+          "default": null
+        },
+        {
+          "name": "notification_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only notifications updated after this timestamp, as filtered by GitHub.",
+          "example": "2025-01-01T00:00:00Z",
+          "default": null
+        },
+        {
+          "name": "notification_before",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only notifications updated before this timestamp, as filtered by GitHub.",
+          "example": "2026-01-01T00:00:00Z",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "caller_id",
+          "source_argument": "caller_id"
+        },
+        {
+          "name": "caller_login",
+          "source_argument": "caller_login"
+        },
+        {
+          "name": "notification_thread_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "subject",
+          "path": [
+            "subject"
+          ]
+        },
+        {
+          "name": "reason",
+          "path": [
+            "reason"
+          ]
+        },
+        {
+          "name": "unread",
+          "path": [
+            "unread"
+          ]
+        },
+        {
+          "name": "updated_at_raw",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "last_read_at_raw",
+          "path": [
+            "last_read_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "subscription_url",
+          "path": [
+            "subscription_url"
+          ]
+        }
+      ],
+      "grain": [
+        "caller_id",
+        "notification_thread_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-notifications-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "all": {
+            "literal": true
+          },
+          "participating": {
+            "argument": "notification_participating"
+          },
+          "since": {
+            "argument": "notification_since"
+          },
+          "before": {
+            "argument": "notification_before"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "notification_repository_source",
+      "description": "activity/list-repo-notifications-for-authenticated-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "caller_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Authenticated GitHub account identity resolved before the status request.",
+          "example": 1
+        },
+        {
+          "name": "caller_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Authenticated GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        },
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "notification_participating",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Optional GitHub participating filter for the caller notification listing.",
+          "example": true,
+          "default": null
+        },
+        {
+          "name": "notification_since",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only notifications updated after this timestamp, as filtered by GitHub.",
+          "example": "2025-01-01T00:00:00Z",
+          "default": null
+        },
+        {
+          "name": "notification_before",
+          "type": "TIMESTAMP WITH TIME ZONE",
+          "nullable": true,
+          "description": "Only notifications updated before this timestamp, as filtered by GitHub.",
+          "example": "2026-01-01T00:00:00Z",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "caller_id",
+          "source_argument": "caller_id"
+        },
+        {
+          "name": "caller_login",
+          "source_argument": "caller_login"
+        },
+        {
+          "name": "notification_thread_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "subject",
+          "path": [
+            "subject"
+          ]
+        },
+        {
+          "name": "reason",
+          "path": [
+            "reason"
+          ]
+        },
+        {
+          "name": "unread",
+          "path": [
+            "unread"
+          ]
+        },
+        {
+          "name": "updated_at_raw",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "last_read_at_raw",
+          "path": [
+            "last_read_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "subscription_url",
+          "path": [
+            "subscription_url"
+          ]
+        }
+      ],
+      "grain": [
+        "caller_id",
+        "notification_thread_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-repo-notifications-for-authenticated-user",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "all": {
+            "literal": true
+          },
+          "participating": {
+            "argument": "notification_participating"
+          },
+          "since": {
+            "argument": "notification_since"
+          },
+          "before": {
+            "argument": "notification_before"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "notification_lookup_source",
+      "description": "activity/get-thread pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "caller_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Authenticated GitHub account identity resolved before the status request.",
+          "example": 1
+        },
+        {
+          "name": "caller_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Authenticated GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        },
+        {
+          "name": "notification_thread_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One canonical decimal notification thread ID; the API wire identity is preserved as text and integer path conversion is validated.",
+          "example": "1",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "caller_id",
+          "source_argument": "caller_id"
+        },
+        {
+          "name": "caller_login",
+          "source_argument": "caller_login"
+        },
+        {
+          "name": "notification_thread_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repository",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "subject",
+          "path": [
+            "subject"
+          ]
+        },
+        {
+          "name": "reason",
+          "path": [
+            "reason"
+          ]
+        },
+        {
+          "name": "unread",
+          "path": [
+            "unread"
+          ]
+        },
+        {
+          "name": "updated_at_raw",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "last_read_at_raw",
+          "path": [
+            "last_read_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "subscription_url",
+          "path": [
+            "subscription_url"
+          ]
+        }
+      ],
+      "grain": [
+        "caller_id",
+        "notification_thread_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/get-thread",
+        "path_bindings": {
+          "thread_id": {
+            "argument": "notification_thread_id",
+            "transform": "decimal_string_to_bigint"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "notification_thread_id",
+            "argument": "notification_thread_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "notification_subscription_source",
+      "description": "activity/get-thread-subscription-for-authenticated-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "caller_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Authenticated GitHub account identity resolved before the status request.",
+          "example": 1
+        },
+        {
+          "name": "caller_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Authenticated GitHub login returned by account hydration.",
+          "example": "octocat",
+          "min_length": 1
+        },
+        {
+          "name": "notification_thread_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "One canonical decimal notification thread ID; the API wire identity is preserved as text and integer path conversion is validated.",
+          "example": "1",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "caller_id",
+          "source_argument": "caller_id"
+        },
+        {
+          "name": "caller_login",
+          "source_argument": "caller_login"
+        },
+        {
+          "name": "notification_thread_id",
+          "source_argument": "notification_thread_id"
+        },
+        {
+          "name": "subscribed",
+          "path": [
+            "subscribed"
+          ]
+        },
+        {
+          "name": "ignored",
+          "path": [
+            "ignored"
+          ]
+        },
+        {
+          "name": "reason",
+          "path": [
+            "reason"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "thread_url",
+          "path": [
+            "thread_url"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repository_url"
+          ]
+        }
+      ],
+      "grain": [
+        "caller_id",
+        "notification_thread_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/get-thread-subscription-for-authenticated-user",
+        "path_bindings": {
+          "thread_id": {
+            "argument": "notification_thread_id",
+            "transform": "decimal_string_to_bigint"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "activity_events_organization_authenticated_source",
+      "description": "activity/list-org-events-for-authenticated-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        },
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-org-events-for-authenticated-user",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          },
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_events_network_source",
+      "description": "activity/list-public-events-for-repo-network pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-public-events-for-repo-network",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_events_performed_public_source",
+      "description": "activity/list-public-events-for-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-public-events-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_events_received_source",
+      "description": "activity/list-received-events-for-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-received-events-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_events_received_public_source",
+      "description": "activity/list-received-public-events-for-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-received-public-events-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_events_performed_source",
+      "description": "activity/list-events-for-authenticated-user pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-events-for-authenticated-user",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_events_repository_source",
+      "description": "activity/list-repo-events pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-repo-events",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_events_organization_source",
+      "description": "activity/list-public-org-events pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-public-org-events",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_events_public_source",
+      "description": "activity/list-public-events pinned, schema-derived read source.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "event_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "event_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "repository_id",
+          "path": [
+            "repo",
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repo",
+            "name"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repo",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_id",
+          "path": [
+            "org",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "org",
+            "login"
+          ]
+        },
+        {
+          "name": "organization_actor",
+          "path": [
+            "org"
+          ]
+        },
+        {
+          "name": "public",
+          "path": [
+            "public"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "event_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/list-public-events",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "reject_at_rows": 300
+        }
+      }
+    },
+    {
+      "name": "activity_feeds_source",
+      "description": "activity/get-feeds pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "api_host",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Configured API product host for this observation.",
+          "example": "api.github.com",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_argument": "api_host"
+        },
+        {
+          "name": "timeline_url",
+          "path": [
+            "timeline_url"
+          ]
+        },
+        {
+          "name": "user_url",
+          "path": [
+            "user_url"
+          ]
+        },
+        {
+          "name": "current_user_public_url",
+          "path": [
+            "current_user_public_url"
+          ]
+        },
+        {
+          "name": "current_user_url",
+          "path": [
+            "current_user_url"
+          ]
+        },
+        {
+          "name": "current_user_actor_url",
+          "path": [
+            "current_user_actor_url"
+          ]
+        },
+        {
+          "name": "current_user_organization_url",
+          "path": [
+            "current_user_organization_url"
+          ]
+        },
+        {
+          "name": "current_user_organization_urls",
+          "path": [
+            "current_user_organization_urls"
+          ]
+        },
+        {
+          "name": "security_advisories_url",
+          "path": [
+            "security_advisories_url"
+          ]
+        },
+        {
+          "name": "repository_discussions_url",
+          "path": [
+            "repository_discussions_url"
+          ]
+        },
+        {
+          "name": "repository_discussions_category_url",
+          "path": [
+            "repository_discussions_category_url"
+          ]
+        },
+        {
+          "name": "links",
+          "path": [
+            "_links"
+          ]
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "activity/get-feeds",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "repository_stars",
+      "description": "Canonical current repository stars keyed by stable repository and stargazer account IDs. Repository and user routes express alternate retrieval directions of this one business relation.",
+      "grain": [
+        "repository_id",
+        "stargazer_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "stargazer_id",
+          "stargazer_login",
+          "starred_at"
+        ],
+        "dimensions": [
+          "repository",
+          "stargazer_login",
+          "starred_at"
+        ],
+        "sql_names": {
+          "repository": "repository_stars_repository",
+          "stargazer_login": "repository_stars_stargazer_login",
+          "starred_at": "repository_stars_starred_at"
+        },
+        "metrics": [
+          {
+            "name": "repository_star_count",
+            "kind": "count",
+            "comment": "Current repository/account relationships, with the same grain from repository and account retrieval directions. Not historical follow/unfollow events."
+          }
+        ]
+      },
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "relations",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "relations",
+              "source_column": "repository"
+            },
+            {
+              "name": "stargazer_id",
+              "source_stage": "relations",
+              "source_column": "stargazer_id"
+            },
+            {
+              "name": "stargazer_login",
+              "source_stage": "relations",
+              "source_column": "stargazer_login"
+            },
+            {
+              "name": "starred_at",
+              "source_stage": "relations",
+              "source_column": "starred_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "relations",
+                "entity": "repository_stars_by_repository_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "relations"
+          },
+          "population": "All current stars for each selected repository. Missing actor identity fails the source qualification; no anonymous row is silently dropped."
+        },
+        {
+          "name": "user",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "relations",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "relations",
+              "source_column": "repository"
+            },
+            {
+              "name": "stargazer_id",
+              "source_stage": "relations",
+              "source_column": "stargazer_id"
+            },
+            {
+              "name": "stargazer_login",
+              "source_stage": "relations",
+              "source_column": "stargazer_login"
+            },
+            {
+              "name": "starred_at",
+              "source_stage": "relations",
+              "source_column": "starred_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "account",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              },
+              {
+                "name": "relations",
+                "entity": "repository_stars_user_source",
+                "arguments": {
+                  "account_id": {
+                    "stage": "account",
+                    "column": "user_id"
+                  },
+                  "account_login": {
+                    "stage": "account",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "relations"
+          },
+          "population": "Current stars for the named user, restricted by GitHub profile/repository visibility.",
+          "select": [
+            "user"
+          ]
+        },
+        {
+          "name": "authenticated",
+          "arguments": [],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "relations",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "relations",
+              "source_column": "repository"
+            },
+            {
+              "name": "stargazer_id",
+              "source_stage": "relations",
+              "source_column": "stargazer_id"
+            },
+            {
+              "name": "stargazer_login",
+              "source_stage": "relations",
+              "source_column": "stargazer_login"
+            },
+            {
+              "name": "starred_at",
+              "source_stage": "relations",
+              "source_column": "starred_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "account",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "relations",
+                "entity": "repository_stars_authenticated_source",
+                "arguments": {
+                  "account_id": {
+                    "stage": "account",
+                    "column": "caller_id"
+                  },
+                  "account_login": {
+                    "stage": "account",
+                    "column": "caller_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "relations"
+          },
+          "population": "Current stars for the authenticated caller, across advertised pages.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "repository_watchers",
+      "description": "Canonical current repository watchers keyed by stable repository and watcher account IDs. Repository and user routes express alternate retrieval directions of this one business relation.",
+      "grain": [
+        "repository_id",
+        "watcher_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "watcher_id",
+          "watcher_login"
+        ],
+        "dimensions": [
+          "repository",
+          "watcher_login"
+        ],
+        "sql_names": {
+          "repository": "repository_watchers_repository",
+          "watcher_login": "repository_watchers_watcher_login"
+        },
+        "metrics": [
+          {
+            "name": "repository_watcher_count",
+            "kind": "count",
+            "comment": "Current repository/account relationships, with the same grain from repository and account retrieval directions. Not historical follow/unfollow events."
+          }
+        ]
+      },
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "relations",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "relations",
+              "source_column": "repository"
+            },
+            {
+              "name": "watcher_id",
+              "source_stage": "relations",
+              "source_column": "watcher_id"
+            },
+            {
+              "name": "watcher_login",
+              "source_stage": "relations",
+              "source_column": "watcher_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "relations",
+                "entity": "repository_watchers_by_repository_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "relations"
+          },
+          "population": "All current watchers for each selected repository. Missing actor identity fails the source qualification; no anonymous row is silently dropped."
+        },
+        {
+          "name": "user",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "relations",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "relations",
+              "source_column": "repository"
+            },
+            {
+              "name": "watcher_id",
+              "source_stage": "relations",
+              "source_column": "watcher_id"
+            },
+            {
+              "name": "watcher_login",
+              "source_stage": "relations",
+              "source_column": "watcher_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "account",
+                "entity": "user_profile_lookup",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              },
+              {
+                "name": "relations",
+                "entity": "repository_watchers_user_source",
+                "arguments": {
+                  "account_id": {
+                    "stage": "account",
+                    "column": "user_id"
+                  },
+                  "account_login": {
+                    "stage": "account",
+                    "column": "user_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "relations"
+          },
+          "population": "Current watchers for the named user, restricted by GitHub profile/repository visibility.",
+          "select": [
+            "user"
+          ]
+        },
+        {
+          "name": "authenticated",
+          "arguments": [],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "relations",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "relations",
+              "source_column": "repository"
+            },
+            {
+              "name": "watcher_id",
+              "source_stage": "relations",
+              "source_column": "watcher_id"
+            },
+            {
+              "name": "watcher_login",
+              "source_stage": "relations",
+              "source_column": "watcher_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "account",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "relations",
+                "entity": "repository_watchers_authenticated_source",
+                "arguments": {
+                  "account_id": {
+                    "stage": "account",
+                    "column": "caller_id"
+                  },
+                  "account_login": {
+                    "stage": "account",
+                    "column": "caller_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "relations"
+          },
+          "population": "Current watchers for the authenticated caller, across advertised pages.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "repository_star_counts",
+      "description": "Current repository star-count snapshots. Previously removed stars are excluded; repeated invocations are observations, not additive history.",
+      "grain": [
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "current_count"
+        ],
+        "dimensions": [
+          "repository"
+        ],
+        "sql_names": {
+          "repository": "repository_star_counts_repository"
+        },
+        "metrics": [
+          {
+            "name": "repository_star_count_observation_count",
+            "kind": "count",
+            "comment": "Selected repository snapshots."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_current_stars": {
+              "expression": "COALESCE(SUM(repository_star_counts.current_count), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_current_stars": {
+              "comment": "Sum over distinct selected repositories in the current snapshot.",
+              "additivity": "additive",
+              "dataset": "repository_star_counts",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "observations",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "observations",
+              "source_column": "repository"
+            },
+            {
+              "name": "current_count",
+              "source_stage": "observations",
+              "source_column": "current_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "observations",
+                "entity": "repository_star_counts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "observations"
+          },
+          "population": "Current repository star-count snapshots. Previously removed stars are excluded; repeated invocations are observations, not additive history. Follow all advertised pages; reaching the history API 100-page/3000-week boundary fails."
+        }
+      ]
+    },
+    {
+      "name": "repository_star_history",
+      "description": "Repository-qualified calendar-week star creation buckets. Days start Sunday; API day/week boundaries need not align with UTC, so the supplied Unix week key is preserved without inventing UTC dates.",
+      "grain": [
+        "repository_id",
+        "week_unix"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "week_unix",
+          "total",
+          "days"
+        ],
+        "dimensions": [
+          "repository",
+          "week_unix"
+        ],
+        "sql_names": {
+          "repository": "repository_star_history_repository",
+          "week_unix": "repository_star_history_week_unix"
+        },
+        "metrics": [
+          {
+            "name": "repository_star_week_count",
+            "kind": "count",
+            "comment": "Selected repository/week buckets, including zero-count weeks."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_weekly_stars_created": {
+              "expression": "COALESCE(SUM(repository_star_history.total), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_weekly_stars_created": {
+              "comment": "Reported stars created in the selected distinct repository/week buckets.",
+              "additivity": "additive",
+              "dataset": "repository_star_history",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "observations",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "observations",
+              "source_column": "repository"
+            },
+            {
+              "name": "week_unix",
+              "source_stage": "observations",
+              "source_column": "week_unix"
+            },
+            {
+              "name": "total",
+              "source_stage": "observations",
+              "source_column": "total"
+            },
+            {
+              "name": "days",
+              "source_stage": "observations",
+              "source_column": "days"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "observations",
+                "entity": "repository_star_history_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "observations"
+          },
+          "population": "Repository-qualified calendar-week star creation buckets. Days start Sunday; API day/week boundaries need not align with UTC, so the supplied Unix week key is preserved without inventing UTC dates. Follow all advertised pages; reaching the history API 100-page/3000-week boundary fails."
+        }
+      ]
+    },
+    {
+      "name": "repository_subscriptions",
+      "description": "Authenticated caller-qualified repository subscription snapshots, distinct from public watcher identity relations. Typed state and timestamps retain the API response; missing lookups fail closed.",
+      "grain": [
+        "caller_id",
+        "repository_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "caller_id",
+          "caller_login",
+          "subscribed",
+          "ignored",
+          "reason",
+          "created_at",
+          "url",
+          "repository_url"
+        ],
+        "dimensions": [
+          "repository",
+          "caller_login",
+          "subscribed",
+          "ignored",
+          "created_at"
+        ],
+        "sql_names": {
+          "repository": "repository_subscriptions_repository",
+          "caller_login": "repository_subscriptions_caller_login",
+          "subscribed": "repository_subscriptions_subscribed",
+          "ignored": "repository_subscriptions_ignored",
+          "created_at": "repository_subscriptions_created_at"
+        },
+        "metrics": [
+          {
+            "name": "repository_subscription_observation_count",
+            "kind": "count",
+            "comment": "Caller/repository subscription snapshots returned successfully; not an inference about inaccessible repositories."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "ignored_repository_subscription_count": {
+              "expression": "COUNT(*) FILTER (WHERE repository_subscriptions.ignored = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "ignored_repository_subscription_count": {
+              "comment": "Selected repository subscription observations explicitly marked ignored.",
+              "additivity": "additive",
+              "dataset": "repository_subscriptions"
+            }
+          }
+        }
+      },
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "subscriptions",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "subscriptions",
+              "source_column": "repository"
+            },
+            {
+              "name": "caller_id",
+              "source_stage": "subscriptions",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "subscriptions",
+              "source_column": "caller_login"
+            },
+            {
+              "name": "subscribed",
+              "source_stage": "subscriptions",
+              "source_column": "subscribed"
+            },
+            {
+              "name": "ignored",
+              "source_stage": "subscriptions",
+              "source_column": "ignored"
+            },
+            {
+              "name": "reason",
+              "source_stage": "subscriptions",
+              "source_column": "reason"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "subscriptions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "subscriptions",
+              "source_column": "url"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "subscriptions",
+              "source_column": "repository_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "caller",
+                "entity": "activity_repository_caller_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              },
+              {
+                "name": "subscriptions",
+                "entity": "repository_subscription_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "caller",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "caller",
+                    "column": "repository_id"
+                  },
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "caller",
+                    "column": "caller_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "subscriptions"
+          },
+          "population": "Caller subscription state for every selected repository. Missing/inaccessible subscription responses fail; a 404 is not silently interpreted as a universal negative."
+        },
+        {
+          "name": "authenticated",
+          "arguments": [],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "subscriptions",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "subscriptions",
+              "source_column": "repository"
+            },
+            {
+              "name": "caller_id",
+              "source_stage": "subscriptions",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "subscriptions",
+              "source_column": "caller_login"
+            },
+            {
+              "name": "subscribed",
+              "source_stage": "subscriptions",
+              "source_column": "subscribed"
+            },
+            {
+              "name": "ignored",
+              "source_stage": "subscriptions",
+              "source_column": "ignored"
+            },
+            {
+              "name": "reason",
+              "source_stage": "subscriptions",
+              "source_column": "reason"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "subscriptions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "subscriptions",
+              "source_column": "url"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "subscriptions",
+              "source_column": "repository_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "caller",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "watched",
+                "entity": "repository_watchers_authenticated_source",
+                "arguments": {
+                  "account_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  },
+                  "account_login": {
+                    "stage": "caller",
+                    "column": "caller_login"
+                  }
+                }
+              },
+              {
+                "name": "subscriptions",
+                "entity": "repository_subscription_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "watched",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "watched",
+                    "column": "repository_id"
+                  },
+                  "caller_id": {
+                    "stage": "watched",
+                    "column": "watcher_id"
+                  },
+                  "caller_login": {
+                    "stage": "watched",
+                    "column": "watcher_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "subscriptions"
+          },
+          "population": "Every repository in the authenticated caller watched listing, hydrated to typed subscription state.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "repository_star_observations",
+      "description": "Current authenticated-caller repository star-status observations. No repository hydration precedes the predicate, preserving negative responses even when a target is inaccessible.",
+      "grain": [
+        "caller_id",
+        "repository"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository",
+          "caller_id",
+          "status_code",
+          "caller_login"
+        ],
+        "dimensions": [
+          "repository",
+          "caller_login",
+          "status_code"
+        ],
+        "sql_names": {
+          "repository": "repository_star_observations_repository",
+          "caller_login": "repository_star_observations_caller_login",
+          "status_code": "repository_star_observations_status_code"
+        },
+        "metrics": [
+          {
+            "name": "repository_star_observation_count",
+            "kind": "count",
+            "comment": "Current caller/requested repository star-status observations. The requested owner/name is an observation locator, not a stable renamed repository identity."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "starred_repository_observation_count": {
+              "expression": "COUNT(*) FILTER (WHERE repository_star_observations.status_code = 204)"
+            }
+          },
+          "metric_semantics": {
+            "starred_repository_observation_count": {
+              "comment": "The documented affirmative star status; 404 does not prove target existence or visibility.",
+              "additivity": "additive",
+              "dataset": "repository_star_observations"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "repository"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository",
+              "source_stage": "status",
+              "source_column": "repository"
+            },
+            {
+              "name": "caller_id",
+              "source_stage": "status",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "status",
+              "source_column": "status_code"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "caller",
+              "source_column": "caller_login"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "caller",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "status",
+                "entity": "repository_star_status_source",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  },
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "status"
+          },
+          "population": "One current authenticated-caller star predicate for the exact requested target. No existence lookup precedes the predicate; 404 retains its documented negative status without asserting target existence."
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "description": "Canonical caller-qualified notifications, unifying account, repository and direct-thread retrieval. Subject URLs remain native descriptive text; raw timestamps remain VARCHAR because the pinned schema has no date-time format.",
+      "grain": [
+        "caller_id",
+        "notification_thread_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "caller_id",
+          "caller_login",
+          "notification_thread_id",
+          "repository_id",
+          "repository",
+          "subject",
+          "reason",
+          "unread",
+          "updated_at_raw",
+          "last_read_at_raw",
+          "url",
+          "subscription_url"
+        ],
+        "dimensions": [
+          "repository",
+          "caller_login",
+          "reason",
+          "unread"
+        ],
+        "sql_names": {
+          "repository": "notifications_repository",
+          "caller_login": "notifications_caller_login",
+          "reason": "notifications_reason",
+          "unread": "notifications_unread"
+        },
+        "metrics": [
+          {
+            "name": "notification_count",
+            "kind": "count",
+            "comment": "Current caller-qualified notification threads, including read and unread entries."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "unread_notification_count": {
+              "expression": "COUNT(*) FILTER (WHERE notifications.unread = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "unread_notification_count": {
+              "comment": "Selected caller notification threads explicitly marked unread.",
+              "additivity": "additive",
+              "dataset": "notifications"
+            }
+          }
+        }
+      },
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "notification_thread_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One canonical decimal notification thread ID; the API wire identity is preserved as text and integer path conversion is validated.",
+              "example": "1",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "caller_id",
+              "source_stage": "notifications",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "notifications",
+              "source_column": "caller_login"
+            },
+            {
+              "name": "notification_thread_id",
+              "source_stage": "notifications",
+              "source_column": "notification_thread_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "notifications",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "notifications",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject",
+              "source_stage": "notifications",
+              "source_column": "subject"
+            },
+            {
+              "name": "reason",
+              "source_stage": "notifications",
+              "source_column": "reason"
+            },
+            {
+              "name": "unread",
+              "source_stage": "notifications",
+              "source_column": "unread"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "notifications",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "last_read_at_raw",
+              "source_stage": "notifications",
+              "source_column": "last_read_at_raw"
+            },
+            {
+              "name": "url",
+              "source_stage": "notifications",
+              "source_column": "url"
+            },
+            {
+              "name": "subscription_url",
+              "source_stage": "notifications",
+              "source_column": "subscription_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "caller",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "notifications",
+                "entity": "notification_lookup_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "caller",
+                    "column": "caller_login"
+                  },
+                  "notification_thread_id": {
+                    "parameter": "notification_thread_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "notifications"
+          },
+          "population": "One caller-visible notification thread by exact canonical decimal ID.",
+          "select": [
+            "notification_thread_id"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "notification_participating",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "description": "Optional GitHub participating filter for the caller notification listing.",
+              "example": true,
+              "default": null
+            },
+            {
+              "name": "notification_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only notifications updated after this timestamp, as filtered by GitHub.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            },
+            {
+              "name": "notification_before",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only notifications updated before this timestamp, as filtered by GitHub.",
+              "example": "2026-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "caller_id",
+              "source_stage": "notifications",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "notifications",
+              "source_column": "caller_login"
+            },
+            {
+              "name": "notification_thread_id",
+              "source_stage": "notifications",
+              "source_column": "notification_thread_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "notifications",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "notifications",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject",
+              "source_stage": "notifications",
+              "source_column": "subject"
+            },
+            {
+              "name": "reason",
+              "source_stage": "notifications",
+              "source_column": "reason"
+            },
+            {
+              "name": "unread",
+              "source_stage": "notifications",
+              "source_column": "unread"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "notifications",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "last_read_at_raw",
+              "source_stage": "notifications",
+              "source_column": "last_read_at_raw"
+            },
+            {
+              "name": "url",
+              "source_stage": "notifications",
+              "source_column": "url"
+            },
+            {
+              "name": "subscription_url",
+              "source_stage": "notifications",
+              "source_column": "subscription_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "caller",
+                "entity": "activity_repository_caller_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              },
+              {
+                "name": "notifications",
+                "entity": "notification_repository_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "caller",
+                    "column": "caller_login"
+                  },
+                  "repository": {
+                    "stage": "caller",
+                    "column": "repository"
+                  },
+                  "notification_participating": {
+                    "parameter": "notification_participating"
+                  },
+                  "notification_since": {
+                    "parameter": "notification_since"
+                  },
+                  "notification_before": {
+                    "parameter": "notification_before"
+                  }
+                }
+              }
+            ],
+            "output_stage": "notifications"
+          },
+          "population": "All read and unread caller-visible notifications for the selected repository population, with optional API time and participation filters."
+        },
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "notification_participating",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "description": "Optional GitHub participating filter for the caller notification listing.",
+              "example": true,
+              "default": null
+            },
+            {
+              "name": "notification_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only notifications updated after this timestamp, as filtered by GitHub.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            },
+            {
+              "name": "notification_before",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only notifications updated before this timestamp, as filtered by GitHub.",
+              "example": "2026-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "caller_id",
+              "source_stage": "notifications",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "notifications",
+              "source_column": "caller_login"
+            },
+            {
+              "name": "notification_thread_id",
+              "source_stage": "notifications",
+              "source_column": "notification_thread_id"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "notifications",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "notifications",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject",
+              "source_stage": "notifications",
+              "source_column": "subject"
+            },
+            {
+              "name": "reason",
+              "source_stage": "notifications",
+              "source_column": "reason"
+            },
+            {
+              "name": "unread",
+              "source_stage": "notifications",
+              "source_column": "unread"
+            },
+            {
+              "name": "updated_at_raw",
+              "source_stage": "notifications",
+              "source_column": "updated_at_raw"
+            },
+            {
+              "name": "last_read_at_raw",
+              "source_stage": "notifications",
+              "source_column": "last_read_at_raw"
+            },
+            {
+              "name": "url",
+              "source_stage": "notifications",
+              "source_column": "url"
+            },
+            {
+              "name": "subscription_url",
+              "source_stage": "notifications",
+              "source_column": "subscription_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "caller",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "notifications",
+                "entity": "notification_caller_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "caller",
+                    "column": "caller_login"
+                  },
+                  "notification_participating": {
+                    "parameter": "notification_participating"
+                  },
+                  "notification_since": {
+                    "parameter": "notification_since"
+                  },
+                  "notification_before": {
+                    "parameter": "notification_before"
+                  }
+                }
+              }
+            ],
+            "output_stage": "notifications"
+          },
+          "population": "All read and unread caller-visible notifications across advertised pages, subject to API retention and optional filters.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "notification_subscriptions",
+      "description": "Current caller-qualified notification subscription observations with automatic notification parent traversal. Nullable created_at remains NULL for responses without a subscription creation timestamp.",
+      "grain": [
+        "caller_id",
+        "notification_thread_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "caller_id",
+          "caller_login",
+          "notification_thread_id",
+          "subscribed",
+          "ignored",
+          "reason",
+          "created_at",
+          "url",
+          "thread_url",
+          "repository_url"
+        ],
+        "dimensions": [
+          "caller_login",
+          "subscribed",
+          "ignored",
+          "created_at"
+        ],
+        "sql_names": {
+          "caller_login": "notification_subscriptions_caller_login",
+          "subscribed": "notification_subscriptions_subscribed",
+          "ignored": "notification_subscriptions_ignored",
+          "created_at": "notification_subscriptions_created_at"
+        },
+        "metrics": [
+          {
+            "name": "notification_subscription_observation_count",
+            "kind": "count",
+            "comment": "Caller/thread subscription snapshots hydrated from the selected canonical notification population."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "subscribed_notification_count": {
+              "expression": "COUNT(*) FILTER (WHERE notification_subscriptions.subscribed = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "subscribed_notification_count": {
+              "comment": "Selected thread subscription snapshots explicitly marked subscribed.",
+              "additivity": "additive",
+              "dataset": "notification_subscriptions"
+            }
+          }
+        }
+      },
+      "cohort_root": "repositories",
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "notification_thread_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "One canonical decimal notification thread ID; the API wire identity is preserved as text and integer path conversion is validated.",
+              "example": "1",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "caller_id",
+              "source_stage": "subscriptions",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "subscriptions",
+              "source_column": "caller_login"
+            },
+            {
+              "name": "notification_thread_id",
+              "source_stage": "subscriptions",
+              "source_column": "notification_thread_id"
+            },
+            {
+              "name": "subscribed",
+              "source_stage": "subscriptions",
+              "source_column": "subscribed"
+            },
+            {
+              "name": "ignored",
+              "source_stage": "subscriptions",
+              "source_column": "ignored"
+            },
+            {
+              "name": "reason",
+              "source_stage": "subscriptions",
+              "source_column": "reason"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "subscriptions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "subscriptions",
+              "source_column": "url"
+            },
+            {
+              "name": "thread_url",
+              "source_stage": "subscriptions",
+              "source_column": "thread_url"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "subscriptions",
+              "source_column": "repository_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "caller",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "notifications",
+                "entity": "notification_lookup_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "caller",
+                    "column": "caller_login"
+                  },
+                  "notification_thread_id": {
+                    "parameter": "notification_thread_id"
+                  }
+                }
+              },
+              {
+                "name": "subscriptions",
+                "entity": "notification_subscription_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "notifications",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "notifications",
+                    "column": "caller_login"
+                  },
+                  "notification_thread_id": {
+                    "stage": "notifications",
+                    "column": "notification_thread_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "subscriptions"
+          },
+          "population": "One caller-visible notification thread by exact canonical decimal ID. Hydrate the caller subscription for each discovered notification; missing/inaccessible responses fail.",
+          "select": [
+            "notification_thread_id"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "notification_participating",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "description": "Optional GitHub participating filter for the caller notification listing.",
+              "example": true,
+              "default": null
+            },
+            {
+              "name": "notification_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only notifications updated after this timestamp, as filtered by GitHub.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            },
+            {
+              "name": "notification_before",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only notifications updated before this timestamp, as filtered by GitHub.",
+              "example": "2026-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "caller_id",
+              "source_stage": "subscriptions",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "subscriptions",
+              "source_column": "caller_login"
+            },
+            {
+              "name": "notification_thread_id",
+              "source_stage": "subscriptions",
+              "source_column": "notification_thread_id"
+            },
+            {
+              "name": "subscribed",
+              "source_stage": "subscriptions",
+              "source_column": "subscribed"
+            },
+            {
+              "name": "ignored",
+              "source_stage": "subscriptions",
+              "source_column": "ignored"
+            },
+            {
+              "name": "reason",
+              "source_stage": "subscriptions",
+              "source_column": "reason"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "subscriptions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "subscriptions",
+              "source_column": "url"
+            },
+            {
+              "name": "thread_url",
+              "source_stage": "subscriptions",
+              "source_column": "thread_url"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "subscriptions",
+              "source_column": "repository_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "caller",
+                "entity": "activity_repository_caller_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  }
+                }
+              },
+              {
+                "name": "notifications",
+                "entity": "notification_repository_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "caller",
+                    "column": "caller_login"
+                  },
+                  "repository": {
+                    "stage": "caller",
+                    "column": "repository"
+                  },
+                  "notification_participating": {
+                    "parameter": "notification_participating"
+                  },
+                  "notification_since": {
+                    "parameter": "notification_since"
+                  },
+                  "notification_before": {
+                    "parameter": "notification_before"
+                  }
+                }
+              },
+              {
+                "name": "subscriptions",
+                "entity": "notification_subscription_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "notifications",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "notifications",
+                    "column": "caller_login"
+                  },
+                  "notification_thread_id": {
+                    "stage": "notifications",
+                    "column": "notification_thread_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "subscriptions"
+          },
+          "population": "All read and unread caller-visible notifications for the selected repository population, with optional API time and participation filters. Hydrate the caller subscription for each discovered notification; missing/inaccessible responses fail."
+        },
+        {
+          "name": "authenticated",
+          "arguments": [
+            {
+              "name": "notification_participating",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "description": "Optional GitHub participating filter for the caller notification listing.",
+              "example": true,
+              "default": null
+            },
+            {
+              "name": "notification_since",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only notifications updated after this timestamp, as filtered by GitHub.",
+              "example": "2025-01-01T00:00:00Z",
+              "default": null
+            },
+            {
+              "name": "notification_before",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true,
+              "description": "Only notifications updated before this timestamp, as filtered by GitHub.",
+              "example": "2026-01-01T00:00:00Z",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "caller_id",
+              "source_stage": "subscriptions",
+              "source_column": "caller_id"
+            },
+            {
+              "name": "caller_login",
+              "source_stage": "subscriptions",
+              "source_column": "caller_login"
+            },
+            {
+              "name": "notification_thread_id",
+              "source_stage": "subscriptions",
+              "source_column": "notification_thread_id"
+            },
+            {
+              "name": "subscribed",
+              "source_stage": "subscriptions",
+              "source_column": "subscribed"
+            },
+            {
+              "name": "ignored",
+              "source_stage": "subscriptions",
+              "source_column": "ignored"
+            },
+            {
+              "name": "reason",
+              "source_stage": "subscriptions",
+              "source_column": "reason"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "subscriptions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "subscriptions",
+              "source_column": "url"
+            },
+            {
+              "name": "thread_url",
+              "source_stage": "subscriptions",
+              "source_column": "thread_url"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "subscriptions",
+              "source_column": "repository_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "caller",
+                "entity": "collaboration_authenticated_account_source",
+                "arguments": {}
+              },
+              {
+                "name": "notifications",
+                "entity": "notification_caller_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "caller",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "caller",
+                    "column": "caller_login"
+                  },
+                  "notification_participating": {
+                    "parameter": "notification_participating"
+                  },
+                  "notification_since": {
+                    "parameter": "notification_since"
+                  },
+                  "notification_before": {
+                    "parameter": "notification_before"
+                  }
+                }
+              },
+              {
+                "name": "subscriptions",
+                "entity": "notification_subscription_source",
+                "arguments": {
+                  "caller_id": {
+                    "stage": "notifications",
+                    "column": "caller_id"
+                  },
+                  "caller_login": {
+                    "stage": "notifications",
+                    "column": "caller_login"
+                  },
+                  "notification_thread_id": {
+                    "stage": "notifications",
+                    "column": "notification_thread_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "subscriptions"
+          },
+          "population": "All read and unread caller-visible notifications across advertised pages, subject to API retention and optional filters. Hydrate the caller subscription for each discovered notification; missing/inaccessible responses fail.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "activity_events",
+      "description": "Canonical GitHub activity event envelopes keyed by event ID, with separate event actor, repository and organization roles. Payload remains an explicit coverage gap: pinned payload variants overlap and include an unconstrained PublicEvent object, so no fabricated JSON schema or untyped payload is exposed. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+      "grain": [
+        "event_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "event_id",
+          "event_type",
+          "actor_id",
+          "actor_login",
+          "actor",
+          "repository_id",
+          "repository",
+          "repository_url",
+          "organization_id",
+          "organization_login",
+          "organization_actor",
+          "public",
+          "created_at"
+        ],
+        "dimensions": [
+          "repository",
+          "event_type",
+          "actor_login",
+          "organization_login",
+          "public",
+          "created_at"
+        ],
+        "sql_names": {
+          "repository": "activity_events_repository",
+          "event_type": "activity_events_event_type",
+          "actor_login": "activity_events_actor_login",
+          "organization_login": "activity_events_organization_login",
+          "public": "activity_events_public",
+          "created_at": "activity_events_created_at"
+        },
+        "metrics": [
+          {
+            "name": "activity_event_count",
+            "kind": "count",
+            "comment": "Distinct event envelopes within the explicitly retained API timeline; not complete issue, commit or release history."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "organization_authenticated",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "activity_view",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Activity feed population: public global feed, performed or performed_public for a user, received or received_public for a user, network for a repository, or organization_authenticated for an authenticated user and organization.",
+              "example": "performed",
+              "enum": [
+                "public",
+                "performed",
+                "performed_public",
+                "received",
+                "received_public",
+                "network",
+                "organization_authenticated"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_organization_authenticated_source",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  },
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "organization authenticated event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "activity_view"
+          ],
+          "select_values": {
+            "activity_view": [
+              "organization_authenticated"
+            ]
+          }
+        },
+        {
+          "name": "network",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "activity_view",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Activity feed population: public global feed, performed or performed_public for a user, received or received_public for a user, network for a repository, or organization_authenticated for an authenticated user and organization.",
+              "example": "performed",
+              "enum": [
+                "public",
+                "performed",
+                "performed_public",
+                "received",
+                "received_public",
+                "network",
+                "organization_authenticated"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_network_source",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "network event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "activity_view"
+          ],
+          "select_values": {
+            "activity_view": [
+              "network"
+            ]
+          }
+        },
+        {
+          "name": "performed_public",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "activity_view",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Activity feed population: public global feed, performed or performed_public for a user, received or received_public for a user, network for a repository, or organization_authenticated for an authenticated user and organization.",
+              "example": "performed",
+              "enum": [
+                "public",
+                "performed",
+                "performed_public",
+                "received",
+                "received_public",
+                "network",
+                "organization_authenticated"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_performed_public_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "performed public event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "activity_view"
+          ],
+          "select_values": {
+            "activity_view": [
+              "performed_public"
+            ]
+          }
+        },
+        {
+          "name": "received",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "activity_view",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Activity feed population: public global feed, performed or performed_public for a user, received or received_public for a user, network for a repository, or organization_authenticated for an authenticated user and organization.",
+              "example": "performed",
+              "enum": [
+                "public",
+                "performed",
+                "performed_public",
+                "received",
+                "received_public",
+                "network",
+                "organization_authenticated"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_received_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "received event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "activity_view"
+          ],
+          "select_values": {
+            "activity_view": [
+              "received"
+            ]
+          }
+        },
+        {
+          "name": "received_public",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "activity_view",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Activity feed population: public global feed, performed or performed_public for a user, received or received_public for a user, network for a repository, or organization_authenticated for an authenticated user and organization.",
+              "example": "performed",
+              "enum": [
+                "public",
+                "performed",
+                "performed_public",
+                "received",
+                "received_public",
+                "network",
+                "organization_authenticated"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_received_public_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "received public event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "activity_view"
+          ],
+          "select_values": {
+            "activity_view": [
+              "received_public"
+            ]
+          }
+        },
+        {
+          "name": "performed",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            },
+            {
+              "name": "activity_view",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Activity feed population: public global feed, performed or performed_public for a user, received or received_public for a user, network for a repository, or organization_authenticated for an authenticated user and organization.",
+              "example": "performed",
+              "enum": [
+                "public",
+                "performed",
+                "performed_public",
+                "received",
+                "received_public",
+                "network",
+                "organization_authenticated"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_performed_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "performed event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "activity_view"
+          ],
+          "select_values": {
+            "activity_view": [
+              "performed"
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "arguments": [
+            {
+              "name": "user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+              "example": "octocat"
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_performed_source",
+                "arguments": {
+                  "user": {
+                    "parameter": "user"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "Named-user performed events; private visibility only applies to the same authenticated account. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "user"
+          ]
+        },
+        {
+          "name": "repository",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_repository_source",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "repository event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "repository"
+          ]
+        },
+        {
+          "name": "organization",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_organization_source",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "organization event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "select": [
+            "organization"
+          ]
+        },
+        {
+          "name": "public",
+          "arguments": [
+            {
+              "name": "activity_view",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Activity feed population: public global feed, performed or performed_public for a user, received or received_public for a user, network for a repository, or organization_authenticated for an authenticated user and organization.",
+              "example": "performed",
+              "enum": [
+                "public",
+                "performed",
+                "performed_public",
+                "received",
+                "received_public",
+                "network",
+                "organization_authenticated"
+              ],
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "event_id",
+              "source_stage": "events",
+              "source_column": "event_id"
+            },
+            {
+              "name": "event_type",
+              "source_stage": "events",
+              "source_column": "event_type"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "events",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "events",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "actor",
+              "source_stage": "events",
+              "source_column": "actor"
+            },
+            {
+              "name": "repository_id",
+              "source_stage": "events",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "events",
+              "source_column": "repository"
+            },
+            {
+              "name": "repository_url",
+              "source_stage": "events",
+              "source_column": "repository_url"
+            },
+            {
+              "name": "organization_id",
+              "source_stage": "events",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "events",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "organization_actor",
+              "source_stage": "events",
+              "source_column": "organization_actor"
+            },
+            {
+              "name": "public",
+              "source_stage": "events",
+              "source_column": "public"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "events",
+              "source_column": "created_at"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "events",
+                "entity": "activity_events_public_source",
+                "arguments": {}
+              }
+            ],
+            "output_stage": "events"
+          },
+          "population": "public event timeline. Only the API-retained recent timeline is modeled: current GitHub.com documentation limits it to the past 30 days and at most 300 events, with 30s-6h latency. Reaching 300 fails rather than advertising a complete recent population. Source: https://docs.github.com/en/rest/activity/events .",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "activity_feed_observations",
+      "description": "Typed current-caller feed URLs and URI templates, preserving optional authenticated links and nested link structures. These are descriptive values and are never followed as arbitrary HTTP targets; repeated invocations are snapshots.",
+      "grain": [
+        "api_host"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "api_host",
+          "timeline_url",
+          "user_url",
+          "current_user_public_url",
+          "current_user_url",
+          "current_user_actor_url",
+          "current_user_organization_url",
+          "current_user_organization_urls",
+          "security_advisories_url",
+          "repository_discussions_url",
+          "repository_discussions_category_url",
+          "links"
+        ],
+        "dimensions": [
+          "api_host"
+        ],
+        "sql_names": {
+          "api_host": "activity_feed_observations_api_host"
+        },
+        "metrics": [
+          {
+            "name": "activity_feed_observation_count",
+            "kind": "count",
+            "comment": "One API-host/current-caller feed discovery response in this invocation; not durable feed membership history."
+          }
+        ]
+      },
+      "arguments": [],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_stage": "feeds",
+          "source_column": "api_host"
+        },
+        {
+          "name": "timeline_url",
+          "source_stage": "feeds",
+          "source_column": "timeline_url"
+        },
+        {
+          "name": "user_url",
+          "source_stage": "feeds",
+          "source_column": "user_url"
+        },
+        {
+          "name": "current_user_public_url",
+          "source_stage": "feeds",
+          "source_column": "current_user_public_url"
+        },
+        {
+          "name": "current_user_url",
+          "source_stage": "feeds",
+          "source_column": "current_user_url"
+        },
+        {
+          "name": "current_user_actor_url",
+          "source_stage": "feeds",
+          "source_column": "current_user_actor_url"
+        },
+        {
+          "name": "current_user_organization_url",
+          "source_stage": "feeds",
+          "source_column": "current_user_organization_url"
+        },
+        {
+          "name": "current_user_organization_urls",
+          "source_stage": "feeds",
+          "source_column": "current_user_organization_urls"
+        },
+        {
+          "name": "security_advisories_url",
+          "source_stage": "feeds",
+          "source_column": "security_advisories_url"
+        },
+        {
+          "name": "repository_discussions_url",
+          "source_stage": "feeds",
+          "source_column": "repository_discussions_url"
+        },
+        {
+          "name": "repository_discussions_category_url",
+          "source_stage": "feeds",
+          "source_column": "repository_discussions_category_url"
+        },
+        {
+          "name": "links",
+          "source_stage": "feeds",
+          "source_column": "links"
+        }
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "feeds",
+            "entity": "activity_feeds_source",
+            "arguments": {
+              "api_host": {
+                "literal": "api.github.com"
+              }
+            }
+          }
+        ],
+        "output_stage": "feeds"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "repository_stars_to_repositories",
+      "from": "repository_stars",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_stars_to_users",
+      "from": "repository_stars",
+      "to": "users",
+      "from_columns": [
+        "stargazer_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "stargazer_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "user",
+          "bindings": {
+            "user": "user_login"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "repository_watchers_to_repositories",
+      "from": "repository_watchers",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_watchers_to_users",
+      "from": "repository_watchers",
+      "to": "users",
+      "from_columns": [
+        "watcher_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "watcher_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "user",
+          "bindings": {
+            "user": "user_login"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "repository_star_counts_to_repositories",
+      "from": "repository_star_counts",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_star_history_to_repositories",
+      "from": "repository_star_history",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_subscriptions_to_repositories",
+      "from": "repository_subscriptions",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_subscriptions_to_users",
+      "from": "repository_subscriptions",
+      "to": "users",
+      "from_columns": [
+        "caller_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "caller_login"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "notifications_to_repositories",
+      "from": "notifications",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "notifications_to_users",
+      "from": "notifications",
+      "to": "users",
+      "from_columns": [
+        "caller_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "caller_login"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "notification_subscriptions_to_notifications",
+      "from": "notification_subscriptions",
+      "to": "notifications",
+      "from_columns": [
+        "caller_id",
+        "notification_thread_id"
+      ],
+      "to_columns": [
+        "caller_id",
+        "notification_thread_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "notification_thread_id": "notification_thread_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "notification_thread_id": "notification_thread_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "activity_events_to_repositories",
+      "from": "activity_events",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repository",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "activity_events_to_users",
+      "from": "activity_events",
+      "to": "users",
+      "from_columns": [
+        "actor_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "actor_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "user",
+          "bindings": {
+            "user": "user_login"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "activity_events_to_organizations",
+      "from": "activity_events",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organization",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ],
+      "optional": true,
+      "analytical": false
+    }
+  ]
+}

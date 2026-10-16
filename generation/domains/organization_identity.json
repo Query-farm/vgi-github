@@ -1,0 +1,3492 @@
+{
+  "entities": [
+    {
+      "name": "organization_directory_source",
+      "description": "Pinned orgs/list read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization_directory",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "description": "Explicitly enumerate the global public organization directory; optionally start after organization_since_id.",
+          "enum": [
+            true
+          ],
+          "example": true
+        },
+        {
+          "name": "organization_since_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Exclusive numeric organization-ID cursor for global directory retrieval; this scopes the returned population.",
+          "minimum": 0,
+          "example": 2500,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "since": {
+            "argument": "organization_since_id"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_authenticated_list_source",
+      "description": "Pinned orgs/list-for-authenticated-user read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "authenticated_user",
+          "type": "BOOLEAN",
+          "nullable": false,
+          "enum": [
+            true
+          ],
+          "example": true,
+          "description": "Select the authenticated personal account using GitHub /user endpoints; never infer the account from ambient login names."
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "login"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_discovered_profile_source",
+      "description": "Pinned orgs/get read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "expected_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable organization ID from discovery.",
+          "minimum": 1,
+          "example": 2500
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/get",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "organization_id",
+            "argument": "expected_organization_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_memberships_summary_source",
+      "description": "Pinned orgs/list-members read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "summary_membership_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Membership list endpoints establish active membership, rather than a pending invitation.",
+          "enum": [
+            "active"
+          ],
+          "example": "active"
+        },
+        {
+          "name": "summary_membership_role",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_direct_membership",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_enterprise_team_slugs",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_membership_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_can_create_repository",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_api_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_repos_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_hooks_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_issues_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_members_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_public_members_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_avatar_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_description",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_email",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_avatar_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_gravatar_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_followers_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_following_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_gists_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_starred_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_subscriptions_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_organizations_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_repos_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_received_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_site_admin",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_starred_at",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_user_view_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "member_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "member_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "membership_state",
+          "source_argument": "summary_membership_state"
+        },
+        {
+          "name": "membership_role",
+          "source_argument": "summary_membership_role"
+        },
+        {
+          "name": "direct_membership",
+          "source_argument": "summary_direct_membership"
+        },
+        {
+          "name": "enterprise_team_slugs",
+          "source_argument": "summary_enterprise_team_slugs"
+        },
+        {
+          "name": "membership_url",
+          "source_argument": "summary_membership_url"
+        },
+        {
+          "name": "organization_url",
+          "source_argument": "summary_organization_url"
+        },
+        {
+          "name": "can_create_repository",
+          "source_argument": "summary_can_create_repository"
+        },
+        {
+          "name": "organization_node_id",
+          "source_argument": "summary_organization_node_id"
+        },
+        {
+          "name": "organization_api_url",
+          "source_argument": "summary_organization_api_url"
+        },
+        {
+          "name": "organization_repos_url",
+          "source_argument": "summary_organization_repos_url"
+        },
+        {
+          "name": "organization_events_url",
+          "source_argument": "summary_organization_events_url"
+        },
+        {
+          "name": "organization_hooks_url",
+          "source_argument": "summary_organization_hooks_url"
+        },
+        {
+          "name": "organization_issues_url",
+          "source_argument": "summary_organization_issues_url"
+        },
+        {
+          "name": "organization_members_url",
+          "source_argument": "summary_organization_members_url"
+        },
+        {
+          "name": "organization_public_members_url",
+          "source_argument": "summary_organization_public_members_url"
+        },
+        {
+          "name": "organization_avatar_url",
+          "source_argument": "summary_organization_avatar_url"
+        },
+        {
+          "name": "organization_description",
+          "source_argument": "summary_organization_description"
+        },
+        {
+          "name": "observed_member_name",
+          "source_argument": "summary_observed_member_name"
+        },
+        {
+          "name": "observed_member_email",
+          "source_argument": "summary_observed_member_email"
+        },
+        {
+          "name": "observed_member_login",
+          "source_argument": "summary_observed_member_login"
+        },
+        {
+          "name": "observed_member_id",
+          "source_argument": "summary_observed_member_id"
+        },
+        {
+          "name": "observed_member_node_id",
+          "source_argument": "summary_observed_member_node_id"
+        },
+        {
+          "name": "observed_member_avatar_url",
+          "source_argument": "summary_observed_member_avatar_url"
+        },
+        {
+          "name": "observed_member_gravatar_id",
+          "source_argument": "summary_observed_member_gravatar_id"
+        },
+        {
+          "name": "observed_member_url",
+          "source_argument": "summary_observed_member_url"
+        },
+        {
+          "name": "observed_member_html_url",
+          "source_argument": "summary_observed_member_html_url"
+        },
+        {
+          "name": "observed_member_followers_url",
+          "source_argument": "summary_observed_member_followers_url"
+        },
+        {
+          "name": "observed_member_following_url",
+          "source_argument": "summary_observed_member_following_url"
+        },
+        {
+          "name": "observed_member_gists_url",
+          "source_argument": "summary_observed_member_gists_url"
+        },
+        {
+          "name": "observed_member_starred_url",
+          "source_argument": "summary_observed_member_starred_url"
+        },
+        {
+          "name": "observed_member_subscriptions_url",
+          "source_argument": "summary_observed_member_subscriptions_url"
+        },
+        {
+          "name": "observed_member_organizations_url",
+          "source_argument": "summary_observed_member_organizations_url"
+        },
+        {
+          "name": "observed_member_repos_url",
+          "source_argument": "summary_observed_member_repos_url"
+        },
+        {
+          "name": "observed_member_events_url",
+          "source_argument": "summary_observed_member_events_url"
+        },
+        {
+          "name": "observed_member_received_events_url",
+          "source_argument": "summary_observed_member_received_events_url"
+        },
+        {
+          "name": "observed_member_type",
+          "source_argument": "summary_observed_member_type"
+        },
+        {
+          "name": "observed_member_site_admin",
+          "source_argument": "summary_observed_member_site_admin"
+        },
+        {
+          "name": "observed_member_starred_at",
+          "source_argument": "summary_observed_member_starred_at"
+        },
+        {
+          "name": "observed_member_user_view_type",
+          "source_argument": "summary_observed_member_user_view_type"
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-members",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_public_memberships_source",
+      "description": "Pinned orgs/list-public-members read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "summary_membership_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Membership list endpoints establish active membership, rather than a pending invitation.",
+          "enum": [
+            "active"
+          ],
+          "example": "active"
+        },
+        {
+          "name": "summary_membership_role",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_direct_membership",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_enterprise_team_slugs",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_membership_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_can_create_repository",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_api_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_repos_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_hooks_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_issues_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_members_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_public_members_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_avatar_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_description",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_email",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_avatar_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_gravatar_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_followers_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_following_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_gists_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_starred_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_subscriptions_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_organizations_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_repos_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_received_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_site_admin",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_starred_at",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_user_view_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "member_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "member_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "membership_state",
+          "source_argument": "summary_membership_state"
+        },
+        {
+          "name": "membership_role",
+          "source_argument": "summary_membership_role"
+        },
+        {
+          "name": "direct_membership",
+          "source_argument": "summary_direct_membership"
+        },
+        {
+          "name": "enterprise_team_slugs",
+          "source_argument": "summary_enterprise_team_slugs"
+        },
+        {
+          "name": "membership_url",
+          "source_argument": "summary_membership_url"
+        },
+        {
+          "name": "organization_url",
+          "source_argument": "summary_organization_url"
+        },
+        {
+          "name": "can_create_repository",
+          "source_argument": "summary_can_create_repository"
+        },
+        {
+          "name": "organization_node_id",
+          "source_argument": "summary_organization_node_id"
+        },
+        {
+          "name": "organization_api_url",
+          "source_argument": "summary_organization_api_url"
+        },
+        {
+          "name": "organization_repos_url",
+          "source_argument": "summary_organization_repos_url"
+        },
+        {
+          "name": "organization_events_url",
+          "source_argument": "summary_organization_events_url"
+        },
+        {
+          "name": "organization_hooks_url",
+          "source_argument": "summary_organization_hooks_url"
+        },
+        {
+          "name": "organization_issues_url",
+          "source_argument": "summary_organization_issues_url"
+        },
+        {
+          "name": "organization_members_url",
+          "source_argument": "summary_organization_members_url"
+        },
+        {
+          "name": "organization_public_members_url",
+          "source_argument": "summary_organization_public_members_url"
+        },
+        {
+          "name": "organization_avatar_url",
+          "source_argument": "summary_organization_avatar_url"
+        },
+        {
+          "name": "organization_description",
+          "source_argument": "summary_organization_description"
+        },
+        {
+          "name": "observed_member_name",
+          "source_argument": "summary_observed_member_name"
+        },
+        {
+          "name": "observed_member_email",
+          "source_argument": "summary_observed_member_email"
+        },
+        {
+          "name": "observed_member_login",
+          "source_argument": "summary_observed_member_login"
+        },
+        {
+          "name": "observed_member_id",
+          "source_argument": "summary_observed_member_id"
+        },
+        {
+          "name": "observed_member_node_id",
+          "source_argument": "summary_observed_member_node_id"
+        },
+        {
+          "name": "observed_member_avatar_url",
+          "source_argument": "summary_observed_member_avatar_url"
+        },
+        {
+          "name": "observed_member_gravatar_id",
+          "source_argument": "summary_observed_member_gravatar_id"
+        },
+        {
+          "name": "observed_member_url",
+          "source_argument": "summary_observed_member_url"
+        },
+        {
+          "name": "observed_member_html_url",
+          "source_argument": "summary_observed_member_html_url"
+        },
+        {
+          "name": "observed_member_followers_url",
+          "source_argument": "summary_observed_member_followers_url"
+        },
+        {
+          "name": "observed_member_following_url",
+          "source_argument": "summary_observed_member_following_url"
+        },
+        {
+          "name": "observed_member_gists_url",
+          "source_argument": "summary_observed_member_gists_url"
+        },
+        {
+          "name": "observed_member_starred_url",
+          "source_argument": "summary_observed_member_starred_url"
+        },
+        {
+          "name": "observed_member_subscriptions_url",
+          "source_argument": "summary_observed_member_subscriptions_url"
+        },
+        {
+          "name": "observed_member_organizations_url",
+          "source_argument": "summary_observed_member_organizations_url"
+        },
+        {
+          "name": "observed_member_repos_url",
+          "source_argument": "summary_observed_member_repos_url"
+        },
+        {
+          "name": "observed_member_events_url",
+          "source_argument": "summary_observed_member_events_url"
+        },
+        {
+          "name": "observed_member_received_events_url",
+          "source_argument": "summary_observed_member_received_events_url"
+        },
+        {
+          "name": "observed_member_type",
+          "source_argument": "summary_observed_member_type"
+        },
+        {
+          "name": "observed_member_site_admin",
+          "source_argument": "summary_observed_member_site_admin"
+        },
+        {
+          "name": "observed_member_starred_at",
+          "source_argument": "summary_observed_member_starred_at"
+        },
+        {
+          "name": "observed_member_user_view_type",
+          "source_argument": "summary_observed_member_user_view_type"
+        }
+      ],
+      "grain": [
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-public-members",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "user_public_organization_memberships_source",
+      "description": "Pinned orgs/list-for-user read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One personal GitHub user login, including work in repositories owned by other accounts.",
+          "example": "octocat"
+        },
+        {
+          "name": "summary_membership_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Membership list endpoints establish active membership, rather than a pending invitation.",
+          "enum": [
+            "active"
+          ],
+          "example": "active"
+        },
+        {
+          "name": "summary_membership_role",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_direct_membership",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_enterprise_team_slugs",
+          "type": "VARCHAR[]",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_membership_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_can_create_repository",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_api_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_repos_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_hooks_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_issues_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_members_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_public_members_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_avatar_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_organization_description",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_name",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_email",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_login",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_avatar_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_gravatar_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_html_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_followers_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_following_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_gists_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_starred_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_subscriptions_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_organizations_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_repos_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_received_events_url",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_site_admin",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_starred_at",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        },
+        {
+          "name": "summary_observed_member_user_view_type",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Unavailable membership-object metadata on this summary route.",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "membership_state",
+          "source_argument": "summary_membership_state"
+        },
+        {
+          "name": "membership_role",
+          "source_argument": "summary_membership_role"
+        },
+        {
+          "name": "direct_membership",
+          "source_argument": "summary_direct_membership"
+        },
+        {
+          "name": "enterprise_team_slugs",
+          "source_argument": "summary_enterprise_team_slugs"
+        },
+        {
+          "name": "membership_url",
+          "source_argument": "summary_membership_url"
+        },
+        {
+          "name": "organization_url",
+          "source_argument": "summary_organization_url"
+        },
+        {
+          "name": "can_create_repository",
+          "source_argument": "summary_can_create_repository"
+        },
+        {
+          "name": "organization_node_id",
+          "source_argument": "summary_organization_node_id"
+        },
+        {
+          "name": "organization_api_url",
+          "source_argument": "summary_organization_api_url"
+        },
+        {
+          "name": "organization_repos_url",
+          "source_argument": "summary_organization_repos_url"
+        },
+        {
+          "name": "organization_events_url",
+          "source_argument": "summary_organization_events_url"
+        },
+        {
+          "name": "organization_hooks_url",
+          "source_argument": "summary_organization_hooks_url"
+        },
+        {
+          "name": "organization_issues_url",
+          "source_argument": "summary_organization_issues_url"
+        },
+        {
+          "name": "organization_members_url",
+          "source_argument": "summary_organization_members_url"
+        },
+        {
+          "name": "organization_public_members_url",
+          "source_argument": "summary_organization_public_members_url"
+        },
+        {
+          "name": "organization_avatar_url",
+          "source_argument": "summary_organization_avatar_url"
+        },
+        {
+          "name": "organization_description",
+          "source_argument": "summary_organization_description"
+        },
+        {
+          "name": "observed_member_name",
+          "source_argument": "summary_observed_member_name"
+        },
+        {
+          "name": "observed_member_email",
+          "source_argument": "summary_observed_member_email"
+        },
+        {
+          "name": "observed_member_login",
+          "source_argument": "summary_observed_member_login"
+        },
+        {
+          "name": "observed_member_id",
+          "source_argument": "summary_observed_member_id"
+        },
+        {
+          "name": "observed_member_node_id",
+          "source_argument": "summary_observed_member_node_id"
+        },
+        {
+          "name": "observed_member_avatar_url",
+          "source_argument": "summary_observed_member_avatar_url"
+        },
+        {
+          "name": "observed_member_gravatar_id",
+          "source_argument": "summary_observed_member_gravatar_id"
+        },
+        {
+          "name": "observed_member_url",
+          "source_argument": "summary_observed_member_url"
+        },
+        {
+          "name": "observed_member_html_url",
+          "source_argument": "summary_observed_member_html_url"
+        },
+        {
+          "name": "observed_member_followers_url",
+          "source_argument": "summary_observed_member_followers_url"
+        },
+        {
+          "name": "observed_member_following_url",
+          "source_argument": "summary_observed_member_following_url"
+        },
+        {
+          "name": "observed_member_gists_url",
+          "source_argument": "summary_observed_member_gists_url"
+        },
+        {
+          "name": "observed_member_starred_url",
+          "source_argument": "summary_observed_member_starred_url"
+        },
+        {
+          "name": "observed_member_subscriptions_url",
+          "source_argument": "summary_observed_member_subscriptions_url"
+        },
+        {
+          "name": "observed_member_organizations_url",
+          "source_argument": "summary_observed_member_organizations_url"
+        },
+        {
+          "name": "observed_member_repos_url",
+          "source_argument": "summary_observed_member_repos_url"
+        },
+        {
+          "name": "observed_member_events_url",
+          "source_argument": "summary_observed_member_events_url"
+        },
+        {
+          "name": "observed_member_received_events_url",
+          "source_argument": "summary_observed_member_received_events_url"
+        },
+        {
+          "name": "observed_member_type",
+          "source_argument": "summary_observed_member_type"
+        },
+        {
+          "name": "observed_member_site_admin",
+          "source_argument": "summary_observed_member_site_admin"
+        },
+        {
+          "name": "observed_member_starred_at",
+          "source_argument": "summary_observed_member_starred_at"
+        },
+        {
+          "name": "observed_member_user_view_type",
+          "source_argument": "summary_observed_member_user_view_type"
+        }
+      ],
+      "grain": [
+        "organization_login"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-for-user",
+        "path_bindings": {
+          "username": {
+            "argument": "user"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_member_identity_source",
+      "description": "Pinned users/get-by-username read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected organization identity.",
+          "minimum": 1,
+          "example": 2500
+        },
+        {
+          "name": "selected_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected organization login.",
+          "min_length": 1,
+          "example": "membership-fixture"
+        },
+        {
+          "name": "membership_user",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Account login whose organization membership or membership-check observation is selected.",
+          "min_length": 1,
+          "example": "identity-alice"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_organization_login"
+        },
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "users/get-by-username",
+        "path_bindings": {
+          "username": {
+            "argument": "membership_user"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "response_variants": "common_fields"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "organization_membership_named_source",
+      "description": "Pinned orgs/get-membership-for-user read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected organization identity.",
+          "minimum": 1,
+          "example": 2500
+        },
+        {
+          "name": "selected_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected organization login.",
+          "min_length": 1,
+          "example": "membership-fixture"
+        },
+        {
+          "name": "selected_membership_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected member account identity.",
+          "minimum": 1,
+          "example": 2901
+        },
+        {
+          "name": "selected_membership_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected member login.",
+          "min_length": 1,
+          "example": "identity-alice"
+        },
+        {
+          "name": "selected_membership_user_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Declared account type of the selected member.",
+          "min_length": 1,
+          "example": "User"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "organization",
+            "login"
+          ]
+        },
+        {
+          "name": "user_id",
+          "source_argument": "selected_membership_user_id"
+        },
+        {
+          "name": "member_login",
+          "source_argument": "selected_membership_user_login"
+        },
+        {
+          "name": "member_type",
+          "source_argument": "selected_membership_user_type"
+        },
+        {
+          "name": "membership_state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "membership_role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "direct_membership",
+          "path": [
+            "direct_membership"
+          ]
+        },
+        {
+          "name": "enterprise_team_slugs",
+          "path": [
+            "enterprise_teams_providing_indirect_membership"
+          ]
+        },
+        {
+          "name": "membership_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "organization_url",
+          "path": [
+            "organization_url"
+          ]
+        },
+        {
+          "name": "can_create_repository",
+          "path": [
+            "permissions",
+            "can_create_repository"
+          ]
+        },
+        {
+          "name": "organization_node_id",
+          "path": [
+            "organization",
+            "node_id"
+          ]
+        },
+        {
+          "name": "organization_api_url",
+          "path": [
+            "organization",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_repos_url",
+          "path": [
+            "organization",
+            "repos_url"
+          ]
+        },
+        {
+          "name": "organization_events_url",
+          "path": [
+            "organization",
+            "events_url"
+          ]
+        },
+        {
+          "name": "organization_hooks_url",
+          "path": [
+            "organization",
+            "hooks_url"
+          ]
+        },
+        {
+          "name": "organization_issues_url",
+          "path": [
+            "organization",
+            "issues_url"
+          ]
+        },
+        {
+          "name": "organization_members_url",
+          "path": [
+            "organization",
+            "members_url"
+          ]
+        },
+        {
+          "name": "organization_public_members_url",
+          "path": [
+            "organization",
+            "public_members_url"
+          ]
+        },
+        {
+          "name": "organization_avatar_url",
+          "path": [
+            "organization",
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "organization_description",
+          "path": [
+            "organization",
+            "description"
+          ]
+        },
+        {
+          "name": "observed_member_name",
+          "path": [
+            "user",
+            "name"
+          ]
+        },
+        {
+          "name": "observed_member_email",
+          "path": [
+            "user",
+            "email"
+          ]
+        },
+        {
+          "name": "observed_member_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "observed_member_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "observed_member_node_id",
+          "path": [
+            "user",
+            "node_id"
+          ]
+        },
+        {
+          "name": "observed_member_avatar_url",
+          "path": [
+            "user",
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "observed_member_gravatar_id",
+          "path": [
+            "user",
+            "gravatar_id"
+          ]
+        },
+        {
+          "name": "observed_member_url",
+          "path": [
+            "user",
+            "url"
+          ]
+        },
+        {
+          "name": "observed_member_html_url",
+          "path": [
+            "user",
+            "html_url"
+          ]
+        },
+        {
+          "name": "observed_member_followers_url",
+          "path": [
+            "user",
+            "followers_url"
+          ]
+        },
+        {
+          "name": "observed_member_following_url",
+          "path": [
+            "user",
+            "following_url"
+          ]
+        },
+        {
+          "name": "observed_member_gists_url",
+          "path": [
+            "user",
+            "gists_url"
+          ]
+        },
+        {
+          "name": "observed_member_starred_url",
+          "path": [
+            "user",
+            "starred_url"
+          ]
+        },
+        {
+          "name": "observed_member_subscriptions_url",
+          "path": [
+            "user",
+            "subscriptions_url"
+          ]
+        },
+        {
+          "name": "observed_member_organizations_url",
+          "path": [
+            "user",
+            "organizations_url"
+          ]
+        },
+        {
+          "name": "observed_member_repos_url",
+          "path": [
+            "user",
+            "repos_url"
+          ]
+        },
+        {
+          "name": "observed_member_events_url",
+          "path": [
+            "user",
+            "events_url"
+          ]
+        },
+        {
+          "name": "observed_member_received_events_url",
+          "path": [
+            "user",
+            "received_events_url"
+          ]
+        },
+        {
+          "name": "observed_member_type",
+          "path": [
+            "user",
+            "type"
+          ]
+        },
+        {
+          "name": "observed_member_site_admin",
+          "path": [
+            "user",
+            "site_admin"
+          ]
+        },
+        {
+          "name": "observed_member_starred_at",
+          "path": [
+            "user",
+            "starred_at"
+          ]
+        },
+        {
+          "name": "observed_member_user_view_type",
+          "path": [
+            "user",
+            "user_view_type"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/get-membership-for-user",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_organization_login"
+          },
+          "username": {
+            "argument": "selected_membership_user_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "organization_id",
+          "organization_login"
+        ],
+        "row_assertions": [
+          {
+            "column": "observed_member_id",
+            "argument": "selected_membership_user_id",
+            "comparison": "equal_if_present"
+          },
+          {
+            "column": "organization_id",
+            "argument": "selected_organization_id",
+            "comparison": "equal"
+          }
+        ],
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "organization_membership_authenticated_source",
+      "description": "Pinned orgs/get-membership-for-authenticated-user read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "selected_membership_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected member account identity.",
+          "minimum": 1,
+          "example": 2901
+        },
+        {
+          "name": "selected_membership_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected member login.",
+          "min_length": 1,
+          "example": "identity-alice"
+        },
+        {
+          "name": "selected_membership_user_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Declared account type of the selected member.",
+          "min_length": 1,
+          "example": "User"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "organization",
+            "login"
+          ]
+        },
+        {
+          "name": "user_id",
+          "source_argument": "selected_membership_user_id"
+        },
+        {
+          "name": "member_login",
+          "source_argument": "selected_membership_user_login"
+        },
+        {
+          "name": "member_type",
+          "source_argument": "selected_membership_user_type"
+        },
+        {
+          "name": "membership_state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "membership_role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "direct_membership",
+          "path": [
+            "direct_membership"
+          ]
+        },
+        {
+          "name": "enterprise_team_slugs",
+          "path": [
+            "enterprise_teams_providing_indirect_membership"
+          ]
+        },
+        {
+          "name": "membership_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "organization_url",
+          "path": [
+            "organization_url"
+          ]
+        },
+        {
+          "name": "can_create_repository",
+          "path": [
+            "permissions",
+            "can_create_repository"
+          ]
+        },
+        {
+          "name": "organization_node_id",
+          "path": [
+            "organization",
+            "node_id"
+          ]
+        },
+        {
+          "name": "organization_api_url",
+          "path": [
+            "organization",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_repos_url",
+          "path": [
+            "organization",
+            "repos_url"
+          ]
+        },
+        {
+          "name": "organization_events_url",
+          "path": [
+            "organization",
+            "events_url"
+          ]
+        },
+        {
+          "name": "organization_hooks_url",
+          "path": [
+            "organization",
+            "hooks_url"
+          ]
+        },
+        {
+          "name": "organization_issues_url",
+          "path": [
+            "organization",
+            "issues_url"
+          ]
+        },
+        {
+          "name": "organization_members_url",
+          "path": [
+            "organization",
+            "members_url"
+          ]
+        },
+        {
+          "name": "organization_public_members_url",
+          "path": [
+            "organization",
+            "public_members_url"
+          ]
+        },
+        {
+          "name": "organization_avatar_url",
+          "path": [
+            "organization",
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "organization_description",
+          "path": [
+            "organization",
+            "description"
+          ]
+        },
+        {
+          "name": "observed_member_name",
+          "path": [
+            "user",
+            "name"
+          ]
+        },
+        {
+          "name": "observed_member_email",
+          "path": [
+            "user",
+            "email"
+          ]
+        },
+        {
+          "name": "observed_member_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "observed_member_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "observed_member_node_id",
+          "path": [
+            "user",
+            "node_id"
+          ]
+        },
+        {
+          "name": "observed_member_avatar_url",
+          "path": [
+            "user",
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "observed_member_gravatar_id",
+          "path": [
+            "user",
+            "gravatar_id"
+          ]
+        },
+        {
+          "name": "observed_member_url",
+          "path": [
+            "user",
+            "url"
+          ]
+        },
+        {
+          "name": "observed_member_html_url",
+          "path": [
+            "user",
+            "html_url"
+          ]
+        },
+        {
+          "name": "observed_member_followers_url",
+          "path": [
+            "user",
+            "followers_url"
+          ]
+        },
+        {
+          "name": "observed_member_following_url",
+          "path": [
+            "user",
+            "following_url"
+          ]
+        },
+        {
+          "name": "observed_member_gists_url",
+          "path": [
+            "user",
+            "gists_url"
+          ]
+        },
+        {
+          "name": "observed_member_starred_url",
+          "path": [
+            "user",
+            "starred_url"
+          ]
+        },
+        {
+          "name": "observed_member_subscriptions_url",
+          "path": [
+            "user",
+            "subscriptions_url"
+          ]
+        },
+        {
+          "name": "observed_member_organizations_url",
+          "path": [
+            "user",
+            "organizations_url"
+          ]
+        },
+        {
+          "name": "observed_member_repos_url",
+          "path": [
+            "user",
+            "repos_url"
+          ]
+        },
+        {
+          "name": "observed_member_events_url",
+          "path": [
+            "user",
+            "events_url"
+          ]
+        },
+        {
+          "name": "observed_member_received_events_url",
+          "path": [
+            "user",
+            "received_events_url"
+          ]
+        },
+        {
+          "name": "observed_member_type",
+          "path": [
+            "user",
+            "type"
+          ]
+        },
+        {
+          "name": "observed_member_site_admin",
+          "path": [
+            "user",
+            "site_admin"
+          ]
+        },
+        {
+          "name": "observed_member_starred_at",
+          "path": [
+            "user",
+            "starred_at"
+          ]
+        },
+        {
+          "name": "observed_member_user_view_type",
+          "path": [
+            "user",
+            "user_view_type"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/get-membership-for-authenticated-user",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "organization_id",
+          "organization_login"
+        ],
+        "row_assertions": [
+          {
+            "column": "observed_member_id",
+            "argument": "selected_membership_user_id",
+            "comparison": "equal_if_present"
+          }
+        ],
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "organization_membership_authenticated_list_source",
+      "description": "Pinned orgs/list-memberships-for-authenticated-user read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "organization_membership_state",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional authenticated membership state filter. Pending means an invitation has not been accepted; active member counts exclude pending rows.",
+          "enum": [
+            "active",
+            "pending"
+          ],
+          "example": "active",
+          "default": null
+        },
+        {
+          "name": "selected_membership_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected member account identity.",
+          "minimum": 1,
+          "example": 2901
+        },
+        {
+          "name": "selected_membership_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected member login.",
+          "min_length": 1,
+          "example": "identity-alice"
+        },
+        {
+          "name": "selected_membership_user_type",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Declared account type of the selected member.",
+          "min_length": 1,
+          "example": "User"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "path": [
+            "organization",
+            "id"
+          ]
+        },
+        {
+          "name": "organization_login",
+          "path": [
+            "organization",
+            "login"
+          ]
+        },
+        {
+          "name": "user_id",
+          "source_argument": "selected_membership_user_id"
+        },
+        {
+          "name": "member_login",
+          "source_argument": "selected_membership_user_login"
+        },
+        {
+          "name": "member_type",
+          "source_argument": "selected_membership_user_type"
+        },
+        {
+          "name": "membership_state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "membership_role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "direct_membership",
+          "path": [
+            "direct_membership"
+          ]
+        },
+        {
+          "name": "enterprise_team_slugs",
+          "path": [
+            "enterprise_teams_providing_indirect_membership"
+          ]
+        },
+        {
+          "name": "membership_url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "organization_url",
+          "path": [
+            "organization_url"
+          ]
+        },
+        {
+          "name": "can_create_repository",
+          "path": [
+            "permissions",
+            "can_create_repository"
+          ]
+        },
+        {
+          "name": "organization_node_id",
+          "path": [
+            "organization",
+            "node_id"
+          ]
+        },
+        {
+          "name": "organization_api_url",
+          "path": [
+            "organization",
+            "url"
+          ]
+        },
+        {
+          "name": "organization_repos_url",
+          "path": [
+            "organization",
+            "repos_url"
+          ]
+        },
+        {
+          "name": "organization_events_url",
+          "path": [
+            "organization",
+            "events_url"
+          ]
+        },
+        {
+          "name": "organization_hooks_url",
+          "path": [
+            "organization",
+            "hooks_url"
+          ]
+        },
+        {
+          "name": "organization_issues_url",
+          "path": [
+            "organization",
+            "issues_url"
+          ]
+        },
+        {
+          "name": "organization_members_url",
+          "path": [
+            "organization",
+            "members_url"
+          ]
+        },
+        {
+          "name": "organization_public_members_url",
+          "path": [
+            "organization",
+            "public_members_url"
+          ]
+        },
+        {
+          "name": "organization_avatar_url",
+          "path": [
+            "organization",
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "organization_description",
+          "path": [
+            "organization",
+            "description"
+          ]
+        },
+        {
+          "name": "observed_member_name",
+          "path": [
+            "user",
+            "name"
+          ]
+        },
+        {
+          "name": "observed_member_email",
+          "path": [
+            "user",
+            "email"
+          ]
+        },
+        {
+          "name": "observed_member_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "observed_member_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "observed_member_node_id",
+          "path": [
+            "user",
+            "node_id"
+          ]
+        },
+        {
+          "name": "observed_member_avatar_url",
+          "path": [
+            "user",
+            "avatar_url"
+          ]
+        },
+        {
+          "name": "observed_member_gravatar_id",
+          "path": [
+            "user",
+            "gravatar_id"
+          ]
+        },
+        {
+          "name": "observed_member_url",
+          "path": [
+            "user",
+            "url"
+          ]
+        },
+        {
+          "name": "observed_member_html_url",
+          "path": [
+            "user",
+            "html_url"
+          ]
+        },
+        {
+          "name": "observed_member_followers_url",
+          "path": [
+            "user",
+            "followers_url"
+          ]
+        },
+        {
+          "name": "observed_member_following_url",
+          "path": [
+            "user",
+            "following_url"
+          ]
+        },
+        {
+          "name": "observed_member_gists_url",
+          "path": [
+            "user",
+            "gists_url"
+          ]
+        },
+        {
+          "name": "observed_member_starred_url",
+          "path": [
+            "user",
+            "starred_url"
+          ]
+        },
+        {
+          "name": "observed_member_subscriptions_url",
+          "path": [
+            "user",
+            "subscriptions_url"
+          ]
+        },
+        {
+          "name": "observed_member_organizations_url",
+          "path": [
+            "user",
+            "organizations_url"
+          ]
+        },
+        {
+          "name": "observed_member_repos_url",
+          "path": [
+            "user",
+            "repos_url"
+          ]
+        },
+        {
+          "name": "observed_member_events_url",
+          "path": [
+            "user",
+            "events_url"
+          ]
+        },
+        {
+          "name": "observed_member_received_events_url",
+          "path": [
+            "user",
+            "received_events_url"
+          ]
+        },
+        {
+          "name": "observed_member_type",
+          "path": [
+            "user",
+            "type"
+          ]
+        },
+        {
+          "name": "observed_member_site_admin",
+          "path": [
+            "user",
+            "site_admin"
+          ]
+        },
+        {
+          "name": "observed_member_starred_at",
+          "path": [
+            "user",
+            "starred_at"
+          ]
+        },
+        {
+          "name": "observed_member_user_view_type",
+          "path": [
+            "user",
+            "user_view_type"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-memberships-for-authenticated-user",
+        "path_bindings": {},
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "state": {
+            "argument": "organization_membership_state"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "organization_id",
+          "organization_login"
+        ],
+        "row_assertions": [
+          {
+            "column": "observed_member_id",
+            "argument": "selected_membership_user_id",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_membership_visible_check_source",
+      "description": "Pinned orgs/check-membership-for-user read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected organization identity.",
+          "minimum": 1,
+          "example": 2500
+        },
+        {
+          "name": "selected_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected organization login.",
+          "min_length": 1,
+          "example": "membership-fixture"
+        },
+        {
+          "name": "selected_membership_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected member account identity.",
+          "minimum": 1,
+          "example": 2901
+        },
+        {
+          "name": "selected_membership_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected member login.",
+          "min_length": 1,
+          "example": "identity-alice"
+        },
+        {
+          "name": "selected_membership_check",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Visibility scope of this membership check.",
+          "enum": [
+            "visible",
+            "public"
+          ],
+          "example": "visible"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_organization_login"
+        },
+        {
+          "name": "user_id",
+          "source_argument": "selected_membership_user_id"
+        },
+        {
+          "name": "member_login",
+          "source_argument": "selected_membership_user_login"
+        },
+        {
+          "name": "check_kind",
+          "source_argument": "selected_membership_check"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "user_id",
+        "check_kind"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/check-membership-for-user",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_organization_login"
+          },
+          "username": {
+            "argument": "selected_membership_user_login"
+          }
+        },
+        "query_bindings": {},
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    },
+    {
+      "name": "organization_membership_public_check_source",
+      "description": "Pinned orgs/check-public-membership-for-user read; HTTP permission and upstream failures propagate.",
+      "arguments": [
+        {
+          "name": "selected_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected organization identity.",
+          "minimum": 1,
+          "example": 2500
+        },
+        {
+          "name": "selected_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected organization login.",
+          "min_length": 1,
+          "example": "membership-fixture"
+        },
+        {
+          "name": "selected_membership_user_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable selected member account identity.",
+          "minimum": 1,
+          "example": 2901
+        },
+        {
+          "name": "selected_membership_user_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical selected member login.",
+          "min_length": 1,
+          "example": "identity-alice"
+        },
+        {
+          "name": "selected_membership_check",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Visibility scope of this membership check.",
+          "enum": [
+            "visible",
+            "public"
+          ],
+          "example": "public"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_organization_login"
+        },
+        {
+          "name": "user_id",
+          "source_argument": "selected_membership_user_id"
+        },
+        {
+          "name": "member_login",
+          "source_argument": "selected_membership_user_login"
+        },
+        {
+          "name": "check_kind",
+          "source_argument": "selected_membership_check"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "user_id",
+        "check_kind"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/check-public-membership-for-user",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_organization_login"
+          },
+          "username": {
+            "argument": "selected_membership_user_login"
+          }
+        },
+        "query_bindings": {},
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "204",
+            "404"
+          ]
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "organization_membership_checks",
+      "description": "Organization/account membership visibility observations, not actual membership rows. Public and credential-visible checks preserve their distinct scopes; a negative public result does not prove absence of private membership.",
+      "grain": [
+        "organization_id",
+        "user_id",
+        "check_kind"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "user_id",
+          "member_login",
+          "check_kind",
+          "status_code"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "user_id",
+          "member_login",
+          "check_kind",
+          "status_code"
+        ],
+        "sql_names": {
+          "organization_id": "organization_membership_checks_organization_id",
+          "organization_login": "organization_membership_checks_organization_login",
+          "user_id": "organization_membership_checks_user_id",
+          "member_login": "organization_membership_checks_member_login",
+          "check_kind": "organization_membership_checks_check_kind",
+          "status_code": "organization_membership_checks_status_code"
+        },
+        "metrics": [
+          {
+            "name": "organization_membership_check_count",
+            "kind": "count",
+            "comment": "Selected membership visibility observations including unconfirmed results."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "confirmed_organization_membership_check_count": {
+              "expression": "COUNT(*) FILTER (WHERE organization_membership_checks.status_code = 204)",
+              "type": "BIGINT"
+            },
+            "unconfirmed_organization_membership_check_count": {
+              "expression": "COUNT(*) FILTER (WHERE organization_membership_checks.status_code = 404)",
+              "type": "BIGINT"
+            }
+          },
+          "metric_semantics": {
+            "confirmed_organization_membership_check_count": {
+              "dataset": "organization_membership_checks",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Membership confirmed under the explicitly selected endpoint visibility; no claim about hidden private membership."
+            },
+            "unconfirmed_organization_membership_check_count": {
+              "dataset": "organization_membership_checks",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Membership not confirmed under the explicitly selected endpoint visibility; no claim about hidden private membership."
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "visible",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "membership_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Account login whose organization membership or membership-check observation is selected.",
+              "min_length": 1,
+              "example": "identity-alice"
+            },
+            {
+              "name": "organization_membership_check",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Check visible membership or public membership. A 404 does not establish absence of a private membership.",
+              "enum": [
+                "visible",
+                "public"
+              ],
+              "example": "visible"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "members",
+                "entity": "organization_member_identity_source",
+                "arguments": {
+                  "selected_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "membership_user": {
+                    "parameter": "membership_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_membership_visible_check_source",
+                "arguments": {
+                  "selected_organization_id": {
+                    "stage": "members",
+                    "column": "organization_id"
+                  },
+                  "selected_organization_login": {
+                    "stage": "members",
+                    "column": "organization_login"
+                  },
+                  "selected_membership_user_id": {
+                    "stage": "members",
+                    "column": "user_id"
+                  },
+                  "selected_membership_user_login": {
+                    "stage": "members",
+                    "column": "user_login"
+                  },
+                  "selected_membership_check": {
+                    "literal": "visible"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "member_login",
+              "source_stage": "records",
+              "source_column": "member_login"
+            },
+            {
+              "name": "check_kind",
+              "source_stage": "records",
+              "source_column": "check_kind"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "select": [
+            "organization_membership_check"
+          ],
+          "population": "One visibility-scoped membership check. 204 confirms membership in this visibility scope; 404 means not confirmed and can hide a private membership. Permission errors fail.",
+          "select_values": {
+            "organization_membership_check": [
+              "visible"
+            ]
+          }
+        },
+        {
+          "name": "public",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "membership_user",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Account login whose organization membership or membership-check observation is selected.",
+              "min_length": 1,
+              "example": "identity-alice"
+            },
+            {
+              "name": "organization_membership_check",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Check visible membership or public membership. A 404 does not establish absence of a private membership.",
+              "enum": [
+                "visible",
+                "public"
+              ],
+              "example": "visible"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "members",
+                "entity": "organization_member_identity_source",
+                "arguments": {
+                  "selected_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "membership_user": {
+                    "parameter": "membership_user"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_membership_public_check_source",
+                "arguments": {
+                  "selected_organization_id": {
+                    "stage": "members",
+                    "column": "organization_id"
+                  },
+                  "selected_organization_login": {
+                    "stage": "members",
+                    "column": "organization_login"
+                  },
+                  "selected_membership_user_id": {
+                    "stage": "members",
+                    "column": "user_id"
+                  },
+                  "selected_membership_user_login": {
+                    "stage": "members",
+                    "column": "user_login"
+                  },
+                  "selected_membership_check": {
+                    "literal": "public"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "member_login",
+              "source_stage": "records",
+              "source_column": "member_login"
+            },
+            {
+              "name": "check_kind",
+              "source_stage": "records",
+              "source_column": "check_kind"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "records",
+              "source_column": "status_code"
+            }
+          ],
+          "select": [
+            "organization_membership_check"
+          ],
+          "population": "One visibility-scoped membership check. 204 confirms membership in this visibility scope; 404 means not confirmed and can hide a private membership. Permission errors fail.",
+          "select_values": {
+            "organization_membership_check": [
+              "public"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "membership_checks_to_organizations",
+      "from": "organization_membership_checks",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "membership_checks_to_members",
+      "from": "organization_membership_checks",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "member_login"
+          }
+        }
+      ]
+    }
+  ],
+  "scopes": {
+    "authenticated_organization_memberships": {
+      "select": {
+        "parameter": "organization",
+        "if_present": {
+          "entity": "organization_membership_authenticated_source",
+          "arguments": {
+            "organization": {
+              "parameter": "organization"
+            },
+            "selected_membership_user_id": {
+              "stage": "members",
+              "column": "user_id"
+            },
+            "selected_membership_user_login": {
+              "stage": "members",
+              "column": "user_login"
+            },
+            "selected_membership_user_type": {
+              "stage": "members",
+              "column": "account_type"
+            }
+          }
+        },
+        "if_absent": {
+          "entity": "organization_membership_authenticated_list_source",
+          "arguments": {
+            "organization_membership_state": {
+              "parameter": "organization_membership_state"
+            },
+            "selected_membership_user_id": {
+              "stage": "members",
+              "column": "user_id"
+            },
+            "selected_membership_user_login": {
+              "stage": "members",
+              "column": "user_login"
+            },
+            "selected_membership_user_type": {
+              "stage": "members",
+              "column": "account_type"
+            }
+          }
+        }
+      }
+    }
+  }
+}

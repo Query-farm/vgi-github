@@ -84,12 +84,12 @@ FROM engineering.semantic.github(repositories=>[{'repository':'example/alpha'},{
 # Repository-share denominator is all visible authored PR groups for user/month.
 # UTC offsets place PR202 in September and PR203 in August.
 query ITTTTIIR rowsort
-SELECT activity_user_id, activity_user, authored_pr_created_month, activity_repository_id, authored_repository_name,
-       authored_pr_count, monthly_authored_pr_total,
+SELECT author_id, author_login, pull_request_created_month, activity_repository_id, pull_request_repository_name,
+       pull_request_count, monthly_pr_total,
        monthly_repository_pr_share
 FROM engineering.semantic.github(user=>'researcher')
-GROUP BY activity_user_id, activity_user, authored_pr_created_month,
-         activity_repository_id, authored_repository_name;
+GROUP BY author_id, author_login, pull_request_created_month,
+         activity_repository_id, pull_request_repository_name;
 ----
 701	researcher	2026-08-01	R501	lab/compiler	1	2	0.500
 701	researcher	2026-08-01	R503	outside/docs	1	2	0.500
@@ -99,11 +99,11 @@ GROUP BY activity_user_id, activity_user, authored_pr_created_month,
 
 # QUALIFY filters the rendered groups after their full denominator is computed.
 query ITTTTR rowsort
-SELECT activity_user_id, activity_user, authored_pr_created_month, activity_repository_id, authored_repository_name,
+SELECT author_id, author_login, pull_request_created_month, activity_repository_id, pull_request_repository_name,
        monthly_repository_pr_share
 FROM engineering.semantic.github(user=>'researcher')
-GROUP BY activity_user_id, activity_user, authored_pr_created_month,
-         activity_repository_id, authored_repository_name
+GROUP BY author_id, author_login, pull_request_created_month,
+         activity_repository_id, pull_request_repository_name
 QUALIFY monthly_repository_pr_share > 0.5;
 ----
 701	researcher	2026-09-01	R502	lab/sdk	0.667
@@ -112,9 +112,9 @@ QUALIFY monthly_repository_pr_share > 0.5;
 # Rank considers the selected user cohort in each observed month; zero-activity
 # carol does not fabricate a PR row. No repository-owner traversal is involved.
 query ITTII rowsort
-SELECT activity_user_id, activity_user, authored_pr_created_month, authored_pr_count, monthly_user_pr_rank
+SELECT author_id, author_login, pull_request_created_month, pull_request_count, monthly_user_pr_rank
 FROM engineering.semantic.github(users=>[{'login':'alice'},{'login':'bob'},{'login':'researcher'},{'login':'carol'}])
-GROUP BY activity_user_id, activity_user, authored_pr_created_month;
+GROUP BY author_id, author_login, pull_request_created_month;
 ----
 201	alice	2026-09-01	4	1
 202	bob	2026-09-01	1	3
@@ -125,9 +125,9 @@ GROUP BY activity_user_id, activity_user, authored_pr_created_month;
 # Local calendar is an explicit fixed IANA reporting choice with UTC instants.
 # An August UTC midnight belongs to July in US Eastern.
 query TTI rowsort
-SELECT authored_pr_created_day, authored_pr_created_eastern_day, authored_pr_count
+SELECT pull_request_created_day, pull_request_created_eastern_day, pull_request_count
 FROM engineering.semantic.github(user=>'researcher')
-GROUP BY authored_pr_created_day, authored_pr_created_eastern_day;
+GROUP BY pull_request_created_day, pull_request_created_eastern_day;
 ----
 2026-08-01	2026-07-31	1
 2026-08-31	2026-08-31	1
@@ -144,9 +144,9 @@ statement ok
 SET TimeZone='Asia/Tokyo';
 
 statement error
-SELECT authored_pr_created_eastern_day, authored_pr_count
+SELECT pull_request_created_eastern_day, pull_request_count
 FROM engineering.semantic.github(user=>'researcher')
-GROUP BY authored_pr_created_eastern_day;
+GROUP BY pull_request_created_eastern_day;
 ----
 TIMEZONE_MISMATCH
 
@@ -158,18 +158,18 @@ SET crossfield_mode='strict';
 
 # Dropping a fixed window-grain member cannot silently change the denominator.
 statement error
-SELECT authored_pr_created_month, monthly_repository_pr_share
+SELECT pull_request_created_month, monthly_repository_pr_share
 FROM engineering.semantic.github(user=>'researcher')
-GROUP BY authored_pr_created_month;
+GROUP BY pull_request_created_month;
 ----
 WINDOW_GRAIN
 
 # Caller filtering repository groups before a denominator window is rejected.
 statement error
-SELECT activity_user_id, activity_user, authored_pr_created_month, activity_repository_id, authored_repository_name, monthly_repository_pr_share
+SELECT author_id, author_login, pull_request_created_month, activity_repository_id, pull_request_repository_name, monthly_repository_pr_share
 FROM engineering.semantic.github(user=>'researcher')
-WHERE authored_repository_name='lab/sdk'
-GROUP BY activity_user_id, activity_user, authored_pr_created_month,
-         activity_repository_id, authored_repository_name;
+WHERE pull_request_repository_name='lab/sdk'
+GROUP BY author_id, author_login, pull_request_created_month,
+         activity_repository_id, pull_request_repository_name;
 ----
 WINDOW_FILTER

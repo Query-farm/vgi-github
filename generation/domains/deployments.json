@@ -1,0 +1,4907 @@
+{
+  "entities": [
+    {
+      "name": "deployments_source",
+      "description": "repos/list-deployments schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "deployment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "deployment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "git_ref",
+          "path": [
+            "ref"
+          ]
+        },
+        {
+          "name": "task",
+          "path": [
+            "task"
+          ]
+        },
+        {
+          "name": "environment_name",
+          "path": [
+            "environment"
+          ]
+        },
+        {
+          "name": "original_environment",
+          "path": [
+            "original_environment"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "statuses_url",
+          "path": [
+            "statuses_url"
+          ]
+        },
+        {
+          "name": "transient_environment",
+          "path": [
+            "transient_environment"
+          ]
+        },
+        {
+          "name": "production_environment",
+          "path": [
+            "production_environment"
+          ]
+        },
+        {
+          "name": "deployment_creator_id",
+          "path": [
+            "creator",
+            "id"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "deployment_creator_login",
+          "path": [
+            "creator",
+            "login"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "deployment_creator_type",
+          "path": [
+            "creator",
+            "type"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        }
+      ],
+      "grain": [
+        "repository",
+        "deployment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-deployments",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "environment_deployments_source",
+      "description": "repos/list-deployments schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "environment_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+          "example": "production",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "deployment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "deployment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "git_ref",
+          "path": [
+            "ref"
+          ]
+        },
+        {
+          "name": "task",
+          "path": [
+            "task"
+          ]
+        },
+        {
+          "name": "environment_name",
+          "path": [
+            "environment"
+          ]
+        },
+        {
+          "name": "original_environment",
+          "path": [
+            "original_environment"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "statuses_url",
+          "path": [
+            "statuses_url"
+          ]
+        },
+        {
+          "name": "transient_environment",
+          "path": [
+            "transient_environment"
+          ]
+        },
+        {
+          "name": "production_environment",
+          "path": [
+            "production_environment"
+          ]
+        },
+        {
+          "name": "deployment_creator_id",
+          "path": [
+            "creator",
+            "id"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "deployment_creator_login",
+          "path": [
+            "creator",
+            "login"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "deployment_creator_type",
+          "path": [
+            "creator",
+            "type"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        }
+      ],
+      "grain": [
+        "repository",
+        "deployment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-deployments",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "environment": {
+            "argument": "environment_name"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "environment_name",
+            "argument": "environment_name",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deployment_lookup",
+      "description": "repos/get-deployment schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "deployment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable deployment identity within the selected repository.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "deployment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "deployment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "commit_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "git_ref",
+          "path": [
+            "ref"
+          ]
+        },
+        {
+          "name": "task",
+          "path": [
+            "task"
+          ]
+        },
+        {
+          "name": "environment_name",
+          "path": [
+            "environment"
+          ]
+        },
+        {
+          "name": "original_environment",
+          "path": [
+            "original_environment"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "statuses_url",
+          "path": [
+            "statuses_url"
+          ]
+        },
+        {
+          "name": "transient_environment",
+          "path": [
+            "transient_environment"
+          ]
+        },
+        {
+          "name": "production_environment",
+          "path": [
+            "production_environment"
+          ]
+        },
+        {
+          "name": "deployment_creator_id",
+          "path": [
+            "creator",
+            "id"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "deployment_creator_login",
+          "path": [
+            "creator",
+            "login"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "deployment_creator_type",
+          "path": [
+            "creator",
+            "type"
+          ],
+          "description": "Deployment creator account; role is not inferred from another deployment event."
+        }
+      ],
+      "grain": [
+        "repository",
+        "deployment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-deployment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "deployment_id": {
+            "argument": "deployment_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "deployment_id",
+            "argument": "deployment_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deployment_statuses_source",
+      "description": "repos/list-deployment-statuses schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "deployment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable deployment identity within the selected repository.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "deployment_id",
+          "source_argument": "deployment_id"
+        },
+        {
+          "name": "deployment_status_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "deployment_status_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "environment_name",
+          "path": [
+            "environment"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "target_url",
+          "path": [
+            "target_url"
+          ]
+        },
+        {
+          "name": "environment_url",
+          "path": [
+            "environment_url"
+          ]
+        },
+        {
+          "name": "log_url",
+          "path": [
+            "log_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "status_creator_id",
+          "path": [
+            "creator",
+            "id"
+          ],
+          "description": "Status creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "status_creator_login",
+          "path": [
+            "creator",
+            "login"
+          ],
+          "description": "Status creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "status_creator_type",
+          "path": [
+            "creator",
+            "type"
+          ],
+          "description": "Status creator account; role is not inferred from another deployment event."
+        }
+      ],
+      "grain": [
+        "repository",
+        "deployment_id",
+        "deployment_status_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-deployment-statuses",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "deployment_id": {
+            "argument": "deployment_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "deployment_status_lookup",
+      "description": "repos/get-deployment-status schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "deployment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable deployment identity within the selected repository.",
+          "example": 1,
+          "minimum": 1
+        },
+        {
+          "name": "deployment_status_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable deployment status identity; requires repository and deployment_id.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "deployment_id",
+          "source_argument": "deployment_id"
+        },
+        {
+          "name": "deployment_status_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "deployment_status_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "environment_name",
+          "path": [
+            "environment"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "target_url",
+          "path": [
+            "target_url"
+          ]
+        },
+        {
+          "name": "environment_url",
+          "path": [
+            "environment_url"
+          ]
+        },
+        {
+          "name": "log_url",
+          "path": [
+            "log_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "status_creator_id",
+          "path": [
+            "creator",
+            "id"
+          ],
+          "description": "Status creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "status_creator_login",
+          "path": [
+            "creator",
+            "login"
+          ],
+          "description": "Status creator account; role is not inferred from another deployment event."
+        },
+        {
+          "name": "status_creator_type",
+          "path": [
+            "creator",
+            "type"
+          ],
+          "description": "Status creator account; role is not inferred from another deployment event."
+        }
+      ],
+      "grain": [
+        "repository",
+        "deployment_id",
+        "deployment_status_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-deployment-status",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "deployment_id": {
+            "argument": "deployment_id"
+          },
+          "status_id": {
+            "argument": "deployment_status_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "deployment_status_id",
+            "argument": "deployment_status_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "environments_source",
+      "description": "repos/get-all-environments schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "environment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "environment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "environment_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "protected_branches",
+          "path": [
+            "deployment_branch_policy",
+            "protected_branches"
+          ]
+        },
+        {
+          "name": "custom_branch_policies",
+          "path": [
+            "deployment_branch_policy",
+            "custom_branch_policies"
+          ]
+        },
+        {
+          "name": "protection_rules",
+          "path": [
+            "protection_rules"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": {
+              "id": true,
+              "node_id": true,
+              "type": true,
+              "wait_timer": true
+            },
+            "variant_2": {
+              "id": true,
+              "node_id": true,
+              "type": true,
+              "prevent_self_review": true,
+              "reviewers": {
+                "type": true,
+                "reviewer": {
+                  "variant_1": {
+                    "id": true,
+                    "login": true,
+                    "type": true
+                  },
+                  "variant_2": {
+                    "id": true,
+                    "name": true,
+                    "slug": true
+                  }
+                }
+              }
+            },
+            "variant_3": {
+              "id": true,
+              "node_id": true,
+              "type": true
+            }
+          },
+          "description": "Typed built-in environment rule variants, including wait timers and required user/team reviewers. anyOf preserves every matching schema branch; the returned type field identifies the rule purpose."
+        }
+      ],
+      "grain": [
+        "repository",
+        "environment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-all-environments",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "environments"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "environment_lookup",
+      "description": "repos/get-environment schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "environment_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+          "example": "production",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "environment_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "environment_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "environment_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "protected_branches",
+          "path": [
+            "deployment_branch_policy",
+            "protected_branches"
+          ]
+        },
+        {
+          "name": "custom_branch_policies",
+          "path": [
+            "deployment_branch_policy",
+            "custom_branch_policies"
+          ]
+        },
+        {
+          "name": "protection_rules",
+          "path": [
+            "protection_rules"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": {
+              "id": true,
+              "node_id": true,
+              "type": true,
+              "wait_timer": true
+            },
+            "variant_2": {
+              "id": true,
+              "node_id": true,
+              "type": true,
+              "prevent_self_review": true,
+              "reviewers": {
+                "type": true,
+                "reviewer": {
+                  "variant_1": {
+                    "id": true,
+                    "login": true,
+                    "type": true
+                  },
+                  "variant_2": {
+                    "id": true,
+                    "name": true,
+                    "slug": true
+                  }
+                }
+              }
+            },
+            "variant_3": {
+              "id": true,
+              "node_id": true,
+              "type": true
+            }
+          },
+          "description": "Typed built-in environment rule variants, including wait timers and required user/team reviewers. anyOf preserves every matching schema branch; the returned type field identifies the rule purpose."
+        }
+      ],
+      "grain": [
+        "repository",
+        "environment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-environment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "environment_name": {
+            "argument": "environment_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "environment_name",
+            "argument": "environment_name",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deployment_branch_policies_source",
+      "description": "repos/list-deployment-branch-policies schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "environment_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+          "example": "production",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "environment_name",
+          "source_argument": "environment_name"
+        },
+        {
+          "name": "deployment_branch_policy_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "policy_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name_pattern",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "target_type",
+          "path": [
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "environment_name",
+        "deployment_branch_policy_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-deployment-branch-policies",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "environment_name": {
+            "argument": "environment_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "branch_policies"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "deployment_branch_policy_id"
+        ]
+      }
+    },
+    {
+      "name": "deployment_branch_policy_lookup",
+      "description": "repos/get-deployment-branch-policy schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "environment_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+          "example": "production",
+          "min_length": 1
+        },
+        {
+          "name": "deployment_branch_policy_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable deployment branch or tag policy identity; requires repository and environment_name.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "environment_name",
+          "source_argument": "environment_name"
+        },
+        {
+          "name": "deployment_branch_policy_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "policy_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name_pattern",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "target_type",
+          "path": [
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "environment_name",
+        "deployment_branch_policy_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-deployment-branch-policy",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "environment_name": {
+            "argument": "environment_name"
+          },
+          "branch_policy_id": {
+            "argument": "deployment_branch_policy_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "deployment_branch_policy_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "deployment_branch_policy_id",
+            "argument": "deployment_branch_policy_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deployment_protection_rules_source",
+      "description": "repos/get-all-deployment-protection-rules schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "environment_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+          "example": "production",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "environment_name",
+          "source_argument": "environment_name"
+        },
+        {
+          "name": "deployment_protection_rule_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "rule_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "enabled",
+          "path": [
+            "enabled"
+          ]
+        },
+        {
+          "name": "integration_id",
+          "path": [
+            "app",
+            "id"
+          ]
+        },
+        {
+          "name": "integration_slug",
+          "path": [
+            "app",
+            "slug"
+          ]
+        },
+        {
+          "name": "integration_node_id",
+          "path": [
+            "app",
+            "node_id"
+          ]
+        },
+        {
+          "name": "integration_url",
+          "path": [
+            "app",
+            "integration_url"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "environment_name",
+        "deployment_protection_rule_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-all-deployment-protection-rules",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "environment_name": {
+            "argument": "environment_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [
+          "custom_deployment_protection_rules"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "deployment_protection_rule_lookup",
+      "description": "repos/get-custom-deployment-protection-rule schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "environment_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+          "example": "production",
+          "min_length": 1
+        },
+        {
+          "name": "deployment_protection_rule_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable custom deployment protection rule identity; requires repository and environment_name.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "environment_name",
+          "source_argument": "environment_name"
+        },
+        {
+          "name": "deployment_protection_rule_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "rule_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "enabled",
+          "path": [
+            "enabled"
+          ]
+        },
+        {
+          "name": "integration_id",
+          "path": [
+            "app",
+            "id"
+          ]
+        },
+        {
+          "name": "integration_slug",
+          "path": [
+            "app",
+            "slug"
+          ]
+        },
+        {
+          "name": "integration_node_id",
+          "path": [
+            "app",
+            "node_id"
+          ]
+        },
+        {
+          "name": "integration_url",
+          "path": [
+            "app",
+            "integration_url"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "environment_name",
+        "deployment_protection_rule_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-custom-deployment-protection-rule",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "environment_name": {
+            "argument": "environment_name"
+          },
+          "protection_rule_id": {
+            "argument": "deployment_protection_rule_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "deployment_protection_rule_id",
+            "argument": "deployment_protection_rule_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "deployment_rule_integrations_source",
+      "description": "repos/list-custom-deployment-rule-integrations schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "environment_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+          "example": "production",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "environment_name",
+          "source_argument": "environment_name"
+        },
+        {
+          "name": "integration_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "integration_slug",
+          "path": [
+            "slug"
+          ]
+        },
+        {
+          "name": "integration_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "integration_url",
+          "path": [
+            "integration_url"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "environment_name",
+        "integration_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-custom-deployment-rule-integrations",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "environment_name": {
+            "argument": "environment_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "available_custom_deployment_protection_rule_integrations"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "pages_deployment_status_lookup",
+      "description": "repos/get-pages-deployment schema-derived metadata source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "pages_deployment_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "GitHub Pages deployment ID or commit SHA lookup token. The response does not provide a canonical deployment ID.",
+          "example": "1",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "pages_deployment_id",
+          "source_argument": "pages_deployment_id"
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "pages_deployment_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-pages-deployment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "pages_deployment_id": {
+            "argument": "pages_deployment_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "deployments",
+      "description": "Deployment requests at stable repository/deployment identity, independent of status-event multiplicity. Environment names are labels in deployment records and may refer to renamed or deleted environments; no environment-ID relationship is invented. Actor is deployment_creator, distinct from status creators. Arbitrary deployment payload values are not currently typed.",
+      "grain": [
+        "repository_id",
+        "deployment_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "deployment_id",
+          "deployment_node_id",
+          "commit_sha",
+          "git_ref",
+          "task",
+          "environment_name",
+          "original_environment",
+          "description",
+          "created_at",
+          "updated_at",
+          "url",
+          "statuses_url",
+          "transient_environment",
+          "production_environment",
+          "deployment_creator_id",
+          "deployment_creator_login",
+          "deployment_creator_type",
+          "deployment_created_day"
+        ],
+        "dimensions": [
+          "repository",
+          "deployment_id",
+          "commit_sha",
+          "git_ref",
+          "task",
+          "environment_name",
+          "production_environment",
+          "transient_environment",
+          "deployment_creator_id",
+          "deployment_creator_login",
+          "created_at",
+          "deployment_created_day"
+        ],
+        "metrics": [
+          {
+            "name": "deployment_count",
+            "kind": "count",
+            "comment": "Selected deployment request records, not successful deployments and not status updates."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "deployment_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC calendar date from the returned created_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "deployments_repository",
+          "deployment_id": "deployments_deployment_id",
+          "commit_sha": "deployments_commit_sha",
+          "git_ref": "deployments_git_ref",
+          "task": "deployments_task",
+          "environment_name": "deployments_environment_name",
+          "production_environment": "deployments_production_environment",
+          "transient_environment": "deployments_transient_environment",
+          "deployment_creator_id": "deployments_deployment_creator_id",
+          "deployment_creator_login": "deployments_deployment_creator_login",
+          "created_at": "deployments_created_at",
+          "deployment_created_day": "deployments_deployment_created_day"
+        },
+        "crossfield": {
+          "metrics": {
+            "production_deployment_count": {
+              "expression": "COUNT(*) FILTER (WHERE deployments.production_environment = TRUE)"
+            },
+            "transient_deployment_count": {
+              "expression": "COUNT(*) FILTER (WHERE deployments.transient_environment = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "production_deployment_count": {
+              "dataset": "deployments",
+              "comment": "Deployment records explicitly marked production; missing classification is not false.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "transient_deployment_count": {
+              "dataset": "deployments",
+              "comment": "Deployment records explicitly marked transient.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "deployment_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Stable deployment identity within the selected repository.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "deployment_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment_node_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_node_id"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "deployments",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "git_ref",
+              "source_stage": "deployments",
+              "source_column": "git_ref"
+            },
+            {
+              "name": "task",
+              "source_stage": "deployments",
+              "source_column": "task"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "deployments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "original_environment",
+              "source_stage": "deployments",
+              "source_column": "original_environment"
+            },
+            {
+              "name": "description",
+              "source_stage": "deployments",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "deployments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "deployments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "deployments",
+              "source_column": "url"
+            },
+            {
+              "name": "statuses_url",
+              "source_stage": "deployments",
+              "source_column": "statuses_url"
+            },
+            {
+              "name": "transient_environment",
+              "source_stage": "deployments",
+              "source_column": "transient_environment"
+            },
+            {
+              "name": "production_environment",
+              "source_stage": "deployments",
+              "source_column": "production_environment"
+            },
+            {
+              "name": "deployment_creator_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_id"
+            },
+            {
+              "name": "deployment_creator_login",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_login"
+            },
+            {
+              "name": "deployment_creator_type",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "deployments",
+                "entity": "deployment_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "deployment_id": {
+                    "parameter": "deployment_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployments"
+          },
+          "population": "Visible deployment records, preserving production, transient and environment labels; environment selection uses GitHub's deployment filter without requiring that an environment resource still exists."
+        },
+        {
+          "name": "environments",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "environment_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+              "example": "production",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "environment_name"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment_node_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_node_id"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "deployments",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "git_ref",
+              "source_stage": "deployments",
+              "source_column": "git_ref"
+            },
+            {
+              "name": "task",
+              "source_stage": "deployments",
+              "source_column": "task"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "deployments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "original_environment",
+              "source_stage": "deployments",
+              "source_column": "original_environment"
+            },
+            {
+              "name": "description",
+              "source_stage": "deployments",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "deployments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "deployments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "deployments",
+              "source_column": "url"
+            },
+            {
+              "name": "statuses_url",
+              "source_stage": "deployments",
+              "source_column": "statuses_url"
+            },
+            {
+              "name": "transient_environment",
+              "source_stage": "deployments",
+              "source_column": "transient_environment"
+            },
+            {
+              "name": "production_environment",
+              "source_stage": "deployments",
+              "source_column": "production_environment"
+            },
+            {
+              "name": "deployment_creator_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_id"
+            },
+            {
+              "name": "deployment_creator_login",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_login"
+            },
+            {
+              "name": "deployment_creator_type",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "deployments",
+                "entity": "environment_deployments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployments"
+          },
+          "population": "Visible deployment records, preserving production, transient and environment labels; environment selection uses GitHub's deployment filter without requiring that an environment resource still exists."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment_node_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_node_id"
+            },
+            {
+              "name": "commit_sha",
+              "source_stage": "deployments",
+              "source_column": "commit_sha"
+            },
+            {
+              "name": "git_ref",
+              "source_stage": "deployments",
+              "source_column": "git_ref"
+            },
+            {
+              "name": "task",
+              "source_stage": "deployments",
+              "source_column": "task"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "deployments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "original_environment",
+              "source_stage": "deployments",
+              "source_column": "original_environment"
+            },
+            {
+              "name": "description",
+              "source_stage": "deployments",
+              "source_column": "description"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "deployments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "deployments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "deployments",
+              "source_column": "url"
+            },
+            {
+              "name": "statuses_url",
+              "source_stage": "deployments",
+              "source_column": "statuses_url"
+            },
+            {
+              "name": "transient_environment",
+              "source_stage": "deployments",
+              "source_column": "transient_environment"
+            },
+            {
+              "name": "production_environment",
+              "source_stage": "deployments",
+              "source_column": "production_environment"
+            },
+            {
+              "name": "deployment_creator_id",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_id"
+            },
+            {
+              "name": "deployment_creator_login",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_login"
+            },
+            {
+              "name": "deployment_creator_type",
+              "source_stage": "deployments",
+              "source_column": "deployment_creator_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "deployments",
+                "entity": "deployments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployments"
+          },
+          "population": "Visible deployment records, preserving production, transient and environment labels; environment selection uses GitHub's deployment filter without requiring that an environment resource still exists."
+        }
+      ]
+    },
+    {
+      "name": "deployment_statuses",
+      "description": "All visible deployment status event records, including historical failures followed by success and states queued, pending, in_progress and inactive. This entity is not one latest state per deployment. Direct repository context is analytical; deployment parent navigation is retained without a competing analytical path or conflating deployment/status creator roles.",
+      "grain": [
+        "repository_id",
+        "deployment_id",
+        "deployment_status_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "deployment_id",
+          "deployment_status_id",
+          "deployment_status_node_id",
+          "state",
+          "description",
+          "environment_name",
+          "created_at",
+          "updated_at",
+          "target_url",
+          "environment_url",
+          "log_url",
+          "url",
+          "status_creator_id",
+          "status_creator_login",
+          "status_creator_type",
+          "deployment_status_created_day"
+        ],
+        "dimensions": [
+          "repository",
+          "deployment_id",
+          "deployment_status_id",
+          "state",
+          "environment_name",
+          "status_creator_id",
+          "status_creator_login",
+          "created_at",
+          "deployment_status_created_day"
+        ],
+        "metrics": [
+          {
+            "name": "deployment_status_count",
+            "kind": "count",
+            "comment": "Selected deployment status event records; multiple records can belong to one deployment."
+          },
+          {
+            "name": "successful_deployment_status_count",
+            "kind": "count",
+            "comment": "Status events reporting success, not distinct successful deployments.",
+            "where": {
+              "field": "state",
+              "op": "in",
+              "values": [
+                "success"
+              ]
+            }
+          },
+          {
+            "name": "failed_deployment_status_count",
+            "kind": "count",
+            "comment": "Status events reporting failure or error, including events superseded later.",
+            "where": {
+              "field": "state",
+              "op": "in",
+              "values": [
+                "failure",
+                "error"
+              ]
+            }
+          },
+          {
+            "name": "pending_deployment_status_count",
+            "kind": "count",
+            "comment": "Status events in a nonterminal pending, queued or in-progress state.",
+            "where": {
+              "field": "state",
+              "op": "in",
+              "values": [
+                "pending",
+                "queued",
+                "in_progress"
+              ]
+            }
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "deployment_status_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC calendar date from the returned created_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "deployment_statuses_repository",
+          "deployment_id": "deployment_statuses_deployment_id",
+          "deployment_status_id": "deployment_statuses_deployment_status_id",
+          "state": "deployment_statuses_state",
+          "environment_name": "deployment_statuses_environment_name",
+          "status_creator_id": "deployment_statuses_status_creator_id",
+          "status_creator_login": "deployment_statuses_status_creator_login",
+          "created_at": "deployment_statuses_created_at",
+          "deployment_status_created_day": "deployment_statuses_deployment_status_created_day"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "deployment_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Stable deployment identity within the selected repository.",
+              "example": 1,
+              "minimum": 1
+            },
+            {
+              "name": "deployment_status_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Stable deployment status identity; requires repository and deployment_id.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "deployment_status_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment_status_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_status_id"
+            },
+            {
+              "name": "deployment_status_node_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_status_node_id"
+            },
+            {
+              "name": "state",
+              "source_stage": "statuses",
+              "source_column": "state"
+            },
+            {
+              "name": "description",
+              "source_stage": "statuses",
+              "source_column": "description"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "statuses",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "statuses",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "statuses",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "target_url",
+              "source_stage": "statuses",
+              "source_column": "target_url"
+            },
+            {
+              "name": "environment_url",
+              "source_stage": "statuses",
+              "source_column": "environment_url"
+            },
+            {
+              "name": "log_url",
+              "source_stage": "statuses",
+              "source_column": "log_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "statuses",
+              "source_column": "url"
+            },
+            {
+              "name": "status_creator_id",
+              "source_stage": "statuses",
+              "source_column": "status_creator_id"
+            },
+            {
+              "name": "status_creator_login",
+              "source_stage": "statuses",
+              "source_column": "status_creator_login"
+            },
+            {
+              "name": "status_creator_type",
+              "source_stage": "statuses",
+              "source_column": "status_creator_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "statuses",
+                "entity": "deployment_status_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "deployment_id": {
+                    "parameter": "deployment_id"
+                  },
+                  "deployment_status_id": {
+                    "parameter": "deployment_status_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "statuses"
+          },
+          "population": "One status event identified within one deployment."
+        },
+        {
+          "name": "deployments",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "deployment_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Stable deployment identity within the selected repository.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "deployment_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment_status_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_status_id"
+            },
+            {
+              "name": "deployment_status_node_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_status_node_id"
+            },
+            {
+              "name": "state",
+              "source_stage": "statuses",
+              "source_column": "state"
+            },
+            {
+              "name": "description",
+              "source_stage": "statuses",
+              "source_column": "description"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "statuses",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "statuses",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "statuses",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "target_url",
+              "source_stage": "statuses",
+              "source_column": "target_url"
+            },
+            {
+              "name": "environment_url",
+              "source_stage": "statuses",
+              "source_column": "environment_url"
+            },
+            {
+              "name": "log_url",
+              "source_stage": "statuses",
+              "source_column": "log_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "statuses",
+              "source_column": "url"
+            },
+            {
+              "name": "status_creator_id",
+              "source_stage": "statuses",
+              "source_column": "status_creator_id"
+            },
+            {
+              "name": "status_creator_login",
+              "source_stage": "statuses",
+              "source_column": "status_creator_login"
+            },
+            {
+              "name": "status_creator_type",
+              "source_stage": "statuses",
+              "source_column": "status_creator_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "deployments",
+                "entity": "deployment_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "deployment_id": {
+                    "parameter": "deployment_id"
+                  }
+                }
+              },
+              {
+                "name": "statuses",
+                "entity": "deployment_statuses_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "deployments",
+                    "column": "repository"
+                  },
+                  "deployment_id": {
+                    "stage": "deployments",
+                    "column": "deployment_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "statuses"
+          },
+          "population": "All visible status event records for selected deployments, including superseded and nonterminal states; all pages are followed."
+        },
+        {
+          "name": "environments",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "environment_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+              "example": "production",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "environment_name"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment_status_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_status_id"
+            },
+            {
+              "name": "deployment_status_node_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_status_node_id"
+            },
+            {
+              "name": "state",
+              "source_stage": "statuses",
+              "source_column": "state"
+            },
+            {
+              "name": "description",
+              "source_stage": "statuses",
+              "source_column": "description"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "statuses",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "statuses",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "statuses",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "target_url",
+              "source_stage": "statuses",
+              "source_column": "target_url"
+            },
+            {
+              "name": "environment_url",
+              "source_stage": "statuses",
+              "source_column": "environment_url"
+            },
+            {
+              "name": "log_url",
+              "source_stage": "statuses",
+              "source_column": "log_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "statuses",
+              "source_column": "url"
+            },
+            {
+              "name": "status_creator_id",
+              "source_stage": "statuses",
+              "source_column": "status_creator_id"
+            },
+            {
+              "name": "status_creator_login",
+              "source_stage": "statuses",
+              "source_column": "status_creator_login"
+            },
+            {
+              "name": "status_creator_type",
+              "source_stage": "statuses",
+              "source_column": "status_creator_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "deployments",
+                "entity": "environment_deployments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  }
+                }
+              },
+              {
+                "name": "statuses",
+                "entity": "deployment_statuses_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "deployments",
+                    "column": "repository"
+                  },
+                  "deployment_id": {
+                    "stage": "deployments",
+                    "column": "deployment_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "statuses"
+          },
+          "population": "All visible status event records for selected deployments, including superseded and nonterminal states; all pages are followed."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "deployment_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_id"
+            },
+            {
+              "name": "deployment_status_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_status_id"
+            },
+            {
+              "name": "deployment_status_node_id",
+              "source_stage": "statuses",
+              "source_column": "deployment_status_node_id"
+            },
+            {
+              "name": "state",
+              "source_stage": "statuses",
+              "source_column": "state"
+            },
+            {
+              "name": "description",
+              "source_stage": "statuses",
+              "source_column": "description"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "statuses",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "statuses",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "statuses",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "target_url",
+              "source_stage": "statuses",
+              "source_column": "target_url"
+            },
+            {
+              "name": "environment_url",
+              "source_stage": "statuses",
+              "source_column": "environment_url"
+            },
+            {
+              "name": "log_url",
+              "source_stage": "statuses",
+              "source_column": "log_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "statuses",
+              "source_column": "url"
+            },
+            {
+              "name": "status_creator_id",
+              "source_stage": "statuses",
+              "source_column": "status_creator_id"
+            },
+            {
+              "name": "status_creator_login",
+              "source_stage": "statuses",
+              "source_column": "status_creator_login"
+            },
+            {
+              "name": "status_creator_type",
+              "source_stage": "statuses",
+              "source_column": "status_creator_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "deployments",
+                "entity": "deployments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "statuses",
+                "entity": "deployment_statuses_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "deployments",
+                    "column": "repository"
+                  },
+                  "deployment_id": {
+                    "stage": "deployments",
+                    "column": "deployment_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "statuses"
+          },
+          "population": "All visible status event records for selected deployments, including superseded and nonterminal states; all pages are followed."
+        }
+      ]
+    },
+    {
+      "name": "environments",
+      "description": "Current visible deployment environments at numeric identity, independent of deployment or policy populations. Branch-policy flags remain nullable when settings are absent or unrestricted; NULL must not be interpreted as a protected environment. Built-in wait-timer/reviewer rules remain typed nested metadata with all matching pinned anyOf variants; custom integration rules are a separate entity.",
+      "grain": [
+        "repository_id",
+        "environment_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "environment_id",
+          "environment_node_id",
+          "environment_name",
+          "created_at",
+          "updated_at",
+          "url",
+          "html_url",
+          "protected_branches",
+          "custom_branch_policies",
+          "environment_created_day",
+          "protection_rules"
+        ],
+        "dimensions": [
+          "repository",
+          "environment_id",
+          "environment_name",
+          "protected_branches",
+          "custom_branch_policies",
+          "created_at",
+          "environment_created_day"
+        ],
+        "metrics": [
+          {
+            "name": "environment_count",
+            "kind": "count",
+            "comment": "Current visible environment resources, including unused environments."
+          }
+        ],
+        "derived_fields": [
+          {
+            "name": "environment_created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "UTC calendar date from the returned created_at instant."
+          }
+        ],
+        "sql_names": {
+          "repository": "environments_repository",
+          "environment_id": "environments_environment_id",
+          "environment_name": "environments_environment_name",
+          "protected_branches": "environments_protected_branches",
+          "custom_branch_policies": "environments_custom_branch_policies",
+          "created_at": "environments_created_at",
+          "environment_created_day": "environments_environment_created_day"
+        },
+        "crossfield": {
+          "metrics": {
+            "protected_branch_environment_count": {
+              "expression": "COUNT(*) FILTER (WHERE environments.protected_branches = TRUE)"
+            },
+            "custom_branch_environment_count": {
+              "expression": "COUNT(*) FILTER (WHERE environments.custom_branch_policies = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "protected_branch_environment_count": {
+              "dataset": "environments",
+              "comment": "Environments explicitly restricted to protected branches.",
+              "additivity": "additive",
+              "missing": "zero"
+            },
+            "custom_branch_environment_count": {
+              "dataset": "environments",
+              "comment": "Environments explicitly using named branch or tag policies.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "environment_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+              "example": "production",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "environment_name"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "environment_node_id",
+              "source_stage": "environments",
+              "source_column": "environment_node_id"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "environments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "environments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "environments",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "environments",
+              "source_column": "html_url"
+            },
+            {
+              "name": "protected_branches",
+              "source_stage": "environments",
+              "source_column": "protected_branches"
+            },
+            {
+              "name": "custom_branch_policies",
+              "source_stage": "environments",
+              "source_column": "custom_branch_policies"
+            },
+            {
+              "name": "protection_rules",
+              "source_stage": "environments",
+              "source_column": "protection_rules",
+              "description": "Typed built-in environment rule variants, including wait timers and required user/team reviewers. anyOf preserves every matching schema branch; the returned type field identifies the rule purpose."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "environments",
+                "entity": "environment_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "environments"
+          },
+          "population": "One current environment by its exact name; stable identity remains numeric."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "environment_node_id",
+              "source_stage": "environments",
+              "source_column": "environment_node_id"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "environments",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "environments",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "url",
+              "source_stage": "environments",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "environments",
+              "source_column": "html_url"
+            },
+            {
+              "name": "protected_branches",
+              "source_stage": "environments",
+              "source_column": "protected_branches"
+            },
+            {
+              "name": "custom_branch_policies",
+              "source_stage": "environments",
+              "source_column": "custom_branch_policies"
+            },
+            {
+              "name": "protection_rules",
+              "source_stage": "environments",
+              "source_column": "protection_rules",
+              "description": "Typed built-in environment rule variants, including wait timers and required user/team reviewers. anyOf preserves every matching schema branch; the returned type field identifies the rule purpose."
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "environments",
+                "entity": "environments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "environments"
+          },
+          "population": "All current visible environments, including environments without deployments or configured policy entries."
+        }
+      ]
+    },
+    {
+      "name": "deployment_branch_policies",
+      "description": "Configured environment branch/tag name patterns. Each returned policy must have a numeric ID despite the optional upstream declaration; missing identity fails qualification. Matching names are patterns, not actual branch/tag resources. Direct repository enrichment is analytical; environment parent keys and navigation remain available without a duplicate analytical path.",
+      "grain": [
+        "repository_id",
+        "environment_id",
+        "deployment_branch_policy_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "environment_id",
+          "repository",
+          "environment_name",
+          "deployment_branch_policy_id",
+          "policy_node_id",
+          "name_pattern",
+          "target_type"
+        ],
+        "dimensions": [
+          "repository",
+          "environment_id",
+          "environment_name",
+          "deployment_branch_policy_id",
+          "name_pattern",
+          "target_type"
+        ],
+        "metrics": [
+          {
+            "name": "deployment_branch_policy_count",
+            "kind": "count",
+            "comment": "Current configured branch/tag pattern policies, not matching branches or deployment events."
+          },
+          {
+            "name": "deployment_branch_pattern_count",
+            "kind": "count",
+            "comment": "Configured policies targeting branch names.",
+            "where": {
+              "field": "target_type",
+              "op": "in",
+              "values": [
+                "branch"
+              ]
+            }
+          },
+          {
+            "name": "deployment_tag_pattern_count",
+            "kind": "count",
+            "comment": "Configured policies targeting tag names.",
+            "where": {
+              "field": "target_type",
+              "op": "in",
+              "values": [
+                "tag"
+              ]
+            }
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "deployment_branch_policies_repository",
+          "environment_id": "deployment_branch_policies_environment_id",
+          "environment_name": "deployment_branch_policies_environment_name",
+          "deployment_branch_policy_id": "deployment_branch_policies_deployment_branch_policy_id",
+          "name_pattern": "deployment_branch_policies_name_pattern",
+          "target_type": "deployment_branch_policies_target_type"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "environment_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+              "example": "production",
+              "min_length": 1
+            },
+            {
+              "name": "deployment_branch_policy_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Stable deployment branch or tag policy identity; requires repository and environment_name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "deployment_branch_policy_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "deployment_branch_policy_id",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "deployment_branch_policy_id"
+            },
+            {
+              "name": "policy_node_id",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "policy_node_id"
+            },
+            {
+              "name": "name_pattern",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "name_pattern"
+            },
+            {
+              "name": "target_type",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "target_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "environments",
+                "entity": "environment_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  }
+                }
+              },
+              {
+                "name": "deployment_branch_policies",
+                "entity": "deployment_branch_policy_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "environments",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  },
+                  "deployment_branch_policy_id": {
+                    "parameter": "deployment_branch_policy_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployment_branch_policies"
+          },
+          "population": "One policy record in its identified environment."
+        },
+        {
+          "name": "environments",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "environment_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+              "example": "production",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "environment_name"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "deployment_branch_policy_id",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "deployment_branch_policy_id"
+            },
+            {
+              "name": "policy_node_id",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "policy_node_id"
+            },
+            {
+              "name": "name_pattern",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "name_pattern"
+            },
+            {
+              "name": "target_type",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "target_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "environments",
+                "entity": "environment_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  }
+                }
+              },
+              {
+                "name": "deployment_branch_policies",
+                "entity": "deployment_branch_policies_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "environments",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "stage": "environments",
+                    "column": "environment_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployment_branch_policies"
+          },
+          "population": "All visible records in selected current environments; empty environments produce no child records and all advertised pages are followed."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "deployment_branch_policy_id",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "deployment_branch_policy_id"
+            },
+            {
+              "name": "policy_node_id",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "policy_node_id"
+            },
+            {
+              "name": "name_pattern",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "name_pattern"
+            },
+            {
+              "name": "target_type",
+              "source_stage": "deployment_branch_policies",
+              "source_column": "target_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "environments",
+                "entity": "environments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "deployment_branch_policies",
+                "entity": "deployment_branch_policies_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "environments",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "stage": "environments",
+                    "column": "environment_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployment_branch_policies"
+          },
+          "population": "All visible records in selected current environments; empty environments produce no child records and all advertised pages are followed."
+        }
+      ]
+    },
+    {
+      "name": "deployment_protection_rules",
+      "description": "Custom deployment protection rules enabled in current environments. Integration identity/slug describe the provider of the rule, not the actor who deployed or reviewed. Built-in reviewer/wait-timer configuration is separate from custom rules. Direct repository enrichment is analytical; environment parent keys and navigation remain available without a duplicate analytical path.",
+      "grain": [
+        "repository_id",
+        "environment_id",
+        "deployment_protection_rule_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "environment_id",
+          "repository",
+          "environment_name",
+          "deployment_protection_rule_id",
+          "rule_node_id",
+          "enabled",
+          "integration_id",
+          "integration_slug",
+          "integration_node_id",
+          "integration_url"
+        ],
+        "dimensions": [
+          "repository",
+          "environment_id",
+          "environment_name",
+          "deployment_protection_rule_id",
+          "enabled",
+          "integration_id",
+          "integration_slug"
+        ],
+        "metrics": [
+          {
+            "name": "deployment_protection_rule_count",
+            "kind": "count",
+            "comment": "Custom protection rules returned as enabled for each selected environment; not approval decisions."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "deployment_protection_rules_repository",
+          "environment_id": "deployment_protection_rules_environment_id",
+          "environment_name": "deployment_protection_rules_environment_name",
+          "deployment_protection_rule_id": "deployment_protection_rules_deployment_protection_rule_id",
+          "enabled": "deployment_protection_rules_enabled",
+          "integration_id": "deployment_protection_rules_integration_id",
+          "integration_slug": "deployment_protection_rules_integration_slug"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "environment_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+              "example": "production",
+              "min_length": 1
+            },
+            {
+              "name": "deployment_protection_rule_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Stable custom deployment protection rule identity; requires repository and environment_name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "select": [
+            "deployment_protection_rule_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "deployment_protection_rule_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "deployment_protection_rule_id"
+            },
+            {
+              "name": "rule_node_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "rule_node_id"
+            },
+            {
+              "name": "enabled",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "enabled"
+            },
+            {
+              "name": "integration_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_id"
+            },
+            {
+              "name": "integration_slug",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_slug"
+            },
+            {
+              "name": "integration_node_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_node_id"
+            },
+            {
+              "name": "integration_url",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "environments",
+                "entity": "environment_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  }
+                }
+              },
+              {
+                "name": "deployment_protection_rules",
+                "entity": "deployment_protection_rule_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "environments",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  },
+                  "deployment_protection_rule_id": {
+                    "parameter": "deployment_protection_rule_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployment_protection_rules"
+          },
+          "population": "One policy record in its identified environment."
+        },
+        {
+          "name": "environments",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "environment_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+              "example": "production",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "environment_name"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "deployment_protection_rule_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "deployment_protection_rule_id"
+            },
+            {
+              "name": "rule_node_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "rule_node_id"
+            },
+            {
+              "name": "enabled",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "enabled"
+            },
+            {
+              "name": "integration_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_id"
+            },
+            {
+              "name": "integration_slug",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_slug"
+            },
+            {
+              "name": "integration_node_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_node_id"
+            },
+            {
+              "name": "integration_url",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "environments",
+                "entity": "environment_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  }
+                }
+              },
+              {
+                "name": "deployment_protection_rules",
+                "entity": "deployment_protection_rules_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "environments",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "stage": "environments",
+                    "column": "environment_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployment_protection_rules"
+          },
+          "population": "All visible records in selected current environments; empty environments produce no child records and all advertised pages are followed."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "deployment_protection_rule_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "deployment_protection_rule_id"
+            },
+            {
+              "name": "rule_node_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "rule_node_id"
+            },
+            {
+              "name": "enabled",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "enabled"
+            },
+            {
+              "name": "integration_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_id"
+            },
+            {
+              "name": "integration_slug",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_slug"
+            },
+            {
+              "name": "integration_node_id",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_node_id"
+            },
+            {
+              "name": "integration_url",
+              "source_stage": "deployment_protection_rules",
+              "source_column": "integration_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "environments",
+                "entity": "environments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "deployment_protection_rules",
+                "entity": "deployment_protection_rules_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "environments",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "stage": "environments",
+                    "column": "environment_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployment_protection_rules"
+          },
+          "population": "All visible records in selected current environments; empty environments produce no child records and all advertised pages are followed."
+        }
+      ]
+    },
+    {
+      "name": "deployment_rule_integrations",
+      "description": "Available custom deployment-rule integrations per environment; an app can appear in several environment populations and counts once per environment. This endpoint needs repository admin/owner permission. Inaccessibility fails rather than being reported as an empty inventory. Direct repository enrichment is analytical; environment parent keys and navigation remain available without a duplicate analytical path.",
+      "grain": [
+        "repository_id",
+        "environment_id",
+        "integration_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "environment_id",
+          "repository",
+          "environment_name",
+          "integration_id",
+          "integration_slug",
+          "integration_node_id",
+          "integration_url"
+        ],
+        "dimensions": [
+          "repository",
+          "environment_id",
+          "environment_name",
+          "integration_id",
+          "integration_slug"
+        ],
+        "metrics": [
+          {
+            "name": "deployment_rule_integration_count",
+            "kind": "count",
+            "comment": "Available custom protection-rule integration/environment pairs visible with required repository administration permissions; availability does not imply enabled or installed on every environment."
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "deployment_rule_integrations_repository",
+          "environment_id": "deployment_rule_integrations_environment_id",
+          "environment_name": "deployment_rule_integrations_environment_name",
+          "integration_id": "deployment_rule_integrations_integration_id",
+          "integration_slug": "deployment_rule_integrations_integration_slug"
+        }
+      },
+      "routes": [
+        {
+          "name": "environments",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "environment_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact environment name within the repository. Names are mutable; environment identity is its numeric ID.",
+              "example": "production",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "environment_name"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "integration_id",
+              "source_stage": "deployment_rule_integrations",
+              "source_column": "integration_id"
+            },
+            {
+              "name": "integration_slug",
+              "source_stage": "deployment_rule_integrations",
+              "source_column": "integration_slug"
+            },
+            {
+              "name": "integration_node_id",
+              "source_stage": "deployment_rule_integrations",
+              "source_column": "integration_node_id"
+            },
+            {
+              "name": "integration_url",
+              "source_stage": "deployment_rule_integrations",
+              "source_column": "integration_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "environments",
+                "entity": "environment_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "parameter": "environment_name"
+                  }
+                }
+              },
+              {
+                "name": "deployment_rule_integrations",
+                "entity": "deployment_rule_integrations_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "environments",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "stage": "environments",
+                    "column": "environment_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployment_rule_integrations"
+          },
+          "population": "All visible records in selected current environments; empty environments produce no child records and all advertised pages are followed."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "environment_id",
+              "source_stage": "environments",
+              "source_column": "environment_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "environment_name",
+              "source_stage": "environments",
+              "source_column": "environment_name"
+            },
+            {
+              "name": "integration_id",
+              "source_stage": "deployment_rule_integrations",
+              "source_column": "integration_id"
+            },
+            {
+              "name": "integration_slug",
+              "source_stage": "deployment_rule_integrations",
+              "source_column": "integration_slug"
+            },
+            {
+              "name": "integration_node_id",
+              "source_stage": "deployment_rule_integrations",
+              "source_column": "integration_node_id"
+            },
+            {
+              "name": "integration_url",
+              "source_stage": "deployment_rule_integrations",
+              "source_column": "integration_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "environments",
+                "entity": "environments_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "deployment_rule_integrations",
+                "entity": "deployment_rule_integrations_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "environments",
+                    "column": "repository"
+                  },
+                  "environment_name": {
+                    "stage": "environments",
+                    "column": "environment_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "deployment_rule_integrations"
+          },
+          "population": "All visible records in selected current environments; empty environments produce no child records and all advertised pages are followed."
+        }
+      ]
+    },
+    {
+      "name": "pages_deployment_statuses",
+      "description": "One current GitHub Pages deployment-status observation per repository and supplied lookup token. GitHub accepts deployment ID or commit SHA but returns no canonical ID, so aliases are not deduplicated into deployment business entities. Missing status remains unknown, not success.",
+      "grain": [
+        "repository_id",
+        "pages_deployment_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "pages_deployment_id",
+          "status"
+        ],
+        "dimensions": [
+          "repository",
+          "pages_deployment_id",
+          "status"
+        ],
+        "metrics": [
+          {
+            "name": "pages_deployment_status_count",
+            "kind": "count",
+            "comment": "Status lookup observations, not a complete Pages deployment population or distinct deployments across aliases."
+          },
+          {
+            "name": "successful_pages_deployment_status_count",
+            "kind": "count",
+            "comment": "Lookup observations whose returned state is succeed.",
+            "where": {
+              "field": "status",
+              "op": "in",
+              "values": [
+                "succeed"
+              ]
+            }
+          }
+        ],
+        "derived_fields": [],
+        "sql_names": {
+          "repository": "pages_deployment_statuses_repository",
+          "pages_deployment_id": "pages_deployment_statuses_pages_deployment_id",
+          "status": "pages_deployment_statuses_status"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "pages_deployment_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "GitHub Pages deployment ID or commit SHA lookup token. The response does not provide a canonical deployment ID.",
+              "example": "1",
+              "min_length": 1
+            }
+          ],
+          "select": [
+            "pages_deployment_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "pages_deployment_id",
+              "source_stage": "pages",
+              "source_column": "pages_deployment_id"
+            },
+            {
+              "name": "status",
+              "source_stage": "pages",
+              "source_column": "status"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "pages",
+                "entity": "pages_deployment_status_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "pages_deployment_id": {
+                    "parameter": "pages_deployment_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "pages"
+          },
+          "population": "One requested Pages deployment lookup token; no API collection discovery is implied."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "deployments_to_repositories",
+      "from": "deployments",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deployment_statuses_to_repositories",
+      "from": "deployment_statuses",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "environments_to_repositories",
+      "from": "environments",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deployment_branch_policies_to_repositories",
+      "from": "deployment_branch_policies",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deployment_protection_rules_to_repositories",
+      "from": "deployment_protection_rules",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deployment_rule_integrations_to_repositories",
+      "from": "deployment_rule_integrations",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "pages_deployment_statuses_to_repositories",
+      "from": "pages_deployment_statuses",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "deployment_statuses_to_deployments",
+      "from": "deployment_statuses",
+      "to": "deployments",
+      "from_columns": [
+        "repository_id",
+        "deployment_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "deployment_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "deployment_id": "deployment_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "deployments",
+          "bindings": {
+            "repository": "repository",
+            "deployment_id": "deployment_id"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "deployment_branch_policies_to_environments",
+      "from": "deployment_branch_policies",
+      "to": "environments",
+      "from_columns": [
+        "repository_id",
+        "environment_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "environment_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "environment_name": "environment_name"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "environments",
+          "bindings": {
+            "repository": "repository",
+            "environment_name": "environment_name"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "deployment_protection_rules_to_environments",
+      "from": "deployment_protection_rules",
+      "to": "environments",
+      "from_columns": [
+        "repository_id",
+        "environment_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "environment_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "environment_name": "environment_name"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "environments",
+          "bindings": {
+            "repository": "repository",
+            "environment_name": "environment_name"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "deployment_rule_integrations_to_environments",
+      "from": "deployment_rule_integrations",
+      "to": "environments",
+      "from_columns": [
+        "repository_id",
+        "environment_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "environment_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "environment_name": "environment_name"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "environments",
+          "bindings": {
+            "repository": "repository",
+            "environment_name": "environment_name"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "deployments_to_creators",
+      "from": "deployments",
+      "to": "users",
+      "from_columns": [
+        "deployment_creator_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "deployment_creator_login"
+          }
+        }
+      ],
+      "optional": true
+    },
+    {
+      "name": "deployment_statuses_to_creators",
+      "from": "deployment_statuses",
+      "to": "users",
+      "from_columns": [
+        "status_creator_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "status_creator_login"
+          }
+        }
+      ],
+      "optional": true
+    }
+  ]
+}

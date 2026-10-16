@@ -1,0 +1,2913 @@
+{
+  "entities": [
+    {
+      "name": "codes_of_conduct_list_source",
+      "description": "codes-of-conduct/get-all-codes-of-conduct pinned, schema-derived read source.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "conduct_key",
+          "path": [
+            "key"
+          ]
+        }
+      ],
+      "grain": [
+        "conduct_key"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codes-of-conduct/get-all-codes-of-conduct",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "codes_of_conduct_get_source",
+      "description": "codes-of-conduct/get-conduct-code pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "conduct_key",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact code-of-conduct catalog key; omit to retrieve the complete catalog.",
+          "example": "contributor_covenant",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "conduct_key",
+          "path": [
+            "key"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        }
+      ],
+      "grain": [
+        "conduct_key"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "codes-of-conduct/get-conduct-code",
+        "path_bindings": {
+          "key": {
+            "argument": "conduct_key"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "conduct_key",
+            "argument": "conduct_key",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "gitignore_templates_list_source",
+      "description": "gitignore/get-all-templates pinned, schema-derived read source.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "template_name",
+          "source_value": true
+        }
+      ],
+      "grain": [
+        "template_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gitignore/get-all-templates",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "gitignore_templates_get_source",
+      "description": "gitignore/get-template pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "gitignore_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact Gitignore template name; omit to retrieve every catalog template.",
+          "example": "Python",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "template_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "source",
+          "path": [
+            "source"
+          ]
+        }
+      ],
+      "grain": [
+        "template_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "gitignore/get-template",
+        "path_bindings": {
+          "name": {
+            "argument": "gitignore_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "template_name",
+            "argument": "gitignore_name",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "licenses_list_source",
+      "description": "licenses/get-all-commonly-used pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "license_featured",
+          "type": "BOOLEAN",
+          "nullable": true,
+          "description": "Optional GitHub featured filter for the license catalog; omission retains the complete commonly used catalog.",
+          "example": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "license_key",
+          "path": [
+            "key"
+          ]
+        }
+      ],
+      "grain": [
+        "license_key"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "licenses/get-all-commonly-used",
+        "path_bindings": {},
+        "query_bindings": {
+          "featured": {
+            "argument": "license_featured"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "licenses_get_source",
+      "description": "licenses/get pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "license_key",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GitHub license catalog key; omit to retrieve the commonly used license catalog.",
+          "example": "mit",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "license_key",
+          "path": [
+            "key"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "spdx_id",
+          "path": [
+            "spdx_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "implementation",
+          "path": [
+            "implementation"
+          ]
+        },
+        {
+          "name": "permissions",
+          "path": [
+            "permissions"
+          ]
+        },
+        {
+          "name": "conditions",
+          "path": [
+            "conditions"
+          ]
+        },
+        {
+          "name": "limitations",
+          "path": [
+            "limitations"
+          ]
+        },
+        {
+          "name": "body",
+          "path": [
+            "body"
+          ]
+        },
+        {
+          "name": "featured",
+          "path": [
+            "featured"
+          ]
+        }
+      ],
+      "grain": [
+        "license_key"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "licenses/get",
+        "path_bindings": {
+          "license": {
+            "argument": "license_key"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "license_key",
+            "argument": "license_key",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "emoji_dictionary_source",
+      "description": "emojis/get pinned, schema-derived read source.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "emoji_name",
+          "source_entry": "key"
+        },
+        {
+          "name": "image_url",
+          "source_entry": "value"
+        }
+      ],
+      "grain": [
+        "emoji_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "emojis/get",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object_entries",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "api_versions_source",
+      "description": "meta/get-all-versions pinned, schema-derived read source.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "api_version",
+          "source_value": true
+        }
+      ],
+      "grain": [
+        "api_version"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "meta/get-all-versions",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "api_root_observations_source",
+      "description": "meta/root pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "api_host",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Pinned GitHub API service identity carried through one observation invocation.",
+          "example": "api.github.com",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_argument": "api_host"
+        },
+        {
+          "name": "current_user_url",
+          "path": [
+            "current_user_url"
+          ]
+        },
+        {
+          "name": "current_user_authorizations_html_url",
+          "path": [
+            "current_user_authorizations_html_url"
+          ]
+        },
+        {
+          "name": "authorizations_url",
+          "path": [
+            "authorizations_url"
+          ]
+        },
+        {
+          "name": "code_search_url",
+          "path": [
+            "code_search_url"
+          ]
+        },
+        {
+          "name": "commit_search_url",
+          "path": [
+            "commit_search_url"
+          ]
+        },
+        {
+          "name": "emails_url",
+          "path": [
+            "emails_url"
+          ]
+        },
+        {
+          "name": "emojis_url",
+          "path": [
+            "emojis_url"
+          ]
+        },
+        {
+          "name": "events_url",
+          "path": [
+            "events_url"
+          ]
+        },
+        {
+          "name": "feeds_url",
+          "path": [
+            "feeds_url"
+          ]
+        },
+        {
+          "name": "followers_url",
+          "path": [
+            "followers_url"
+          ]
+        },
+        {
+          "name": "following_url",
+          "path": [
+            "following_url"
+          ]
+        },
+        {
+          "name": "gists_url",
+          "path": [
+            "gists_url"
+          ]
+        },
+        {
+          "name": "hub_url",
+          "path": [
+            "hub_url"
+          ]
+        },
+        {
+          "name": "issue_search_url",
+          "path": [
+            "issue_search_url"
+          ]
+        },
+        {
+          "name": "issues_url",
+          "path": [
+            "issues_url"
+          ]
+        },
+        {
+          "name": "keys_url",
+          "path": [
+            "keys_url"
+          ]
+        },
+        {
+          "name": "label_search_url",
+          "path": [
+            "label_search_url"
+          ]
+        },
+        {
+          "name": "notifications_url",
+          "path": [
+            "notifications_url"
+          ]
+        },
+        {
+          "name": "organization_url",
+          "path": [
+            "organization_url"
+          ]
+        },
+        {
+          "name": "organization_repositories_url",
+          "path": [
+            "organization_repositories_url"
+          ]
+        },
+        {
+          "name": "organization_teams_url",
+          "path": [
+            "organization_teams_url"
+          ]
+        },
+        {
+          "name": "public_gists_url",
+          "path": [
+            "public_gists_url"
+          ]
+        },
+        {
+          "name": "rate_limit_url",
+          "path": [
+            "rate_limit_url"
+          ]
+        },
+        {
+          "name": "repository_url",
+          "path": [
+            "repository_url"
+          ]
+        },
+        {
+          "name": "repository_search_url",
+          "path": [
+            "repository_search_url"
+          ]
+        },
+        {
+          "name": "current_user_repositories_url",
+          "path": [
+            "current_user_repositories_url"
+          ]
+        },
+        {
+          "name": "starred_url",
+          "path": [
+            "starred_url"
+          ]
+        },
+        {
+          "name": "starred_gists_url",
+          "path": [
+            "starred_gists_url"
+          ]
+        },
+        {
+          "name": "topic_search_url",
+          "path": [
+            "topic_search_url"
+          ]
+        },
+        {
+          "name": "user_url",
+          "path": [
+            "user_url"
+          ]
+        },
+        {
+          "name": "user_organizations_url",
+          "path": [
+            "user_organizations_url"
+          ]
+        },
+        {
+          "name": "user_repositories_url",
+          "path": [
+            "user_repositories_url"
+          ]
+        },
+        {
+          "name": "user_search_url",
+          "path": [
+            "user_search_url"
+          ]
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "meta/root",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "api_metadata_observations_source",
+      "description": "meta/get pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "api_host",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Pinned GitHub API service identity carried through one observation invocation.",
+          "example": "api.github.com",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_argument": "api_host"
+        },
+        {
+          "name": "verifiable_password_authentication",
+          "path": [
+            "verifiable_password_authentication"
+          ]
+        },
+        {
+          "name": "ssh_key_fingerprints",
+          "path": [
+            "ssh_key_fingerprints"
+          ]
+        },
+        {
+          "name": "ssh_keys",
+          "path": [
+            "ssh_keys"
+          ]
+        },
+        {
+          "name": "hooks",
+          "path": [
+            "hooks"
+          ]
+        },
+        {
+          "name": "github_enterprise_importer",
+          "path": [
+            "github_enterprise_importer"
+          ]
+        },
+        {
+          "name": "web",
+          "path": [
+            "web"
+          ]
+        },
+        {
+          "name": "api",
+          "path": [
+            "api"
+          ]
+        },
+        {
+          "name": "git",
+          "path": [
+            "git"
+          ]
+        },
+        {
+          "name": "packages",
+          "path": [
+            "packages"
+          ]
+        },
+        {
+          "name": "pages",
+          "path": [
+            "pages"
+          ]
+        },
+        {
+          "name": "importer",
+          "path": [
+            "importer"
+          ]
+        },
+        {
+          "name": "actions",
+          "path": [
+            "actions"
+          ]
+        },
+        {
+          "name": "actions_macos",
+          "path": [
+            "actions_macos"
+          ]
+        },
+        {
+          "name": "codespaces",
+          "path": [
+            "codespaces"
+          ]
+        },
+        {
+          "name": "dependabot",
+          "path": [
+            "dependabot"
+          ]
+        },
+        {
+          "name": "copilot",
+          "path": [
+            "copilot"
+          ]
+        },
+        {
+          "name": "commit_signing_keys",
+          "path": [
+            "commit_signing_keys"
+          ]
+        },
+        {
+          "name": "domains",
+          "path": [
+            "domains"
+          ]
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "meta/get",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "api_rate_limit_observations_source",
+      "description": "rate-limit/get pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "api_host",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Pinned GitHub API service identity carried through one observation invocation.",
+          "example": "api.github.com",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_argument": "api_host"
+        },
+        {
+          "name": "resources",
+          "path": [
+            "resources"
+          ]
+        },
+        {
+          "name": "rate",
+          "path": [
+            "rate"
+          ]
+        },
+        {
+          "name": "core_limit",
+          "path": [
+            "resources",
+            "core",
+            "limit"
+          ]
+        },
+        {
+          "name": "core_remaining",
+          "path": [
+            "resources",
+            "core",
+            "remaining"
+          ]
+        },
+        {
+          "name": "core_reset",
+          "path": [
+            "resources",
+            "core",
+            "reset"
+          ]
+        },
+        {
+          "name": "core_used",
+          "path": [
+            "resources",
+            "core",
+            "used"
+          ]
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "rate-limit/get",
+        "path_bindings": {},
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    },
+    {
+      "name": "api_zen_observations_source",
+      "description": "meta/get-zen pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "api_host",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Pinned GitHub API service identity carried through one observation invocation.",
+          "example": "api.github.com",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_argument": "api_host"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type"
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length"
+        },
+        {
+          "name": "body",
+          "source_response": "body"
+        },
+        {
+          "name": "text",
+          "source_response": "body_text"
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "meta/get-zen",
+        "path_bindings": {},
+        "query_bindings": {},
+        "content": {
+          "accept": "text/plain",
+          "response_statuses": [
+            "200"
+          ],
+          "text_encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "name": "api_octocat_observations_source",
+      "description": "meta/get-octocat pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "api_host",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Pinned GitHub API service identity carried through one observation invocation.",
+          "example": "api.github.com",
+          "min_length": 1
+        },
+        {
+          "name": "octocat_speech",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional text for the Octocat speech bubble; omission uses GitHub default text.",
+          "example": "Hello",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_argument": "api_host"
+        },
+        {
+          "name": "speech",
+          "source_argument": "octocat_speech"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code"
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type"
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length"
+        },
+        {
+          "name": "body",
+          "source_response": "body"
+        },
+        {
+          "name": "text",
+          "source_response": "body_text"
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "meta/get-octocat",
+        "path_bindings": {},
+        "query_bindings": {
+          "s": {
+            "argument": "octocat_speech"
+          }
+        },
+        "content": {
+          "accept": "application/octocat-stream",
+          "response_statuses": [
+            "200"
+          ],
+          "text_encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "name": "repository_license_file_source",
+      "description": "licenses/get-for-repo pinned, schema-derived read source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "license_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional Git ref for the repository license file; omission follows the repository default branch.",
+          "example": "main",
+          "min_length": 1,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "requested_ref",
+          "source_argument": "license_ref"
+        },
+        {
+          "name": "file_name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "file_path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "blob_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "byte_size",
+          "path": [
+            "size"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "git_url",
+          "path": [
+            "git_url"
+          ]
+        },
+        {
+          "name": "download_url",
+          "path": [
+            "download_url"
+          ]
+        },
+        {
+          "name": "file_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "encoded_content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "encoding",
+          "path": [
+            "encoding"
+          ]
+        },
+        {
+          "name": "links",
+          "path": [
+            "_links"
+          ]
+        },
+        {
+          "name": "detected_license",
+          "path": [
+            "license"
+          ]
+        },
+        {
+          "name": "license_key",
+          "path": [
+            "license",
+            "key"
+          ]
+        },
+        {
+          "name": "license_spdx_id",
+          "path": [
+            "license",
+            "spdx_id"
+          ]
+        }
+      ],
+      "grain": [
+        "repository",
+        "file_path",
+        "blob_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "licenses/get-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "license_ref"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "repository_languages_source",
+      "description": "Typed repository language dictionary; values retain upstream byte counts.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "language",
+          "source_entry": "key"
+        },
+        {
+          "name": "byte_count",
+          "source_entry": "value"
+        }
+      ],
+      "grain": [
+        "repository",
+        "language"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-languages",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object_entries",
+        "pagination": {
+          "kind": "none"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "codes_of_conduct",
+      "description": "Canonical GitHub code-of-conduct templates. Catalog entries and exact lookups share the same key and hydrated body; this does not assert adoption by any repository.",
+      "grain": [
+        "conduct_key"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "conduct_key",
+          "name",
+          "url",
+          "html_url",
+          "body"
+        ],
+        "dimensions": [
+          "conduct_key",
+          "name"
+        ],
+        "metrics": [
+          {
+            "name": "code_of_conduct_count",
+            "kind": "count",
+            "comment": "Canonical catalog records selected by listing or exact key; list entries are hydrated to the same complete detail shape."
+          }
+        ],
+        "sql_names": {
+          "conduct_key": "codes_of_conduct_conduct_key",
+          "name": "codes_of_conduct_name"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "conduct_key"
+          ],
+          "arguments": [
+            {
+              "name": "conduct_key",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact code-of-conduct catalog key; omit to retrieve the complete catalog.",
+              "example": "contributor_covenant",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "conduct_key",
+              "source_stage": "records",
+              "source_column": "conduct_key"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "body",
+              "source_stage": "records",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "codes_of_conduct_get_source",
+                "arguments": {
+                  "conduct_key": {
+                    "parameter": "conduct_key"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One exact catalog key; missing or inaccessible lookups fail."
+        },
+        {
+          "name": "catalog",
+          "default": true,
+          "arguments": [],
+          "columns": [
+            {
+              "name": "conduct_key",
+              "source_stage": "records",
+              "source_column": "conduct_key"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "body",
+              "source_stage": "records",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "catalog",
+                "entity": "codes_of_conduct_list_source",
+                "arguments": {}
+              },
+              {
+                "name": "records",
+                "entity": "codes_of_conduct_get_source",
+                "arguments": {
+                  "conduct_key": {
+                    "stage": "catalog",
+                    "column": "conduct_key"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Every returned catalog entry across all advertised pages, hydrated by its exact key; a failed detail stops the retrieval."
+        }
+      ]
+    },
+    {
+      "name": "gitignore_templates",
+      "description": "Canonical Gitignore templates selected by exact case-sensitive name or complete catalog discovery. Template source remains native text.",
+      "grain": [
+        "template_name"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "template_name",
+          "source"
+        ],
+        "dimensions": [
+          "template_name"
+        ],
+        "metrics": [
+          {
+            "name": "gitignore_template_count",
+            "kind": "count",
+            "comment": "Canonical catalog records selected by listing or exact key; list entries are hydrated to the same complete detail shape."
+          }
+        ],
+        "sql_names": {
+          "template_name": "gitignore_templates_template_name"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "gitignore_name"
+          ],
+          "arguments": [
+            {
+              "name": "gitignore_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact Gitignore template name; omit to retrieve every catalog template.",
+              "example": "Python",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "template_name",
+              "source_stage": "records",
+              "source_column": "template_name"
+            },
+            {
+              "name": "source",
+              "source_stage": "records",
+              "source_column": "source"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "gitignore_templates_get_source",
+                "arguments": {
+                  "gitignore_name": {
+                    "parameter": "gitignore_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One exact catalog key; missing or inaccessible lookups fail."
+        },
+        {
+          "name": "catalog",
+          "default": true,
+          "arguments": [],
+          "columns": [
+            {
+              "name": "template_name",
+              "source_stage": "records",
+              "source_column": "template_name"
+            },
+            {
+              "name": "source",
+              "source_stage": "records",
+              "source_column": "source"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "catalog",
+                "entity": "gitignore_templates_list_source",
+                "arguments": {}
+              },
+              {
+                "name": "records",
+                "entity": "gitignore_templates_get_source",
+                "arguments": {
+                  "gitignore_name": {
+                    "stage": "catalog",
+                    "column": "template_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Every returned catalog entry across all advertised pages, hydrated by its exact key; a failed detail stops the retrieval."
+        }
+      ]
+    },
+    {
+      "name": "licenses",
+      "description": "Canonical license descriptions identified by GitHub license key. Catalog population is the API commonly used list, not every license ever recognized; list discovery hydrates exact license details. Permissions, conditions and limitations remain typed lists.",
+      "grain": [
+        "license_key"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "license_key",
+          "name",
+          "spdx_id",
+          "url",
+          "node_id",
+          "html_url",
+          "description",
+          "implementation",
+          "permissions",
+          "conditions",
+          "limitations",
+          "body",
+          "featured"
+        ],
+        "dimensions": [
+          "license_key",
+          "name",
+          "spdx_id",
+          "featured"
+        ],
+        "metrics": [
+          {
+            "name": "license_count",
+            "kind": "count",
+            "comment": "Canonical catalog records selected by listing or exact key; list entries are hydrated to the same complete detail shape."
+          }
+        ],
+        "sql_names": {
+          "license_key": "licenses_license_key",
+          "name": "licenses_name",
+          "spdx_id": "licenses_spdx_id",
+          "featured": "licenses_featured"
+        },
+        "crossfield": {
+          "metrics": {
+            "featured_license_count": {
+              "expression": "COUNT(*) FILTER (WHERE licenses.featured = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "featured_license_count": {
+              "comment": "Selected canonical licenses marked featured by GitHub.",
+              "additivity": "additive",
+              "dataset": "licenses"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "license_key"
+          ],
+          "arguments": [
+            {
+              "name": "license_key",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GitHub license catalog key; omit to retrieve the commonly used license catalog.",
+              "example": "mit",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "license_key",
+              "source_stage": "records",
+              "source_column": "license_key"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "spdx_id",
+              "source_stage": "records",
+              "source_column": "spdx_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "implementation",
+              "source_stage": "records",
+              "source_column": "implementation"
+            },
+            {
+              "name": "permissions",
+              "source_stage": "records",
+              "source_column": "permissions"
+            },
+            {
+              "name": "conditions",
+              "source_stage": "records",
+              "source_column": "conditions"
+            },
+            {
+              "name": "limitations",
+              "source_stage": "records",
+              "source_column": "limitations"
+            },
+            {
+              "name": "body",
+              "source_stage": "records",
+              "source_column": "body"
+            },
+            {
+              "name": "featured",
+              "source_stage": "records",
+              "source_column": "featured"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "records",
+                "entity": "licenses_get_source",
+                "arguments": {
+                  "license_key": {
+                    "parameter": "license_key"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One exact catalog key; missing or inaccessible lookups fail."
+        },
+        {
+          "name": "catalog",
+          "default": true,
+          "arguments": [
+            {
+              "name": "license_featured",
+              "type": "BOOLEAN",
+              "nullable": true,
+              "description": "Optional GitHub featured filter for the license catalog; omission retains the complete commonly used catalog.",
+              "example": true,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "license_key",
+              "source_stage": "records",
+              "source_column": "license_key"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "spdx_id",
+              "source_stage": "records",
+              "source_column": "spdx_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "implementation",
+              "source_stage": "records",
+              "source_column": "implementation"
+            },
+            {
+              "name": "permissions",
+              "source_stage": "records",
+              "source_column": "permissions"
+            },
+            {
+              "name": "conditions",
+              "source_stage": "records",
+              "source_column": "conditions"
+            },
+            {
+              "name": "limitations",
+              "source_stage": "records",
+              "source_column": "limitations"
+            },
+            {
+              "name": "body",
+              "source_stage": "records",
+              "source_column": "body"
+            },
+            {
+              "name": "featured",
+              "source_stage": "records",
+              "source_column": "featured"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "catalog",
+                "entity": "licenses_list_source",
+                "arguments": {
+                  "license_featured": {
+                    "parameter": "license_featured"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "licenses_get_source",
+                "arguments": {
+                  "license_key": {
+                    "stage": "catalog",
+                    "column": "license_key"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Every returned catalog entry across all advertised pages, hydrated by its exact key; a failed detail stops the retrieval."
+        }
+      ]
+    },
+    {
+      "name": "emojis",
+      "description": "Named GitHub emoji image references. The dictionary key is the stable entry grain; aliases remain separate named entries even when they share an image URL.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "emoji_name",
+          "source_stage": "emojis",
+          "source_column": "emoji_name"
+        },
+        {
+          "name": "image_url",
+          "source_stage": "emojis",
+          "source_column": "image_url"
+        }
+      ],
+      "grain": [
+        "emoji_name"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "emojis",
+            "entity": "emoji_dictionary_source",
+            "arguments": {}
+          }
+        ],
+        "output_stage": "emojis"
+      },
+      "semantics": {
+        "detail_fields": [
+          "emoji_name",
+          "image_url"
+        ],
+        "dimensions": [
+          "emoji_name"
+        ],
+        "metrics": [
+          {
+            "name": "emoji_count",
+            "kind": "count",
+            "comment": "Named dictionary entries, including distinct aliases with shared image URLs."
+          }
+        ],
+        "sql_names": {
+          "emoji_name": "emojis_emoji_name"
+        }
+      }
+    },
+    {
+      "name": "api_versions",
+      "description": "Supported GitHub REST API version dates from the pinned scalar date-array contract. One row per supported version; these are version labels, not release publication observations.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "api_version",
+          "source_stage": "versions",
+          "source_column": "api_version"
+        }
+      ],
+      "grain": [
+        "api_version"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "versions",
+            "entity": "api_versions_source",
+            "arguments": {}
+          }
+        ],
+        "output_stage": "versions"
+      },
+      "semantics": {
+        "detail_fields": [
+          "api_version"
+        ],
+        "dimensions": [
+          "api_version"
+        ],
+        "metrics": [
+          {
+            "name": "api_version_count",
+            "kind": "count",
+            "comment": "Distinct supported REST API version labels returned by GitHub."
+          }
+        ],
+        "sql_names": {
+          "api_version": "api_versions_api_version"
+        }
+      }
+    },
+    {
+      "name": "api_root_observations",
+      "description": "GitHub root discovery URLs and URI templates as native text. Templates are descriptive values and are never followed as arbitrary request targets. Grain is one endpoint observation for the API host and current caller within an invocation; repeated invocations are snapshots, not historical records.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_stage": "observation",
+          "source_column": "api_host"
+        },
+        {
+          "name": "current_user_url",
+          "source_stage": "observation",
+          "source_column": "current_user_url"
+        },
+        {
+          "name": "current_user_authorizations_html_url",
+          "source_stage": "observation",
+          "source_column": "current_user_authorizations_html_url"
+        },
+        {
+          "name": "authorizations_url",
+          "source_stage": "observation",
+          "source_column": "authorizations_url"
+        },
+        {
+          "name": "code_search_url",
+          "source_stage": "observation",
+          "source_column": "code_search_url"
+        },
+        {
+          "name": "commit_search_url",
+          "source_stage": "observation",
+          "source_column": "commit_search_url"
+        },
+        {
+          "name": "emails_url",
+          "source_stage": "observation",
+          "source_column": "emails_url"
+        },
+        {
+          "name": "emojis_url",
+          "source_stage": "observation",
+          "source_column": "emojis_url"
+        },
+        {
+          "name": "events_url",
+          "source_stage": "observation",
+          "source_column": "events_url"
+        },
+        {
+          "name": "feeds_url",
+          "source_stage": "observation",
+          "source_column": "feeds_url"
+        },
+        {
+          "name": "followers_url",
+          "source_stage": "observation",
+          "source_column": "followers_url"
+        },
+        {
+          "name": "following_url",
+          "source_stage": "observation",
+          "source_column": "following_url"
+        },
+        {
+          "name": "gists_url",
+          "source_stage": "observation",
+          "source_column": "gists_url"
+        },
+        {
+          "name": "hub_url",
+          "source_stage": "observation",
+          "source_column": "hub_url"
+        },
+        {
+          "name": "issue_search_url",
+          "source_stage": "observation",
+          "source_column": "issue_search_url"
+        },
+        {
+          "name": "issues_url",
+          "source_stage": "observation",
+          "source_column": "issues_url"
+        },
+        {
+          "name": "keys_url",
+          "source_stage": "observation",
+          "source_column": "keys_url"
+        },
+        {
+          "name": "label_search_url",
+          "source_stage": "observation",
+          "source_column": "label_search_url"
+        },
+        {
+          "name": "notifications_url",
+          "source_stage": "observation",
+          "source_column": "notifications_url"
+        },
+        {
+          "name": "organization_url",
+          "source_stage": "observation",
+          "source_column": "organization_url"
+        },
+        {
+          "name": "organization_repositories_url",
+          "source_stage": "observation",
+          "source_column": "organization_repositories_url"
+        },
+        {
+          "name": "organization_teams_url",
+          "source_stage": "observation",
+          "source_column": "organization_teams_url"
+        },
+        {
+          "name": "public_gists_url",
+          "source_stage": "observation",
+          "source_column": "public_gists_url"
+        },
+        {
+          "name": "rate_limit_url",
+          "source_stage": "observation",
+          "source_column": "rate_limit_url"
+        },
+        {
+          "name": "repository_url",
+          "source_stage": "observation",
+          "source_column": "repository_url"
+        },
+        {
+          "name": "repository_search_url",
+          "source_stage": "observation",
+          "source_column": "repository_search_url"
+        },
+        {
+          "name": "current_user_repositories_url",
+          "source_stage": "observation",
+          "source_column": "current_user_repositories_url"
+        },
+        {
+          "name": "starred_url",
+          "source_stage": "observation",
+          "source_column": "starred_url"
+        },
+        {
+          "name": "starred_gists_url",
+          "source_stage": "observation",
+          "source_column": "starred_gists_url"
+        },
+        {
+          "name": "topic_search_url",
+          "source_stage": "observation",
+          "source_column": "topic_search_url"
+        },
+        {
+          "name": "user_url",
+          "source_stage": "observation",
+          "source_column": "user_url"
+        },
+        {
+          "name": "user_organizations_url",
+          "source_stage": "observation",
+          "source_column": "user_organizations_url"
+        },
+        {
+          "name": "user_repositories_url",
+          "source_stage": "observation",
+          "source_column": "user_repositories_url"
+        },
+        {
+          "name": "user_search_url",
+          "source_stage": "observation",
+          "source_column": "user_search_url"
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "observation",
+            "entity": "api_root_observations_source",
+            "arguments": {
+              "api_host": {
+                "literal": "api.github.com"
+              }
+            }
+          }
+        ],
+        "output_stage": "observation"
+      },
+      "semantics": {
+        "detail_fields": [
+          "api_host",
+          "current_user_url",
+          "current_user_authorizations_html_url",
+          "authorizations_url",
+          "code_search_url",
+          "commit_search_url",
+          "emails_url",
+          "emojis_url",
+          "events_url",
+          "feeds_url",
+          "followers_url",
+          "following_url",
+          "gists_url",
+          "hub_url",
+          "issue_search_url",
+          "issues_url",
+          "keys_url",
+          "label_search_url",
+          "notifications_url",
+          "organization_url",
+          "organization_repositories_url",
+          "organization_teams_url",
+          "public_gists_url",
+          "rate_limit_url",
+          "repository_url",
+          "repository_search_url",
+          "current_user_repositories_url",
+          "starred_url",
+          "starred_gists_url",
+          "topic_search_url",
+          "user_url",
+          "user_organizations_url",
+          "user_repositories_url",
+          "user_search_url"
+        ],
+        "dimensions": [
+          "api_host"
+        ],
+        "metrics": [
+          {
+            "name": "api_root_observation_count",
+            "kind": "count",
+            "comment": "Endpoint observations retrieved for the current caller; not a count of durable GitHub resources."
+          }
+        ],
+        "sql_names": {
+          "api_host": "api_root_observations_api_host"
+        }
+      }
+    },
+    {
+      "name": "api_metadata_observations",
+      "description": "Typed GitHub service metadata, network range lists, SSH fingerprints and nested service domains. Returned ranges are retained exactly; they are not inferred to be exhaustive access-control policy. Grain is one endpoint observation for the API host and current caller within an invocation; repeated invocations are snapshots, not historical records.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_stage": "observation",
+          "source_column": "api_host"
+        },
+        {
+          "name": "verifiable_password_authentication",
+          "source_stage": "observation",
+          "source_column": "verifiable_password_authentication"
+        },
+        {
+          "name": "ssh_key_fingerprints",
+          "source_stage": "observation",
+          "source_column": "ssh_key_fingerprints"
+        },
+        {
+          "name": "ssh_keys",
+          "source_stage": "observation",
+          "source_column": "ssh_keys"
+        },
+        {
+          "name": "hooks",
+          "source_stage": "observation",
+          "source_column": "hooks"
+        },
+        {
+          "name": "github_enterprise_importer",
+          "source_stage": "observation",
+          "source_column": "github_enterprise_importer"
+        },
+        {
+          "name": "web",
+          "source_stage": "observation",
+          "source_column": "web"
+        },
+        {
+          "name": "api",
+          "source_stage": "observation",
+          "source_column": "api"
+        },
+        {
+          "name": "git",
+          "source_stage": "observation",
+          "source_column": "git"
+        },
+        {
+          "name": "packages",
+          "source_stage": "observation",
+          "source_column": "packages"
+        },
+        {
+          "name": "pages",
+          "source_stage": "observation",
+          "source_column": "pages"
+        },
+        {
+          "name": "importer",
+          "source_stage": "observation",
+          "source_column": "importer"
+        },
+        {
+          "name": "actions",
+          "source_stage": "observation",
+          "source_column": "actions"
+        },
+        {
+          "name": "actions_macos",
+          "source_stage": "observation",
+          "source_column": "actions_macos"
+        },
+        {
+          "name": "codespaces",
+          "source_stage": "observation",
+          "source_column": "codespaces"
+        },
+        {
+          "name": "dependabot",
+          "source_stage": "observation",
+          "source_column": "dependabot"
+        },
+        {
+          "name": "copilot",
+          "source_stage": "observation",
+          "source_column": "copilot"
+        },
+        {
+          "name": "commit_signing_keys",
+          "source_stage": "observation",
+          "source_column": "commit_signing_keys"
+        },
+        {
+          "name": "domains",
+          "source_stage": "observation",
+          "source_column": "domains"
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "observation",
+            "entity": "api_metadata_observations_source",
+            "arguments": {
+              "api_host": {
+                "literal": "api.github.com"
+              }
+            }
+          }
+        ],
+        "output_stage": "observation"
+      },
+      "semantics": {
+        "detail_fields": [
+          "api_host",
+          "verifiable_password_authentication",
+          "ssh_key_fingerprints",
+          "ssh_keys",
+          "hooks",
+          "github_enterprise_importer",
+          "web",
+          "api",
+          "git",
+          "packages",
+          "pages",
+          "importer",
+          "actions",
+          "actions_macos",
+          "codespaces",
+          "dependabot",
+          "copilot",
+          "commit_signing_keys",
+          "domains"
+        ],
+        "dimensions": [
+          "api_host",
+          "verifiable_password_authentication"
+        ],
+        "metrics": [
+          {
+            "name": "api_metadata_observation_count",
+            "kind": "count",
+            "comment": "Endpoint observations retrieved for the current caller; not a count of durable GitHub resources."
+          }
+        ],
+        "sql_names": {
+          "api_host": "api_metadata_observations_api_host",
+          "verifiable_password_authentication": "api_metadata_observations_verifiable_password_authentication"
+        }
+      }
+    },
+    {
+      "name": "api_rate_limit_observations",
+      "description": "Typed rate-limit resources and compatibility rate summary. Values depend on the current credential identity or unauthenticated egress IP; reset values are explicit Unix seconds, not fabricated observation times. Grain is one endpoint observation for the API host and current caller within an invocation; repeated invocations are snapshots, not historical records.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_stage": "observation",
+          "source_column": "api_host"
+        },
+        {
+          "name": "resources",
+          "source_stage": "observation",
+          "source_column": "resources"
+        },
+        {
+          "name": "rate",
+          "source_stage": "observation",
+          "source_column": "rate"
+        },
+        {
+          "name": "core_limit",
+          "source_stage": "observation",
+          "source_column": "core_limit"
+        },
+        {
+          "name": "core_remaining",
+          "source_stage": "observation",
+          "source_column": "core_remaining"
+        },
+        {
+          "name": "core_reset",
+          "source_stage": "observation",
+          "source_column": "core_reset"
+        },
+        {
+          "name": "core_used",
+          "source_stage": "observation",
+          "source_column": "core_used"
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "observation",
+            "entity": "api_rate_limit_observations_source",
+            "arguments": {
+              "api_host": {
+                "literal": "api.github.com"
+              }
+            }
+          }
+        ],
+        "output_stage": "observation"
+      },
+      "semantics": {
+        "detail_fields": [
+          "api_host",
+          "resources",
+          "rate",
+          "core_limit",
+          "core_remaining",
+          "core_reset",
+          "core_used"
+        ],
+        "dimensions": [
+          "api_host"
+        ],
+        "metrics": [
+          {
+            "name": "api_rate_limit_observation_count",
+            "kind": "count",
+            "comment": "Endpoint observations retrieved for the current caller; not a count of durable GitHub resources."
+          }
+        ],
+        "sql_names": {
+          "api_host": "api_rate_limit_observations_api_host"
+        },
+        "crossfield": {
+          "metrics": {
+            "api_core_requests_remaining": {
+              "expression": "MAX(api_rate_limit_observations.core_remaining)"
+            }
+          },
+          "metric_semantics": {
+            "api_core_requests_remaining": {
+              "comment": "Core requests remaining in the selected requester snapshot. Non-additive across callers or repeated invocations.",
+              "additivity": "non_additive",
+              "dataset": "api_rate_limit_observations"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "api_zen_observations",
+      "description": "One GitHub Zen text response, retaining UTF-8 text and exact response bytes. Grain is one endpoint observation for the API host and current caller within an invocation; repeated invocations are snapshots, not historical records.",
+      "arguments": [],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_stage": "observation",
+          "source_column": "api_host"
+        },
+        {
+          "name": "status_code",
+          "source_stage": "observation",
+          "source_column": "status_code"
+        },
+        {
+          "name": "content_type",
+          "source_stage": "observation",
+          "source_column": "content_type"
+        },
+        {
+          "name": "byte_length",
+          "source_stage": "observation",
+          "source_column": "byte_length"
+        },
+        {
+          "name": "body",
+          "source_stage": "observation",
+          "source_column": "body"
+        },
+        {
+          "name": "text",
+          "source_stage": "observation",
+          "source_column": "text"
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "observation",
+            "entity": "api_zen_observations_source",
+            "arguments": {
+              "api_host": {
+                "literal": "api.github.com"
+              }
+            }
+          }
+        ],
+        "output_stage": "observation"
+      },
+      "semantics": {
+        "detail_fields": [
+          "api_host",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "body",
+          "text"
+        ],
+        "dimensions": [
+          "api_host"
+        ],
+        "metrics": [
+          {
+            "name": "api_zen_observation_count",
+            "kind": "count",
+            "comment": "Endpoint observations retrieved for the current caller; not a count of durable GitHub resources."
+          }
+        ],
+        "sql_names": {
+          "api_host": "api_zen_observations_api_host"
+        }
+      }
+    },
+    {
+      "name": "api_octocat_observations",
+      "description": "One Octocat text rendering for the optional speech argument, retaining UTF-8 text and exact bytes. Grain is one endpoint observation for the API host and current caller within an invocation; repeated invocations are snapshots, not historical records.",
+      "arguments": [
+        {
+          "name": "octocat_speech",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional text for the Octocat speech bubble; omission uses GitHub default text.",
+          "example": "Hello",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "api_host",
+          "source_stage": "observation",
+          "source_column": "api_host"
+        },
+        {
+          "name": "speech",
+          "source_stage": "observation",
+          "source_column": "speech"
+        },
+        {
+          "name": "status_code",
+          "source_stage": "observation",
+          "source_column": "status_code"
+        },
+        {
+          "name": "content_type",
+          "source_stage": "observation",
+          "source_column": "content_type"
+        },
+        {
+          "name": "byte_length",
+          "source_stage": "observation",
+          "source_column": "byte_length"
+        },
+        {
+          "name": "body",
+          "source_stage": "observation",
+          "source_column": "body"
+        },
+        {
+          "name": "text",
+          "source_stage": "observation",
+          "source_column": "text"
+        }
+      ],
+      "grain": [
+        "api_host"
+      ],
+      "traversal": {
+        "stages": [
+          {
+            "name": "observation",
+            "entity": "api_octocat_observations_source",
+            "arguments": {
+              "api_host": {
+                "literal": "api.github.com"
+              },
+              "octocat_speech": {
+                "parameter": "octocat_speech"
+              }
+            }
+          }
+        ],
+        "output_stage": "observation"
+      },
+      "semantics": {
+        "detail_fields": [
+          "api_host",
+          "speech",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "body",
+          "text"
+        ],
+        "dimensions": [
+          "api_host"
+        ],
+        "metrics": [
+          {
+            "name": "api_octocat_observation_count",
+            "kind": "count",
+            "comment": "Endpoint observations retrieved for the current caller; not a count of durable GitHub resources."
+          }
+        ],
+        "sql_names": {
+          "api_host": "api_octocat_observations_api_host"
+        }
+      }
+    },
+    {
+      "name": "repository_license_files",
+      "description": "Repository-qualified license file snapshots, keyed by stable repository ID, returned path and immutable blob SHA. Returned license classification may be NULL; it is not equivalent to absence of a file. Default-branch or explicit-ref retrieval follows owner, organization, repository or repository cohort populations. Missing/inaccessible endpoint responses fail closed rather than claim zero coverage.",
+      "grain": [
+        "repository_id",
+        "file_path",
+        "blob_sha"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "requested_ref",
+          "file_name",
+          "file_path",
+          "blob_sha",
+          "byte_size",
+          "url",
+          "html_url",
+          "git_url",
+          "download_url",
+          "file_type",
+          "encoded_content",
+          "encoding",
+          "links",
+          "detected_license",
+          "license_key",
+          "license_spdx_id"
+        ],
+        "dimensions": [
+          "repository",
+          "file_path",
+          "blob_sha",
+          "license_key",
+          "license_spdx_id",
+          "encoding"
+        ],
+        "metrics": [
+          {
+            "name": "repository_license_file_count",
+            "kind": "count",
+            "comment": "Selected repository license files, including files with no recognized catalog license classification."
+          }
+        ],
+        "sql_names": {
+          "repository": "repository_license_files_repository",
+          "file_path": "repository_license_files_file_path",
+          "blob_sha": "repository_license_files_blob_sha",
+          "license_key": "repository_license_files_license_key",
+          "license_spdx_id": "repository_license_files_license_spdx_id",
+          "encoding": "repository_license_files_encoding"
+        },
+        "crossfield": {
+          "metrics": {
+            "repository_license_file_bytes": {
+              "expression": "COALESCE(SUM(repository_license_files.byte_size), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_license_file_bytes": {
+              "comment": "Upstream file byte sizes for selected repository/path/blob snapshots; not the encoded string length.",
+              "additivity": "additive",
+              "dataset": "repository_license_files",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "license_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional Git ref for the repository license file; omission follows the repository default branch.",
+              "example": "main",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "license_file",
+              "source_column": "repository"
+            },
+            {
+              "name": "requested_ref",
+              "source_stage": "license_file",
+              "source_column": "requested_ref"
+            },
+            {
+              "name": "file_name",
+              "source_stage": "license_file",
+              "source_column": "file_name"
+            },
+            {
+              "name": "file_path",
+              "source_stage": "license_file",
+              "source_column": "file_path"
+            },
+            {
+              "name": "blob_sha",
+              "source_stage": "license_file",
+              "source_column": "blob_sha"
+            },
+            {
+              "name": "byte_size",
+              "source_stage": "license_file",
+              "source_column": "byte_size"
+            },
+            {
+              "name": "url",
+              "source_stage": "license_file",
+              "source_column": "url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "license_file",
+              "source_column": "html_url"
+            },
+            {
+              "name": "git_url",
+              "source_stage": "license_file",
+              "source_column": "git_url"
+            },
+            {
+              "name": "download_url",
+              "source_stage": "license_file",
+              "source_column": "download_url"
+            },
+            {
+              "name": "file_type",
+              "source_stage": "license_file",
+              "source_column": "file_type"
+            },
+            {
+              "name": "encoded_content",
+              "source_stage": "license_file",
+              "source_column": "encoded_content"
+            },
+            {
+              "name": "encoding",
+              "source_stage": "license_file",
+              "source_column": "encoding"
+            },
+            {
+              "name": "links",
+              "source_stage": "license_file",
+              "source_column": "links"
+            },
+            {
+              "name": "detected_license",
+              "source_stage": "license_file",
+              "source_column": "detected_license"
+            },
+            {
+              "name": "license_key",
+              "source_stage": "license_file",
+              "source_column": "license_key"
+            },
+            {
+              "name": "license_spdx_id",
+              "source_stage": "license_file",
+              "source_column": "license_spdx_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "license_file",
+                "entity": "repository_license_file_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "license_ref": {
+                    "parameter": "license_ref"
+                  }
+                }
+              }
+            ],
+            "output_stage": "license_file"
+          },
+          "population": "One detected license file for each selected repository/ref, with repository identity hydrated first. Missing/inaccessible file responses fail; a 404 is not silently counted as an unlicensed repository. Encoded content retains its declared encoding."
+        }
+      ]
+    },
+    {
+      "name": "repository_languages",
+      "description": "Canonical repository-qualified language byte statistics. Grain is repository ID plus the exact dictionary language name; values are GitHub language byte totals, not source-file counts or contributor ownership.",
+      "grain": [
+        "repository_id",
+        "language"
+      ],
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "languages",
+              "source_column": "repository"
+            },
+            {
+              "name": "language",
+              "source_stage": "languages",
+              "source_column": "language"
+            },
+            {
+              "name": "byte_count",
+              "source_stage": "languages",
+              "source_column": "byte_count"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "languages",
+                "entity": "repository_languages_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "languages"
+          },
+          "population": "All language entries from each selected repository, with full repository/owner/organization/cohort traversal. An empty dictionary emits zero language facts while repository context remains available."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "language",
+          "byte_count"
+        ],
+        "dimensions": [
+          "repository",
+          "language"
+        ],
+        "sql_names": {
+          "repository": "repository_languages_repository",
+          "language": "repository_languages_language"
+        },
+        "metrics": [
+          {
+            "name": "repository_language_count",
+            "kind": "count",
+            "comment": "Repository/language entries; the same language in two repositories counts twice."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_language_bytes": {
+              "expression": "COALESCE(SUM(repository_languages.byte_count), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_language_bytes": {
+              "comment": "GitHub reported language bytes over the selected repository/language entries.",
+              "additivity": "additive",
+              "dataset": "repository_languages",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "repository_license_files_to_repositories",
+      "from": "repository_license_files",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_license_files_to_licenses",
+      "from": "repository_license_files",
+      "to": "licenses",
+      "from_columns": [
+        "license_key"
+      ],
+      "to_columns": [
+        "license_key"
+      ],
+      "optional": true,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "license_key": "license_key"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_languages_to_repositories",
+      "from": "repository_languages",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    }
+  ]
+}

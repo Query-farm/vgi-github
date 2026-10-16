@@ -1,87 +1,87 @@
 PREPARE github_activity_compare AS
 WITH earlier AS (
     SELECT 'pull_request' AS activity_kind, counts.* FROM (
-        SELECT authored_pr_count AS records,
-           authored_pr_active_days AS active_days, authored_pr_repository_count AS known_repositories
+        SELECT pull_request_count AS records,
+           pull_request_active_days AS active_days, pull_request_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_pr_created_day >= $2 AND authored_pr_created_day < $3
+        WHERE pull_request_created_day >= $2 AND pull_request_created_day < $3
     ) counts
     UNION ALL
     SELECT 'issue' AS activity_kind, counts.* FROM (
-        SELECT authored_issue_count AS records,
-           authored_issue_active_days AS active_days, authored_issue_repository_count AS known_repositories
+        SELECT issue_count AS records,
+           issue_active_days AS active_days, issue_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_issue_created_day >= $2 AND authored_issue_created_day < $3
+        WHERE issue_created_day >= $2 AND issue_created_day < $3
     ) counts
     UNION ALL
     SELECT 'discussion' AS activity_kind, counts.* FROM (
-        SELECT authored_discussion_count AS records,
-           authored_discussion_active_days AS active_days, authored_discussion_repository_count AS known_repositories
+        SELECT discussion_count AS records,
+           discussion_active_days AS active_days, discussion_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_discussion_created_day >= $2 AND authored_discussion_created_day < $3
+        WHERE discussion_created_day >= $2 AND discussion_created_day < $3
     ) counts
     UNION ALL
     SELECT 'issue_or_pr_comment' AS activity_kind, counts.* FROM (
-        SELECT authored_issue_comment_count AS records,
-           authored_issue_comment_active_days AS active_days, authored_issue_comment_repository_count AS known_repositories
+        SELECT issue_comment_count AS records,
+           issue_comment_active_days AS active_days, issue_comment_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_issue_comment_created_day >= $2 AND authored_issue_comment_created_day < $3
+        WHERE issue_comment_created_day >= $2 AND issue_comment_created_day < $3
     ) counts
     UNION ALL
     SELECT 'discussion_comment' AS activity_kind, counts.* FROM (
-        SELECT authored_discussion_comment_count AS records,
-           authored_discussion_comment_active_days AS active_days, authored_discussion_comment_repository_count AS known_repositories
+        SELECT discussion_comment_count AS records,
+           discussion_comment_active_days AS active_days, discussion_comment_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_discussion_comment_created_day >= $2 AND authored_discussion_comment_created_day < $3
+        WHERE discussion_comment_created_day >= $2 AND discussion_comment_created_day < $3
     ) counts
     UNION ALL
     SELECT 'commit_comment' AS activity_kind, counts.* FROM (
-        SELECT authored_commit_comment_count AS records,
-           authored_commit_comment_active_days AS active_days, authored_commit_comment_repository_count AS known_repositories
+        SELECT commit_comment_count AS records,
+           commit_comment_active_days AS active_days, commit_comment_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_commit_comment_created_day >= $2 AND authored_commit_comment_created_day < $3
+        WHERE commit_comment_created_day >= $2 AND commit_comment_created_day < $3
     ) counts
 ), later AS (
     SELECT 'pull_request' AS activity_kind, counts.* FROM (
-        SELECT authored_pr_count AS records,
-           authored_pr_active_days AS active_days, authored_pr_repository_count AS known_repositories
+        SELECT pull_request_count AS records,
+           pull_request_active_days AS active_days, pull_request_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_pr_created_day >= $4 AND authored_pr_created_day < $5
+        WHERE pull_request_created_day >= $4 AND pull_request_created_day < $5
     ) counts
     UNION ALL
     SELECT 'issue' AS activity_kind, counts.* FROM (
-        SELECT authored_issue_count AS records,
-           authored_issue_active_days AS active_days, authored_issue_repository_count AS known_repositories
+        SELECT issue_count AS records,
+           issue_active_days AS active_days, issue_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_issue_created_day >= $4 AND authored_issue_created_day < $5
+        WHERE issue_created_day >= $4 AND issue_created_day < $5
     ) counts
     UNION ALL
     SELECT 'discussion' AS activity_kind, counts.* FROM (
-        SELECT authored_discussion_count AS records,
-           authored_discussion_active_days AS active_days, authored_discussion_repository_count AS known_repositories
+        SELECT discussion_count AS records,
+           discussion_active_days AS active_days, discussion_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_discussion_created_day >= $4 AND authored_discussion_created_day < $5
+        WHERE discussion_created_day >= $4 AND discussion_created_day < $5
     ) counts
     UNION ALL
     SELECT 'issue_or_pr_comment' AS activity_kind, counts.* FROM (
-        SELECT authored_issue_comment_count AS records,
-           authored_issue_comment_active_days AS active_days, authored_issue_comment_repository_count AS known_repositories
+        SELECT issue_comment_count AS records,
+           issue_comment_active_days AS active_days, issue_comment_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_issue_comment_created_day >= $4 AND authored_issue_comment_created_day < $5
+        WHERE issue_comment_created_day >= $4 AND issue_comment_created_day < $5
     ) counts
     UNION ALL
     SELECT 'discussion_comment' AS activity_kind, counts.* FROM (
-        SELECT authored_discussion_comment_count AS records,
-           authored_discussion_comment_active_days AS active_days, authored_discussion_comment_repository_count AS known_repositories
+        SELECT discussion_comment_count AS records,
+           discussion_comment_active_days AS active_days, discussion_comment_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_discussion_comment_created_day >= $4 AND authored_discussion_comment_created_day < $5
+        WHERE discussion_comment_created_day >= $4 AND discussion_comment_created_day < $5
     ) counts
     UNION ALL
     SELECT 'commit_comment' AS activity_kind, counts.* FROM (
-        SELECT authored_commit_comment_count AS records,
-           authored_commit_comment_active_days AS active_days, authored_commit_comment_repository_count AS known_repositories
+        SELECT commit_comment_count AS records,
+           commit_comment_active_days AS active_days, commit_comment_repository_count AS known_repositories
         FROM engineering.semantic.github(user => $1)
-        WHERE authored_commit_comment_created_day >= $4 AND authored_commit_comment_created_day < $5
+        WHERE commit_comment_created_day >= $4 AND commit_comment_created_day < $5
     ) counts
 ), bounds AS (
     SELECT DATE_DIFF('day', CAST($2 AS DATE), CAST($3 AS DATE)) AS earlier_days,

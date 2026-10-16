@@ -1,0 +1,204 @@
+# Releases and release assets: independent fixture values, never generated answers.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Two published releases and one draft. The second published release is a prerelease.
+query IIIII
+SELECT release_count,published_release_count,draft_release_count,prerelease_count,release_publication_day_count FROM engineering.semantic.github(repository=>'release-fixture/alpha');
+----
+3	2	1	1	2
+
+# Native planning must not multiply releases by their assets.
+query IIIIII
+SELECT release_count,published_release_count,release_asset_count,uploaded_release_asset_count,release_asset_size_bytes,release_asset_download_count FROM engineering.semantic.github(organization=>'release-fixture');
+----
+4	3	4	3	700	15
+
+# Repository enrichment has one approved path for releases and assets.
+query TII
+SELECT repository_name,release_count,release_asset_count FROM engineering.semantic.github(organization=>'release-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+release-fixture/alpha	3	3
+release-fixture/beta	1	1
+
+# A direct asset retains its known repository even though its parent release is unknown.
+query TI
+SELECT repository_name,release_asset_count FROM engineering.semantic.github(repository=>'release-fixture/alpha',release_asset_id=>111) GROUP BY repository_name;
+----
+release-fixture/alpha	1
+
+query R
+SELECT median_release_asset_size_bytes FROM engineering.semantic.github(organization=>'release-fixture');
+----
+150.0
+
+# Latest is the API's stable release, despite newer draft/prerelease rows in the list.
+query IIII
+SELECT release_count,published_release_count,prerelease_count,release_asset_count FROM engineering.semantic.github(repository=>'release-fixture/alpha',release_selection=>'latest');
+----
+1	1	0	2
+
+query II
+SELECT repository_id,release_id FROM engineering.detail.releases(repository=>'release-fixture/alpha',release_selection=>'latest');
+----
+101	11
+
+query II
+SELECT repository_id,release_id FROM engineering.detail.releases(repository=>'release-fixture/alpha',release_tag=>'v1');
+----
+101	11
+
+query II
+SELECT repository_id,release_id FROM engineering.detail.releases(repository=>'release-fixture/beta',release_tag=>'v1');
+----
+102	21
+
+query III
+SELECT release_count,published_release_count,release_asset_count FROM engineering.semantic.github(repository=>'release-fixture/alpha',release_id=>13);
+----
+1	0	0
+
+# The release embeds only asset 111. Asset 112 must arrive through its next page.
+query IIIII
+SELECT release_id,release_asset_id,uploader_id,size_bytes,download_count FROM engineering.detail.release_assets(repository=>'release-fixture/alpha',release_id=>11) ORDER BY release_asset_id;
+----
+11	111	202	100	3
+11	112	NULL	200	5
+
+# Direct asset lookup supplies no release parent; publisher and uploader remain distinct.
+query III
+SELECT release_id,release_asset_id,uploader_id FROM engineering.detail.release_assets(repository=>'release-fixture/alpha',release_asset_id=>111);
+----
+NULL	111	202
+
+query IT
+SELECT publisher_id,publisher_login FROM engineering.detail.releases(repository=>'release-fixture/alpha',release_id=>11);
+----
+201	alice
+
+query ITII
+SELECT release_asset_id,state,size_bytes,download_count FROM engineering.detail.release_assets(repository=>'release-fixture/alpha',release_tag=>'v2-rc');
+----
+121	open	0	0
+
+# Current reported counters remain distinct from release and asset population counts.
+query II
+SELECT release_reported_mention_count,release_reported_reaction_count FROM engineering.semantic.github(organization=>'release-fixture');
+----
+2	3
+
+query II
+SELECT release_reported_mention_count,release_reported_reaction_count FROM engineering.semantic.github(repository=>'release-fixture/alpha',release_id=>13);
+----
+NULL	NULL
+
+query II
+SELECT release_reported_mention_count,release_reported_reaction_count FROM engineering.semantic.github(repository=>'release-fixture/beta');
+----
+0	0
+
+statement ok
+CREATE TEMP TABLE release_snapshot AS SELECT * FROM engineering.detail.releases(repository=>'release-fixture/alpha',release_id=>11);
+
+statement ok
+CREATE TEMP TABLE release_asset_snapshot AS SELECT * FROM engineering.detail.release_assets(repository=>'release-fixture/alpha',release_id=>11);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITIITT
+SELECT publisher.id,publisher.login,reaction_summary."+1",reaction_summary.heart,body_html,body_text FROM release_snapshot;
+----
+201	alice	2	1	<p>Independent release notes</p>	Independent release notes
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IIT
+SELECT release_asset_id,uploader.id,uploader.login FROM release_asset_snapshot ORDER BY release_asset_id;
+----
+111	202	bob
+112	NULL	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT release_count,release_asset_count FROM engineering.semantic.github(repository=>'release-fixture/empty');
+----
+0	0
+
+query II
+SELECT release_count,release_asset_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0
+
+query TII
+SELECT releases_release_published_day,release_count,published_release_count FROM engineering.semantic.github(organization=>'release-fixture') GROUP BY releases_release_published_day ORDER BY releases_release_published_day NULLS LAST;
+----
+2026-09-02	2	2
+2026-09-05	1	1
+NULL	1	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT release_count FROM engineering.semantic.github(repository=>'release-fixture/alpha',release_selection=>'first');
+----
+release_selection
+
+statement error
+SELECT release_asset_count FROM engineering.semantic.github(release_asset_id=>111);
+----
+repository
+
+statement error
+SELECT release_count FROM engineering.semantic.github(repository=>'release-fixture/alpha',release_id=>11,release_tag=>'v1');
+----
+arguments do not apply
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

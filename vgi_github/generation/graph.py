@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 
-from .schema import _binding, _complete, _entity_base, _fail, _identifier, _keys, _merge_schemas
+from .schema import _binding, _complete, _entity_base, _fail, _identifier, _keys, _merge_schemas, _sql_type
 
 
 def _scope_constraints(scope: dict, public: dict, location: str) -> tuple[set[str], dict]:
@@ -97,7 +97,9 @@ def compile_functions(contract: dict, overlay: dict) -> dict:
                 target = expected[name]
                 if not isinstance(binding, dict):
                     _fail(location, "source argument mappings must be objects")
-                if set(binding) == {"parameter"}:
+                if set(binding) in ({"parameter"}, {"parameter", "transform"}):
+                    if "transform" in binding and binding["transform"] != "decimal_string_to_bigint":
+                        _fail(location, "parameter transforms require reviewed decimal VARCHAR to BIGINT")
                     parameter = public.get(binding["parameter"])
                     if parameter is None:
                         _fail(location, "scope refers to an undeclared public parameter")
@@ -110,16 +112,32 @@ def compile_functions(contract: dict, overlay: dict) -> dict:
                         ]
                     }
                     _binding(
-                        {"argument": parameter["name"]}, mapped, target["type"], target["nullable"], location
+                        {
+                            "argument": parameter["name"],
+                            **({"transform": binding["transform"]} if "transform" in binding else {}),
+                        },
+                        mapped,
+                        target["type"],
+                        target["nullable"],
+                        location,
                     )
-                elif set(binding) == {"stage", "column"}:
+                elif set(binding) in ({"stage", "column"}, {"stage", "column", "transform"}):
                     stage = stages.get(binding["stage"])
                     if stage is None or binding["column"] not in stage:
                         _fail(location, "a traversal binding must reference an earlier stage column")
                     column = stage[binding["column"]]
                     nullable = column["nullable"] or not column["required"]
-                    if column["type"] != target["type"] or nullable and not target["nullable"]:
-                        _fail(location, "stage arguments must preserve exact types and non-null requirements")
+                    actual_type = column["type"]
+                    if "transform" in binding:
+                        if binding["transform"] != "decimal_string_to_bigint" or actual_type != "VARCHAR":
+                            _fail(location, "stage transforms require reviewed decimal VARCHAR to BIGINT")
+                        actual_type = "BIGINT"
+                    if actual_type != target["type"] or nullable and not target["nullable"]:
+                        _fail(
+                            location,
+                            "stage arguments must preserve exact types and non-null requirements: "
+                            f"{binding['stage']}.{binding['column']} -> {source['name']}.{name}",
+                        )
                 elif set(binding) == {"literal"}:
                     _binding(binding, base, target["type"], target["nullable"], location)
                 else:
@@ -127,7 +145,11 @@ def compile_functions(contract: dict, overlay: dict) -> dict:
             if stages and not any(
                 value.get("stage") == list(stages)[-1] for value in node["arguments"].values()
             ):
-                _fail(location, "each child source must consume its immediate parent stage")
+                _fail(
+                    location,
+                    "each child source must consume its immediate parent stage: "
+                    f"{source['name']} after {list(stages)[-1]}",
+                )
             return source
 
         def decision(
@@ -170,12 +192,20 @@ def compile_functions(contract: dict, overlay: dict) -> dict:
             ]
 
         for stage in traversal["stages"]:
-            _keys(stage, {"name", "entity", "arguments", "scope"}, {"name"}, location)
+            _keys(
+                stage,
+                {"name", "entity", "arguments", "scope", "where", "where_parameters", "children"},
+                {"name"},
+                location,
+            )
             name = _identifier(stage["name"], location)
             if name in stages:
                 _fail(location, "traversal stage names must be unique")
             if "scope" in stage:
-                if set(stage) != {"name", "scope"} or stage["scope"] not in scopes:
+                if (
+                    set(stage) - {"where", "where_parameters", "children"} != {"name", "scope"}
+                    or stage["scope"] not in scopes
+                ):
                     _fail(location, "scope stages require a declared scope and no inline entity")
                 scope_name = stage["scope"]
                 used_scopes.add(scope_name)
@@ -184,7 +214,14 @@ def compile_functions(contract: dict, overlay: dict) -> dict:
                 variants = decision(scope["select"], required_parameters, set(), exclusive, dependencies)
             else:
                 variants = [
-                    leaf({key: value for key, value in stage.items() if key != "name"}, required_parameters)
+                    leaf(
+                        {
+                            key: value
+                            for key, value in stage.items()
+                            if key not in {"name", "where", "where_parameters", "children"}
+                        },
+                        required_parameters,
+                    )
                 ]
             fields = [{column["name"]: column for column in source["columns"]} for source in variants]
             if any(set(value) != set(fields[0]) for value in fields[1:]):
@@ -199,12 +236,51 @@ def compile_functions(contract: dict, overlay: dict) -> dict:
                     "required": all(value[field]["required"] for value in fields),
                 }
             stages[name] = columns
+            if "children" in stage:
+                if name != traversal["output_stage"]:
+                    _fail(location, "recursive children require the output stage")
+                child = leaf(stage["children"], required_parameters)
+                child_fields = {column["name"]: column for column in child["columns"]}
+                if (
+                    child["grain"] != variants[0]["grain"]
+                    or set(child_fields) != set(columns)
+                    or any(child_fields[key]["schema"] != value["schema"] for key, value in columns.items())
+                ):
+                    _fail(location, "recursive children must preserve the complete source schema and grain")
+            if "where" in stage:
+                if not isinstance(stage["where"], dict) or not stage["where"]:
+                    _fail(location, "stage where requires explicit scalar equalities")
+                for key, value in stage["where"].items():
+                    if key not in columns:
+                        _fail(location, "stage where references an unknown column")
+                    _binding(
+                        {"literal": value},
+                        base,
+                        columns[key]["type"],
+                        columns[key]["nullable"] or not columns[key]["required"],
+                        location,
+                    )
+            if "where_parameters" in stage:
+                equalities = stage["where_parameters"]
+                if not isinstance(equalities, dict) or not equalities:
+                    _fail(location, "stage where_parameters requires explicit column/parameter equalities")
+                if set(equalities) & stage.get("where", {}).keys():
+                    _fail(location, "stage equality filters must not bind the same column twice")
+                for key, parameter in equalities.items():
+                    if (
+                        key not in columns
+                        or columns[key]["schema"]["kind"] != "scalar"
+                        or not isinstance(parameter, str)
+                        or parameter not in public
+                        or public[parameter]["type"] != columns[key]["type"]
+                    ):
+                        _fail(location, "stage where_parameters must preserve scalar column/parameter types")
         if not stages or traversal["output_stage"] != list(stages)[-1]:
             _fail(location, "output_stage must be the final nonempty traversal stage")
         for column in definition["columns"]:
             _keys(
                 column,
-                {"name", "source_stage", "source_column", "description"},
+                {"name", "source_stage", "source_column", "source_path", "description"},
                 {"name", "source_stage", "source_column"},
                 location,
             )
@@ -212,6 +288,28 @@ def compile_functions(contract: dict, overlay: dict) -> dict:
             selected = stages.get(column["source_stage"], {}).get(column["source_column"])
             if selected is None:
                 _fail(location, "public column references an unknown stage field")
+            selected = copy.deepcopy(selected)
+            if "source_path" in column:
+                path = column["source_path"]
+                if not isinstance(path, list) or not path or any(not isinstance(key, str) for key in path):
+                    _fail(location, "source_path requires a nonempty STRUCT member path")
+                schema = selected["schema"]
+                nullable = selected["nullable"] or not selected["required"]
+                for key in path:
+                    field = (
+                        next((field for field in schema.get("fields", []) if field["name"] == key), None)
+                        if schema["kind"] == "struct"
+                        else None
+                    )
+                    if field is None:
+                        _fail(location, "source_path must select declared STRUCT members")
+                    nullable |= field.get(
+                        "nullable", field["schema"].get("nullable", False)
+                    ) or not field.get("required", True)
+                    schema = field["schema"]
+                schema = copy.deepcopy(schema)
+                schema["nullable"] = nullable
+                selected.update(schema=schema, type=_sql_type(schema), nullable=nullable, required=True)
             base["columns"].append(
                 {
                     key: copy.deepcopy(value)

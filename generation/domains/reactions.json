@@ -1,0 +1,3773 @@
+{
+  "entities": [
+    {
+      "name": "reaction_issue_threads_subject_source",
+      "description": "Resolve the selected reaction subject database and node identities without treating a repository-local issue number as its database ID. This source is identity hydration, not complete parent metadata.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "issue_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Issue or pull-request number for conversation comments; requires repository.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "subject_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "subject_number",
+          "path": [
+            "number"
+          ]
+        },
+        {
+          "name": "subject_pull_request",
+          "path": [
+            "pull_request"
+          ],
+          "description": "Optional typed PR marker object from the issue-thread API. Object presence, not nullable URLs inside it, determines the canonical parent kind."
+        }
+      ],
+      "grain": [
+        "subject_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "issues/get",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "issue_number": {
+            "argument": "issue_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "subject_id",
+          "subject_node_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "subject_number",
+            "argument": "issue_number",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reaction_issue_threads_source",
+      "description": "Complete paginated reactions attached to one explicitly identified subject. Deleted reactor accounts remain NULL without dropping the reaction.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "issue_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Issue or pull-request number for conversation comments; requires repository.",
+          "example": 1
+        },
+        {
+          "name": "reaction_content",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+          "example": "heart",
+          "enum": [
+            "+1",
+            "-1",
+            "laugh",
+            "confused",
+            "heart",
+            "hooray",
+            "rocket",
+            "eyes"
+          ]
+        },
+        {
+          "name": "reaction_subject_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_node_id",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_review_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_release_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_kind",
+          "source_argument": "reaction_subject_kind"
+        },
+        {
+          "name": "subject_id",
+          "source_argument": "reaction_subject_id"
+        },
+        {
+          "name": "subject_node_id",
+          "source_argument": "reaction_subject_node_id"
+        },
+        {
+          "name": "subject_number",
+          "source_argument": "reaction_subject_number"
+        },
+        {
+          "name": "subject_issue_node_id",
+          "source_argument": "reaction_subject_issue_node_id"
+        },
+        {
+          "name": "subject_issue_comment_id",
+          "source_argument": "reaction_subject_issue_comment_id"
+        },
+        {
+          "name": "subject_issue_comment_node_id",
+          "source_argument": "reaction_subject_issue_comment_node_id"
+        },
+        {
+          "name": "subject_review_comment_id",
+          "source_argument": "reaction_subject_review_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_id",
+          "source_argument": "reaction_subject_commit_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_node_id",
+          "source_argument": "reaction_subject_commit_comment_node_id"
+        },
+        {
+          "name": "subject_release_id",
+          "source_argument": "reaction_subject_release_id"
+        },
+        {
+          "name": "reaction_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "reaction_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "reactor",
+          "path": [
+            "user"
+          ]
+        },
+        {
+          "name": "reactor_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "reactor_node_id",
+          "path": [
+            "user",
+            "node_id"
+          ]
+        },
+        {
+          "name": "reactor_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "reactor_type",
+          "path": [
+            "user",
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "reaction_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "reactions/list-for-issue",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "issue_number": {
+            "argument": "issue_number"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "content": {
+            "argument": "reaction_content"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "reaction_issue_comments_subject_source",
+      "description": "Resolve the selected reaction subject database and node identities without treating a repository-local issue number as its database ID. This source is identity hydration, not complete parent metadata.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "issue_comment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact numeric issue or PR conversation comment identity; distinct from review-comment ID.",
+          "example": 501,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "subject_node_id",
+          "path": [
+            "node_id"
+          ]
+        }
+      ],
+      "grain": [
+        "subject_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "issues/get-comment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "comment_id": {
+            "argument": "issue_comment_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "subject_id",
+          "subject_node_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "subject_id",
+            "argument": "issue_comment_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reaction_issue_comments_source",
+      "description": "Complete paginated reactions attached to one explicitly identified subject. Deleted reactor accounts remain NULL without dropping the reaction.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "issue_comment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact numeric issue or PR conversation comment identity; distinct from review-comment ID.",
+          "example": 501,
+          "minimum": 1
+        },
+        {
+          "name": "reaction_content",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+          "example": "heart",
+          "enum": [
+            "+1",
+            "-1",
+            "laugh",
+            "confused",
+            "heart",
+            "hooray",
+            "rocket",
+            "eyes"
+          ]
+        },
+        {
+          "name": "reaction_subject_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_node_id",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_review_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_release_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_kind",
+          "source_argument": "reaction_subject_kind"
+        },
+        {
+          "name": "subject_id",
+          "source_argument": "reaction_subject_id"
+        },
+        {
+          "name": "subject_node_id",
+          "source_argument": "reaction_subject_node_id"
+        },
+        {
+          "name": "subject_number",
+          "source_argument": "reaction_subject_number"
+        },
+        {
+          "name": "subject_issue_node_id",
+          "source_argument": "reaction_subject_issue_node_id"
+        },
+        {
+          "name": "subject_issue_comment_id",
+          "source_argument": "reaction_subject_issue_comment_id"
+        },
+        {
+          "name": "subject_issue_comment_node_id",
+          "source_argument": "reaction_subject_issue_comment_node_id"
+        },
+        {
+          "name": "subject_review_comment_id",
+          "source_argument": "reaction_subject_review_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_id",
+          "source_argument": "reaction_subject_commit_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_node_id",
+          "source_argument": "reaction_subject_commit_comment_node_id"
+        },
+        {
+          "name": "subject_release_id",
+          "source_argument": "reaction_subject_release_id"
+        },
+        {
+          "name": "reaction_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "reaction_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "reactor",
+          "path": [
+            "user"
+          ]
+        },
+        {
+          "name": "reactor_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "reactor_node_id",
+          "path": [
+            "user",
+            "node_id"
+          ]
+        },
+        {
+          "name": "reactor_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "reactor_type",
+          "path": [
+            "user",
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "reaction_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "reactions/list-for-issue-comment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "comment_id": {
+            "argument": "issue_comment_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "content": {
+            "argument": "reaction_content"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "reaction_review_comments_subject_source",
+      "description": "Resolve the selected reaction subject database and node identities without treating a repository-local issue number as its database ID. This source is identity hydration, not complete parent metadata.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "review_comment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "description": "Stable review comment ID within the selected repository; does not require an invented pull request number.",
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "subject_node_id",
+          "path": [
+            "node_id"
+          ]
+        }
+      ],
+      "grain": [
+        "subject_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "pulls/get-review-comment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "comment_id": {
+            "argument": "review_comment_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "subject_id",
+          "subject_node_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "subject_id",
+            "argument": "review_comment_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reaction_review_comments_source",
+      "description": "Complete paginated reactions attached to one explicitly identified subject. Deleted reactor accounts remain NULL without dropping the reaction.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "review_comment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "description": "Stable review comment ID within the selected repository; does not require an invented pull request number.",
+          "minimum": 1
+        },
+        {
+          "name": "reaction_content",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+          "example": "heart",
+          "enum": [
+            "+1",
+            "-1",
+            "laugh",
+            "confused",
+            "heart",
+            "hooray",
+            "rocket",
+            "eyes"
+          ]
+        },
+        {
+          "name": "reaction_subject_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_node_id",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_review_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_release_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_kind",
+          "source_argument": "reaction_subject_kind"
+        },
+        {
+          "name": "subject_id",
+          "source_argument": "reaction_subject_id"
+        },
+        {
+          "name": "subject_node_id",
+          "source_argument": "reaction_subject_node_id"
+        },
+        {
+          "name": "subject_number",
+          "source_argument": "reaction_subject_number"
+        },
+        {
+          "name": "subject_issue_node_id",
+          "source_argument": "reaction_subject_issue_node_id"
+        },
+        {
+          "name": "subject_issue_comment_id",
+          "source_argument": "reaction_subject_issue_comment_id"
+        },
+        {
+          "name": "subject_issue_comment_node_id",
+          "source_argument": "reaction_subject_issue_comment_node_id"
+        },
+        {
+          "name": "subject_review_comment_id",
+          "source_argument": "reaction_subject_review_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_id",
+          "source_argument": "reaction_subject_commit_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_node_id",
+          "source_argument": "reaction_subject_commit_comment_node_id"
+        },
+        {
+          "name": "subject_release_id",
+          "source_argument": "reaction_subject_release_id"
+        },
+        {
+          "name": "reaction_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "reaction_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "reactor",
+          "path": [
+            "user"
+          ]
+        },
+        {
+          "name": "reactor_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "reactor_node_id",
+          "path": [
+            "user",
+            "node_id"
+          ]
+        },
+        {
+          "name": "reactor_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "reactor_type",
+          "path": [
+            "user",
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "reaction_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "reactions/list-for-pull-request-review-comment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "comment_id": {
+            "argument": "review_comment_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "content": {
+            "argument": "reaction_content"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "reaction_commit_comments_subject_source",
+      "description": "Resolve the selected reaction subject database and node identities without treating a repository-local issue number as its database ID. This source is identity hydration, not complete parent metadata.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "commit_comment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact numeric repository commit-comment identity, distinct from issue and review comment IDs.",
+          "example": 701,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "subject_node_id",
+          "path": [
+            "node_id"
+          ]
+        }
+      ],
+      "grain": [
+        "subject_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-commit-comment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "comment_id": {
+            "argument": "commit_comment_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "subject_id",
+          "subject_node_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "subject_id",
+            "argument": "commit_comment_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reaction_commit_comments_source",
+      "description": "Complete paginated reactions attached to one explicitly identified subject. Deleted reactor accounts remain NULL without dropping the reaction.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "commit_comment_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact numeric repository commit-comment identity, distinct from issue and review comment IDs.",
+          "example": 701,
+          "minimum": 1
+        },
+        {
+          "name": "reaction_content",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+          "example": "heart",
+          "enum": [
+            "+1",
+            "-1",
+            "laugh",
+            "confused",
+            "heart",
+            "hooray",
+            "rocket",
+            "eyes"
+          ]
+        },
+        {
+          "name": "reaction_subject_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_node_id",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_review_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_release_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_kind",
+          "source_argument": "reaction_subject_kind"
+        },
+        {
+          "name": "subject_id",
+          "source_argument": "reaction_subject_id"
+        },
+        {
+          "name": "subject_node_id",
+          "source_argument": "reaction_subject_node_id"
+        },
+        {
+          "name": "subject_number",
+          "source_argument": "reaction_subject_number"
+        },
+        {
+          "name": "subject_issue_node_id",
+          "source_argument": "reaction_subject_issue_node_id"
+        },
+        {
+          "name": "subject_issue_comment_id",
+          "source_argument": "reaction_subject_issue_comment_id"
+        },
+        {
+          "name": "subject_issue_comment_node_id",
+          "source_argument": "reaction_subject_issue_comment_node_id"
+        },
+        {
+          "name": "subject_review_comment_id",
+          "source_argument": "reaction_subject_review_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_id",
+          "source_argument": "reaction_subject_commit_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_node_id",
+          "source_argument": "reaction_subject_commit_comment_node_id"
+        },
+        {
+          "name": "subject_release_id",
+          "source_argument": "reaction_subject_release_id"
+        },
+        {
+          "name": "reaction_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "reaction_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "reactor",
+          "path": [
+            "user"
+          ]
+        },
+        {
+          "name": "reactor_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "reactor_node_id",
+          "path": [
+            "user",
+            "node_id"
+          ]
+        },
+        {
+          "name": "reactor_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "reactor_type",
+          "path": [
+            "user",
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "reaction_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "reactions/list-for-commit-comment",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "comment_id": {
+            "argument": "commit_comment_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "content": {
+            "argument": "reaction_content"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "reaction_releases_subject_source",
+      "description": "Resolve the selected reaction subject database and node identities without treating a repository-local issue number as its database ID. This source is identity hydration, not complete parent metadata.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "release_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+          "example": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "subject_node_id",
+          "path": [
+            "node_id"
+          ]
+        }
+      ],
+      "grain": [
+        "subject_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-release",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "release_id": {
+            "argument": "release_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "subject_id",
+          "subject_node_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "subject_id",
+            "argument": "release_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reaction_releases_source",
+      "description": "Complete paginated reactions attached to one explicitly identified subject. Deleted reactor accounts remain NULL without dropping the reaction.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "release_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "minimum": 1,
+          "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+          "example": 1
+        },
+        {
+          "name": "reaction_content",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null,
+          "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+          "example": "heart",
+          "enum": [
+            "+1",
+            "laugh",
+            "heart",
+            "hooray",
+            "rocket",
+            "eyes"
+          ]
+        },
+        {
+          "name": "reaction_subject_kind",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_id",
+          "type": "BIGINT",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_node_id",
+          "type": "VARCHAR",
+          "nullable": false
+        },
+        {
+          "name": "reaction_subject_number",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_issue_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_review_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_commit_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": true,
+          "default": null
+        },
+        {
+          "name": "reaction_subject_release_id",
+          "type": "BIGINT",
+          "nullable": true,
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_kind",
+          "source_argument": "reaction_subject_kind"
+        },
+        {
+          "name": "subject_id",
+          "source_argument": "reaction_subject_id"
+        },
+        {
+          "name": "subject_node_id",
+          "source_argument": "reaction_subject_node_id"
+        },
+        {
+          "name": "subject_number",
+          "source_argument": "reaction_subject_number"
+        },
+        {
+          "name": "subject_issue_node_id",
+          "source_argument": "reaction_subject_issue_node_id"
+        },
+        {
+          "name": "subject_issue_comment_id",
+          "source_argument": "reaction_subject_issue_comment_id"
+        },
+        {
+          "name": "subject_issue_comment_node_id",
+          "source_argument": "reaction_subject_issue_comment_node_id"
+        },
+        {
+          "name": "subject_review_comment_id",
+          "source_argument": "reaction_subject_review_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_id",
+          "source_argument": "reaction_subject_commit_comment_id"
+        },
+        {
+          "name": "subject_commit_comment_node_id",
+          "source_argument": "reaction_subject_commit_comment_node_id"
+        },
+        {
+          "name": "subject_release_id",
+          "source_argument": "reaction_subject_release_id"
+        },
+        {
+          "name": "reaction_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "reaction_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "reactor",
+          "path": [
+            "user"
+          ]
+        },
+        {
+          "name": "reactor_id",
+          "path": [
+            "user",
+            "id"
+          ]
+        },
+        {
+          "name": "reactor_node_id",
+          "path": [
+            "user",
+            "node_id"
+          ]
+        },
+        {
+          "name": "reactor_login",
+          "path": [
+            "user",
+            "login"
+          ]
+        },
+        {
+          "name": "reactor_type",
+          "path": [
+            "user",
+            "type"
+          ]
+        }
+      ],
+      "grain": [
+        "reaction_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "reactions/list-for-release",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "release_id": {
+            "argument": "release_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "content": {
+            "argument": "reaction_content"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "reaction_issue_comment_nodes_subject_source",
+      "description": "Resolve a canonical comment node to its REST numeric identity and actual repository. Missing numeric identity fails instead of omitting the subject; CommitComment exposes only legacy databaseId in the pinned schema.",
+      "arguments": [
+        {
+          "name": "reaction_issue_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GraphQL IssueComment node identity; resolves the subject and its current repository before retrieving reactions.",
+          "example": "IC_fixture",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_id",
+          "path": [
+            "fullDatabaseId"
+          ]
+        },
+        {
+          "name": "subject_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        }
+      ],
+      "grain": [
+        "subject_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "node"
+        ],
+        "field_arguments": {
+          "node": {
+            "id": {
+              "argument": "reaction_issue_comment_node_id"
+            }
+          }
+        },
+        "field_types": {
+          "node": "IssueComment"
+        },
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "subject_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "subject_node_id",
+            "argument": "reaction_issue_comment_node_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reaction_commit_comment_nodes_subject_source",
+      "description": "Resolve a canonical comment node to its REST numeric identity and actual repository. Missing numeric identity fails instead of omitting the subject; CommitComment exposes only legacy databaseId in the pinned schema.",
+      "arguments": [
+        {
+          "name": "reaction_commit_comment_node_id",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact GraphQL CommitComment node identity; resolves the subject and its current repository before retrieving reactions.",
+          "example": "CC_fixture",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "subject_id",
+          "path": [
+            "databaseId"
+          ]
+        },
+        {
+          "name": "subject_node_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository",
+            "nameWithOwner"
+          ]
+        }
+      ],
+      "grain": [
+        "subject_node_id"
+      ],
+      "transport": {
+        "kind": "graphql",
+        "field_path": [
+          "node"
+        ],
+        "field_arguments": {
+          "node": {
+            "id": {
+              "argument": "reaction_commit_comment_node_id"
+            }
+          }
+        },
+        "field_types": {
+          "node": "CommitComment"
+        },
+        "result_path": [],
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "subject_id"
+        ],
+        "row_assertions": [
+          {
+            "column": "subject_node_id",
+            "argument": "reaction_commit_comment_node_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "reactions",
+      "description": "One canonical reaction entity across issue/PR threads, issue conversation comments, pull request review comments, commit comments and releases. Subject database/node IDs remain distinct from issue numbers and repository identity. issue_thread includes pull requests because the Issues reactions endpoint serves both. Reactors are distinct from parent authors, reviewers and publishers; deleted actors remain unknown. Each route exhausts its subject collection; there is no repository-wide route. Parent relationships preserve navigation but are not approved for analytical enrichment, avoiding ambiguous subject roles and loss of reactions whose optional actor is unavailable. Forward issue/PR navigation uses presence of the typed pull_request marker object; nullable marker URLs are never used to guess parent kind.",
+      "grain": [
+        "repository_id",
+        "reaction_id"
+      ],
+      "routes": [
+        {
+          "name": "issue_threads",
+          "select": [
+            "issue_number"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "issue_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Issue or pull-request number for conversation comments; requires repository.",
+              "example": 1
+            },
+            {
+              "name": "reaction_content",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+              "example": "heart",
+              "enum": [
+                "+1",
+                "-1",
+                "laugh",
+                "confused",
+                "heart",
+                "hooray",
+                "rocket",
+                "eyes"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject_kind",
+              "source_stage": "reactions",
+              "source_column": "subject_kind"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "reactions",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "subject_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_node_id"
+            },
+            {
+              "name": "subject_number",
+              "source_stage": "reactions",
+              "source_column": "subject_number"
+            },
+            {
+              "name": "subject_issue_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_node_id"
+            },
+            {
+              "name": "subject_issue_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_id"
+            },
+            {
+              "name": "subject_issue_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_node_id"
+            },
+            {
+              "name": "subject_review_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_review_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_node_id"
+            },
+            {
+              "name": "subject_release_id",
+              "source_stage": "reactions",
+              "source_column": "subject_release_id"
+            },
+            {
+              "name": "reaction_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_id"
+            },
+            {
+              "name": "reaction_node_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_node_id"
+            },
+            {
+              "name": "content",
+              "source_stage": "reactions",
+              "source_column": "content"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "reactions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "reactor",
+              "source_stage": "reactions",
+              "source_column": "reactor"
+            },
+            {
+              "name": "reactor_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_id"
+            },
+            {
+              "name": "reactor_node_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_node_id"
+            },
+            {
+              "name": "reactor_login",
+              "source_stage": "reactions",
+              "source_column": "reactor_login"
+            },
+            {
+              "name": "reactor_type",
+              "source_stage": "reactions",
+              "source_column": "reactor_type"
+            },
+            {
+              "name": "subject_pull_request",
+              "source_stage": "subject",
+              "source_column": "subject_pull_request"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "subject",
+                "entity": "reaction_issue_threads_subject_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "issue_number": {
+                    "parameter": "issue_number"
+                  }
+                }
+              },
+              {
+                "name": "reactions",
+                "entity": "reaction_issue_threads_source",
+                "arguments": {
+                  "issue_number": {
+                    "stage": "subject",
+                    "column": "subject_number"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "reaction_content": {
+                    "parameter": "reaction_content"
+                  },
+                  "reaction_subject_kind": {
+                    "literal": "issue_thread"
+                  },
+                  "reaction_subject_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_number": {
+                    "stage": "subject",
+                    "column": "subject_number"
+                  },
+                  "reaction_subject_issue_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_issue_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_review_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_release_id": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "reactions"
+          },
+          "population": "Every advertised page of reactions on the exact subject, optionally restricted to one supported reaction content. This is not a repository-wide reaction search."
+        },
+        {
+          "name": "issue_comments",
+          "select": [
+            "issue_comment_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "issue_comment_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact numeric issue or PR conversation comment identity; distinct from review-comment ID.",
+              "example": 501,
+              "minimum": 1
+            },
+            {
+              "name": "reaction_content",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+              "example": "heart",
+              "enum": [
+                "+1",
+                "-1",
+                "laugh",
+                "confused",
+                "heart",
+                "hooray",
+                "rocket",
+                "eyes"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject_kind",
+              "source_stage": "reactions",
+              "source_column": "subject_kind"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "reactions",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "subject_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_node_id"
+            },
+            {
+              "name": "subject_number",
+              "source_stage": "reactions",
+              "source_column": "subject_number"
+            },
+            {
+              "name": "subject_issue_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_node_id"
+            },
+            {
+              "name": "subject_issue_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_id"
+            },
+            {
+              "name": "subject_issue_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_node_id"
+            },
+            {
+              "name": "subject_review_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_review_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_node_id"
+            },
+            {
+              "name": "subject_release_id",
+              "source_stage": "reactions",
+              "source_column": "subject_release_id"
+            },
+            {
+              "name": "reaction_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_id"
+            },
+            {
+              "name": "reaction_node_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_node_id"
+            },
+            {
+              "name": "content",
+              "source_stage": "reactions",
+              "source_column": "content"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "reactions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "reactor",
+              "source_stage": "reactions",
+              "source_column": "reactor"
+            },
+            {
+              "name": "reactor_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_id"
+            },
+            {
+              "name": "reactor_node_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_node_id"
+            },
+            {
+              "name": "reactor_login",
+              "source_stage": "reactions",
+              "source_column": "reactor_login"
+            },
+            {
+              "name": "reactor_type",
+              "source_stage": "reactions",
+              "source_column": "reactor_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "subject",
+                "entity": "reaction_issue_comments_subject_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "issue_comment_id": {
+                    "parameter": "issue_comment_id"
+                  }
+                }
+              },
+              {
+                "name": "reactions",
+                "entity": "reaction_issue_comments_source",
+                "arguments": {
+                  "issue_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "reaction_content": {
+                    "parameter": "reaction_content"
+                  },
+                  "reaction_subject_kind": {
+                    "literal": "issue_comment"
+                  },
+                  "reaction_subject_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_number": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_issue_comment_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_review_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_release_id": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "reactions"
+          },
+          "population": "Every advertised page of reactions on the exact subject, optionally restricted to one supported reaction content. This is not a repository-wide reaction search."
+        },
+        {
+          "name": "review_comments",
+          "select": [
+            "review_comment_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "review_comment_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "example": 1,
+              "description": "Stable review comment ID within the selected repository; does not require an invented pull request number.",
+              "minimum": 1
+            },
+            {
+              "name": "reaction_content",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+              "example": "heart",
+              "enum": [
+                "+1",
+                "-1",
+                "laugh",
+                "confused",
+                "heart",
+                "hooray",
+                "rocket",
+                "eyes"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject_kind",
+              "source_stage": "reactions",
+              "source_column": "subject_kind"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "reactions",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "subject_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_node_id"
+            },
+            {
+              "name": "subject_number",
+              "source_stage": "reactions",
+              "source_column": "subject_number"
+            },
+            {
+              "name": "subject_issue_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_node_id"
+            },
+            {
+              "name": "subject_issue_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_id"
+            },
+            {
+              "name": "subject_issue_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_node_id"
+            },
+            {
+              "name": "subject_review_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_review_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_node_id"
+            },
+            {
+              "name": "subject_release_id",
+              "source_stage": "reactions",
+              "source_column": "subject_release_id"
+            },
+            {
+              "name": "reaction_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_id"
+            },
+            {
+              "name": "reaction_node_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_node_id"
+            },
+            {
+              "name": "content",
+              "source_stage": "reactions",
+              "source_column": "content"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "reactions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "reactor",
+              "source_stage": "reactions",
+              "source_column": "reactor"
+            },
+            {
+              "name": "reactor_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_id"
+            },
+            {
+              "name": "reactor_node_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_node_id"
+            },
+            {
+              "name": "reactor_login",
+              "source_stage": "reactions",
+              "source_column": "reactor_login"
+            },
+            {
+              "name": "reactor_type",
+              "source_stage": "reactions",
+              "source_column": "reactor_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "subject",
+                "entity": "reaction_review_comments_subject_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "review_comment_id": {
+                    "parameter": "review_comment_id"
+                  }
+                }
+              },
+              {
+                "name": "reactions",
+                "entity": "reaction_review_comments_source",
+                "arguments": {
+                  "review_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "reaction_content": {
+                    "parameter": "reaction_content"
+                  },
+                  "reaction_subject_kind": {
+                    "literal": "pull_request_review_comment"
+                  },
+                  "reaction_subject_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_number": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_review_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_commit_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_release_id": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "reactions"
+          },
+          "population": "Every advertised page of reactions on the exact subject, optionally restricted to one supported reaction content. This is not a repository-wide reaction search."
+        },
+        {
+          "name": "commit_comments",
+          "select": [
+            "commit_comment_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "commit_comment_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact numeric repository commit-comment identity, distinct from issue and review comment IDs.",
+              "example": 701,
+              "minimum": 1
+            },
+            {
+              "name": "reaction_content",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+              "example": "heart",
+              "enum": [
+                "+1",
+                "-1",
+                "laugh",
+                "confused",
+                "heart",
+                "hooray",
+                "rocket",
+                "eyes"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject_kind",
+              "source_stage": "reactions",
+              "source_column": "subject_kind"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "reactions",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "subject_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_node_id"
+            },
+            {
+              "name": "subject_number",
+              "source_stage": "reactions",
+              "source_column": "subject_number"
+            },
+            {
+              "name": "subject_issue_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_node_id"
+            },
+            {
+              "name": "subject_issue_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_id"
+            },
+            {
+              "name": "subject_issue_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_node_id"
+            },
+            {
+              "name": "subject_review_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_review_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_node_id"
+            },
+            {
+              "name": "subject_release_id",
+              "source_stage": "reactions",
+              "source_column": "subject_release_id"
+            },
+            {
+              "name": "reaction_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_id"
+            },
+            {
+              "name": "reaction_node_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_node_id"
+            },
+            {
+              "name": "content",
+              "source_stage": "reactions",
+              "source_column": "content"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "reactions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "reactor",
+              "source_stage": "reactions",
+              "source_column": "reactor"
+            },
+            {
+              "name": "reactor_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_id"
+            },
+            {
+              "name": "reactor_node_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_node_id"
+            },
+            {
+              "name": "reactor_login",
+              "source_stage": "reactions",
+              "source_column": "reactor_login"
+            },
+            {
+              "name": "reactor_type",
+              "source_stage": "reactions",
+              "source_column": "reactor_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "subject",
+                "entity": "reaction_commit_comments_subject_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "commit_comment_id": {
+                    "parameter": "commit_comment_id"
+                  }
+                }
+              },
+              {
+                "name": "reactions",
+                "entity": "reaction_commit_comments_source",
+                "arguments": {
+                  "commit_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "reaction_content": {
+                    "parameter": "reaction_content"
+                  },
+                  "reaction_subject_kind": {
+                    "literal": "commit_comment"
+                  },
+                  "reaction_subject_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_number": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_review_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_commit_comment_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_release_id": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "reactions"
+          },
+          "population": "Every advertised page of reactions on the exact subject, optionally restricted to one supported reaction content. This is not a repository-wide reaction search."
+        },
+        {
+          "name": "releases",
+          "select": [
+            "release_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+              "example": 1
+            },
+            {
+              "name": "reaction_content",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+              "example": "heart",
+              "enum": [
+                "+1",
+                "-1",
+                "laugh",
+                "confused",
+                "heart",
+                "hooray",
+                "rocket",
+                "eyes"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject_kind",
+              "source_stage": "reactions",
+              "source_column": "subject_kind"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "reactions",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "subject_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_node_id"
+            },
+            {
+              "name": "subject_number",
+              "source_stage": "reactions",
+              "source_column": "subject_number"
+            },
+            {
+              "name": "subject_issue_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_node_id"
+            },
+            {
+              "name": "subject_issue_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_id"
+            },
+            {
+              "name": "subject_issue_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_node_id"
+            },
+            {
+              "name": "subject_review_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_review_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_node_id"
+            },
+            {
+              "name": "subject_release_id",
+              "source_stage": "reactions",
+              "source_column": "subject_release_id"
+            },
+            {
+              "name": "reaction_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_id"
+            },
+            {
+              "name": "reaction_node_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_node_id"
+            },
+            {
+              "name": "content",
+              "source_stage": "reactions",
+              "source_column": "content"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "reactions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "reactor",
+              "source_stage": "reactions",
+              "source_column": "reactor"
+            },
+            {
+              "name": "reactor_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_id"
+            },
+            {
+              "name": "reactor_node_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_node_id"
+            },
+            {
+              "name": "reactor_login",
+              "source_stage": "reactions",
+              "source_column": "reactor_login"
+            },
+            {
+              "name": "reactor_type",
+              "source_stage": "reactions",
+              "source_column": "reactor_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "subject",
+                "entity": "reaction_releases_subject_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "parameter": "release_id"
+                  }
+                }
+              },
+              {
+                "name": "reactions",
+                "entity": "reaction_releases_source",
+                "arguments": {
+                  "release_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "reaction_content": {
+                    "parameter": "reaction_content"
+                  },
+                  "reaction_subject_kind": {
+                    "literal": "release"
+                  },
+                  "reaction_subject_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_number": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_review_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_release_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "reactions"
+          },
+          "population": "Every advertised page of reactions on the exact subject, optionally restricted to one supported reaction content. This is not a repository-wide reaction search."
+        },
+        {
+          "name": "issue_comment_nodes",
+          "select": [
+            "reaction_issue_comment_node_id"
+          ],
+          "arguments": [
+            {
+              "name": "reaction_issue_comment_node_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GraphQL IssueComment node identity; resolves the subject and its current repository before retrieving reactions.",
+              "example": "IC_fixture",
+              "min_length": 1
+            },
+            {
+              "name": "reaction_content",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+              "example": "heart",
+              "enum": [
+                "+1",
+                "-1",
+                "laugh",
+                "confused",
+                "heart",
+                "hooray",
+                "rocket",
+                "eyes"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject_kind",
+              "source_stage": "reactions",
+              "source_column": "subject_kind"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "reactions",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "subject_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_node_id"
+            },
+            {
+              "name": "subject_number",
+              "source_stage": "reactions",
+              "source_column": "subject_number"
+            },
+            {
+              "name": "subject_issue_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_node_id"
+            },
+            {
+              "name": "subject_issue_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_id"
+            },
+            {
+              "name": "subject_issue_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_node_id"
+            },
+            {
+              "name": "subject_review_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_review_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_node_id"
+            },
+            {
+              "name": "subject_release_id",
+              "source_stage": "reactions",
+              "source_column": "subject_release_id"
+            },
+            {
+              "name": "reaction_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_id"
+            },
+            {
+              "name": "reaction_node_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_node_id"
+            },
+            {
+              "name": "content",
+              "source_stage": "reactions",
+              "source_column": "content"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "reactions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "reactor",
+              "source_stage": "reactions",
+              "source_column": "reactor"
+            },
+            {
+              "name": "reactor_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_id"
+            },
+            {
+              "name": "reactor_node_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_node_id"
+            },
+            {
+              "name": "reactor_login",
+              "source_stage": "reactions",
+              "source_column": "reactor_login"
+            },
+            {
+              "name": "reactor_type",
+              "source_stage": "reactions",
+              "source_column": "reactor_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subject",
+                "entity": "reaction_issue_comment_nodes_subject_source",
+                "arguments": {
+                  "reaction_issue_comment_node_id": {
+                    "parameter": "reaction_issue_comment_node_id"
+                  }
+                }
+              },
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "subject",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "reactions",
+                "entity": "reaction_issue_comments_source",
+                "arguments": {
+                  "issue_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "reaction_content": {
+                    "parameter": "reaction_content"
+                  },
+                  "reaction_subject_kind": {
+                    "literal": "issue_comment"
+                  },
+                  "reaction_subject_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_number": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_issue_comment_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_review_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_release_id": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "reactions"
+          },
+          "population": "All pages of reactions on the canonical comment node, after resolving its actual repository and REST ID. Unknown numeric identity is an error, not an empty population."
+        },
+        {
+          "name": "commit_comment_nodes",
+          "select": [
+            "reaction_commit_comment_node_id"
+          ],
+          "arguments": [
+            {
+              "name": "reaction_commit_comment_node_id",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact GraphQL CommitComment node identity; resolves the subject and its current repository before retrieving reactions.",
+              "example": "CC_fixture",
+              "min_length": 1
+            },
+            {
+              "name": "reaction_content",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "description": "Optional exact reaction symbol. Comments and issue threads support +1, -1, laugh, confused, heart, hooray, rocket and eyes; releases support +1, laugh, heart, hooray, rocket and eyes. Omission includes every reaction type.",
+              "example": "heart",
+              "enum": [
+                "+1",
+                "-1",
+                "laugh",
+                "confused",
+                "heart",
+                "hooray",
+                "rocket",
+                "eyes"
+              ]
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "subject_kind",
+              "source_stage": "reactions",
+              "source_column": "subject_kind"
+            },
+            {
+              "name": "subject_id",
+              "source_stage": "reactions",
+              "source_column": "subject_id"
+            },
+            {
+              "name": "subject_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_node_id"
+            },
+            {
+              "name": "subject_number",
+              "source_stage": "reactions",
+              "source_column": "subject_number"
+            },
+            {
+              "name": "subject_issue_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_node_id"
+            },
+            {
+              "name": "subject_issue_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_id"
+            },
+            {
+              "name": "subject_issue_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_issue_comment_node_id"
+            },
+            {
+              "name": "subject_review_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_review_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_id"
+            },
+            {
+              "name": "subject_commit_comment_node_id",
+              "source_stage": "reactions",
+              "source_column": "subject_commit_comment_node_id"
+            },
+            {
+              "name": "subject_release_id",
+              "source_stage": "reactions",
+              "source_column": "subject_release_id"
+            },
+            {
+              "name": "reaction_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_id"
+            },
+            {
+              "name": "reaction_node_id",
+              "source_stage": "reactions",
+              "source_column": "reaction_node_id"
+            },
+            {
+              "name": "content",
+              "source_stage": "reactions",
+              "source_column": "content"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "reactions",
+              "source_column": "created_at"
+            },
+            {
+              "name": "reactor",
+              "source_stage": "reactions",
+              "source_column": "reactor"
+            },
+            {
+              "name": "reactor_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_id"
+            },
+            {
+              "name": "reactor_node_id",
+              "source_stage": "reactions",
+              "source_column": "reactor_node_id"
+            },
+            {
+              "name": "reactor_login",
+              "source_stage": "reactions",
+              "source_column": "reactor_login"
+            },
+            {
+              "name": "reactor_type",
+              "source_stage": "reactions",
+              "source_column": "reactor_type"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "subject",
+                "entity": "reaction_commit_comment_nodes_subject_source",
+                "arguments": {
+                  "reaction_commit_comment_node_id": {
+                    "parameter": "reaction_commit_comment_node_id"
+                  }
+                }
+              },
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "subject",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "reactions",
+                "entity": "reaction_commit_comments_source",
+                "arguments": {
+                  "commit_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "reaction_content": {
+                    "parameter": "reaction_content"
+                  },
+                  "reaction_subject_kind": {
+                    "literal": "commit_comment"
+                  },
+                  "reaction_subject_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_number": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_issue_comment_node_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_review_comment_id": {
+                    "literal": null
+                  },
+                  "reaction_subject_commit_comment_id": {
+                    "stage": "subject",
+                    "column": "subject_id"
+                  },
+                  "reaction_subject_commit_comment_node_id": {
+                    "stage": "subject",
+                    "column": "subject_node_id"
+                  },
+                  "reaction_subject_release_id": {
+                    "literal": null
+                  }
+                }
+              }
+            ],
+            "output_stage": "reactions"
+          },
+          "population": "All pages of reactions on the canonical comment node, after resolving its actual repository and REST ID. Unknown numeric identity is an error, not an empty population."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "subject_kind",
+          "subject_id",
+          "subject_node_id",
+          "subject_number",
+          "subject_issue_node_id",
+          "subject_issue_comment_id",
+          "subject_issue_comment_node_id",
+          "subject_review_comment_id",
+          "subject_commit_comment_id",
+          "subject_commit_comment_node_id",
+          "subject_release_id",
+          "reaction_id",
+          "reaction_node_id",
+          "content",
+          "created_at",
+          "reactor",
+          "reactor_id",
+          "reactor_node_id",
+          "reactor_login",
+          "reactor_type",
+          "subject_pull_request"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "subject_kind",
+          "subject_id",
+          "subject_node_id",
+          "subject_number",
+          "subject_issue_node_id",
+          "subject_issue_comment_id",
+          "subject_issue_comment_node_id",
+          "subject_review_comment_id",
+          "subject_commit_comment_id",
+          "subject_commit_comment_node_id",
+          "subject_release_id",
+          "reaction_id",
+          "reaction_node_id",
+          "content",
+          "created_at",
+          "reactor_id",
+          "reactor_node_id",
+          "reactor_login",
+          "reactor_type"
+        ],
+        "sql_names": {
+          "repository_id": "reactions_repository_id",
+          "repository": "reactions_repository",
+          "subject_kind": "reactions_subject_kind",
+          "subject_id": "reactions_subject_id",
+          "subject_node_id": "reactions_subject_node_id",
+          "subject_number": "reactions_subject_number",
+          "subject_issue_node_id": "reactions_subject_issue_node_id",
+          "subject_issue_comment_id": "reactions_subject_issue_comment_id",
+          "subject_issue_comment_node_id": "reactions_subject_issue_comment_node_id",
+          "subject_review_comment_id": "reactions_subject_review_comment_id",
+          "subject_commit_comment_id": "reactions_subject_commit_comment_id",
+          "subject_commit_comment_node_id": "reactions_subject_commit_comment_node_id",
+          "subject_release_id": "reactions_subject_release_id",
+          "reaction_id": "reactions_reaction_id",
+          "reaction_node_id": "reactions_reaction_node_id",
+          "content": "reactions_content",
+          "created_at": "reactions_created_at",
+          "reactor_id": "reactions_reactor_id",
+          "reactor_node_id": "reactions_reactor_node_id",
+          "reactor_login": "reactions_reactor_login",
+          "reactor_type": "reactions_reactor_type"
+        },
+        "metrics": [
+          {
+            "name": "reaction_count",
+            "kind": "count",
+            "comment": "Current reaction identities attached to the selected subject, not distinct actors, parent records or historical reaction events."
+          },
+          {
+            "name": "reaction_reactor_count",
+            "kind": "count_distinct",
+            "field": "reactor_id",
+            "comment": "Distinct known reacting account identities. Deleted or unavailable reactors are excluded; non-additive across subjects and reaction symbols."
+          },
+          {
+            "name": "reaction_thumbsup_count",
+            "kind": "count",
+            "where": {
+              "field": "content",
+              "op": "eq",
+              "value": "+1"
+            },
+            "comment": "Current +1 reactions only; no sentiment interpretation is assigned to other symbols."
+          },
+          {
+            "name": "reaction_thumbsdown_count",
+            "kind": "count",
+            "where": {
+              "field": "content",
+              "op": "eq",
+              "value": "-1"
+            },
+            "comment": "Current -1 reactions only. Releases do not support this reaction symbol in the pinned API."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "reaction_unknown_reactor_count": {
+              "expression": "COUNT(*) FILTER (WHERE reactions.reactor_id IS NULL)"
+            }
+          },
+          "metric_semantics": {
+            "reaction_unknown_reactor_count": {
+              "dataset": "reactions",
+              "additivity": "additive",
+              "missing": "zero",
+              "comment": "Reaction rows whose reacting account ID is unavailable; these still contribute to reaction_count."
+            }
+          }
+        }
+      },
+      "nullable_route_fields": [
+        "subject_pull_request"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "reactions_to_repositories",
+      "from": "reactions",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reactions_to_issues",
+      "from": "reactions",
+      "to": "issues",
+      "from_columns": [
+        "subject_issue_node_id"
+      ],
+      "to_columns": [
+        "issue_node_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "nodes",
+          "bindings": {
+            "issue_node_id": "subject_issue_node_id"
+          },
+          "when": {
+            "subject_kind": "issue_thread"
+          },
+          "when_null": [
+            "subject_pull_request"
+          ],
+          "when_not_null": [
+            "subject_issue_node_id"
+          ]
+        },
+        {
+          "direction": "reverse",
+          "route": "issue_threads",
+          "bindings": {
+            "repository": "repository_name",
+            "issue_number": "number"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reactions_to_pull_requests",
+      "from": "reactions",
+      "to": "pull_requests",
+      "from_columns": [
+        "repository_id",
+        "subject_number"
+      ],
+      "to_columns": [
+        "repository_id",
+        "pull_request_number"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "pull_request_number": "subject_number"
+          },
+          "when": {
+            "subject_kind": "issue_thread"
+          },
+          "when_not_null": [
+            "subject_pull_request",
+            "subject_number"
+          ]
+        },
+        {
+          "direction": "reverse",
+          "route": "issue_threads",
+          "bindings": {
+            "repository": "repository",
+            "issue_number": "pull_request_number"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reactions_to_issue_comments",
+      "from": "reactions",
+      "to": "issue_comments",
+      "from_columns": [
+        "subject_issue_comment_node_id"
+      ],
+      "to_columns": [
+        "comment_node_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "issue_comment_id": "subject_issue_comment_id"
+          },
+          "when": {
+            "subject_kind": "issue_comment"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "issue_comment_nodes",
+          "bindings": {
+            "reaction_issue_comment_node_id": "comment_node_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reactions_to_commit_comments",
+      "from": "reactions",
+      "to": "commit_comments",
+      "from_columns": [
+        "subject_commit_comment_node_id"
+      ],
+      "to_columns": [
+        "comment_node_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "commit_comment_id": "subject_commit_comment_id"
+          },
+          "when": {
+            "subject_kind": "commit_comment"
+          },
+          "when_not_null": [
+            "subject_commit_comment_id"
+          ]
+        },
+        {
+          "direction": "reverse",
+          "route": "commit_comment_nodes",
+          "bindings": {
+            "reaction_commit_comment_node_id": "comment_node_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reactions_to_review_comments",
+      "from": "reactions",
+      "to": "pull_request_review_comments",
+      "from_columns": [
+        "repository_id",
+        "subject_review_comment_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "review_comment_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "review_comment_id": "subject_review_comment_id"
+          },
+          "when": {
+            "subject_kind": "pull_request_review_comment"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "review_comments",
+          "bindings": {
+            "repository": "repository",
+            "review_comment_id": "review_comment_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reactions_to_releases",
+      "from": "reactions",
+      "to": "releases",
+      "from_columns": [
+        "repository_id",
+        "subject_release_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "release_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "release_id": "subject_release_id"
+          },
+          "when": {
+            "subject_kind": "release"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "releases",
+          "bindings": {
+            "repository": "repository",
+            "release_id": "release_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "reactions_to_reactors",
+      "from": "reactions",
+      "to": "users",
+      "from_columns": [
+        "reactor_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "reactor_login"
+          }
+        }
+      ]
+    }
+  ]
+}

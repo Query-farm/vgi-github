@@ -1,0 +1,6809 @@
+{
+  "entities": [
+    {
+      "name": "actions_workflow_list_source",
+      "description": "actions/list-repo-workflows pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter. A stable reported total_count must match the number of raw records after the final page; inconsistent or truncated listings fail.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "workflow_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "workflow_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "deleted_at",
+          "path": [
+            "deleted_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "badge_url",
+          "path": [
+            "badge_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        }
+      ],
+      "grain": [
+        "workflow_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-repo-workflows",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "workflows"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "actions_workflow_lookup_source",
+      "description": "actions/get-workflow pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "workflow_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "workflow_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "workflow_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "state",
+          "path": [
+            "state"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "deleted_at",
+          "path": [
+            "deleted_at"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "badge_url",
+          "path": [
+            "badge_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        }
+      ],
+      "grain": [
+        "workflow_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-workflow",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "workflow_id": {
+            "argument": "workflow_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "workflow_id",
+            "argument": "workflow_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_workflow_runs_source",
+      "description": "actions/list-workflow-runs pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter. A stable reported total_count must match the number of raw records after the final page; inconsistent or truncated listings fail.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "workflow_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "run_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "run_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "workflow_id",
+          "path": [
+            "workflow_id"
+          ]
+        },
+        {
+          "name": "run_number",
+          "path": [
+            "run_number"
+          ]
+        },
+        {
+          "name": "run_attempt",
+          "path": [
+            "run_attempt"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "display_title",
+          "path": [
+            "display_title"
+          ]
+        },
+        {
+          "name": "event",
+          "path": [
+            "event"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "run_started_at",
+          "path": [
+            "run_started_at"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "triggering_actor_id",
+          "path": [
+            "triggering_actor",
+            "id"
+          ]
+        },
+        {
+          "name": "triggering_actor_login",
+          "path": [
+            "triggering_actor",
+            "login"
+          ]
+        },
+        {
+          "name": "check_suite_id",
+          "path": [
+            "check_suite_id"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "check_suite_node_id",
+          "path": [
+            "check_suite_node_id"
+          ]
+        },
+        {
+          "name": "referenced_workflows",
+          "path": [
+            "referenced_workflows"
+          ]
+        },
+        {
+          "name": "matching_pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "description": "Open pull requests matching the run head SHA/branch; these are not necessarily the pull requests that triggered the run."
+        },
+        {
+          "name": "head_commit",
+          "path": [
+            "head_commit"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "triggering_actor",
+          "path": [
+            "triggering_actor"
+          ]
+        },
+        {
+          "name": "repository_snapshot",
+          "path": [
+            "repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            },
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "default_branch": true
+          }
+        },
+        {
+          "name": "head_repository_snapshot",
+          "path": [
+            "head_repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            },
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "default_branch": true
+          }
+        },
+        {
+          "name": "head_repository_id",
+          "path": [
+            "head_repository",
+            "id"
+          ]
+        },
+        {
+          "name": "head_repository",
+          "path": [
+            "head_repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "reported_head_repository_id",
+          "path": [
+            "head_repository_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "jobs_url",
+          "path": [
+            "jobs_url"
+          ]
+        },
+        {
+          "name": "logs_url",
+          "path": [
+            "logs_url"
+          ]
+        },
+        {
+          "name": "check_suite_url",
+          "path": [
+            "check_suite_url"
+          ]
+        },
+        {
+          "name": "artifacts_url",
+          "path": [
+            "artifacts_url"
+          ]
+        },
+        {
+          "name": "cancel_url",
+          "path": [
+            "cancel_url"
+          ]
+        },
+        {
+          "name": "rerun_url",
+          "path": [
+            "rerun_url"
+          ]
+        },
+        {
+          "name": "previous_attempt_url",
+          "path": [
+            "previous_attempt_url"
+          ]
+        },
+        {
+          "name": "workflow_url",
+          "path": [
+            "workflow_url"
+          ]
+        }
+      ],
+      "grain": [
+        "run_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-workflow-runs",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "workflow_id": {
+            "argument": "workflow_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "workflow_runs"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "workflow_id",
+            "argument": "workflow_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_repository_runs_source",
+      "description": "actions/list-workflow-runs-for-repo pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter. A stable reported total_count must match the number of raw records after the final page; inconsistent or truncated listings fail.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "run_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "run_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "workflow_id",
+          "path": [
+            "workflow_id"
+          ]
+        },
+        {
+          "name": "run_number",
+          "path": [
+            "run_number"
+          ]
+        },
+        {
+          "name": "run_attempt",
+          "path": [
+            "run_attempt"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "display_title",
+          "path": [
+            "display_title"
+          ]
+        },
+        {
+          "name": "event",
+          "path": [
+            "event"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "run_started_at",
+          "path": [
+            "run_started_at"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "triggering_actor_id",
+          "path": [
+            "triggering_actor",
+            "id"
+          ]
+        },
+        {
+          "name": "triggering_actor_login",
+          "path": [
+            "triggering_actor",
+            "login"
+          ]
+        },
+        {
+          "name": "check_suite_id",
+          "path": [
+            "check_suite_id"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "check_suite_node_id",
+          "path": [
+            "check_suite_node_id"
+          ]
+        },
+        {
+          "name": "referenced_workflows",
+          "path": [
+            "referenced_workflows"
+          ]
+        },
+        {
+          "name": "matching_pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "description": "Open pull requests matching the run head SHA/branch; these are not necessarily the pull requests that triggered the run."
+        },
+        {
+          "name": "head_commit",
+          "path": [
+            "head_commit"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "triggering_actor",
+          "path": [
+            "triggering_actor"
+          ]
+        },
+        {
+          "name": "repository_snapshot",
+          "path": [
+            "repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            },
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "default_branch": true
+          }
+        },
+        {
+          "name": "head_repository_snapshot",
+          "path": [
+            "head_repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            },
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "default_branch": true
+          }
+        },
+        {
+          "name": "head_repository_id",
+          "path": [
+            "head_repository",
+            "id"
+          ]
+        },
+        {
+          "name": "head_repository",
+          "path": [
+            "head_repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "reported_head_repository_id",
+          "path": [
+            "head_repository_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "jobs_url",
+          "path": [
+            "jobs_url"
+          ]
+        },
+        {
+          "name": "logs_url",
+          "path": [
+            "logs_url"
+          ]
+        },
+        {
+          "name": "check_suite_url",
+          "path": [
+            "check_suite_url"
+          ]
+        },
+        {
+          "name": "artifacts_url",
+          "path": [
+            "artifacts_url"
+          ]
+        },
+        {
+          "name": "cancel_url",
+          "path": [
+            "cancel_url"
+          ]
+        },
+        {
+          "name": "rerun_url",
+          "path": [
+            "rerun_url"
+          ]
+        },
+        {
+          "name": "previous_attempt_url",
+          "path": [
+            "previous_attempt_url"
+          ]
+        },
+        {
+          "name": "workflow_url",
+          "path": [
+            "workflow_url"
+          ]
+        }
+      ],
+      "grain": [
+        "run_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-workflow-runs-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "workflow_runs"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "actions_run_lookup_source",
+      "description": "actions/get-workflow-run pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Workflow run identity; a rerun retains this identity.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "run_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "run_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "workflow_id",
+          "path": [
+            "workflow_id"
+          ]
+        },
+        {
+          "name": "run_number",
+          "path": [
+            "run_number"
+          ]
+        },
+        {
+          "name": "run_attempt",
+          "path": [
+            "run_attempt"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "display_title",
+          "path": [
+            "display_title"
+          ]
+        },
+        {
+          "name": "event",
+          "path": [
+            "event"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "run_started_at",
+          "path": [
+            "run_started_at"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "triggering_actor_id",
+          "path": [
+            "triggering_actor",
+            "id"
+          ]
+        },
+        {
+          "name": "triggering_actor_login",
+          "path": [
+            "triggering_actor",
+            "login"
+          ]
+        },
+        {
+          "name": "check_suite_id",
+          "path": [
+            "check_suite_id"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "check_suite_node_id",
+          "path": [
+            "check_suite_node_id"
+          ]
+        },
+        {
+          "name": "referenced_workflows",
+          "path": [
+            "referenced_workflows"
+          ]
+        },
+        {
+          "name": "matching_pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "description": "Open pull requests matching the run head SHA/branch; these are not necessarily the pull requests that triggered the run."
+        },
+        {
+          "name": "head_commit",
+          "path": [
+            "head_commit"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "triggering_actor",
+          "path": [
+            "triggering_actor"
+          ]
+        },
+        {
+          "name": "repository_snapshot",
+          "path": [
+            "repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            },
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "default_branch": true
+          }
+        },
+        {
+          "name": "head_repository_snapshot",
+          "path": [
+            "head_repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            },
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "default_branch": true
+          }
+        },
+        {
+          "name": "head_repository_id",
+          "path": [
+            "head_repository",
+            "id"
+          ]
+        },
+        {
+          "name": "head_repository",
+          "path": [
+            "head_repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "reported_head_repository_id",
+          "path": [
+            "head_repository_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "jobs_url",
+          "path": [
+            "jobs_url"
+          ]
+        },
+        {
+          "name": "logs_url",
+          "path": [
+            "logs_url"
+          ]
+        },
+        {
+          "name": "check_suite_url",
+          "path": [
+            "check_suite_url"
+          ]
+        },
+        {
+          "name": "artifacts_url",
+          "path": [
+            "artifacts_url"
+          ]
+        },
+        {
+          "name": "cancel_url",
+          "path": [
+            "cancel_url"
+          ]
+        },
+        {
+          "name": "rerun_url",
+          "path": [
+            "rerun_url"
+          ]
+        },
+        {
+          "name": "previous_attempt_url",
+          "path": [
+            "previous_attempt_url"
+          ]
+        },
+        {
+          "name": "workflow_url",
+          "path": [
+            "workflow_url"
+          ]
+        }
+      ],
+      "grain": [
+        "run_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-workflow-run",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "run_id",
+            "argument": "run_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_attempt_lookup_source",
+      "description": "actions/get-workflow-run-attempt pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Workflow run identity; a rerun retains this identity.",
+          "example": 1,
+          "minimum": 1
+        },
+        {
+          "name": "attempt_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "One explicit attempt number, starting at one; this selector does not enumerate attempts.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "run_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "run_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "workflow_id",
+          "path": [
+            "workflow_id"
+          ]
+        },
+        {
+          "name": "run_number",
+          "path": [
+            "run_number"
+          ]
+        },
+        {
+          "name": "run_attempt",
+          "path": [
+            "run_attempt"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "display_title",
+          "path": [
+            "display_title"
+          ]
+        },
+        {
+          "name": "event",
+          "path": [
+            "event"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "run_started_at",
+          "path": [
+            "run_started_at"
+          ]
+        },
+        {
+          "name": "actor_id",
+          "path": [
+            "actor",
+            "id"
+          ]
+        },
+        {
+          "name": "actor_login",
+          "path": [
+            "actor",
+            "login"
+          ]
+        },
+        {
+          "name": "triggering_actor_id",
+          "path": [
+            "triggering_actor",
+            "id"
+          ]
+        },
+        {
+          "name": "triggering_actor_login",
+          "path": [
+            "triggering_actor",
+            "login"
+          ]
+        },
+        {
+          "name": "check_suite_id",
+          "path": [
+            "check_suite_id"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "attempt_number",
+          "source_argument": "attempt_number"
+        },
+        {
+          "name": "check_suite_node_id",
+          "path": [
+            "check_suite_node_id"
+          ]
+        },
+        {
+          "name": "referenced_workflows",
+          "path": [
+            "referenced_workflows"
+          ]
+        },
+        {
+          "name": "matching_pull_requests",
+          "path": [
+            "pull_requests"
+          ],
+          "description": "Open pull requests matching the run head SHA/branch; these are not necessarily the pull requests that triggered the run."
+        },
+        {
+          "name": "head_commit",
+          "path": [
+            "head_commit"
+          ]
+        },
+        {
+          "name": "actor",
+          "path": [
+            "actor"
+          ]
+        },
+        {
+          "name": "triggering_actor",
+          "path": [
+            "triggering_actor"
+          ]
+        },
+        {
+          "name": "repository_snapshot",
+          "path": [
+            "repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            },
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "default_branch": true
+          }
+        },
+        {
+          "name": "head_repository_snapshot",
+          "path": [
+            "head_repository"
+          ],
+          "selection": {
+            "id": true,
+            "node_id": true,
+            "name": true,
+            "full_name": true,
+            "owner": {
+              "id": true,
+              "login": true,
+              "type": true
+            },
+            "private": true,
+            "html_url": true,
+            "description": true,
+            "fork": true,
+            "default_branch": true
+          }
+        },
+        {
+          "name": "head_repository_id",
+          "path": [
+            "head_repository",
+            "id"
+          ]
+        },
+        {
+          "name": "head_repository",
+          "path": [
+            "head_repository",
+            "full_name"
+          ]
+        },
+        {
+          "name": "reported_head_repository_id",
+          "path": [
+            "head_repository_id"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "jobs_url",
+          "path": [
+            "jobs_url"
+          ]
+        },
+        {
+          "name": "logs_url",
+          "path": [
+            "logs_url"
+          ]
+        },
+        {
+          "name": "check_suite_url",
+          "path": [
+            "check_suite_url"
+          ]
+        },
+        {
+          "name": "artifacts_url",
+          "path": [
+            "artifacts_url"
+          ]
+        },
+        {
+          "name": "cancel_url",
+          "path": [
+            "cancel_url"
+          ]
+        },
+        {
+          "name": "rerun_url",
+          "path": [
+            "rerun_url"
+          ]
+        },
+        {
+          "name": "previous_attempt_url",
+          "path": [
+            "previous_attempt_url"
+          ]
+        },
+        {
+          "name": "workflow_url",
+          "path": [
+            "workflow_url"
+          ]
+        }
+      ],
+      "grain": [
+        "run_id",
+        "attempt_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-workflow-run-attempt",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          },
+          "attempt_number": {
+            "argument": "attempt_number"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "run_id",
+            "argument": "run_id",
+            "comparison": "equal"
+          },
+          {
+            "column": "run_attempt",
+            "argument": "attempt_number",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_run_jobs_source",
+      "description": "actions/list-jobs-for-workflow-run pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter. A stable reported total_count must match the number of raw records after the final page; inconsistent or truncated listings fail.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Workflow run identity; a rerun retains this identity.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "job_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "job_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "run_id",
+          "path": [
+            "run_id"
+          ]
+        },
+        {
+          "name": "run_attempt",
+          "path": [
+            "run_attempt"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "workflow_name",
+          "path": [
+            "workflow_name"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "started_at",
+          "path": [
+            "started_at"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "path": [
+            "completed_at"
+          ]
+        },
+        {
+          "name": "runner_id",
+          "path": [
+            "runner_id"
+          ]
+        },
+        {
+          "name": "runner_name",
+          "path": [
+            "runner_name"
+          ]
+        },
+        {
+          "name": "runner_group_id",
+          "path": [
+            "runner_group_id"
+          ]
+        },
+        {
+          "name": "runner_group_name",
+          "path": [
+            "runner_group_name"
+          ]
+        },
+        {
+          "name": "runner_labels",
+          "path": [
+            "labels"
+          ]
+        },
+        {
+          "name": "steps",
+          "path": [
+            "steps"
+          ],
+          "selection": {
+            "number": true,
+            "name": true,
+            "status": true,
+            "conclusion": true,
+            "started_at": true,
+            "completed_at": true
+          }
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "check_run_url",
+          "path": [
+            "check_run_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "run_url",
+          "path": [
+            "run_url"
+          ]
+        }
+      ],
+      "grain": [
+        "job_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-jobs-for-workflow-run",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "filter": {
+            "literal": "all"
+          }
+        },
+        "result_path": [
+          "jobs"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "run_id",
+            "argument": "run_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_attempt_jobs_source",
+      "description": "actions/list-jobs-for-workflow-run-attempt pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter. A stable reported total_count must match the number of raw records after the final page; inconsistent or truncated listings fail.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Workflow run identity; a rerun retains this identity.",
+          "example": 1,
+          "minimum": 1
+        },
+        {
+          "name": "attempt_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "One explicit attempt number, starting at one; this selector does not enumerate attempts.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "job_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "job_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "run_id",
+          "path": [
+            "run_id"
+          ]
+        },
+        {
+          "name": "run_attempt",
+          "path": [
+            "run_attempt"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "workflow_name",
+          "path": [
+            "workflow_name"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "started_at",
+          "path": [
+            "started_at"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "path": [
+            "completed_at"
+          ]
+        },
+        {
+          "name": "runner_id",
+          "path": [
+            "runner_id"
+          ]
+        },
+        {
+          "name": "runner_name",
+          "path": [
+            "runner_name"
+          ]
+        },
+        {
+          "name": "runner_group_id",
+          "path": [
+            "runner_group_id"
+          ]
+        },
+        {
+          "name": "runner_group_name",
+          "path": [
+            "runner_group_name"
+          ]
+        },
+        {
+          "name": "runner_labels",
+          "path": [
+            "labels"
+          ]
+        },
+        {
+          "name": "steps",
+          "path": [
+            "steps"
+          ],
+          "selection": {
+            "number": true,
+            "name": true,
+            "status": true,
+            "conclusion": true,
+            "started_at": true,
+            "completed_at": true
+          }
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "check_run_url",
+          "path": [
+            "check_run_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "run_url",
+          "path": [
+            "run_url"
+          ]
+        }
+      ],
+      "grain": [
+        "job_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-jobs-for-workflow-run-attempt",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          },
+          "attempt_number": {
+            "argument": "attempt_number"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "jobs"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "run_id",
+            "argument": "run_id",
+            "comparison": "equal"
+          },
+          {
+            "column": "run_attempt",
+            "argument": "attempt_number",
+            "comparison": "equal_if_present"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_job_lookup_source",
+      "description": "actions/get-job-for-workflow-run pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "job_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "One workflow job identity.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "job_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "job_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "run_id",
+          "path": [
+            "run_id"
+          ]
+        },
+        {
+          "name": "run_attempt",
+          "path": [
+            "run_attempt"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "workflow_name",
+          "path": [
+            "workflow_name"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "head_branch"
+          ]
+        },
+        {
+          "name": "status",
+          "path": [
+            "status"
+          ]
+        },
+        {
+          "name": "conclusion",
+          "path": [
+            "conclusion"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "started_at",
+          "path": [
+            "started_at"
+          ]
+        },
+        {
+          "name": "completed_at",
+          "path": [
+            "completed_at"
+          ]
+        },
+        {
+          "name": "runner_id",
+          "path": [
+            "runner_id"
+          ]
+        },
+        {
+          "name": "runner_name",
+          "path": [
+            "runner_name"
+          ]
+        },
+        {
+          "name": "runner_group_id",
+          "path": [
+            "runner_group_id"
+          ]
+        },
+        {
+          "name": "runner_group_name",
+          "path": [
+            "runner_group_name"
+          ]
+        },
+        {
+          "name": "runner_labels",
+          "path": [
+            "labels"
+          ]
+        },
+        {
+          "name": "steps",
+          "path": [
+            "steps"
+          ],
+          "selection": {
+            "number": true,
+            "name": true,
+            "status": true,
+            "conclusion": true,
+            "started_at": true,
+            "completed_at": true
+          }
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "check_run_url",
+          "path": [
+            "check_run_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "run_url",
+          "path": [
+            "run_url"
+          ]
+        }
+      ],
+      "grain": [
+        "job_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-job-for-workflow-run",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "job_id": {
+            "argument": "job_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "job_id",
+            "argument": "job_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "actions_repository_artifacts_source",
+      "description": "actions/list-artifacts-for-repo pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter. A stable reported total_count must match the number of raw records after the final page; inconsistent or truncated listings fail.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "artifact_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "artifact_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "size_in_bytes",
+          "path": [
+            "size_in_bytes"
+          ]
+        },
+        {
+          "name": "expired",
+          "path": [
+            "expired"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "digest",
+          "path": [
+            "digest"
+          ]
+        },
+        {
+          "name": "run_id",
+          "path": [
+            "workflow_run",
+            "id"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "workflow_run",
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "workflow_run",
+            "head_branch"
+          ]
+        },
+        {
+          "name": "archive_download_url",
+          "path": [
+            "archive_download_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "workflow_run",
+          "path": [
+            "workflow_run"
+          ]
+        },
+        {
+          "name": "run_repository_id",
+          "path": [
+            "workflow_run",
+            "repository_id"
+          ]
+        },
+        {
+          "name": "head_repository_id",
+          "path": [
+            "workflow_run",
+            "head_repository_id"
+          ]
+        }
+      ],
+      "grain": [
+        "artifact_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-artifacts-for-repo",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "artifacts"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "actions_run_artifacts_source",
+      "description": "actions/list-workflow-run-artifacts pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter. A stable reported total_count must match the number of raw records after the final page; inconsistent or truncated listings fail.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Workflow run identity; a rerun retains this identity.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "artifact_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "artifact_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "size_in_bytes",
+          "path": [
+            "size_in_bytes"
+          ]
+        },
+        {
+          "name": "expired",
+          "path": [
+            "expired"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "digest",
+          "path": [
+            "digest"
+          ]
+        },
+        {
+          "name": "run_id",
+          "path": [
+            "workflow_run",
+            "id"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "workflow_run",
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "workflow_run",
+            "head_branch"
+          ]
+        },
+        {
+          "name": "archive_download_url",
+          "path": [
+            "archive_download_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "workflow_run",
+          "path": [
+            "workflow_run"
+          ]
+        },
+        {
+          "name": "run_repository_id",
+          "path": [
+            "workflow_run",
+            "repository_id"
+          ]
+        },
+        {
+          "name": "head_repository_id",
+          "path": [
+            "workflow_run",
+            "head_repository_id"
+          ]
+        }
+      ],
+      "grain": [
+        "artifact_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/list-workflow-run-artifacts",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [
+          "artifacts"
+        ],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link",
+          "total_count_path": [
+            "total_count"
+          ]
+        }
+      }
+    },
+    {
+      "name": "actions_artifact_lookup_source",
+      "description": "actions/get-artifact pinned schema source. Full Link pagination for list responses; no implicit latest-attempt job filter.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "artifact_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "One Actions artifact identity.",
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "artifact_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "artifact_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "size_in_bytes",
+          "path": [
+            "size_in_bytes"
+          ]
+        },
+        {
+          "name": "expired",
+          "path": [
+            "expired"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "path": [
+            "expires_at"
+          ]
+        },
+        {
+          "name": "digest",
+          "path": [
+            "digest"
+          ]
+        },
+        {
+          "name": "run_id",
+          "path": [
+            "workflow_run",
+            "id"
+          ]
+        },
+        {
+          "name": "head_sha",
+          "path": [
+            "workflow_run",
+            "head_sha"
+          ]
+        },
+        {
+          "name": "head_branch",
+          "path": [
+            "workflow_run",
+            "head_branch"
+          ]
+        },
+        {
+          "name": "archive_download_url",
+          "path": [
+            "archive_download_url"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "workflow_run",
+          "path": [
+            "workflow_run"
+          ]
+        },
+        {
+          "name": "run_repository_id",
+          "path": [
+            "workflow_run",
+            "repository_id"
+          ]
+        },
+        {
+          "name": "head_repository_id",
+          "path": [
+            "workflow_run",
+            "head_repository_id"
+          ]
+        }
+      ],
+      "grain": [
+        "artifact_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "actions/get-artifact",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "artifact_id": {
+            "argument": "artifact_id"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "artifact_id",
+            "argument": "artifact_id",
+            "comparison": "equal"
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "workflows",
+      "description": "Visible workflow definitions, including inactive workflows returned by GitHub; one row per stable workflow ID.",
+      "grain": [
+        "workflow_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "workflow_id",
+          "workflow_node_id",
+          "name",
+          "path",
+          "state",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "html_url",
+          "badge_url",
+          "url"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "workflow_id",
+          "name",
+          "path",
+          "state",
+          "created_at"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_count",
+            "kind": "count",
+            "comment": "Visible workflow definitions, including inactive workflows returned by GitHub; one row per stable workflow ID."
+          }
+        ],
+        "sql_names": {
+          "repository_id": "workflows_repository_id",
+          "repository": "workflows_repository",
+          "workflow_id": "workflows_workflow_id",
+          "name": "workflows_name",
+          "path": "workflows_path",
+          "state": "workflows_state",
+          "created_at": "workflows_created_at"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "workflow_id",
+              "source_stage": "records",
+              "source_column": "workflow_id"
+            },
+            {
+              "name": "workflow_node_id",
+              "source_stage": "records",
+              "source_column": "workflow_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "deleted_at",
+              "source_stage": "records",
+              "source_column": "deleted_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "badge_url",
+              "source_stage": "records",
+              "source_column": "badge_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_workflow_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible records in the selected repository scope; pagination is exhausted, but deleted or inaccessible records are not a historical archive."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "workflow_id",
+              "source_stage": "records",
+              "source_column": "workflow_id"
+            },
+            {
+              "name": "workflow_node_id",
+              "source_stage": "records",
+              "source_column": "workflow_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "state",
+              "source_stage": "records",
+              "source_column": "state"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "deleted_at",
+              "source_stage": "records",
+              "source_column": "deleted_at"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "badge_url",
+              "source_stage": "records",
+              "source_column": "badge_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "actions_workflow_list_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible records in the selected repository scope; pagination is exhausted, but deleted or inaccessible records are not a historical archive."
+        }
+      ]
+    },
+    {
+      "name": "workflow_runs",
+      "description": "Visible workflow run identities. Reruns update the same run; status, conclusion and run_started_at describe the latest attempt. Actor and triggering actor are distinct roles, not commit authors. Typed referenced workflows retain their own path/ref/SHA; matching_pull_requests are open PRs sharing the head and do not establish trigger causality. Git commit author/committer remain separate from actor and triggering_actor. Repository snapshots describe base/head contexts; API action URLs are metadata and are never followed as commands.",
+      "grain": [
+        "run_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "run_node_id",
+          "workflow_id",
+          "run_number",
+          "run_attempt",
+          "name",
+          "display_title",
+          "event",
+          "status",
+          "conclusion",
+          "head_sha",
+          "head_branch",
+          "path",
+          "created_at",
+          "updated_at",
+          "run_started_at",
+          "actor_id",
+          "actor_login",
+          "triggering_actor_id",
+          "triggering_actor_login",
+          "check_suite_id",
+          "html_url",
+          "created_day",
+          "check_suite_node_id",
+          "referenced_workflows",
+          "matching_pull_requests",
+          "head_commit",
+          "actor",
+          "triggering_actor",
+          "repository_snapshot",
+          "head_repository_snapshot",
+          "head_repository_id",
+          "head_repository",
+          "reported_head_repository_id",
+          "url",
+          "jobs_url",
+          "logs_url",
+          "check_suite_url",
+          "artifacts_url",
+          "cancel_url",
+          "rerun_url",
+          "previous_attempt_url",
+          "workflow_url"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "workflow_id",
+          "run_number",
+          "run_attempt",
+          "event",
+          "status",
+          "conclusion",
+          "head_sha",
+          "head_branch",
+          "created_at",
+          "actor_id",
+          "actor_login",
+          "triggering_actor_id",
+          "triggering_actor_login",
+          "created_day"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_run_count",
+            "kind": "count",
+            "comment": "Visible workflow run identities. Reruns update the same run; status, conclusion and run_started_at describe the latest attempt. Actor and triggering actor are distinct roles, not commit authors."
+          },
+          {
+            "name": "workflow_run_success_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "success"
+            },
+            "comment": "Visible workflow run identities. Reruns update the same run; status, conclusion and run_started_at describe the latest attempt. Actor and triggering actor are distinct roles, not commit authors. Counts records whose conclusion equals success; pending or unknown outcomes are excluded."
+          },
+          {
+            "name": "workflow_run_failure_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "failure"
+            },
+            "comment": "Visible workflow run identities. Reruns update the same run; status, conclusion and run_started_at describe the latest attempt. Actor and triggering actor are distinct roles, not commit authors. Counts records whose conclusion equals failure; pending or unknown outcomes are excluded."
+          },
+          {
+            "name": "workflow_run_cancelled_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "cancelled"
+            },
+            "comment": "Visible workflow run identities. Reruns update the same run; status, conclusion and run_started_at describe the latest attempt. Actor and triggering actor are distinct roles, not commit authors. Counts records whose conclusion equals cancelled; pending or unknown outcomes are excluded."
+          }
+        ],
+        "sql_names": {
+          "repository_id": "workflow_runs_repository_id",
+          "repository": "workflow_runs_repository",
+          "run_id": "workflow_runs_run_id",
+          "workflow_id": "workflow_runs_workflow_id",
+          "run_number": "workflow_runs_run_number",
+          "run_attempt": "workflow_runs_run_attempt",
+          "event": "workflow_runs_event",
+          "status": "workflow_runs_status",
+          "conclusion": "workflow_runs_conclusion",
+          "head_sha": "workflow_runs_head_sha",
+          "head_branch": "workflow_runs_head_branch",
+          "created_at": "workflow_runs_created_at",
+          "actor_id": "workflow_runs_actor_id",
+          "actor_login": "workflow_runs_actor_login",
+          "triggering_actor_id": "workflow_runs_triggering_actor_id",
+          "triggering_actor_login": "workflow_runs_triggering_actor_login",
+          "created_day": "workflow_runs_created_day"
+        },
+        "derived_fields": [
+          {
+            "name": "created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "Gregorian UTC date of the source timestamp; missing timestamps remain NULL."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_node_id",
+              "source_stage": "records",
+              "source_column": "run_node_id"
+            },
+            {
+              "name": "workflow_id",
+              "source_stage": "records",
+              "source_column": "workflow_id"
+            },
+            {
+              "name": "run_number",
+              "source_stage": "records",
+              "source_column": "run_number"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "display_title",
+              "source_stage": "records",
+              "source_column": "display_title"
+            },
+            {
+              "name": "event",
+              "source_stage": "records",
+              "source_column": "event"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "run_started_at",
+              "source_stage": "records",
+              "source_column": "run_started_at"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "records",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "records",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "triggering_actor_id",
+              "source_stage": "records",
+              "source_column": "triggering_actor_id"
+            },
+            {
+              "name": "triggering_actor_login",
+              "source_stage": "records",
+              "source_column": "triggering_actor_login"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "records",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "check_suite_node_id",
+              "source_stage": "records",
+              "source_column": "check_suite_node_id"
+            },
+            {
+              "name": "referenced_workflows",
+              "source_stage": "records",
+              "source_column": "referenced_workflows"
+            },
+            {
+              "name": "matching_pull_requests",
+              "source_stage": "records",
+              "source_column": "matching_pull_requests"
+            },
+            {
+              "name": "head_commit",
+              "source_stage": "records",
+              "source_column": "head_commit"
+            },
+            {
+              "name": "actor",
+              "source_stage": "records",
+              "source_column": "actor"
+            },
+            {
+              "name": "triggering_actor",
+              "source_stage": "records",
+              "source_column": "triggering_actor"
+            },
+            {
+              "name": "repository_snapshot",
+              "source_stage": "records",
+              "source_column": "repository_snapshot"
+            },
+            {
+              "name": "head_repository_snapshot",
+              "source_stage": "records",
+              "source_column": "head_repository_snapshot"
+            },
+            {
+              "name": "head_repository_id",
+              "source_stage": "records",
+              "source_column": "head_repository_id"
+            },
+            {
+              "name": "head_repository",
+              "source_stage": "records",
+              "source_column": "head_repository"
+            },
+            {
+              "name": "reported_head_repository_id",
+              "source_stage": "records",
+              "source_column": "reported_head_repository_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "jobs_url",
+              "source_stage": "records",
+              "source_column": "jobs_url"
+            },
+            {
+              "name": "logs_url",
+              "source_stage": "records",
+              "source_column": "logs_url"
+            },
+            {
+              "name": "check_suite_url",
+              "source_stage": "records",
+              "source_column": "check_suite_url"
+            },
+            {
+              "name": "artifacts_url",
+              "source_stage": "records",
+              "source_column": "artifacts_url"
+            },
+            {
+              "name": "cancel_url",
+              "source_stage": "records",
+              "source_column": "cancel_url"
+            },
+            {
+              "name": "rerun_url",
+              "source_stage": "records",
+              "source_column": "rerun_url"
+            },
+            {
+              "name": "previous_attempt_url",
+              "source_stage": "records",
+              "source_column": "previous_attempt_url"
+            },
+            {
+              "name": "workflow_url",
+              "source_stage": "records",
+              "source_column": "workflow_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible records in the selected repository scope; pagination is exhausted, but deleted or inaccessible records are not a historical archive."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_node_id",
+              "source_stage": "records",
+              "source_column": "run_node_id"
+            },
+            {
+              "name": "workflow_id",
+              "source_stage": "records",
+              "source_column": "workflow_id"
+            },
+            {
+              "name": "run_number",
+              "source_stage": "records",
+              "source_column": "run_number"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "display_title",
+              "source_stage": "records",
+              "source_column": "display_title"
+            },
+            {
+              "name": "event",
+              "source_stage": "records",
+              "source_column": "event"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "run_started_at",
+              "source_stage": "records",
+              "source_column": "run_started_at"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "records",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "records",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "triggering_actor_id",
+              "source_stage": "records",
+              "source_column": "triggering_actor_id"
+            },
+            {
+              "name": "triggering_actor_login",
+              "source_stage": "records",
+              "source_column": "triggering_actor_login"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "records",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "check_suite_node_id",
+              "source_stage": "records",
+              "source_column": "check_suite_node_id"
+            },
+            {
+              "name": "referenced_workflows",
+              "source_stage": "records",
+              "source_column": "referenced_workflows"
+            },
+            {
+              "name": "matching_pull_requests",
+              "source_stage": "records",
+              "source_column": "matching_pull_requests"
+            },
+            {
+              "name": "head_commit",
+              "source_stage": "records",
+              "source_column": "head_commit"
+            },
+            {
+              "name": "actor",
+              "source_stage": "records",
+              "source_column": "actor"
+            },
+            {
+              "name": "triggering_actor",
+              "source_stage": "records",
+              "source_column": "triggering_actor"
+            },
+            {
+              "name": "repository_snapshot",
+              "source_stage": "records",
+              "source_column": "repository_snapshot"
+            },
+            {
+              "name": "head_repository_snapshot",
+              "source_stage": "records",
+              "source_column": "head_repository_snapshot"
+            },
+            {
+              "name": "head_repository_id",
+              "source_stage": "records",
+              "source_column": "head_repository_id"
+            },
+            {
+              "name": "head_repository",
+              "source_stage": "records",
+              "source_column": "head_repository"
+            },
+            {
+              "name": "reported_head_repository_id",
+              "source_stage": "records",
+              "source_column": "reported_head_repository_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "jobs_url",
+              "source_stage": "records",
+              "source_column": "jobs_url"
+            },
+            {
+              "name": "logs_url",
+              "source_stage": "records",
+              "source_column": "logs_url"
+            },
+            {
+              "name": "check_suite_url",
+              "source_stage": "records",
+              "source_column": "check_suite_url"
+            },
+            {
+              "name": "artifacts_url",
+              "source_stage": "records",
+              "source_column": "artifacts_url"
+            },
+            {
+              "name": "cancel_url",
+              "source_stage": "records",
+              "source_column": "cancel_url"
+            },
+            {
+              "name": "rerun_url",
+              "source_stage": "records",
+              "source_column": "rerun_url"
+            },
+            {
+              "name": "previous_attempt_url",
+              "source_stage": "records",
+              "source_column": "previous_attempt_url"
+            },
+            {
+              "name": "workflow_url",
+              "source_stage": "records",
+              "source_column": "workflow_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible records in the selected repository scope; pagination is exhausted, but deleted or inaccessible records are not a historical archive."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_node_id",
+              "source_stage": "records",
+              "source_column": "run_node_id"
+            },
+            {
+              "name": "workflow_id",
+              "source_stage": "records",
+              "source_column": "workflow_id"
+            },
+            {
+              "name": "run_number",
+              "source_stage": "records",
+              "source_column": "run_number"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "display_title",
+              "source_stage": "records",
+              "source_column": "display_title"
+            },
+            {
+              "name": "event",
+              "source_stage": "records",
+              "source_column": "event"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "run_started_at",
+              "source_stage": "records",
+              "source_column": "run_started_at"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "records",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "records",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "triggering_actor_id",
+              "source_stage": "records",
+              "source_column": "triggering_actor_id"
+            },
+            {
+              "name": "triggering_actor_login",
+              "source_stage": "records",
+              "source_column": "triggering_actor_login"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "records",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "check_suite_node_id",
+              "source_stage": "records",
+              "source_column": "check_suite_node_id"
+            },
+            {
+              "name": "referenced_workflows",
+              "source_stage": "records",
+              "source_column": "referenced_workflows"
+            },
+            {
+              "name": "matching_pull_requests",
+              "source_stage": "records",
+              "source_column": "matching_pull_requests"
+            },
+            {
+              "name": "head_commit",
+              "source_stage": "records",
+              "source_column": "head_commit"
+            },
+            {
+              "name": "actor",
+              "source_stage": "records",
+              "source_column": "actor"
+            },
+            {
+              "name": "triggering_actor",
+              "source_stage": "records",
+              "source_column": "triggering_actor"
+            },
+            {
+              "name": "repository_snapshot",
+              "source_stage": "records",
+              "source_column": "repository_snapshot"
+            },
+            {
+              "name": "head_repository_snapshot",
+              "source_stage": "records",
+              "source_column": "head_repository_snapshot"
+            },
+            {
+              "name": "head_repository_id",
+              "source_stage": "records",
+              "source_column": "head_repository_id"
+            },
+            {
+              "name": "head_repository",
+              "source_stage": "records",
+              "source_column": "head_repository"
+            },
+            {
+              "name": "reported_head_repository_id",
+              "source_stage": "records",
+              "source_column": "reported_head_repository_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "jobs_url",
+              "source_stage": "records",
+              "source_column": "jobs_url"
+            },
+            {
+              "name": "logs_url",
+              "source_stage": "records",
+              "source_column": "logs_url"
+            },
+            {
+              "name": "check_suite_url",
+              "source_stage": "records",
+              "source_column": "check_suite_url"
+            },
+            {
+              "name": "artifacts_url",
+              "source_stage": "records",
+              "source_column": "artifacts_url"
+            },
+            {
+              "name": "cancel_url",
+              "source_stage": "records",
+              "source_column": "cancel_url"
+            },
+            {
+              "name": "rerun_url",
+              "source_stage": "records",
+              "source_column": "rerun_url"
+            },
+            {
+              "name": "previous_attempt_url",
+              "source_stage": "records",
+              "source_column": "previous_attempt_url"
+            },
+            {
+              "name": "workflow_url",
+              "source_stage": "records",
+              "source_column": "workflow_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "actions_repository_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible records in the selected repository scope; pagination is exhausted, but deleted or inaccessible records are not a historical archive."
+        }
+      ]
+    },
+    {
+      "name": "workflow_run_attempts",
+      "description": "Only explicitly selected workflow run attempts, keyed by run ID and attempt number; no exhaustive attempt-history claim. Typed referenced workflows retain their own path/ref/SHA; matching_pull_requests are open PRs sharing the head and do not establish trigger causality. Git commit author/committer remain separate from actor and triggering_actor. Repository snapshots describe base/head contexts; API action URLs are metadata and are never followed as commands.",
+      "grain": [
+        "run_id",
+        "attempt_number"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "run_node_id",
+          "workflow_id",
+          "run_number",
+          "run_attempt",
+          "name",
+          "display_title",
+          "event",
+          "status",
+          "conclusion",
+          "head_sha",
+          "head_branch",
+          "path",
+          "created_at",
+          "updated_at",
+          "run_started_at",
+          "actor_id",
+          "actor_login",
+          "triggering_actor_id",
+          "triggering_actor_login",
+          "check_suite_id",
+          "html_url",
+          "attempt_number",
+          "check_suite_node_id",
+          "referenced_workflows",
+          "matching_pull_requests",
+          "head_commit",
+          "actor",
+          "triggering_actor",
+          "repository_snapshot",
+          "head_repository_snapshot",
+          "head_repository_id",
+          "head_repository",
+          "reported_head_repository_id",
+          "url",
+          "jobs_url",
+          "logs_url",
+          "check_suite_url",
+          "artifacts_url",
+          "cancel_url",
+          "rerun_url",
+          "previous_attempt_url",
+          "workflow_url"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "workflow_id",
+          "attempt_number",
+          "event",
+          "status",
+          "conclusion",
+          "head_sha",
+          "head_branch",
+          "actor_id",
+          "actor_login",
+          "triggering_actor_id",
+          "triggering_actor_login"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_run_attempt_count",
+            "kind": "count",
+            "comment": "Only explicitly selected workflow run attempts, keyed by run ID and attempt number; no exhaustive attempt-history claim."
+          },
+          {
+            "name": "workflow_run_attempt_success_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "success"
+            },
+            "comment": "Only explicitly selected workflow run attempts, keyed by run ID and attempt number; no exhaustive attempt-history claim. Counts records whose conclusion equals success; pending or unknown outcomes are excluded."
+          },
+          {
+            "name": "workflow_run_attempt_failure_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "failure"
+            },
+            "comment": "Only explicitly selected workflow run attempts, keyed by run ID and attempt number; no exhaustive attempt-history claim. Counts records whose conclusion equals failure; pending or unknown outcomes are excluded."
+          },
+          {
+            "name": "workflow_run_attempt_cancelled_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "cancelled"
+            },
+            "comment": "Only explicitly selected workflow run attempts, keyed by run ID and attempt number; no exhaustive attempt-history claim. Counts records whose conclusion equals cancelled; pending or unknown outcomes are excluded."
+          }
+        ],
+        "sql_names": {
+          "repository_id": "workflow_run_attempts_repository_id",
+          "repository": "workflow_run_attempts_repository",
+          "run_id": "workflow_run_attempts_run_id",
+          "workflow_id": "workflow_run_attempts_workflow_id",
+          "attempt_number": "workflow_run_attempts_attempt_number",
+          "event": "workflow_run_attempts_event",
+          "status": "workflow_run_attempts_status",
+          "conclusion": "workflow_run_attempts_conclusion",
+          "head_sha": "workflow_run_attempts_head_sha",
+          "head_branch": "workflow_run_attempts_head_branch",
+          "actor_id": "workflow_run_attempts_actor_id",
+          "actor_login": "workflow_run_attempts_actor_login",
+          "triggering_actor_id": "workflow_run_attempts_triggering_actor_id",
+          "triggering_actor_login": "workflow_run_attempts_triggering_actor_login"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "attempt_number"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            },
+            {
+              "name": "attempt_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One explicit attempt number, starting at one; this selector does not enumerate attempts.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_node_id",
+              "source_stage": "records",
+              "source_column": "run_node_id"
+            },
+            {
+              "name": "workflow_id",
+              "source_stage": "records",
+              "source_column": "workflow_id"
+            },
+            {
+              "name": "run_number",
+              "source_stage": "records",
+              "source_column": "run_number"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "display_title",
+              "source_stage": "records",
+              "source_column": "display_title"
+            },
+            {
+              "name": "event",
+              "source_stage": "records",
+              "source_column": "event"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "path",
+              "source_stage": "records",
+              "source_column": "path"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "run_started_at",
+              "source_stage": "records",
+              "source_column": "run_started_at"
+            },
+            {
+              "name": "actor_id",
+              "source_stage": "records",
+              "source_column": "actor_id"
+            },
+            {
+              "name": "actor_login",
+              "source_stage": "records",
+              "source_column": "actor_login"
+            },
+            {
+              "name": "triggering_actor_id",
+              "source_stage": "records",
+              "source_column": "triggering_actor_id"
+            },
+            {
+              "name": "triggering_actor_login",
+              "source_stage": "records",
+              "source_column": "triggering_actor_login"
+            },
+            {
+              "name": "check_suite_id",
+              "source_stage": "records",
+              "source_column": "check_suite_id"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "attempt_number",
+              "source_stage": "records",
+              "source_column": "attempt_number"
+            },
+            {
+              "name": "check_suite_node_id",
+              "source_stage": "records",
+              "source_column": "check_suite_node_id"
+            },
+            {
+              "name": "referenced_workflows",
+              "source_stage": "records",
+              "source_column": "referenced_workflows"
+            },
+            {
+              "name": "matching_pull_requests",
+              "source_stage": "records",
+              "source_column": "matching_pull_requests"
+            },
+            {
+              "name": "head_commit",
+              "source_stage": "records",
+              "source_column": "head_commit"
+            },
+            {
+              "name": "actor",
+              "source_stage": "records",
+              "source_column": "actor"
+            },
+            {
+              "name": "triggering_actor",
+              "source_stage": "records",
+              "source_column": "triggering_actor"
+            },
+            {
+              "name": "repository_snapshot",
+              "source_stage": "records",
+              "source_column": "repository_snapshot"
+            },
+            {
+              "name": "head_repository_snapshot",
+              "source_stage": "records",
+              "source_column": "head_repository_snapshot"
+            },
+            {
+              "name": "head_repository_id",
+              "source_stage": "records",
+              "source_column": "head_repository_id"
+            },
+            {
+              "name": "head_repository",
+              "source_stage": "records",
+              "source_column": "head_repository"
+            },
+            {
+              "name": "reported_head_repository_id",
+              "source_stage": "records",
+              "source_column": "reported_head_repository_id"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "jobs_url",
+              "source_stage": "records",
+              "source_column": "jobs_url"
+            },
+            {
+              "name": "logs_url",
+              "source_stage": "records",
+              "source_column": "logs_url"
+            },
+            {
+              "name": "check_suite_url",
+              "source_stage": "records",
+              "source_column": "check_suite_url"
+            },
+            {
+              "name": "artifacts_url",
+              "source_stage": "records",
+              "source_column": "artifacts_url"
+            },
+            {
+              "name": "cancel_url",
+              "source_stage": "records",
+              "source_column": "cancel_url"
+            },
+            {
+              "name": "rerun_url",
+              "source_stage": "records",
+              "source_column": "rerun_url"
+            },
+            {
+              "name": "previous_attempt_url",
+              "source_stage": "records",
+              "source_column": "previous_attempt_url"
+            },
+            {
+              "name": "workflow_url",
+              "source_stage": "records",
+              "source_column": "workflow_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_attempt_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  },
+                  "attempt_number": {
+                    "parameter": "attempt_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "One explicitly requested attempt. This route does not enumerate all historical attempts; omitted attempts are not zero observations."
+        }
+      ]
+    },
+    {
+      "name": "workflow_jobs",
+      "description": "Visible job executions at stable job-ID grain. Rerun jobs count separately; no default latest-attempt filter. Steps and runner labels are embedded lists, not job multipliers. Analytical parent enrichment follows job to run to workflow. Attempt identity remains an explicit job field and exact-attempt retrieval route; it does not implicitly join the exact-selector-only attempt dataset.",
+      "grain": [
+        "job_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "job_id",
+          "job_node_id",
+          "run_id",
+          "run_attempt",
+          "name",
+          "workflow_name",
+          "head_sha",
+          "head_branch",
+          "status",
+          "conclusion",
+          "created_at",
+          "started_at",
+          "completed_at",
+          "runner_id",
+          "runner_name",
+          "runner_group_id",
+          "runner_group_name",
+          "runner_labels",
+          "steps",
+          "html_url",
+          "check_run_url",
+          "execution_hours",
+          "created_day",
+          "url",
+          "run_url"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "job_id",
+          "run_id",
+          "run_attempt",
+          "name",
+          "workflow_name",
+          "status",
+          "conclusion",
+          "head_sha",
+          "head_branch",
+          "runner_id",
+          "runner_name",
+          "created_at",
+          "execution_hours",
+          "created_day"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_job_count",
+            "kind": "count",
+            "comment": "Visible job executions at stable job-ID grain. Rerun jobs count separately; no default latest-attempt filter. Steps and runner labels are embedded lists, not job multipliers."
+          },
+          {
+            "name": "workflow_job_success_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "success"
+            },
+            "comment": "Visible job executions at stable job-ID grain. Rerun jobs count separately; no default latest-attempt filter. Steps and runner labels are embedded lists, not job multipliers. Counts records whose conclusion equals success; pending or unknown outcomes are excluded."
+          },
+          {
+            "name": "workflow_job_failure_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "failure"
+            },
+            "comment": "Visible job executions at stable job-ID grain. Rerun jobs count separately; no default latest-attempt filter. Steps and runner labels are embedded lists, not job multipliers. Counts records whose conclusion equals failure; pending or unknown outcomes are excluded."
+          },
+          {
+            "name": "workflow_job_cancelled_count",
+            "kind": "count",
+            "where": {
+              "field": "conclusion",
+              "op": "eq",
+              "value": "cancelled"
+            },
+            "comment": "Visible job executions at stable job-ID grain. Rerun jobs count separately; no default latest-attempt filter. Steps and runner labels are embedded lists, not job multipliers. Counts records whose conclusion equals cancelled; pending or unknown outcomes are excluded."
+          },
+          {
+            "name": "median_workflow_job_execution_hours",
+            "kind": "median",
+            "field": "execution_hours",
+            "where": {
+              "field": "completed_at",
+              "op": "is_not_null"
+            },
+            "comment": "Median elapsed job execution hours for completed, timestamped jobs; each job contributes once, including prior attempts."
+          }
+        ],
+        "sql_names": {
+          "repository_id": "workflow_jobs_repository_id",
+          "repository": "workflow_jobs_repository",
+          "job_id": "workflow_jobs_job_id",
+          "run_id": "workflow_jobs_run_id",
+          "run_attempt": "workflow_jobs_run_attempt",
+          "name": "workflow_jobs_name",
+          "workflow_name": "workflow_jobs_workflow_name",
+          "status": "workflow_jobs_status",
+          "conclusion": "workflow_jobs_conclusion",
+          "head_sha": "workflow_jobs_head_sha",
+          "head_branch": "workflow_jobs_head_branch",
+          "runner_id": "workflow_jobs_runner_id",
+          "runner_name": "workflow_jobs_runner_name",
+          "created_at": "workflow_jobs_created_at",
+          "execution_hours": "workflow_jobs_execution_hours",
+          "created_day": "workflow_jobs_created_day"
+        },
+        "derived_fields": [
+          {
+            "name": "execution_hours",
+            "kind": "elapsed",
+            "start": "started_at",
+            "end": "completed_at",
+            "unit": "h",
+            "comment": "Elapsed UTC job execution time; unfinished jobs retain NULL. This is not runner billing time."
+          },
+          {
+            "name": "created_day",
+            "kind": "date",
+            "source": "created_at",
+            "timezone": "UTC",
+            "comment": "Gregorian UTC date of the source timestamp; missing timestamps remain NULL."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "job_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "job_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One workflow job identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "job_node_id",
+              "source_stage": "records",
+              "source_column": "job_node_id"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "workflow_name",
+              "source_stage": "records",
+              "source_column": "workflow_name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "records",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "records",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "runner_id",
+              "source_stage": "records",
+              "source_column": "runner_id"
+            },
+            {
+              "name": "runner_name",
+              "source_stage": "records",
+              "source_column": "runner_name"
+            },
+            {
+              "name": "runner_group_id",
+              "source_stage": "records",
+              "source_column": "runner_group_id"
+            },
+            {
+              "name": "runner_group_name",
+              "source_stage": "records",
+              "source_column": "runner_group_name"
+            },
+            {
+              "name": "runner_labels",
+              "source_stage": "records",
+              "source_column": "runner_labels"
+            },
+            {
+              "name": "steps",
+              "source_stage": "records",
+              "source_column": "steps"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "check_run_url",
+              "source_stage": "records",
+              "source_column": "check_run_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "run_url",
+              "source_stage": "records",
+              "source_column": "run_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_job_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "job_id": {
+                    "parameter": "job_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible records in the selected repository scope; pagination is exhausted, but deleted or inaccessible records are not a historical archive."
+        },
+        {
+          "name": "attempts",
+          "select": [
+            "attempt_number"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            },
+            {
+              "name": "attempt_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One explicit attempt number, starting at one; this selector does not enumerate attempts.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "job_node_id",
+              "source_stage": "records",
+              "source_column": "job_node_id"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "workflow_name",
+              "source_stage": "records",
+              "source_column": "workflow_name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "records",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "records",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "runner_id",
+              "source_stage": "records",
+              "source_column": "runner_id"
+            },
+            {
+              "name": "runner_name",
+              "source_stage": "records",
+              "source_column": "runner_name"
+            },
+            {
+              "name": "runner_group_id",
+              "source_stage": "records",
+              "source_column": "runner_group_id"
+            },
+            {
+              "name": "runner_group_name",
+              "source_stage": "records",
+              "source_column": "runner_group_name"
+            },
+            {
+              "name": "runner_labels",
+              "source_stage": "records",
+              "source_column": "runner_labels"
+            },
+            {
+              "name": "steps",
+              "source_stage": "records",
+              "source_column": "steps"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "check_run_url",
+              "source_stage": "records",
+              "source_column": "check_run_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "run_url",
+              "source_stage": "records",
+              "source_column": "run_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_attempt_jobs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  },
+                  "attempt_number": {
+                    "parameter": "attempt_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible jobs in the one requested run attempt."
+        },
+        {
+          "name": "runs",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "job_node_id",
+              "source_stage": "records",
+              "source_column": "job_node_id"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "workflow_name",
+              "source_stage": "records",
+              "source_column": "workflow_name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "records",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "records",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "runner_id",
+              "source_stage": "records",
+              "source_column": "runner_id"
+            },
+            {
+              "name": "runner_name",
+              "source_stage": "records",
+              "source_column": "runner_name"
+            },
+            {
+              "name": "runner_group_id",
+              "source_stage": "records",
+              "source_column": "runner_group_id"
+            },
+            {
+              "name": "runner_group_name",
+              "source_stage": "records",
+              "source_column": "runner_group_name"
+            },
+            {
+              "name": "runner_labels",
+              "source_stage": "records",
+              "source_column": "runner_labels"
+            },
+            {
+              "name": "steps",
+              "source_stage": "records",
+              "source_column": "steps"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "check_run_url",
+              "source_stage": "records",
+              "source_column": "check_run_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "run_url",
+              "source_stage": "records",
+              "source_column": "run_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_jobs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible jobs from all attempts of the selected run, using filter=all, including jobs from failed and superseded attempts."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "job_node_id",
+              "source_stage": "records",
+              "source_column": "job_node_id"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "workflow_name",
+              "source_stage": "records",
+              "source_column": "workflow_name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "records",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "records",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "runner_id",
+              "source_stage": "records",
+              "source_column": "runner_id"
+            },
+            {
+              "name": "runner_name",
+              "source_stage": "records",
+              "source_column": "runner_name"
+            },
+            {
+              "name": "runner_group_id",
+              "source_stage": "records",
+              "source_column": "runner_group_id"
+            },
+            {
+              "name": "runner_group_name",
+              "source_stage": "records",
+              "source_column": "runner_group_name"
+            },
+            {
+              "name": "runner_labels",
+              "source_stage": "records",
+              "source_column": "runner_labels"
+            },
+            {
+              "name": "steps",
+              "source_stage": "records",
+              "source_column": "steps"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "check_run_url",
+              "source_stage": "records",
+              "source_column": "check_run_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "run_url",
+              "source_stage": "records",
+              "source_column": "run_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_jobs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible jobs across every returned run and all of its attempts for the selected workflow."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "job_node_id",
+              "source_stage": "records",
+              "source_column": "job_node_id"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "run_attempt",
+              "source_stage": "records",
+              "source_column": "run_attempt"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "workflow_name",
+              "source_stage": "records",
+              "source_column": "workflow_name"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "status",
+              "source_stage": "records",
+              "source_column": "status"
+            },
+            {
+              "name": "conclusion",
+              "source_stage": "records",
+              "source_column": "conclusion"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "started_at",
+              "source_stage": "records",
+              "source_column": "started_at"
+            },
+            {
+              "name": "completed_at",
+              "source_stage": "records",
+              "source_column": "completed_at"
+            },
+            {
+              "name": "runner_id",
+              "source_stage": "records",
+              "source_column": "runner_id"
+            },
+            {
+              "name": "runner_name",
+              "source_stage": "records",
+              "source_column": "runner_name"
+            },
+            {
+              "name": "runner_group_id",
+              "source_stage": "records",
+              "source_column": "runner_group_id"
+            },
+            {
+              "name": "runner_group_name",
+              "source_stage": "records",
+              "source_column": "runner_group_name"
+            },
+            {
+              "name": "runner_labels",
+              "source_stage": "records",
+              "source_column": "runner_labels"
+            },
+            {
+              "name": "steps",
+              "source_stage": "records",
+              "source_column": "steps"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "check_run_url",
+              "source_stage": "records",
+              "source_column": "check_run_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "run_url",
+              "source_stage": "records",
+              "source_column": "run_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "runs",
+                "entity": "actions_repository_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_jobs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible jobs across every returned run and all of its attempts in the repository selection."
+        }
+      ]
+    },
+    {
+      "name": "workflow_artifacts",
+      "description": "Visible Actions artifact metadata, distinct from release assets. Expired artifacts remain if returned; deleted artifacts are absent. Artifact names are not identities and run linkage may be NULL. Repository selection includes artifacts without discoverable runs; workflow and run selections follow their listing endpoints. No attempt-specific artifact population is claimed. Analytical enrichment follows the known repository directly, preserving artifacts with no discoverable run. Run identity and bidirectional run retrieval remain explicit, but artifact aggregation by attributes from the run or workflow entities is not approved because it would introduce a competing analytical path and can lose orphan artifacts. Nullable workflow_run metadata includes its actual repository/head-repository IDs, without assigning a missing run or fork to the requested repository by assumption.",
+      "grain": [
+        "artifact_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "artifact_id",
+          "artifact_node_id",
+          "name",
+          "size_in_bytes",
+          "expired",
+          "created_at",
+          "updated_at",
+          "expires_at",
+          "digest",
+          "run_id",
+          "head_sha",
+          "head_branch",
+          "archive_download_url",
+          "url",
+          "workflow_run",
+          "run_repository_id",
+          "head_repository_id"
+        ],
+        "dimensions": [
+          "repository_id",
+          "repository",
+          "artifact_id",
+          "name",
+          "expired",
+          "run_id",
+          "head_sha",
+          "head_branch",
+          "created_at",
+          "expires_at"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_artifact_count",
+            "kind": "count",
+            "comment": "Visible Actions artifact metadata, distinct from release assets. Expired artifacts remain if returned; deleted artifacts are absent. Artifact names are not identities and run linkage may be NULL. Repository selection includes artifacts without discoverable runs; workflow and run selections follow their listing endpoints. No attempt-specific artifact population is claimed. Analytical enrichment follows the known repository directly, preserving artifacts with no discoverable run. Run identity and bidirectional run retrieval remain explicit, but artifact aggregation by attributes from the run or workflow entities is not approved because it would introduce a competing analytical path and can lose orphan artifacts."
+          }
+        ],
+        "sql_names": {
+          "repository_id": "workflow_artifacts_repository_id",
+          "repository": "workflow_artifacts_repository",
+          "artifact_id": "workflow_artifacts_artifact_id",
+          "name": "workflow_artifacts_name",
+          "expired": "workflow_artifacts_expired",
+          "run_id": "workflow_artifacts_run_id",
+          "head_sha": "workflow_artifacts_head_sha",
+          "head_branch": "workflow_artifacts_head_branch",
+          "created_at": "workflow_artifacts_created_at",
+          "expires_at": "workflow_artifacts_expires_at"
+        },
+        "crossfield": {
+          "metrics": {
+            "workflow_artifact_bytes": {
+              "expression": "SUM(workflow_artifacts.size_in_bytes)",
+              "type": "HUGEINT"
+            }
+          },
+          "metric_semantics": {
+            "workflow_artifact_bytes": {
+              "dataset": "workflow_artifacts",
+              "additivity": "additive",
+              "missing": "null",
+              "comment": "Sum of reported bytes for selected visible artifacts, including expired artifacts if returned; not retained storage usage or billing.",
+              "unit": "bytes"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "artifact_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "artifact_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One Actions artifact identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "artifact_id",
+              "source_stage": "records",
+              "source_column": "artifact_id"
+            },
+            {
+              "name": "artifact_node_id",
+              "source_stage": "records",
+              "source_column": "artifact_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "size_in_bytes",
+              "source_stage": "records",
+              "source_column": "size_in_bytes"
+            },
+            {
+              "name": "expired",
+              "source_stage": "records",
+              "source_column": "expired"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "digest",
+              "source_stage": "records",
+              "source_column": "digest"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "archive_download_url",
+              "source_stage": "records",
+              "source_column": "archive_download_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "workflow_run",
+              "source_stage": "records",
+              "source_column": "workflow_run"
+            },
+            {
+              "name": "run_repository_id",
+              "source_stage": "records",
+              "source_column": "run_repository_id"
+            },
+            {
+              "name": "head_repository_id",
+              "source_stage": "records",
+              "source_column": "head_repository_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_artifact_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "artifact_id": {
+                    "parameter": "artifact_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Visible records in the selected repository scope; pagination is exhausted, but deleted or inaccessible records are not a historical archive."
+        },
+        {
+          "name": "runs",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "artifact_id",
+              "source_stage": "records",
+              "source_column": "artifact_id"
+            },
+            {
+              "name": "artifact_node_id",
+              "source_stage": "records",
+              "source_column": "artifact_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "size_in_bytes",
+              "source_stage": "records",
+              "source_column": "size_in_bytes"
+            },
+            {
+              "name": "expired",
+              "source_stage": "records",
+              "source_column": "expired"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "digest",
+              "source_stage": "records",
+              "source_column": "digest"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "archive_download_url",
+              "source_stage": "records",
+              "source_column": "archive_download_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "workflow_run",
+              "source_stage": "records",
+              "source_column": "workflow_run"
+            },
+            {
+              "name": "run_repository_id",
+              "source_stage": "records",
+              "source_column": "run_repository_id"
+            },
+            {
+              "name": "head_repository_id",
+              "source_stage": "records",
+              "source_column": "head_repository_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_artifacts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Artifacts returned by the selected run endpoint, including expired artifacts still returned. Unknown run metadata remains NULL; no attempt filter is applied because GitHub does not expose attempt-specific artifact listing."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "artifact_id",
+              "source_stage": "records",
+              "source_column": "artifact_id"
+            },
+            {
+              "name": "artifact_node_id",
+              "source_stage": "records",
+              "source_column": "artifact_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "size_in_bytes",
+              "source_stage": "records",
+              "source_column": "size_in_bytes"
+            },
+            {
+              "name": "expired",
+              "source_stage": "records",
+              "source_column": "expired"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "digest",
+              "source_stage": "records",
+              "source_column": "digest"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "archive_download_url",
+              "source_stage": "records",
+              "source_column": "archive_download_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "workflow_run",
+              "source_stage": "records",
+              "source_column": "workflow_run"
+            },
+            {
+              "name": "run_repository_id",
+              "source_stage": "records",
+              "source_column": "run_repository_id"
+            },
+            {
+              "name": "head_repository_id",
+              "source_stage": "records",
+              "source_column": "head_repository_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_artifacts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Artifacts returned for all visible runs of the selected workflow, including expired artifacts still returned. Artifact metadata with unknown run identity stays NULL; run/workflow selection follows endpoint association and cannot include repository artifacts with no discoverable run."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "artifact_id",
+              "source_stage": "records",
+              "source_column": "artifact_id"
+            },
+            {
+              "name": "artifact_node_id",
+              "source_stage": "records",
+              "source_column": "artifact_node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "size_in_bytes",
+              "source_stage": "records",
+              "source_column": "size_in_bytes"
+            },
+            {
+              "name": "expired",
+              "source_stage": "records",
+              "source_column": "expired"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "expires_at",
+              "source_stage": "records",
+              "source_column": "expires_at"
+            },
+            {
+              "name": "digest",
+              "source_stage": "records",
+              "source_column": "digest"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "head_sha",
+              "source_stage": "records",
+              "source_column": "head_sha"
+            },
+            {
+              "name": "head_branch",
+              "source_stage": "records",
+              "source_column": "head_branch"
+            },
+            {
+              "name": "archive_download_url",
+              "source_stage": "records",
+              "source_column": "archive_download_url"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "workflow_run",
+              "source_stage": "records",
+              "source_column": "workflow_run"
+            },
+            {
+              "name": "run_repository_id",
+              "source_stage": "records",
+              "source_column": "run_repository_id"
+            },
+            {
+              "name": "head_repository_id",
+              "source_stage": "records",
+              "source_column": "head_repository_id"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "actions_repository_artifacts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "All visible repository artifact identities, including expired artifacts still returned and metadata with missing or unknown run links. Artifact names are not identities."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "workflows_to_repositories",
+      "from": "workflows",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_runs_to_repositories",
+      "from": "workflow_runs",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "workflow_run_attempts_to_repositories",
+      "from": "workflow_run_attempts",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "workflow_jobs_to_repositories",
+      "from": "workflow_jobs",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "workflow_artifacts_to_repositories",
+      "from": "workflow_artifacts",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_runs_to_workflows",
+      "from": "workflow_runs",
+      "to": "workflows",
+      "from_columns": [
+        "workflow_id"
+      ],
+      "to_columns": [
+        "workflow_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "workflow_id": "workflow_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "workflows",
+          "bindings": {
+            "repository": "repository",
+            "workflow_id": "workflow_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_attempts_to_runs",
+      "from": "workflow_run_attempts",
+      "to": "workflow_runs",
+      "from_columns": [
+        "run_id"
+      ],
+      "to_columns": [
+        "run_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_jobs_to_runs",
+      "from": "workflow_jobs",
+      "to": "workflow_runs",
+      "from_columns": [
+        "run_id"
+      ],
+      "to_columns": [
+        "run_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "runs",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_jobs_to_attempts",
+      "from": "workflow_jobs",
+      "to": "workflow_run_attempts",
+      "from_columns": [
+        "run_id",
+        "run_attempt"
+      ],
+      "to_columns": [
+        "run_id",
+        "attempt_number"
+      ],
+      "optional": true,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id",
+            "attempt_number": "run_attempt"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "attempts",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id",
+            "attempt_number": "attempt_number"
+          }
+        }
+      ],
+      "analytical": false
+    },
+    {
+      "name": "workflow_artifacts_to_runs",
+      "from": "workflow_artifacts",
+      "to": "workflow_runs",
+      "from_columns": [
+        "run_id"
+      ],
+      "to_columns": [
+        "run_id"
+      ],
+      "optional": true,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "runs",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        }
+      ],
+      "analytical": false
+    }
+  ],
+  "crossfield": {
+    "invocations": {
+      "derived_datasets": {
+        "workflow_job_steps": {
+          "id": "github/derived/workflow_job_steps",
+          "from": "workflow_jobs",
+          "dataset": {
+            "name": "workflow_job_steps",
+            "id": "github/analysis/workflow_job_steps",
+            "grain": [
+              "job_id",
+              "number"
+            ],
+            "fields": {
+              "repository_id": {
+                "source_column": "repository_id",
+                "dimension": true
+              },
+              "repository": {
+                "source_column": "repository",
+                "dimension": true
+              },
+              "job_id": {
+                "source_column": "job_id",
+                "dimension": true
+              },
+              "run_id": {
+                "source_column": "run_id",
+                "dimension": true
+              },
+              "run_attempt": {
+                "source_column": "run_attempt",
+                "dimension": true
+              },
+              "number": {
+                "source_column": "number",
+                "dimension": true
+              },
+              "name": {
+                "source_column": "name",
+                "dimension": true
+              },
+              "status": {
+                "source_column": "status",
+                "dimension": true
+              },
+              "conclusion": {
+                "source_column": "conclusion",
+                "dimension": true
+              },
+              "started_at": {
+                "source_column": "started_at",
+                "dimension": true,
+                "timezone": "UTC"
+              },
+              "completed_at": {
+                "source_column": "completed_at",
+                "dimension": true,
+                "timezone": "UTC"
+              }
+            }
+          },
+          "columns": [
+            {
+              "name": "repository_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false
+            },
+            {
+              "name": "job_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "run_attempt",
+              "type": "BIGINT",
+              "nullable": true
+            },
+            {
+              "name": "number",
+              "type": "BIGINT",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "type": "VARCHAR",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "type": "VARCHAR",
+              "nullable": false
+            },
+            {
+              "name": "conclusion",
+              "type": "VARCHAR",
+              "nullable": true
+            },
+            {
+              "name": "started_at",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true
+            },
+            {
+              "name": "completed_at",
+              "type": "TIMESTAMP WITH TIME ZONE",
+              "nullable": true
+            }
+          ],
+          "parent_fields": {
+            "repository_id": "workflow_jobs.repository_id",
+            "repository": "workflow_jobs.repository",
+            "job_id": "workflow_jobs.job_id",
+            "run_id": "workflow_jobs.run_id",
+            "run_attempt": "workflow_jobs.run_attempt"
+          },
+          "expand": {
+            "member": "workflow_jobs.steps",
+            "element_columns": {
+              "number": [
+                "number"
+              ],
+              "name": [
+                "name"
+              ],
+              "status": [
+                "status"
+              ],
+              "conclusion": [
+                "conclusion"
+              ],
+              "started_at": [
+                "started_at"
+              ],
+              "completed_at": [
+                "completed_at"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "workflow_job_step_count": {
+        "expression": "COUNT(*)",
+        "type": "BIGINT"
+      },
+      "workflow_job_step_failure_count": {
+        "expression": "COUNT(*) FILTER (WHERE workflow_job_steps.conclusion = 'failure')",
+        "type": "BIGINT"
+      }
+    },
+    "policy": {
+      "metrics": [
+        "workflow_job_step_count",
+        "workflow_job_step_failure_count"
+      ],
+      "dimensions": [
+        "workflow_job_steps.repository_id",
+        "workflow_job_steps.repository",
+        "workflow_job_steps.job_id",
+        "workflow_job_steps.run_id",
+        "workflow_job_steps.run_attempt",
+        "workflow_job_steps.number",
+        "workflow_job_steps.name",
+        "workflow_job_steps.status",
+        "workflow_job_steps.conclusion",
+        "workflow_job_steps.started_at",
+        "workflow_job_steps.completed_at"
+      ],
+      "filter_dimensions": [
+        "workflow_job_steps.repository_id",
+        "workflow_job_steps.repository",
+        "workflow_job_steps.job_id",
+        "workflow_job_steps.run_id",
+        "workflow_job_steps.run_attempt",
+        "workflow_job_steps.number",
+        "workflow_job_steps.name",
+        "workflow_job_steps.status",
+        "workflow_job_steps.conclusion",
+        "workflow_job_steps.started_at",
+        "workflow_job_steps.completed_at"
+      ],
+      "detail_fields": [
+        "workflow_job_steps.repository_id",
+        "workflow_job_steps.repository",
+        "workflow_job_steps.job_id",
+        "workflow_job_steps.run_id",
+        "workflow_job_steps.run_attempt",
+        "workflow_job_steps.number",
+        "workflow_job_steps.name",
+        "workflow_job_steps.status",
+        "workflow_job_steps.conclusion",
+        "workflow_job_steps.started_at",
+        "workflow_job_steps.completed_at"
+      ],
+      "metric_semantics": {
+        "workflow_job_step_count": {
+          "dataset": "workflow_job_steps",
+          "additivity": "additive",
+          "missing": "zero",
+          "comment": "Steps explicitly returned in selected job responses, identified by job ID and step number. Missing step lists are not fabricated steps and do not establish zero configured steps."
+        },
+        "workflow_job_step_failure_count": {
+          "dataset": "workflow_job_steps",
+          "additivity": "additive",
+          "missing": "zero",
+          "comment": "Returned steps whose conclusion is failure, at job ID and step number grain."
+        }
+      },
+      "field_semantics": {
+        "workflow_job_steps.repository_id": {
+          "sql_name": "workflow_job_step_repository_id"
+        },
+        "workflow_job_steps.repository": {
+          "sql_name": "workflow_job_step_repository"
+        },
+        "workflow_job_steps.job_id": {
+          "sql_name": "workflow_job_step_job_id"
+        },
+        "workflow_job_steps.run_id": {
+          "sql_name": "workflow_job_step_run_id"
+        },
+        "workflow_job_steps.run_attempt": {
+          "sql_name": "workflow_job_step_run_attempt"
+        },
+        "workflow_job_steps.number": {
+          "sql_name": "workflow_job_step_number"
+        },
+        "workflow_job_steps.name": {
+          "sql_name": "workflow_job_step_name"
+        },
+        "workflow_job_steps.status": {
+          "sql_name": "workflow_job_step_status"
+        },
+        "workflow_job_steps.conclusion": {
+          "sql_name": "workflow_job_step_conclusion"
+        },
+        "workflow_job_steps.started_at": {
+          "sql_name": "workflow_job_step_started_at"
+        },
+        "workflow_job_steps.completed_at": {
+          "sql_name": "workflow_job_step_completed_at"
+        }
+      }
+    }
+  }
+}

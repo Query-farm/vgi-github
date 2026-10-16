@@ -1,0 +1,257 @@
+# Campaign memberships, code-quality findings and bounded dismissal requests have distinct grains.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Counter sums are memberships across campaigns; the missing third snapshot is unknown.
+query IIIIII
+SELECT security_campaign_count,open_security_campaign_count,closed_security_campaign_count,security_campaign_open_alert_occurrences,security_campaign_closed_alert_occurrences,security_campaign_in_progress_alert_occurrences FROM engineering.semantic.github(organization=>'security-fixture');
+----
+3	2	1	4	8	1
+
+query TIII
+SELECT security_campaigns_state,security_campaign_count,security_campaign_open_alert_occurrences,security_campaign_closed_alert_occurrences FROM engineering.semantic.github(organization=>'security-fixture') GROUP BY security_campaigns_state ORDER BY security_campaigns_state;
+----
+closed	1	0	5
+open	2	4	3
+
+query IIII
+SELECT security_campaign_count,security_campaign_open_alert_occurrences,security_campaign_closed_alert_occurrences,security_campaign_in_progress_alert_occurrences FROM engineering.semantic.github(organization=>'security-fixture',security_campaign_number=>3);
+----
+1	NULL	NULL	NULL
+
+query II
+SELECT security_campaign_count,security_campaign_closed_alert_occurrences FROM engineering.semantic.github(organization=>'security-fixture',security_campaign_state=>'closed');
+----
+1	5
+
+query TI
+SELECT organization_login,security_campaign_count FROM engineering.semantic.github(organization=>'security-fixture') GROUP BY organization_login;
+----
+security-fixture	3
+
+statement ok
+CREATE TEMP TABLE security_operations_detail_1 AS SELECT * FROM engineering.detail.security_campaigns(organization=>'security-fixture',security_campaign_number=>1);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query IITII
+SELECT organization_id,campaign_number,managers[1].login,team_managers[1].id,alert_stats.open_count FROM security_operations_detail_1;
+----
+2500	1	security-alice	2701	4
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIIIIII
+SELECT code_quality_finding_count,code_quality_open_finding_count,code_quality_dismissed_finding_count,code_quality_error_finding_count,code_quality_warning_finding_count,code_quality_note_finding_count,code_quality_none_finding_count FROM engineering.semantic.github(repository=>'security-fixture/alpha');
+----
+3	2	1	1	1	1	0
+
+query TI
+SELECT code_quality_findings_severity,code_quality_finding_count FROM engineering.semantic.github(organization=>'security-fixture') GROUP BY code_quality_findings_severity ORDER BY code_quality_findings_severity;
+----
+error	1
+none	1
+note	1
+warning	1
+
+query TII
+SELECT repository_name,code_quality_finding_count,code_quality_open_finding_count FROM engineering.semantic.github(organization=>'security-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+security-fixture/alpha	3	2
+security-fixture/beta	1	1
+
+statement ok
+CREATE TEMP TABLE code_quality_finding_detail AS SELECT * FROM engineering.detail.code_quality_findings(repository=>'security-fixture/alpha',code_quality_finding_number=>1);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IITTI
+SELECT repository_id,finding_number,rule.help,message.markdown,location.end_column FROM code_quality_finding_detail;
+----
+2501	1	Extract a function	**Repeated logic**	8
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT code_quality_finding_count,code_quality_warning_finding_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',code_quality_finding_state=>'dismissed');
+----
+1	1
+
+query II
+SELECT code_quality_finding_count,code_quality_open_finding_count FROM engineering.semantic.github(repository=>'security-fixture/empty');
+----
+0	0
+
+# Two current repository requests; the expired request predates the default month.
+query IIIII
+SELECT dependabot_dismissal_request_count,dependabot_pending_dismissal_request_count,dependabot_approved_dismissal_request_count,dependabot_denied_dismissal_request_count,dependabot_expired_dismissal_request_count FROM engineering.semantic.github(repository=>'security-fixture/alpha');
+----
+2	1	1	0	0
+
+# The pinned organization default is one day, unlike the repository month default.
+query II
+SELECT dependabot_dismissal_request_count,dependabot_pending_dismissal_request_count FROM engineering.semantic.github(organization=>'security-fixture');
+----
+1	1
+
+query III
+SELECT dependabot_dismissal_request_count,dependabot_pending_dismissal_request_count,dependabot_denied_dismissal_request_count FROM engineering.semantic.github(organization=>'security-fixture',dependabot_dismissal_period=>'month');
+----
+3	1	1
+
+query TII
+SELECT dependabot_dismissal_requests_requester_login,dependabot_dismissal_request_count,dependabot_approved_dismissal_request_count FROM engineering.semantic.github(organization=>'security-fixture',dependabot_dismissal_period=>'month') GROUP BY dependabot_dismissal_requests_requester_login ORDER BY dependabot_dismissal_requests_requester_login;
+----
+security-alice	2	1
+security-bob	1	0
+
+query I
+SELECT dependabot_dismissal_request_count FROM engineering.semantic.github(organization=>'security-fixture',dependabot_dismissal_period=>'month',dependabot_dismissal_repository_name=>'beta');
+----
+1
+
+query I
+SELECT dependabot_dismissal_request_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',dependabot_dismissal_reviewer=>'security-bob');
+----
+1
+
+query I
+SELECT dependabot_dismissal_request_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',dependabot_dismissal_requester=>'security-bob');
+----
+0
+
+query III
+SELECT dismissal_request_id,dismissal_request_number,selected_alert_number FROM engineering.detail.dependabot_dismissal_requests(repository=>'security-fixture/alpha',dependabot_alert_number=>7);
+----
+2801	51	7
+
+statement ok
+CREATE TEMP TABLE security_operations_detail_2 AS SELECT * FROM engineering.detail.dependabot_dismissal_requests(repository=>'security-fixture/alpha',dependabot_alert_number=>7);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query ITTT
+SELECT requester_id,data[1].alert_number,responses[1].reviewer.actor_name,responses[2].reviewer.actor_name FROM security_operations_detail_2;
+----
+2601	7	security-bob	security-carol
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE security_operations_detail_3 AS SELECT * FROM engineering.detail.dependabot_dismissal_requests(repository=>'security-fixture/alpha',dependabot_alert_number=>7);
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTT
+SELECT status,responses[1].status,responses[2].status FROM security_operations_detail_3;
+----
+approved	denied	approved
+
+statement ok
+SET crossfield_mode='strict';
+
+# Exact alert lookup is not constrained by the collection time window.
+query II
+SELECT dependabot_dismissal_request_count,dependabot_expired_dismissal_request_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',dependabot_alert_number=>9);
+----
+1	1
+
+query TII
+SELECT repository_name,code_quality_finding_count,dependabot_dismissal_request_count FROM engineering.semantic.github(repository=>'security-fixture/alpha') GROUP BY repository_name;
+----
+security-fixture/alpha	3	2
+
+statement error
+SELECT security_campaign_count FROM engineering.semantic.github(organization=>'security-fixture',security_campaign_number=>999);
+----
+404
+
+statement error
+SELECT code_quality_finding_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',code_quality_finding_number=>999);
+----
+404
+
+statement error
+SELECT dependabot_dismissal_request_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',dependabot_alert_number=>999);
+----
+404
+
+# Inapplicable selectors reject before any HTTP request.
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT security_campaign_count FROM engineering.semantic.github(organization=>'security-fixture',security_campaign_number=>1,security_campaign_state=>'open');
+----
+arguments do not apply
+
+statement error
+SELECT code_quality_finding_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',code_quality_finding_number=>1,code_quality_finding_state=>'open');
+----
+arguments do not apply
+
+statement error
+SELECT dependabot_dismissal_request_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',dependabot_alert_number=>7,dependabot_dismissal_reviewer=>'security-bob');
+----
+arguments do not apply
+
+statement error
+SELECT dependabot_dismissal_request_count FROM engineering.semantic.github(repository=>'security-fixture/alpha',dependabot_dismissal_org_status=>'completed');
+----
+arguments do not apply
+
+statement error
+SELECT dependabot_dismissal_request_count FROM engineering.semantic.github(organization=>'security-fixture',dependabot_dismissal_status=>'open');
+----
+arguments do not apply
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

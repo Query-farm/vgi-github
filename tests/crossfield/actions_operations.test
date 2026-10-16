@@ -1,0 +1,277 @@
+# Independent Actions cache, queue, gate and review observations.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+# Equal cache keys do not collapse distinct cache IDs or versions.
+query II
+SELECT actions_cache_count,actions_cache_bytes FROM engineering.semantic.github(organization=>'actions-ops-fixture');
+----
+4	480
+
+query TII
+SELECT repository_name,actions_cache_count,actions_cache_bytes FROM engineering.semantic.github(organization=>'actions-ops-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+actions-ops-fixture/alpha	3	400
+actions-ops-fixture/beta	1	80
+
+query ITTI
+SELECT cache_id,cache_key,cache_version,size_in_bytes FROM engineering.detail.actions_caches(repository=>'actions-ops-fixture/alpha',cache_key=>'linux-',cache_ref=>'refs/heads/main') ORDER BY cache_id;
+----
+5101	linux-main	v1	100
+5102	linux-main	v2	250
+
+query II
+SELECT actions_cache_count,actions_cache_bytes FROM engineering.semantic.github(organization=>'actions-ops-fixture',cache_key=>'linux-');
+----
+3	430
+
+# Reported usage is a separate observation: it can differ from live inventory.
+query III
+SELECT actions_cache_usage_observation_count,reported_active_cache_count,reported_active_cache_bytes FROM engineering.semantic.github(organization=>'actions-ops-fixture');
+----
+3	5	540
+
+query III
+SELECT organization_cache_usage_observation_count,organization_reported_active_cache_count,organization_reported_active_cache_bytes FROM engineering.semantic.github(organization=>'actions-ops-fixture');
+----
+1	6	600
+
+query III
+SELECT actions_cache_count,reported_active_cache_count,organization_reported_active_cache_count FROM engineering.semantic.github(organization=>'actions-ops-fixture');
+----
+4	5	6
+
+query TIII
+SELECT repository_name,actions_cache_count,reported_active_cache_count,reported_active_cache_bytes FROM engineering.semantic.github(organization=>'actions-ops-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+actions-ops-fixture/alpha	3	4	450
+actions-ops-fixture/beta	1	1	90
+actions-ops-fixture/empty	0	0	0
+
+query III
+SELECT actions_cache_usage_observation_count,reported_active_cache_count,reported_active_cache_bytes FROM engineering.semantic.github(repository=>'actions-ops-fixture/empty');
+----
+1	0	0
+
+# Group counts are not run counts: one run can hold multiple job-level leases.
+query III
+SELECT actions_concurrency_group_count,actions_concurrency_member_count,reported_concurrency_member_count FROM engineering.semantic.github(organization=>'actions-ops-fixture');
+----
+3	5	5
+
+query TII
+SELECT repository_name,actions_concurrency_group_count,actions_concurrency_member_count FROM engineering.semantic.github(organization=>'actions-ops-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+actions-ops-fixture/alpha	2	4
+actions-ops-fixture/beta	1	1
+
+query III
+SELECT actions_concurrency_group_count,actions_concurrency_member_count,reported_concurrency_member_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',concurrency_group=>'deploy-main');
+----
+1	3	3
+
+query II
+SELECT actions_concurrency_group_count,actions_concurrency_member_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',concurrency_group=>'deploy-main',ahead_of_run_id=>3101);
+----
+1	1
+
+query II
+SELECT actions_concurrency_group_count,actions_concurrency_member_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',concurrency_group=>'deploy-main',ahead_of_job_id=>6102);
+----
+1	2
+
+# Last-acquired timestamp belongs to discovery and is unknown on direct lookup.
+statement ok
+CREATE TEMP TABLE discovered_concurrency_groups AS SELECT * FROM engineering.detail.actions_concurrency_groups(repository=>'actions-ops-fixture/alpha');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TT
+SELECT concurrency_group,CAST(last_acquired_at AS DATE) FROM discovered_concurrency_groups ORDER BY concurrency_group;
+----
+deploy-main	2026-09-03
+test	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE direct_concurrency_group AS SELECT * FROM engineering.detail.actions_concurrency_groups(repository=>'actions-ops-fixture/alpha',concurrency_group=>'deploy-main');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TT
+SELECT concurrency_group,CAST(last_acquired_at AS DATE) FROM direct_concurrency_group;
+----
+deploy-main	NULL
+
+statement ok
+SET crossfield_mode='strict';
+
+# The inactive old-group still has a run/group association with zero members.
+query II
+SELECT workflow_run_concurrency_group_count,workflow_run_concurrency_member_count FROM engineering.semantic.github(organization=>'actions-ops-fixture');
+----
+5	5
+
+query II
+SELECT workflow_run_concurrency_group_count,workflow_run_concurrency_member_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',run_id=>3101);
+----
+2	1
+
+statement ok
+CREATE TEMP TABLE run_concurrency_groups AS SELECT * FROM engineering.detail.workflow_run_concurrency_groups(repository=>'actions-ops-fixture/alpha',run_id=>3101);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TI
+SELECT concurrency_group,array_length(run_group_members) FROM run_concurrency_groups ORDER BY concurrency_group;
+----
+deploy-main	1
+old-group	0
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT workflow_run_concurrency_group_count,workflow_run_concurrency_member_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',workflow_id=>4101);
+----
+4	4
+
+# Configured wait minutes are not elapsed time; reviewer options are not approvals.
+query IIII
+SELECT workflow_pending_deployment_count,pending_deployment_wait_minutes,pending_deployment_reviewer_count,approvable_pending_deployment_count FROM engineering.semantic.github(organization=>'actions-ops-fixture');
+----
+3	40	3	1
+
+query IIII
+SELECT workflow_pending_deployment_count,pending_deployment_wait_minutes,pending_deployment_reviewer_count,approvable_pending_deployment_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',run_id=>3101);
+----
+2	30	2	1
+
+query I
+SELECT workflow_pending_deployment_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',run_id=>3102);
+----
+0
+
+query TI
+SELECT workflow_pending_deployments_wait_started_day,workflow_pending_deployment_count FROM engineering.semantic.github(organization=>'actions-ops-fixture') GROUP BY workflow_pending_deployments_wait_started_day ORDER BY workflow_pending_deployments_wait_started_day NULLS FIRST;
+----
+NULL	1
+2026-09-03	2
+
+# The first two equal review payloads are distinct occurrences on separate pages.
+query IIIII
+SELECT workflow_deployment_review_count,approved_deployment_review_count,rejected_deployment_review_count,pending_deployment_review_count,reviewed_environment_association_count FROM engineering.semantic.github(organization=>'actions-ops-fixture');
+----
+5	3	1	1	6
+
+statement ok
+CREATE TEMP TABLE deployment_review_occurrences AS SELECT * FROM engineering.detail.workflow_deployment_reviews(repository=>'actions-ops-fixture/alpha',run_id=>3101);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITTI
+SELECT review_ordinal,state,reviewer_login,array_length(environments) FROM deployment_review_occurrences ORDER BY review_ordinal;
+----
+1	approved	actions-ops-alice	2
+2	approved	actions-ops-alice	2
+3	rejected	actions-ops-bob	1
+
+statement ok
+SET crossfield_mode='strict';
+
+query III
+SELECT workflow_deployment_review_count,approved_deployment_review_count,reviewed_environment_association_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',workflow_id=>4101);
+----
+4	2	5
+
+# Direct repository context prevents fan-out through run and environment parents.
+query TIII
+SELECT repository_name,workflow_deployment_review_count,workflow_pending_deployment_count,workflow_run_concurrency_group_count FROM engineering.semantic.github(organization=>'actions-ops-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+actions-ops-fixture/alpha	4	2	4
+actions-ops-fixture/beta	1	1	1
+
+query IIIII
+SELECT actions_cache_count,actions_concurrency_group_count,workflow_run_concurrency_group_count,workflow_pending_deployment_count,workflow_deployment_review_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/empty');
+----
+0	0	0	0	0
+
+query IIIII
+SELECT actions_cache_count,actions_concurrency_group_count,workflow_run_concurrency_group_count,workflow_pending_deployment_count,workflow_deployment_review_count FROM engineering.semantic.github(repositories=>[]);
+----
+0	0	0	0	0
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT actions_concurrency_group_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',ahead_of_run_id=>3101);
+----
+concurrency_group
+
+statement error
+SELECT actions_concurrency_group_count FROM engineering.semantic.github(concurrency_group=>'deploy-main');
+----
+repository
+
+statement error
+SELECT actions_concurrency_group_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha',concurrency_group=>'deploy-main',ahead_of_run_id=>3101,ahead_of_job_id=>6102);
+----
+arguments do not apply to the selected population
+
+statement error
+SELECT workflow_pending_deployment_count FROM engineering.semantic.github(run_id=>3101);
+----
+repository
+
+statement error
+SELECT organization_cache_usage_observation_count FROM engineering.semantic.github(repository=>'actions-ops-fixture/alpha');
+----
+SEMANTIC_PARAMETER_UNUSED
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

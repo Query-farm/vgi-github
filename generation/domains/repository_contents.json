@@ -1,0 +1,1143 @@
+{
+  "entities": [
+    {
+      "name": "repository_content_path_source",
+      "description": "repos/get-content pinned typed repository source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        },
+        {
+          "name": "content_path",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 0,
+          "description": "Repository content path. The empty string selects the root directory; omission selects the preferred README unless readme_directory is supplied.",
+          "example": "README.md"
+        },
+        {
+          "name": "content_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Commit, branch or tag for repository Contents/README retrieval; omission uses the repository default branch.",
+          "example": "main",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "content_ref",
+          "source_argument": "content_ref"
+        },
+        {
+          "name": "reported_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "size",
+          "path": [
+            "size"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "content_path",
+          "path": [
+            "path"
+          ],
+          "allow_empty_identity": true
+        },
+        {
+          "name": "content_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "encoded_content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_url",
+          "path": [
+            "git_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "download_url",
+          "path": [
+            "download_url"
+          ]
+        },
+        {
+          "name": "entries",
+          "path": [
+            "entries"
+          ]
+        },
+        {
+          "name": "content_encoding",
+          "path": [
+            "encoding"
+          ]
+        },
+        {
+          "name": "links",
+          "path": [
+            "_links"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "content_path",
+        "content_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-content",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "path": {
+            "argument": "content_path"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "content_ref"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "response_media_type": "application/vnd.github.object",
+        "accept": "application/vnd.github.object+json",
+        "allow_empty_path_parameters": [
+          "path"
+        ],
+        "response_assertions": [
+          {
+            "path": [
+              "entries"
+            ],
+            "comparison": "length_lt",
+            "value": 1000,
+            "when_present": true
+          }
+        ]
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "repository_readme_source",
+      "description": "repos/get-readme pinned typed repository source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        },
+        {
+          "name": "content_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Commit, branch or tag for repository Contents/README retrieval; omission uses the repository default branch.",
+          "example": "main",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "content_ref",
+          "source_argument": "content_ref"
+        },
+        {
+          "name": "reported_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "content_encoding",
+          "path": [
+            "encoding"
+          ]
+        },
+        {
+          "name": "size",
+          "path": [
+            "size"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "content_path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "encoded_content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "content_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_url",
+          "path": [
+            "git_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "download_url",
+          "path": [
+            "download_url"
+          ]
+        },
+        {
+          "name": "links",
+          "path": [
+            "_links"
+          ]
+        },
+        {
+          "name": "symlink_target",
+          "path": [
+            "target"
+          ]
+        },
+        {
+          "name": "submodule_git_url",
+          "path": [
+            "submodule_git_url"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "content_path",
+        "content_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-readme",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "content_ref"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "accept": "application/json"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "repository_directory_readme_source",
+      "description": "repos/get-readme-in-directory pinned typed repository source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository numeric identity hydrated before repository observations.",
+          "example": 1
+        },
+        {
+          "name": "readme_directory",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Directory in which to discover the preferred README; mutually exclusive with content_path.",
+          "example": "docs"
+        },
+        {
+          "name": "content_ref",
+          "type": "VARCHAR",
+          "nullable": true,
+          "min_length": 1,
+          "description": "Commit, branch or tag for repository Contents/README retrieval; omission uses the repository default branch.",
+          "example": "main",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "source_argument": "repository_id"
+        },
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "content_ref",
+          "source_argument": "content_ref"
+        },
+        {
+          "name": "reported_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "content_encoding",
+          "path": [
+            "encoding"
+          ]
+        },
+        {
+          "name": "size",
+          "path": [
+            "size"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "content_path",
+          "path": [
+            "path"
+          ]
+        },
+        {
+          "name": "encoded_content",
+          "path": [
+            "content"
+          ]
+        },
+        {
+          "name": "content_sha",
+          "path": [
+            "sha"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "git_url",
+          "path": [
+            "git_url"
+          ]
+        },
+        {
+          "name": "html_url",
+          "path": [
+            "html_url"
+          ]
+        },
+        {
+          "name": "download_url",
+          "path": [
+            "download_url"
+          ]
+        },
+        {
+          "name": "links",
+          "path": [
+            "_links"
+          ]
+        },
+        {
+          "name": "symlink_target",
+          "path": [
+            "target"
+          ]
+        },
+        {
+          "name": "submodule_git_url",
+          "path": [
+            "submodule_git_url"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id",
+        "content_path",
+        "content_sha"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get-readme-in-directory",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "dir": {
+            "argument": "readme_directory"
+          }
+        },
+        "query_bindings": {
+          "ref": {
+            "argument": "content_ref"
+          }
+        },
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        },
+        "accept": "application/json"
+      },
+      "policy": {
+        "require_one_row": true
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "repository_contents",
+      "description": "Canonical repository content objects, unifying explicit path/root and preferred README retrieval. Grain is stable repository ID plus returned path and content/tree SHA; requested refs are selectors, not extra identities. Encoded content stays VARCHAR with its declared encoding, never falsely decoded as complete bytes. Object-media files of 1\u2013100 MB may report encoding=none and empty content; over 100 MB is unsupported. Directory entries are immediate children only, fail at the 1,000-entry ceiling, and remain NULL/unknown when absent. Submodules may be reported as file and symlinks may return their file target, so reported_type is not a definitive Git object classification. Expiring download URLs are descriptive and never automatically followed. Use Git trees for recursive listings. The object-media pinned schema omits symlink target/submodule URL; those fields are NULL on the path route, even if undocumented extra response keys exist.",
+      "grain": [
+        "repository_id",
+        "content_path",
+        "content_sha"
+      ],
+      "cohort_root": "repositories",
+      "nullable_route_fields": [
+        "entries",
+        "symlink_target",
+        "submodule_git_url"
+      ],
+      "routes": [
+        {
+          "name": "directory_readme",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "readme_directory",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Directory in which to discover the preferred README; mutually exclusive with content_path.",
+              "example": "docs"
+            },
+            {
+              "name": "content_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Commit, branch or tag for repository Contents/README retrieval; omission uses the repository default branch.",
+              "example": "main",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "content_ref",
+              "source_stage": "records",
+              "source_column": "content_ref"
+            },
+            {
+              "name": "reported_type",
+              "source_stage": "records",
+              "source_column": "reported_type"
+            },
+            {
+              "name": "content_encoding",
+              "source_stage": "records",
+              "source_column": "content_encoding"
+            },
+            {
+              "name": "size",
+              "source_stage": "records",
+              "source_column": "size"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "content_path",
+              "source_stage": "records",
+              "source_column": "content_path"
+            },
+            {
+              "name": "encoded_content",
+              "source_stage": "records",
+              "source_column": "encoded_content"
+            },
+            {
+              "name": "content_sha",
+              "source_stage": "records",
+              "source_column": "content_sha"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "git_url",
+              "source_stage": "records",
+              "source_column": "git_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "download_url",
+              "source_stage": "records",
+              "source_column": "download_url"
+            },
+            {
+              "name": "links",
+              "source_stage": "records",
+              "source_column": "links"
+            },
+            {
+              "name": "symlink_target",
+              "source_stage": "records",
+              "source_column": "symlink_target"
+            },
+            {
+              "name": "submodule_git_url",
+              "source_stage": "records",
+              "source_column": "submodule_git_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_directory_readme_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "readme_directory": {
+                    "parameter": "readme_directory"
+                  },
+                  "content_ref": {
+                    "parameter": "content_ref"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Canonical repository content objects, unifying explicit path/root and preferred README retrieval. Grain is stable repository ID plus returned path and content/tree SHA; requested refs are selectors, not extra identities. Encoded content stays VARCHAR with its declared encoding, never falsely decoded as complete bytes. Object-media files of 1\u2013100 MB may report encoding=none and empty content; over 100 MB is unsupported. Directory entries are immediate children only, fail at the 1,000-entry ceiling, and remain NULL/unknown when absent. Submodules may be reported as file and symlinks may return their file target, so reported_type is not a definitive Git object classification. Expiring download URLs are descriptive and never automatically followed. Use Git trees for recursive listings. The object-media pinned schema omits symlink target/submodule URL; those fields are NULL on the path route, even if undocumented extra response keys exist.",
+          "select": [
+            "readme_directory"
+          ]
+        },
+        {
+          "name": "path",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "content_path",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 0,
+              "description": "Repository content path. The empty string selects the root directory; omission selects the preferred README unless readme_directory is supplied.",
+              "example": "README.md"
+            },
+            {
+              "name": "content_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Commit, branch or tag for repository Contents/README retrieval; omission uses the repository default branch.",
+              "example": "main",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "content_ref",
+              "source_stage": "records",
+              "source_column": "content_ref"
+            },
+            {
+              "name": "reported_type",
+              "source_stage": "records",
+              "source_column": "reported_type"
+            },
+            {
+              "name": "size",
+              "source_stage": "records",
+              "source_column": "size"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "content_path",
+              "source_stage": "records",
+              "source_column": "content_path"
+            },
+            {
+              "name": "content_sha",
+              "source_stage": "records",
+              "source_column": "content_sha"
+            },
+            {
+              "name": "encoded_content",
+              "source_stage": "records",
+              "source_column": "encoded_content"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "git_url",
+              "source_stage": "records",
+              "source_column": "git_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "download_url",
+              "source_stage": "records",
+              "source_column": "download_url"
+            },
+            {
+              "name": "entries",
+              "source_stage": "records",
+              "source_column": "entries"
+            },
+            {
+              "name": "content_encoding",
+              "source_stage": "records",
+              "source_column": "content_encoding"
+            },
+            {
+              "name": "links",
+              "source_stage": "records",
+              "source_column": "links"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_content_path_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "content_path": {
+                    "parameter": "content_path"
+                  },
+                  "content_ref": {
+                    "parameter": "content_ref"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Canonical repository content objects, unifying explicit path/root and preferred README retrieval. Grain is stable repository ID plus returned path and content/tree SHA; requested refs are selectors, not extra identities. Encoded content stays VARCHAR with its declared encoding, never falsely decoded as complete bytes. Object-media files of 1\u2013100 MB may report encoding=none and empty content; over 100 MB is unsupported. Directory entries are immediate children only, fail at the 1,000-entry ceiling, and remain NULL/unknown when absent. Submodules may be reported as file and symlinks may return their file target, so reported_type is not a definitive Git object classification. Expiring download URLs are descriptive and never automatically followed. Use Git trees for recursive listings. The object-media pinned schema omits symlink target/submodule URL; those fields are NULL on the path route, even if undocumented extra response keys exist.",
+          "select": [
+            "content_path"
+          ]
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "content_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Commit, branch or tag for repository Contents/README retrieval; omission uses the repository default branch.",
+              "example": "main",
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "records",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "records",
+              "source_column": "repository"
+            },
+            {
+              "name": "content_ref",
+              "source_stage": "records",
+              "source_column": "content_ref"
+            },
+            {
+              "name": "reported_type",
+              "source_stage": "records",
+              "source_column": "reported_type"
+            },
+            {
+              "name": "content_encoding",
+              "source_stage": "records",
+              "source_column": "content_encoding"
+            },
+            {
+              "name": "size",
+              "source_stage": "records",
+              "source_column": "size"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "content_path",
+              "source_stage": "records",
+              "source_column": "content_path"
+            },
+            {
+              "name": "encoded_content",
+              "source_stage": "records",
+              "source_column": "encoded_content"
+            },
+            {
+              "name": "content_sha",
+              "source_stage": "records",
+              "source_column": "content_sha"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "git_url",
+              "source_stage": "records",
+              "source_column": "git_url"
+            },
+            {
+              "name": "html_url",
+              "source_stage": "records",
+              "source_column": "html_url"
+            },
+            {
+              "name": "download_url",
+              "source_stage": "records",
+              "source_column": "download_url"
+            },
+            {
+              "name": "links",
+              "source_stage": "records",
+              "source_column": "links"
+            },
+            {
+              "name": "symlink_target",
+              "source_stage": "records",
+              "source_column": "symlink_target"
+            },
+            {
+              "name": "submodule_git_url",
+              "source_stage": "records",
+              "source_column": "submodule_git_url"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "repository_readme_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "repository_id": {
+                    "stage": "repositories",
+                    "column": "repository_id"
+                  },
+                  "content_ref": {
+                    "parameter": "content_ref"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "population": "Canonical repository content objects, unifying explicit path/root and preferred README retrieval. Grain is stable repository ID plus returned path and content/tree SHA; requested refs are selectors, not extra identities. Encoded content stays VARCHAR with its declared encoding, never falsely decoded as complete bytes. Object-media files of 1\u2013100 MB may report encoding=none and empty content; over 100 MB is unsupported. Directory entries are immediate children only, fail at the 1,000-entry ceiling, and remain NULL/unknown when absent. Submodules may be reported as file and symlinks may return their file target, so reported_type is not a definitive Git object classification. Expiring download URLs are descriptive and never automatically followed. Use Git trees for recursive listings. The object-media pinned schema omits symlink target/submodule URL; those fields are NULL on the path route, even if undocumented extra response keys exist."
+        }
+      ],
+      "semantics": {
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "content_ref",
+          "reported_type",
+          "size",
+          "name",
+          "content_path",
+          "content_sha",
+          "encoded_content",
+          "url",
+          "git_url",
+          "html_url",
+          "download_url",
+          "entries",
+          "content_encoding",
+          "links",
+          "symlink_target",
+          "submodule_git_url"
+        ],
+        "dimensions": [
+          "repository",
+          "content_path",
+          "content_sha",
+          "reported_type",
+          "content_encoding"
+        ],
+        "sql_names": {
+          "repository": "repository_contents_repository",
+          "content_path": "repository_contents_content_path",
+          "content_sha": "repository_contents_content_sha",
+          "reported_type": "repository_contents_reported_type",
+          "content_encoding": "repository_contents_content_encoding"
+        },
+        "metrics": [
+          {
+            "name": "repository_content_object_count",
+            "kind": "count",
+            "comment": "Successfully retrieved content objects at repository/path/SHA grain, not recursive file counts."
+          }
+        ],
+        "crossfield": {
+          "metrics": {
+            "repository_content_reported_size_bytes": {
+              "expression": "COALESCE(SUM(repository_contents.size), 0)"
+            }
+          },
+          "metric_semantics": {
+            "repository_content_reported_size_bytes": {
+              "dataset": "repository_contents",
+              "additivity": "additive",
+              "comment": "Reported size of the distinct selected content objects. Directory size does not represent recursively contained bytes; this is not downloaded payload size.",
+              "missing": "zero"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "name": "repository_contents_to_repositories",
+      "from": "repository_contents",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "repositories",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_contents_to_git_trees",
+      "from": "repository_contents",
+      "to": "git_trees",
+      "from_columns": [
+        "repository_id",
+        "content_sha"
+      ],
+      "to_columns": [
+        "repository_id",
+        "tree_sha"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "tree_sha": "content_sha"
+          },
+          "when": {
+            "reported_type": "dir"
+          }
+        }
+      ]
+    }
+  ]
+}

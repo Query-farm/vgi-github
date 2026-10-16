@@ -1,11 +1,12 @@
 # Complete GitHub semantic access through Crossfield
 
 **Wider implementation plan.** The broad model's public name is `github`.
-An opt-in [connected generated model](../models/generated-pilot/README.md)
-implements a ten-entity graph: repositories, PRs, reviews, labels, organizations,
-users, organization memberships, teams, team memberships and authored PRs.
-Organization/user/owner/repository scopes support model-owned traversal,
-fifteen freely selected measures and callable detail tables.
+The [connected generated model](../models/generated-pilot/README.md) publishes
+canonical entities with alternative retrieval routes, approved measures and
+callable detail tables. Its generated guide and coverage ledger describe the
+implemented contracts. The [coverage policy](../generation/coverage-policy.json)
+assigns the pinned REST operations to implementation batches and records explicit
+exclusions and operation decisions.
 Both packages expose the public model name `github`; separate attachments such
 as `engineering` and `legacy` provide scope while their internal identities
 remain distinct. The generated package does not replace the broad model yet.
@@ -27,7 +28,11 @@ details belong in the worker and model.
 
 The REST denominator is the checked-in manifest: **780 GET operations across 48
 categories**, with separate `api.github.com` and Enterprise Cloud availability.
-The target includes all 21 typed functions and the general GraphQL interface.
+The implementation scope excludes Enterprise, billing, apps and administration,
+as requested. Excluded operations remain visible in the ledger; category and
+operation-level exclusions also apply to the property and parameter denominators.
+The remaining target includes typed equivalents of the worker functions and the
+general GraphQL interface.
 Pin the corresponding public GraphQL schema and inventory its query-accessible
 domain fields, types, connections and arguments; accepting a GraphQL string is
 not coverage of that schema. Upstream changes extend this ledger on revision.
@@ -37,7 +42,7 @@ not coverage of that schema. Upstream changes extend this ledger on revision.
 | Entity collections and individual resources | Named SQL tables/functions, typed fields, keys, supported scopes and automatic pagination. Multiple endpoints may share one entity definition. |
 | Relationships and child collections | Model-owned traversal, qualified identities and approved joins; users do not enumerate every parent or construct child requests. |
 | Analytical facts | Approved counts, state measures, durations, rates and distributions wherever the source supports a defined population. Every published measure has an explicit recipe and numerical tests. |
-| Configuration, permissions, membership and reference data | Typed singleton/detail relations and meaningful state/count measures. These families are required even when they are not traditional reporting facts. |
+| Membership, business classifications and reference data | Typed singleton/detail relations and meaningful state/count measures within the agreed scope. Administrative settings and credentials are excluded. |
 | Logs, text, archives and binary downloads | Named resource access with typed metadata and native text/BLOB payloads. Unstructured content remains content; users need no REST operation ID or media-type selection. |
 | GraphQL-only fields and connections | The same entity/dimension vocabulary, generated typed projections and complete connection traversal. Interfaces/unions retain their concrete type and approved fields. |
 
@@ -53,37 +58,18 @@ Completion is finite against these pinned contracts. It does not promise every
 future GitHub field or every conceivable business calculation. New measures can
 use the complete typed foundation without introducing another API wrapper.
 
-## What the current query actually does
+## Implementation status
 
-In the existing broad model,
-`SELECT repository_count FROM engineering.semantic.github(owner => 'Query-farm')`
-counts rows from the worker's owned-repository listing. It uses complete pagination
-within declared bounds. It does not fetch PRs, reviews or CI for those repositories;
-those metrics still require their own `repository` input. The connected generated
-model instead follows its declared repository/PR/review graph for owner-scoped
-queries, and keeps author and reviewer dimensions separate.
+The generated [model guide](../models/generated-pilot/README.md) describes current
+entity grains, populations, retrieval routes and measures. The generated
+[coverage ledger](../models/generated-pilot/coverage.json) measures selected REST
+operations separately from public response fields, GraphQL fields and arguments.
+It also records exclusions and unresolved coverage. These generated contracts are
+the source of implementation status; the phases below define the acceptance target.
 
-The broad worker's `ReposFunction` currently calls
-`/users/{owner}/repos`, which GitHub documents as a public-repository listing.
-The model's word “visible” and some worker descriptions are broader than the
-endpoint guarantees. Organization and authenticated-user listings have separate
-contracts. Private organization coverage cannot be inferred from having a token,
-and capped search is not a substitute for complete inventory.
-[GitHub repository API contracts](https://docs.github.com/en/rest/repos/repos#list-repositories-for-a-user).
-
-For `owner`, the generated profile resolves account type before choosing the
-organization or user repository route. Organization inventory follows credential
-visibility; a personal owner's inventory contains **public owned repositories**.
-The explicit `organization` scope also connects profiles, members and teams.
-The separate `user` scope provides a personal profile and authored PRs across
-visible repositories, including those the user does not own. Membership and
-authorship remain separate; team attribution is not inferred. Private user-owned
-inventory and multiple-repository cohort inputs remain wider-plan work.
-
-The previous milestone exposed all pinned APIs at response grain. Its 780 REST
-operation IDs establish access coverage; they do not establish 780 usable semantic
-entities, approved measures or live-tested endpoints. The 21 typed functions are
-the foundation for the researcher interface.
+The earlier raw-response milestone made all pinned operation IDs callable. That
+access alone does not establish canonical entities, approved measures, complete
+field coverage or live-tested endpoints.
 
 ## The intended SQL experience
 
@@ -148,8 +134,8 @@ match exactly one project or return an actionable ambiguity error.
 | `visibility => 'public'` | Proposed optional repository scope for public-data studies. Default repository scope is accessible repositories, with credential limitations disclosed. |
 
 Offer one coherent scope per call, including single or multiple repositories and
-owners, explicit research cohorts, and resource-specific scopes such as enterprise,
-installation, user, project or workflow run. Add typed collection/cohort inputs
+owners, explicit research cohorts, and resource-specific scopes such as
+user, project or workflow run. Add typed collection/cohort inputs
 where needed instead of requiring repeated manual calls. Overlapping selections
 must resolve to one declared entity population, with duplicate handling exposed.
 Conflicting or irrelevant inputs reject. Resolve account kind once in the worker
@@ -157,8 +143,8 @@ at execution; routine callers need not know `organization` versus `user`. Infer
 no repository from a project title. Project metrics use an owner/project scope;
 repository visibility options do not silently filter project populations.
 
-Correct owner enumeration chooses reviewed organization, authenticated-user or
-installation routes as appropriate for the token. Other-user public enumeration
+Correct owner enumeration chooses reviewed organization or authenticated-user
+routes as appropriate for the token. Other-user public enumeration
 must remain explicit in metadata. An unsupported credential/scope combination
 fails with guidance rather than claiming complete private coverage. “Accessible”
 does not prove the existence or absence of resources hidden from the credential.
@@ -178,8 +164,8 @@ undefined durations as NULL. Filtered cohorts and denominators remain visible.
 | 1. Inventory and correct scope | Build the full REST/GraphQL coverage ledger. Correct owner resolution, public/private repository selection and source descriptions. | Every pinned operation/read field has an assigned SQL contract and status. Organization/user/token cases have independently expected inventories. |
 | 2. Generate the typed foundation | Use pinned OpenAPI response schemas and GraphQL types to generate adapters, typed arguments/results, documentation and structural tests. Apply reviewed overrides for entity names, keys, pagination, polymorphism and dynamic fields. | No operation is dropped because it is outside the initial reporting families. Schema drift is explicit; generated fields are not automatically approved measures. |
 | 3. Complete generic query composition | Add alternative scopes, typed cohort inputs, callable detail entries, parent/child traversal and shared dimensions. Use reviews, Projects and an organization-wide PR/CI query as integration cases. | Single-resource and cohort queries agree. Empty parents survive, facts do not multiply, and callers need no endpoint IDs, JSON maps or cursor management. |
-| 4. Complete every entity family | Implement all ledger contracts across development, delivery, collaboration, identity, administration, security, billing, usage and reference/content APIs. Reuse adapters for equivalent REST/GraphQL access. | All 48 REST categories and pinned GraphQL domain fields have typed SQL access and product/permission behavior. Raw-only or deferred entries remain gaps. |
-| 5. Complete the measures and research workflows | Define applicable metrics for every family, including review latency, workflow attempts/duration, deployments, code changes, security state, usage and billing. Deliver discovery, repair, explain and export workflows. | Each declared measure has approved population/grain/units and independent answers. Required intermediate aggregation and relationship capabilities are implemented. |
+| 4. Complete every in-scope entity family | Implement ledger contracts across development, delivery, collaboration, identity, security findings, usage and reference/content APIs. Reuse adapters for equivalent REST/GraphQL access. | All in-scope REST operations and pinned GraphQL domain fields have typed SQL access and product/permission behavior. Raw-only or deferred entries remain gaps; excluded administration, Enterprise, billing and apps remain separately identified. |
+| 5. Complete the measures and research workflows | Define applicable metrics for every in-scope family, including review latency, workflow attempts/duration, deployments, code changes, security state and usage. Deliver discovery, repair, explain and export workflows. | Each declared measure has approved population/grain/units and independent answers. Required intermediate aggregation and relationship capabilities are implemented. |
 | 6. Close the ledger | Reconcile generated contracts, public catalog entries, examples and tests; finish every uncovered entry. | No unexplained, raw-only or deferred item is counted as complete. Every mapping and measure has passing evidence; unavailable live credentials are recorded separately from deterministic passes. |
 
 All six steps are required for completion. Each can deliver usable improvements

@@ -1,0 +1,226 @@
+# Canonical personal profiles and ordered directed follow roles.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query I
+SELECT user_count FROM engineering.semantic.github(user_directory=>true);
+----
+4
+
+query I
+SELECT user_count FROM engineering.semantic.github(user_directory=>true,user_since_id=>2901);
+----
+2
+
+query IT
+SELECT user_id,user_login FROM engineering.detail.users(user_account_id=>2901);
+----
+2901	identity-alice
+
+# Existing users semantics intentionally select only personal User accounts.
+query I
+SELECT user_count FROM engineering.semantic.github(user_account_id=>2904);
+----
+0
+
+query I
+SELECT user_count FROM engineering.semantic.github(user_account_id=>2905);
+----
+0
+
+query IT
+SELECT user_id,user_login FROM engineering.detail.users(authenticated_user=>true);
+----
+903	package-fixture-current
+
+query III
+SELECT user_follow_relationship_count,distinct_follower_count,distinct_followed_user_count FROM engineering.semantic.github(follower_user=>'identity-alice');
+----
+3	1	3
+
+query III
+SELECT user_follow_relationship_count,distinct_follower_count,distinct_followed_user_count FROM engineering.semantic.github(followed_user=>'identity-alice');
+----
+2	2	1
+
+query III
+SELECT user_follow_relationship_count,distinct_follower_count,distinct_followed_user_count FROM engineering.semantic.github(authenticated_user=>true,follow_direction=>'followers');
+----
+2	2	1
+
+query III
+SELECT user_follow_relationship_count,distinct_follower_count,distinct_followed_user_count FROM engineering.semantic.github(authenticated_user=>true,follow_direction=>'following');
+----
+2	1	2
+
+query TTI
+SELECT user_follow_relationships_follower_login,user_follow_relationships_followed_login,user_follow_relationship_count FROM engineering.semantic.github(follower_user=>'identity-alice') GROUP BY user_follow_relationships_follower_login,user_follow_relationships_followed_login ORDER BY user_follow_relationships_followed_login;
+----
+identity-alice	identity-bob	1
+identity-alice	identity-carol	1
+identity-alice	package-fixture-current	1
+
+# A negative HTTP status is a check observation, never a following edge.
+query III
+SELECT user_follow_check_count,confirmed_user_follow_count,absent_user_follow_count FROM engineering.semantic.github(follower_user=>'identity-alice',followed_user=>'identity-bob');
+----
+1	1	0
+
+query III
+SELECT user_follow_check_count,confirmed_user_follow_count,absent_user_follow_count FROM engineering.semantic.github(follower_user=>'identity-bob',followed_user=>'identity-carol');
+----
+1	0	1
+
+query III
+SELECT follower_id,followed_id,status_code FROM engineering.detail.user_follow_checks(authenticated_user=>true,followed_user=>'identity-bob');
+----
+903	2902	204
+
+query III
+SELECT follower_id,followed_id,status_code FROM engineering.detail.user_follow_checks(authenticated_user=>true,followed_user=>'identity-carol');
+----
+903	2903	404
+
+query III
+SELECT user_email_count,primary_user_email_count,verified_user_email_count FROM engineering.semantic.github(authenticated_user=>true,user_email_population=>'all');
+----
+3	1	2
+
+query III
+SELECT user_email_count,primary_user_email_count,verified_user_email_count FROM engineering.semantic.github(authenticated_user=>true,user_email_population=>'public');
+----
+1	1	1
+
+query TTTT
+SELECT email,is_primary,is_verified,visibility FROM engineering.detail.user_emails(authenticated_user=>true,user_email_population=>'all') ORDER BY email;
+----
+pending@example.com	false	false	NULL
+private@example.com	false	true	private
+public@example.com	true	true	public
+
+# Multiple URLs on one provider remain distinct account links.
+query TI
+SELECT user_social_accounts_provider,user_social_account_count FROM engineering.semantic.github(user=>'identity-alice') GROUP BY user_social_accounts_provider ORDER BY user_social_accounts_provider;
+----
+linkedin	1
+mastodon	2
+
+query TI
+SELECT user_login,user_social_account_count FROM engineering.semantic.github(user=>'identity-alice') GROUP BY user_login;
+----
+identity-alice	3
+
+query I
+SELECT user_social_account_count FROM engineering.semantic.github(user=>'identity-bob');
+----
+0
+
+query IT
+SELECT user_id,url FROM engineering.detail.user_social_accounts(authenticated_user=>true);
+----
+903	https://social.example/@current
+
+statement ok
+CREATE TEMP TABLE user_identity_detail_1 AS SELECT * FROM engineering.detail.user_context_observations(user=>'identity-alice');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTT
+SELECT subject_type,contexts[1].message,contexts[1].octicon FROM user_identity_detail_1;
+----
+none	Personal account	person
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE user_identity_detail_2 AS SELECT * FROM engineering.detail.user_context_observations(user=>'identity-alice',user_context_subject_type=>'repository',user_context_subject_id=>'123');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TTTT
+SELECT subject_type,subject_id,contexts[1].message,contexts[2].octicon FROM user_identity_detail_2;
+----
+repository	123	Contributor to repository 123	issue-opened
+
+statement ok
+SET crossfield_mode='strict';
+
+# An empty contexts list is one valid observation rather than no account.
+query I
+SELECT user_context_observation_count FROM engineering.semantic.github(user=>'identity-bob');
+----
+1
+
+statement error
+SELECT user_count FROM engineering.semantic.github(user_account_id=>9999);
+----
+404
+
+statement ok
+SET crossfield_mode='off';
+
+statement ok
+COPY (SELECT '' AS path, '' AS query) TO '{CROSSFIELD_GITHUB_API_LOG}' (FORMAT JSON);
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT user_count FROM engineering.semantic.github(user_account_id=>2901,user=>'identity-alice');
+----
+arguments do not apply
+
+statement error
+SELECT user_follow_relationship_count FROM engineering.semantic.github(follower_user=>'identity-alice',followed_user=>'identity-bob');
+----
+arguments do not apply
+
+statement error
+SELECT user_social_account_count FROM engineering.semantic.github(user=>'identity-alice',authenticated_user=>true);
+----
+arguments do not apply
+
+statement error
+SELECT user_context_observation_count FROM engineering.semantic.github(user=>'identity-alice',user_context_subject_type=>'repository');
+----
+user_context_subject_id
+
+statement ok
+SET crossfield_mode='off';
+
+query I
+SELECT count(*) FROM read_json_auto('{CROSSFIELD_GITHUB_API_LOG}') WHERE path<>'';
+----
+0
+
+statement ok
+DETACH engineering;
+
+statement ok
+DETACH github;

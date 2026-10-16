@@ -1,0 +1,219 @@
+# HTTP representation facts are independent of endpoint metadata and JSON schemas.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE content_detail_01 AS SELECT * FROM engineering.detail.workflow_run_log_archives(repository=>'example/alpha',run_id=>1001);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IIITT
+SELECT run_id,status_code,byte_length,typeof(body),hex(body) FROM content_detail_01;
+----
+1001	200	6	BLOB	504B030400FF
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE content_detail_02 AS SELECT * FROM engineering.detail.workflow_attempt_log_archives(repository=>'example/alpha',run_id=>1001,attempt_number=>1);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IIIT
+SELECT run_id,attempt_number,byte_length,hex(body) FROM content_detail_02;
+----
+1001	1	6	504B030400FF
+
+statement ok
+SET crossfield_mode='strict';
+
+# Parent job pagination and reruns are retained before each download.
+statement ok
+CREATE TEMP TABLE content_job_logs AS SELECT * FROM engineering.detail.workflow_job_logs(repository=>'example/alpha',run_id=>1001);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IIT
+SELECT job_id,byte_length,replace(body_text,chr(10),'|') FROM content_job_logs ORDER BY job_id;
+----
+2001	9	job 2001|
+2002	9	job 2002|
+2003	9	job 2003|
+
+statement ok
+SET crossfield_mode='strict';
+
+query TII
+SELECT repository_name,workflow_job_count,workflow_job_logs_count FROM engineering.semantic.github(repository=>'example/alpha') GROUP BY repository_name;
+----
+example/alpha	4	4
+
+statement ok
+CREATE TEMP TABLE content_detail_03 AS SELECT * FROM engineering.detail.workflow_step_logs(repository=>'example/alpha',job_id=>2001,step_number=>2);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IIIT
+SELECT job_id,step_number,byte_length,replace(body_text,chr(10),'|') FROM content_detail_03;
+----
+2001	2	16	job 2001 step 2|
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE content_detail_04 AS SELECT * FROM engineering.detail.workflow_artifact_archives(repository=>'example/alpha',artifact_id=>3001);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IIT
+SELECT artifact_id,byte_length,hex(body) FROM content_detail_04;
+----
+3001	6	504B030400FF
+
+statement ok
+SET crossfield_mode='strict';
+
+# Later expired content must fail after an earlier successful artifact download.
+statement error
+CREATE TEMP TABLE expired_artifact_content AS SELECT * FROM engineering.detail.workflow_artifact_archives(repository=>'example/alpha',run_id=>1001);
+----
+410
+
+statement ok
+CREATE TEMP TABLE content_detail_05 AS SELECT * FROM engineering.detail.release_asset_content(repository=>'release-fixture/alpha',release_id=>11);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IITT
+SELECT release_asset_id,byte_length,typeof(body),hex(body) FROM content_detail_05 ORDER BY release_asset_id;
+----
+111	9	BLOB	00FF72656C65617365
+112	0	BLOB	(empty)
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE content_detail_06 AS SELECT * FROM engineering.detail.code_scanning_sarif_content(repository=>'scan-fixture/alpha',code_scanning_analysis_id=>501);
+
+statement ok
+SET crossfield_mode='semantic';
+
+query IT
+SELECT analysis_id,json_extract_string(body_text,'$.version') FROM content_detail_06;
+----
+501	2.1.0
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE content_detail_07 AS SELECT * FROM engineering.detail.codeql_database_archives(repository=>'scan-fixture/alpha');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TIT
+SELECT language,byte_length,hex(body) FROM content_detail_07 ORDER BY language;
+----
+javascript	6	504B030400FF
+python	6	504B030400FF
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE content_detail_08 AS SELECT * FROM engineering.detail.repository_archives(repository=>'example/alpha',zip_archive_ref=>'main');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TTIT
+SELECT ref,archive_format,byte_length,hex(body) FROM content_detail_08;
+----
+main	zip	6	504B030400FF
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE content_detail_09 AS SELECT * FROM engineering.detail.repository_archives(repository=>'example/alpha',tar_archive_ref=>'v1');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query TTIT
+SELECT ref,archive_format,byte_length,hex(body) FROM content_detail_09;
+----
+v1	tar	6	504B030400FF
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT * FROM engineering.detail.repository_archives(repository=>'example/alpha',zip_archive_ref=>'main',tar_archive_ref=>'main');
+----
+arguments do not apply
+
+# Pending status is a row with NULL body, distinguishable from a completed empty file.
+statement ok
+CREATE TEMP TABLE content_pending_sbom AS SELECT * FROM engineering.detail.dependency_sbom_report_content(repository=>'example/alpha',sbom_uuid=>'pending-report');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITIT
+SELECT status_code,pending,byte_length,body IS NULL FROM content_pending_sbom;
+----
+202	true	0	true
+
+statement ok
+SET crossfield_mode='strict';
+
+statement ok
+CREATE TEMP TABLE content_detail_10 AS SELECT * FROM engineering.detail.dependency_sbom_report_content(repository=>'example/alpha',sbom_uuid=>'ready-report');
+
+statement ok
+SET crossfield_mode='semantic';
+
+query ITIT
+SELECT status_code,pending,byte_length,hex(body) FROM content_detail_10;
+----
+200	false	6	504B030400FF
+
+statement ok
+SET crossfield_mode='strict';
+
+query II
+SELECT dependency_sbom_report_content_count,dependency_sbom_report_pending_count FROM engineering.semantic.github(repository=>'example/alpha',sbom_uuid=>'pending-report');
+----
+1	1

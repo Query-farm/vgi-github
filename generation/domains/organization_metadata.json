@@ -1,0 +1,2563 @@
+{
+  "entities": [
+    {
+      "name": "organization_property_definitions_source",
+      "description": "Pinned orgs/custom-properties-for-repos-get-organization-definitions typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "property_name",
+          "path": [
+            "property_name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "source_type",
+          "path": [
+            "source_type"
+          ]
+        },
+        {
+          "name": "value_type",
+          "path": [
+            "value_type"
+          ]
+        },
+        {
+          "name": "required",
+          "path": [
+            "required"
+          ]
+        },
+        {
+          "name": "default_value",
+          "path": [
+            "default_value"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": true
+          }
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "allowed_values",
+          "path": [
+            "allowed_values"
+          ]
+        },
+        {
+          "name": "values_editable_by",
+          "path": [
+            "values_editable_by"
+          ]
+        },
+        {
+          "name": "require_explicit_values",
+          "path": [
+            "require_explicit_values"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "property_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/custom-properties-for-repos-get-organization-definitions",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_metadata_organization_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_property_definition_lookup_source",
+      "description": "Pinned orgs/custom-properties-for-repos-get-organization-definition typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        },
+        {
+          "name": "custom_property_name",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Exact organization custom-property definition name.",
+          "min_length": 1,
+          "example": "risk"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "property_name",
+          "path": [
+            "property_name"
+          ]
+        },
+        {
+          "name": "url",
+          "path": [
+            "url"
+          ]
+        },
+        {
+          "name": "source_type",
+          "path": [
+            "source_type"
+          ]
+        },
+        {
+          "name": "value_type",
+          "path": [
+            "value_type"
+          ]
+        },
+        {
+          "name": "required",
+          "path": [
+            "required"
+          ]
+        },
+        {
+          "name": "default_value",
+          "path": [
+            "default_value"
+          ],
+          "representation": "tagged",
+          "selection": {
+            "variant_1": true,
+            "variant_2": true
+          }
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "allowed_values",
+          "path": [
+            "allowed_values"
+          ]
+        },
+        {
+          "name": "values_editable_by",
+          "path": [
+            "values_editable_by"
+          ]
+        },
+        {
+          "name": "require_explicit_values",
+          "path": [
+            "require_explicit_values"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "property_name"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/custom-properties-for-repos-get-organization-definition",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_metadata_organization_login"
+          },
+          "custom_property_name": {
+            "argument": "custom_property_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "require_one_row": true,
+        "row_assertions": [
+          {
+            "column": "property_name",
+            "argument": "custom_property_name",
+            "comparison": "equal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "organization_property_repositories_source",
+      "description": "Pinned orgs/custom-properties-for-repos-get-organization-values typed business metadata read.",
+      "arguments": [
+        {
+          "name": "organization",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+          "example": "Query-farm"
+        },
+        {
+          "name": "property_repository_query",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional GitHub repository-search filter on organization custom-property repository discovery. Returned assignments are hydrated from the canonical per-repository endpoint.",
+          "min_length": 1,
+          "example": "archived:false",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "repository_id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "repository_full_name"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/custom-properties-for-repos-get-organization-values",
+        "path_bindings": {
+          "org": {
+            "argument": "organization"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "repository_query": {
+            "argument": "property_repository_query"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_property_repository_lookup_source",
+      "description": "repos/get schema-derived source.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield"
+        },
+        {
+          "name": "expected_property_repository_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Stable repository identity from organization property discovery.",
+          "minimum": 1,
+          "example": 3711
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "repository",
+          "path": [
+            "full_name"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "owner_login",
+          "path": [
+            "owner",
+            "login"
+          ]
+        },
+        {
+          "name": "private",
+          "path": [
+            "private"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "owner_account_id",
+          "path": [
+            "owner",
+            "id"
+          ]
+        },
+        {
+          "name": "owner_account_type",
+          "path": [
+            "owner",
+            "type"
+          ]
+        },
+        {
+          "name": "topic_names",
+          "path": [
+            "topics"
+          ],
+          "description": "Complete topic names returned by this repository REST response; no nested connection or membership cap."
+        },
+        {
+          "name": "repository_node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "repository_language",
+          "path": [
+            "language"
+          ]
+        }
+      ],
+      "grain": [
+        "repository_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/get",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "object",
+        "pagination": {
+          "kind": "none"
+        }
+      },
+      "policy": {
+        "row_assertions": [
+          {
+            "column": "repository_id",
+            "argument": "expected_property_repository_id",
+            "comparison": "equal"
+          }
+        ],
+        "require_one_row": true
+      }
+    },
+    {
+      "name": "organization_issue_types_source",
+      "description": "Pinned orgs/list-issue-types typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "issue_type_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "color",
+          "path": [
+            "color"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "is_enabled",
+          "path": [
+            "is_enabled"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "issue_type_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-issue-types",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_metadata_organization_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "issue_type_id"
+        ]
+      }
+    },
+    {
+      "name": "repository_issue_types_source",
+      "description": "Pinned repos/list-issue-types typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        },
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+          "example": "Query-farm/crossfield"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "issue_type_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "color",
+          "path": [
+            "color"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        },
+        {
+          "name": "is_enabled",
+          "path": [
+            "is_enabled"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "issue_type_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "repos/list-issue-types",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "issue_type_id"
+        ]
+      }
+    },
+    {
+      "name": "organization_issue_fields_source",
+      "description": "Pinned orgs/list-issue-fields typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "issue_field_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "name",
+          "path": [
+            "name"
+          ]
+        },
+        {
+          "name": "description",
+          "path": [
+            "description"
+          ]
+        },
+        {
+          "name": "data_type",
+          "path": [
+            "data_type"
+          ]
+        },
+        {
+          "name": "visibility",
+          "path": [
+            "visibility"
+          ]
+        },
+        {
+          "name": "options",
+          "path": [
+            "options"
+          ],
+          "selection": {
+            "id": true,
+            "name": true,
+            "description": true,
+            "color": true,
+            "priority": true,
+            "created_at": true,
+            "updated_at": true
+          }
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "updated_at",
+          "path": [
+            "updated_at"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "issue_field_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-issue-fields",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_metadata_organization_login"
+          }
+        },
+        "query_bindings": {},
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      },
+      "policy": {
+        "required_non_null_fields": [
+          "issue_field_id"
+        ]
+      }
+    },
+    {
+      "name": "organization_outside_collaborators_source",
+      "description": "Pinned orgs/list-outside-collaborators typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        },
+        {
+          "name": "outside_collaborator_filter",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Credential-visible outside collaborator population, optionally limited by two-factor configuration.",
+          "enum": [
+            "all",
+            "2fa_disabled",
+            "2fa_insecure"
+          ],
+          "example": "all",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "user_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "user_login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "account_type",
+          "path": [
+            "type"
+          ]
+        },
+        {
+          "name": "account",
+          "path": [],
+          "selection": {
+            "name": true,
+            "email": true,
+            "login": true,
+            "id": true,
+            "node_id": true,
+            "avatar_url": true,
+            "gravatar_id": true,
+            "url": true,
+            "html_url": true,
+            "followers_url": true,
+            "following_url": true,
+            "gists_url": true,
+            "starred_url": true,
+            "subscriptions_url": true,
+            "organizations_url": true,
+            "repos_url": true,
+            "events_url": true,
+            "received_events_url": true,
+            "type": true,
+            "site_admin": true,
+            "starred_at": true,
+            "user_view_type": true
+          }
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "user_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-outside-collaborators",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_metadata_organization_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "filter": {
+            "argument": "outside_collaborator_filter"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_pending_invitations_source",
+      "description": "Pinned orgs/list-pending-invitations typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        },
+        {
+          "name": "selected_invitation_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit lifecycle population established by the invitation retrieval endpoint.",
+          "enum": [
+            "pending",
+            "failed"
+          ],
+          "example": "pending"
+        },
+        {
+          "name": "organization_invitation_role",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional pending organization-invitation role filter; this is not a team role.",
+          "enum": [
+            "all",
+            "admin",
+            "direct_member",
+            "billing_manager",
+            "hiring_manager"
+          ],
+          "example": "direct_member",
+          "default": null
+        },
+        {
+          "name": "organization_invitation_source",
+          "type": "VARCHAR",
+          "nullable": true,
+          "description": "Optional pending invitation source filter.",
+          "enum": [
+            "all",
+            "member",
+            "scim"
+          ],
+          "example": "member",
+          "default": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "invitation_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "email",
+          "path": [
+            "email"
+          ]
+        },
+        {
+          "name": "role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "failed_at",
+          "path": [
+            "failed_at"
+          ]
+        },
+        {
+          "name": "failed_reason",
+          "path": [
+            "failed_reason"
+          ]
+        },
+        {
+          "name": "team_count",
+          "path": [
+            "team_count"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "invitation_teams_url",
+          "path": [
+            "invitation_teams_url"
+          ]
+        },
+        {
+          "name": "invitation_source",
+          "path": [
+            "invitation_source"
+          ]
+        },
+        {
+          "name": "inviter",
+          "path": [
+            "inviter"
+          ],
+          "selection": {
+            "name": true,
+            "email": true,
+            "login": true,
+            "id": true,
+            "node_id": true,
+            "avatar_url": true,
+            "gravatar_id": true,
+            "url": true,
+            "html_url": true,
+            "followers_url": true,
+            "following_url": true,
+            "gists_url": true,
+            "starred_url": true,
+            "subscriptions_url": true,
+            "organizations_url": true,
+            "repos_url": true,
+            "events_url": true,
+            "received_events_url": true,
+            "type": true,
+            "site_admin": true,
+            "starred_at": true,
+            "user_view_type": true
+          }
+        },
+        {
+          "name": "invitation_state",
+          "source_argument": "selected_invitation_state"
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "invitation_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-pending-invitations",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_metadata_organization_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          },
+          "role": {
+            "argument": "organization_invitation_role"
+          },
+          "invitation_source": {
+            "argument": "organization_invitation_source"
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_failed_invitations_source",
+      "description": "Pinned orgs/list-failed-invitations typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        },
+        {
+          "name": "selected_invitation_state",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Explicit lifecycle population established by the invitation retrieval endpoint.",
+          "enum": [
+            "pending",
+            "failed"
+          ],
+          "example": "pending"
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "invitation_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "login",
+          "path": [
+            "login"
+          ]
+        },
+        {
+          "name": "email",
+          "path": [
+            "email"
+          ]
+        },
+        {
+          "name": "role",
+          "path": [
+            "role"
+          ]
+        },
+        {
+          "name": "created_at",
+          "path": [
+            "created_at"
+          ]
+        },
+        {
+          "name": "failed_at",
+          "path": [
+            "failed_at"
+          ]
+        },
+        {
+          "name": "failed_reason",
+          "path": [
+            "failed_reason"
+          ]
+        },
+        {
+          "name": "team_count",
+          "path": [
+            "team_count"
+          ]
+        },
+        {
+          "name": "node_id",
+          "path": [
+            "node_id"
+          ]
+        },
+        {
+          "name": "invitation_teams_url",
+          "path": [
+            "invitation_teams_url"
+          ]
+        },
+        {
+          "name": "invitation_source",
+          "path": [
+            "invitation_source"
+          ]
+        },
+        {
+          "name": "inviter",
+          "path": [
+            "inviter"
+          ],
+          "selection": {
+            "name": true,
+            "email": true,
+            "login": true,
+            "id": true,
+            "node_id": true,
+            "avatar_url": true,
+            "gravatar_id": true,
+            "url": true,
+            "html_url": true,
+            "followers_url": true,
+            "following_url": true,
+            "gists_url": true,
+            "starred_url": true,
+            "subscriptions_url": true,
+            "organizations_url": true,
+            "repos_url": true,
+            "events_url": true,
+            "received_events_url": true,
+            "type": true,
+            "site_admin": true,
+            "starred_at": true,
+            "user_view_type": true
+          }
+        },
+        {
+          "name": "invitation_state",
+          "source_argument": "selected_invitation_state"
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "invitation_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-failed-invitations",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_metadata_organization_login"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    },
+    {
+      "name": "organization_invitation_teams_source",
+      "description": "Pinned orgs/list-invitation-teams typed business metadata read.",
+      "arguments": [
+        {
+          "name": "selected_metadata_organization_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Resolved organization identity for this metadata population.",
+          "minimum": 1,
+          "example": 3700
+        },
+        {
+          "name": "selected_metadata_organization_login",
+          "type": "VARCHAR",
+          "nullable": false,
+          "description": "Canonical organization login for this metadata population.",
+          "min_length": 1,
+          "example": "organization-metadata-fixture"
+        },
+        {
+          "name": "organization_invitation_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "description": "Exact organization invitation identity used to retrieve its associated teams.",
+          "minimum": 1,
+          "example": 3502
+        }
+      ],
+      "columns": [
+        {
+          "name": "organization_id",
+          "source_argument": "selected_metadata_organization_id"
+        },
+        {
+          "name": "organization_login",
+          "source_argument": "selected_metadata_organization_login"
+        },
+        {
+          "name": "invitation_id",
+          "source_argument": "organization_invitation_id"
+        },
+        {
+          "name": "team_id",
+          "path": [
+            "id"
+          ]
+        },
+        {
+          "name": "team_slug",
+          "path": [
+            "slug"
+          ]
+        }
+      ],
+      "grain": [
+        "organization_id",
+        "invitation_id",
+        "team_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "product": "api.github.com",
+        "operation_id": "orgs/list-invitation-teams",
+        "path_bindings": {
+          "org": {
+            "argument": "selected_metadata_organization_login"
+          },
+          "invitation_id": {
+            "argument": "organization_invitation_id"
+          }
+        },
+        "query_bindings": {
+          "per_page": {
+            "literal": 100
+          }
+        },
+        "result_path": [],
+        "result_shape": "array",
+        "pagination": {
+          "kind": "link"
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "repository_property_definitions",
+      "description": "Custom repository-property definitions visible in one organization, including their declared source_type, required/default semantics and ordered allowed values. Enterprise source labels describe inherited definitions; enterprise administration endpoints are outside this model.",
+      "grain": [
+        "organization_id",
+        "property_name"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "property_name",
+          "url",
+          "source_type",
+          "value_type",
+          "required",
+          "default_value",
+          "description",
+          "allowed_values",
+          "values_editable_by",
+          "require_explicit_values"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "property_name",
+          "value_type",
+          "source_type",
+          "required",
+          "require_explicit_values"
+        ],
+        "sql_names": {
+          "organization_id": "repository_property_definitions_organization_id",
+          "organization_login": "repository_property_definitions_organization_login",
+          "property_name": "repository_property_definitions_property_name",
+          "value_type": "repository_property_definitions_value_type",
+          "source_type": "repository_property_definitions_source_type",
+          "required": "repository_property_definitions_required",
+          "require_explicit_values": "repository_property_definitions_require_explicit_values"
+        },
+        "metrics": [
+          {
+            "name": "repository_property_definition_count",
+            "kind": "count",
+            "comment": "Selected repository_property_definitions rows at the declared identity grain."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "custom_property_name",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact organization custom-property definition name.",
+              "min_length": 1,
+              "example": "risk"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_property_definition_lookup_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "custom_property_name": {
+                    "parameter": "custom_property_name"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "property_name",
+              "source_stage": "records",
+              "source_column": "property_name"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "source_type",
+              "source_stage": "records",
+              "source_column": "source_type"
+            },
+            {
+              "name": "value_type",
+              "source_stage": "records",
+              "source_column": "value_type"
+            },
+            {
+              "name": "required",
+              "source_stage": "records",
+              "source_column": "required"
+            },
+            {
+              "name": "default_value",
+              "source_stage": "records",
+              "source_column": "default_value"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "allowed_values",
+              "source_stage": "records",
+              "source_column": "allowed_values"
+            },
+            {
+              "name": "values_editable_by",
+              "source_stage": "records",
+              "source_column": "values_editable_by"
+            },
+            {
+              "name": "require_explicit_values",
+              "source_stage": "records",
+              "source_column": "require_explicit_values"
+            }
+          ],
+          "select": [
+            "custom_property_name"
+          ],
+          "population": "One exact custom-property definition; missing404 fails."
+        },
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_property_definitions_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "property_name",
+              "source_stage": "records",
+              "source_column": "property_name"
+            },
+            {
+              "name": "url",
+              "source_stage": "records",
+              "source_column": "url"
+            },
+            {
+              "name": "source_type",
+              "source_stage": "records",
+              "source_column": "source_type"
+            },
+            {
+              "name": "value_type",
+              "source_stage": "records",
+              "source_column": "value_type"
+            },
+            {
+              "name": "required",
+              "source_stage": "records",
+              "source_column": "required"
+            },
+            {
+              "name": "default_value",
+              "source_stage": "records",
+              "source_column": "default_value"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "allowed_values",
+              "source_stage": "records",
+              "source_column": "allowed_values"
+            },
+            {
+              "name": "values_editable_by",
+              "source_stage": "records",
+              "source_column": "values_editable_by"
+            },
+            {
+              "name": "require_explicit_values",
+              "source_stage": "records",
+              "source_column": "require_explicit_values"
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "population": "All custom-property definitions reported for the selected organization. Allowed values are the ordered definition domain, bounded to200 by the pinned API."
+        }
+      ]
+    },
+    {
+      "name": "issue_types",
+      "description": "Organization-defined issue types with full feasible typed pinned fields. Retrieval is metadata availability, not assigned issue occurrences.",
+      "grain": [
+        "organization_id",
+        "issue_type_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "issue_type_id",
+          "node_id",
+          "name",
+          "description",
+          "color",
+          "created_at",
+          "updated_at",
+          "is_enabled"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "issue_type_id",
+          "name",
+          "color",
+          "is_enabled"
+        ],
+        "sql_names": {
+          "organization_id": "issue_types_organization_id",
+          "organization_login": "issue_types_organization_login",
+          "issue_type_id": "issue_types_issue_type_id",
+          "name": "issue_types_name",
+          "color": "issue_types_color",
+          "is_enabled": "issue_types_is_enabled"
+        },
+        "metrics": [
+          {
+            "name": "issue_type_count",
+            "kind": "count",
+            "comment": "Selected issue_types rows at the declared identity grain."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "stage": "repositories",
+                    "column": "owner_login"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "repository_issue_types_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "issue_type_id",
+              "source_stage": "records",
+              "source_column": "issue_type_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "color",
+              "source_stage": "records",
+              "source_column": "color"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "is_enabled",
+              "source_stage": "records",
+              "source_column": "is_enabled"
+            }
+          ],
+          "select": [
+            "repository"
+          ],
+          "population": "Issue types available to one repository, preserving the owning organization/type identity; personal-owner lookup fails rather than inventing organization identity."
+        },
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_issue_types_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "issue_type_id",
+              "source_stage": "records",
+              "source_column": "issue_type_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "color",
+              "source_stage": "records",
+              "source_column": "color"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            },
+            {
+              "name": "is_enabled",
+              "source_stage": "records",
+              "source_column": "is_enabled"
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "population": "All reported issue types defined in the organization; malformed NULL identity rows fail."
+        }
+      ]
+    },
+    {
+      "name": "issue_fields",
+      "description": "Organization-defined issue fields with full feasible typed pinned fields. Retrieval is metadata availability, not assigned issue occurrences.",
+      "grain": [
+        "organization_id",
+        "issue_field_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "issue_field_id",
+          "node_id",
+          "name",
+          "description",
+          "data_type",
+          "visibility",
+          "options",
+          "created_at",
+          "updated_at"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "issue_field_id",
+          "name",
+          "data_type",
+          "visibility"
+        ],
+        "sql_names": {
+          "organization_id": "issue_fields_organization_id",
+          "organization_login": "issue_fields_organization_login",
+          "issue_field_id": "issue_fields_issue_field_id",
+          "name": "issue_fields_name",
+          "data_type": "issue_fields_data_type",
+          "visibility": "issue_fields_visibility"
+        },
+        "metrics": [
+          {
+            "name": "issue_field_count",
+            "kind": "count",
+            "comment": "Selected issue_fields rows at the declared identity grain."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_issue_fields_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "issue_field_id",
+              "source_stage": "records",
+              "source_column": "issue_field_id"
+            },
+            {
+              "name": "node_id",
+              "source_stage": "records",
+              "source_column": "node_id"
+            },
+            {
+              "name": "name",
+              "source_stage": "records",
+              "source_column": "name"
+            },
+            {
+              "name": "description",
+              "source_stage": "records",
+              "source_column": "description"
+            },
+            {
+              "name": "data_type",
+              "source_stage": "records",
+              "source_column": "data_type"
+            },
+            {
+              "name": "visibility",
+              "source_stage": "records",
+              "source_column": "visibility"
+            },
+            {
+              "name": "options",
+              "source_stage": "records",
+              "source_column": "options"
+            },
+            {
+              "name": "created_at",
+              "source_stage": "records",
+              "source_column": "created_at"
+            },
+            {
+              "name": "updated_at",
+              "source_stage": "records",
+              "source_column": "updated_at"
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "population": "All reported issue fields defined in the organization; malformed NULL identity rows fail."
+        }
+      ]
+    },
+    {
+      "name": "organization_outside_collaborators",
+      "description": "Credential-visible organization/account outside-collaborator relationships. These accounts are not organization membership records; account types and optional profile fields are preserved.",
+      "grain": [
+        "organization_id",
+        "user_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "user_id",
+          "user_login",
+          "account_type",
+          "account"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "user_id",
+          "user_login",
+          "account_type"
+        ],
+        "sql_names": {
+          "organization_id": "organization_outside_collaborators_organization_id",
+          "organization_login": "organization_outside_collaborators_organization_login",
+          "user_id": "organization_outside_collaborators_user_id",
+          "user_login": "organization_outside_collaborators_user_login",
+          "account_type": "organization_outside_collaborators_account_type"
+        },
+        "metrics": [
+          {
+            "name": "organization_outside_collaborator_count",
+            "kind": "count",
+            "comment": "Selected organization_outside_collaborators rows at the declared identity grain."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "organizations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "outside_collaborator_filter",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Credential-visible outside collaborator population, optionally limited by two-factor configuration.",
+              "enum": [
+                "all",
+                "2fa_disabled",
+                "2fa_insecure"
+              ],
+              "example": "all",
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_outside_collaborators_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "outside_collaborator_filter": {
+                    "parameter": "outside_collaborator_filter"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "user_id",
+              "source_stage": "records",
+              "source_column": "user_id"
+            },
+            {
+              "name": "user_login",
+              "source_stage": "records",
+              "source_column": "user_login"
+            },
+            {
+              "name": "account_type",
+              "source_stage": "records",
+              "source_column": "account_type"
+            },
+            {
+              "name": "account",
+              "source_stage": "records",
+              "source_column": "account"
+            }
+          ],
+          "select": [
+            "organization"
+          ],
+          "population": "All advertised pages of outside collaborators in the selected optional two-factor population."
+        }
+      ]
+    },
+    {
+      "name": "organization_invitation_teams",
+      "description": "Organization-invitation/team associations, distinct from either invitation or team identity. One invitation for two teams contributes two associations. Both retrieval directions share the same qualified pair.",
+      "grain": [
+        "organization_id",
+        "invitation_id",
+        "team_id"
+      ],
+      "semantics": {
+        "detail_fields": [
+          "organization_id",
+          "organization_login",
+          "invitation_id",
+          "team_id",
+          "team_slug"
+        ],
+        "dimensions": [
+          "organization_id",
+          "organization_login",
+          "invitation_id",
+          "team_id",
+          "team_slug"
+        ],
+        "sql_names": {
+          "organization_id": "organization_invitation_teams_organization_id",
+          "organization_login": "organization_invitation_teams_organization_login",
+          "invitation_id": "organization_invitation_teams_invitation_id",
+          "team_id": "organization_invitation_teams_team_id",
+          "team_slug": "organization_invitation_teams_team_slug"
+        },
+        "metrics": [
+          {
+            "name": "organization_invitation_team_count",
+            "kind": "count",
+            "comment": "Selected organization_invitation_teams rows at the declared identity grain."
+          }
+        ]
+      },
+      "routes": [
+        {
+          "name": "invitations",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "organization_invitation_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact organization invitation identity used to retrieve its associated teams.",
+              "minimum": 1,
+              "example": 3502
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "organizations",
+                "entity": "organization_lookup",
+                "arguments": {
+                  "organization": {
+                    "parameter": "organization"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "organization_invitation_teams_source",
+                "arguments": {
+                  "selected_metadata_organization_id": {
+                    "stage": "organizations",
+                    "column": "organization_id"
+                  },
+                  "selected_metadata_organization_login": {
+                    "stage": "organizations",
+                    "column": "organization_login"
+                  },
+                  "organization_invitation_id": {
+                    "parameter": "organization_invitation_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "invitation_id",
+              "source_stage": "records",
+              "source_column": "invitation_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            }
+          ],
+          "select": [
+            "organization_invitation_id"
+          ],
+          "population": "All advertised team associations for one visible organization invitation."
+        },
+        {
+          "name": "teams",
+          "arguments": [
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "team_slug",
+              "type": "VARCHAR",
+              "nullable": true,
+              "min_length": 1,
+              "description": "Slug of one team; requires organization.",
+              "default": null,
+              "example": "core"
+            },
+            {
+              "name": "team_numeric_id",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Exact stable team identity through pinned legacy numeric routes; GitHub marks these routes as closing down. Prefer organization plus team_slug where available.",
+              "minimum": 1,
+              "example": 3201,
+              "default": null
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "teams",
+                "scope": "selected_identity_team"
+              },
+              {
+                "name": "records",
+                "scope": "selected_team_invitations"
+              }
+            ],
+            "output_stage": "records"
+          },
+          "columns": [
+            {
+              "name": "organization_id",
+              "source_stage": "records",
+              "source_column": "organization_id"
+            },
+            {
+              "name": "organization_login",
+              "source_stage": "records",
+              "source_column": "organization_login"
+            },
+            {
+              "name": "invitation_id",
+              "source_stage": "records",
+              "source_column": "invitation_id"
+            },
+            {
+              "name": "team_id",
+              "source_stage": "records",
+              "source_column": "team_id"
+            },
+            {
+              "name": "team_slug",
+              "source_stage": "records",
+              "source_column": "team_slug"
+            }
+          ],
+          "select": [
+            "team_numeric_id",
+            "organization"
+          ],
+          "population": "All pending invitations associated with one selected team."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "property_definitions_to_organizations",
+      "from": "repository_property_definitions",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "issue_types_to_organizations",
+      "from": "issue_types",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "issue_fields_to_organizations",
+      "from": "issue_fields",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "outside_collaborators_to_organizations",
+      "from": "organization_outside_collaborators",
+      "to": "organizations",
+      "from_columns": [
+        "organization_id"
+      ],
+      "to_columns": [
+        "organization_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "organizations",
+          "bindings": {
+            "organization": "organization_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "outside_collaborators_to_users",
+      "from": "organization_outside_collaborators",
+      "to": "users",
+      "from_columns": [
+        "user_id"
+      ],
+      "to_columns": [
+        "user_id"
+      ],
+      "optional": true,
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "user": "user_login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "invitation_teams_to_invitations",
+      "from": "organization_invitation_teams",
+      "to": "organization_invitations",
+      "from_columns": [
+        "organization_id",
+        "invitation_id"
+      ],
+      "to_columns": [
+        "organization_id",
+        "invitation_id"
+      ],
+      "analytical": false,
+      "retrievals": [
+        {
+          "direction": "reverse",
+          "route": "invitations",
+          "bindings": {
+            "organization": "organization_login",
+            "organization_invitation_id": "invitation_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "invitation_teams_to_teams",
+      "from": "organization_invitation_teams",
+      "to": "teams",
+      "from_columns": [
+        "team_id"
+      ],
+      "to_columns": [
+        "team_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "numeric_identity",
+          "bindings": {
+            "team_numeric_id": "team_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "teams",
+          "bindings": {
+            "team_numeric_id": "team_id"
+          }
+        }
+      ]
+    }
+  ],
+  "scopes": {}
+}

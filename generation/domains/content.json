@@ -1,0 +1,4853 @@
+{
+  "entities": [
+    {
+      "name": "workflow_run_log_archives_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "run_id",
+          "source_argument": "run_id"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        }
+      ],
+      "grain": [
+        "repository",
+        "run_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "actions/download-workflow-run-logs",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          }
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "302"
+          ]
+        }
+      }
+    },
+    {
+      "name": "workflow_attempt_log_archives_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "run_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1
+        },
+        {
+          "name": "attempt_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "run_id",
+          "source_argument": "run_id"
+        },
+        {
+          "name": "attempt_number",
+          "source_argument": "attempt_number"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        }
+      ],
+      "grain": [
+        "repository",
+        "run_id",
+        "attempt_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "actions/download-workflow-run-attempt-logs",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "run_id": {
+            "argument": "run_id"
+          },
+          "attempt_number": {
+            "argument": "attempt_number"
+          }
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "302"
+          ]
+        }
+      }
+    },
+    {
+      "name": "workflow_job_logs_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "job_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1,
+          "description": "One workflow job identity."
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "job_id",
+          "source_argument": "job_id"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        },
+        {
+          "name": "body_text",
+          "source_response": "body_text",
+          "description": "Strict UTF-8 decoding of body; malformed text raises an error."
+        }
+      ],
+      "grain": [
+        "repository",
+        "job_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "actions/download-job-logs-for-workflow-run",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "job_id": {
+            "argument": "job_id"
+          }
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "302"
+          ],
+          "text_encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "name": "workflow_artifact_archives_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "artifact_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "artifact_id",
+          "source_argument": "artifact_id"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        }
+      ],
+      "grain": [
+        "repository",
+        "artifact_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "actions/download-artifact",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "artifact_id": {
+            "argument": "artifact_id"
+          },
+          "archive_format": {
+            "literal": "zip"
+          }
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "302"
+          ]
+        }
+      }
+    },
+    {
+      "name": "release_asset_content_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "release_asset_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "release_asset_id",
+          "source_argument": "release_asset_id"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        }
+      ],
+      "grain": [
+        "repository",
+        "release_asset_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "repos/get-release-asset",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "asset_id": {
+            "argument": "release_asset_id"
+          }
+        },
+        "content": {
+          "accept": "application/octet-stream",
+          "response_statuses": [
+            "200",
+            "302"
+          ]
+        }
+      }
+    },
+    {
+      "name": "code_scanning_sarif_content_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "analysis_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "analysis_id",
+          "source_argument": "analysis_id"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        },
+        {
+          "name": "body_text",
+          "source_response": "body_text",
+          "description": "Strict UTF-8 decoding of body; malformed text raises an error."
+        }
+      ],
+      "grain": [
+        "repository",
+        "analysis_id"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "code-scanning/get-analysis",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "analysis_id": {
+            "argument": "analysis_id"
+          }
+        },
+        "content": {
+          "accept": "application/sarif+json",
+          "response_statuses": [
+            "200"
+          ],
+          "text_encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "name": "codeql_database_archives_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "language",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "language",
+          "source_argument": "language"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        }
+      ],
+      "grain": [
+        "repository",
+        "language"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "code-scanning/get-codeql-database",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "language": {
+            "argument": "language"
+          }
+        },
+        "content": {
+          "accept": "application/zip",
+          "response_statuses": [
+            "302"
+          ]
+        }
+      }
+    },
+    {
+      "name": "workflow_step_logs_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "job_id",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1,
+          "description": "One workflow job identity."
+        },
+        {
+          "name": "step_number",
+          "type": "BIGINT",
+          "nullable": false,
+          "example": 1,
+          "minimum": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "job_id",
+          "source_argument": "job_id"
+        },
+        {
+          "name": "step_number",
+          "source_argument": "step_number"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        },
+        {
+          "name": "body_text",
+          "source_response": "body_text",
+          "description": "Strict UTF-8 decoding of body; malformed text raises an error."
+        }
+      ],
+      "grain": [
+        "repository",
+        "job_id",
+        "step_number"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "actions/download-step-logs-for-workflow-run-job",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "job_id": {
+            "argument": "job_id"
+          },
+          "step_number": {
+            "argument": "step_number"
+          }
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "302"
+          ],
+          "text_encoding": "utf-8"
+        }
+      }
+    },
+    {
+      "name": "dependency_sbom_report_content_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "sbom_uuid",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example",
+          "min_length": 1
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "sbom_uuid",
+          "source_argument": "sbom_uuid"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        }
+      ],
+      "grain": [
+        "repository",
+        "sbom_uuid"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "dependency-graph/fetch-sbom-report",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "sbom_uuid": {
+            "argument": "sbom_uuid"
+          }
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "302",
+            "202"
+          ],
+          "pending_statuses": [
+            "202"
+          ]
+        }
+      }
+    },
+    {
+      "name": "repository_zip_archive_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "ref",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example",
+          "min_length": 1
+        },
+        {
+          "name": "archive_format",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "zip",
+          "min_length": 1,
+          "enum": [
+            "zip"
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "ref",
+          "source_argument": "ref"
+        },
+        {
+          "name": "archive_format",
+          "source_argument": "archive_format"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        }
+      ],
+      "grain": [
+        "repository",
+        "ref",
+        "archive_format"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "repos/download-zipball-archive",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "ref": {
+            "argument": "ref"
+          }
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "302"
+          ]
+        }
+      }
+    },
+    {
+      "name": "repository_tar_archive_source",
+      "description": "Pinned read-only HTTP content representation. Bytes and transport metadata are not a synthesized JSON schema. Redirect handling, credential partitioning, retries and deadlines use the shared REST transport.",
+      "arguments": [
+        {
+          "name": "repository",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "Query-farm/crossfield",
+          "min_length": 1,
+          "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+        },
+        {
+          "name": "ref",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "example",
+          "min_length": 1
+        },
+        {
+          "name": "archive_format",
+          "type": "VARCHAR",
+          "nullable": false,
+          "example": "tar",
+          "min_length": 1,
+          "enum": [
+            "tar"
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "name": "repository",
+          "source_argument": "repository"
+        },
+        {
+          "name": "ref",
+          "source_argument": "ref"
+        },
+        {
+          "name": "archive_format",
+          "source_argument": "archive_format"
+        },
+        {
+          "name": "status_code",
+          "source_response": "status_code",
+          "description": "Final HTTP status after redirects; 202 means pending."
+        },
+        {
+          "name": "content_type",
+          "source_response": "content_type",
+          "description": "Media type returned by the final response, or empty if omitted."
+        },
+        {
+          "name": "byte_length",
+          "source_response": "byte_length",
+          "description": "Exact downloaded byte length; zero while pending."
+        },
+        {
+          "name": "pending",
+          "source_response": "pending",
+          "description": "True only for a declared bodyless 202 response."
+        },
+        {
+          "name": "body",
+          "source_response": "body",
+          "description": "Exact downloaded bytes; NULL while pending. Archives are not decompressed or parsed."
+        }
+      ],
+      "grain": [
+        "repository",
+        "ref",
+        "archive_format"
+      ],
+      "transport": {
+        "kind": "rest",
+        "operation_id": "repos/download-tarball-archive",
+        "path_bindings": {
+          "owner": {
+            "argument": "repository",
+            "transform": "repository_owner"
+          },
+          "repo": {
+            "argument": "repository",
+            "transform": "repository_name"
+          },
+          "ref": {
+            "argument": "ref"
+          }
+        },
+        "content": {
+          "accept": "application/vnd.github+json",
+          "response_statuses": [
+            "302"
+          ]
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "name": "workflow_run_log_archives",
+      "description": "Workflow run log archives. Parent selectors and alternate routes preserve the canonical resource population; payload bytes remain detail fields.",
+      "grain": [
+        "run_id"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "run_id",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_run_log_archives_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "workflow_run_log_archives_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body"
+        ],
+        "sql_names": {
+          "repository": "workflow_run_log_archives_repository",
+          "run_id": "workflow_run_log_archives_run_id",
+          "status_code": "workflow_run_log_archives_status_code",
+          "content_type": "workflow_run_log_archives_content_type",
+          "pending": "workflow_run_log_archives_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_run_log_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "records",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_run_log_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "records",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "actions_repository_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_run_log_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "records",
+                    "column": "run_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        }
+      ]
+    },
+    {
+      "name": "workflow_attempt_log_archives",
+      "description": "Workflow attempt log archives. Parent selectors and alternate routes preserve the canonical resource population; payload bytes remain detail fields.",
+      "grain": [
+        "run_id",
+        "attempt_number"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "run_id",
+          "attempt_number",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_attempt_log_archives_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "workflow_attempt_log_archives_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "run_id",
+          "attempt_number",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body"
+        ],
+        "sql_names": {
+          "repository": "workflow_attempt_log_archives_repository",
+          "run_id": "workflow_attempt_log_archives_run_id",
+          "attempt_number": "workflow_attempt_log_archives_attempt_number",
+          "status_code": "workflow_attempt_log_archives_status_code",
+          "content_type": "workflow_attempt_log_archives_content_type",
+          "pending": "workflow_attempt_log_archives_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "attempt_number"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            },
+            {
+              "name": "attempt_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One explicit attempt number, starting at one; this selector does not enumerate attempts.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "run_id",
+              "source_stage": "records",
+              "source_column": "run_id"
+            },
+            {
+              "name": "attempt_number",
+              "source_stage": "records",
+              "source_column": "attempt_number"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_attempt_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  },
+                  "attempt_number": {
+                    "parameter": "attempt_number"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_attempt_log_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "records",
+                    "column": "run_id"
+                  },
+                  "attempt_number": {
+                    "stage": "records",
+                    "column": "attempt_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        }
+      ]
+    },
+    {
+      "name": "workflow_job_logs",
+      "description": "Workflow job logs. Parent selectors and alternate routes preserve the canonical resource population; payload bytes remain detail fields.",
+      "grain": [
+        "job_id"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "job_id",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_job_logs_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "workflow_job_logs_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "job_id",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body",
+          "body_text"
+        ],
+        "sql_names": {
+          "repository": "workflow_job_logs_repository",
+          "job_id": "workflow_job_logs_job_id",
+          "status_code": "workflow_job_logs_status_code",
+          "content_type": "workflow_job_logs_content_type",
+          "pending": "workflow_job_logs_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "job_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "job_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One workflow job identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "content",
+              "source_column": "body_text"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_job_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "job_id": {
+                    "parameter": "job_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_job_logs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "job_id": {
+                    "stage": "records",
+                    "column": "job_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "attempts",
+          "select": [
+            "attempt_number"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            },
+            {
+              "name": "attempt_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One explicit attempt number, starting at one; this selector does not enumerate attempts.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "content",
+              "source_column": "body_text"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_attempt_jobs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  },
+                  "attempt_number": {
+                    "parameter": "attempt_number"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_job_logs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "job_id": {
+                    "stage": "records",
+                    "column": "job_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "runs",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "content",
+              "source_column": "body_text"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_jobs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_job_logs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "job_id": {
+                    "stage": "records",
+                    "column": "job_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "content",
+              "source_column": "body_text"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_jobs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_job_logs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "job_id": {
+                    "stage": "records",
+                    "column": "job_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "records",
+              "source_column": "job_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "content",
+              "source_column": "body_text"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "runs",
+                "entity": "actions_repository_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_jobs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_job_logs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "job_id": {
+                    "stage": "records",
+                    "column": "job_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        }
+      ]
+    },
+    {
+      "name": "workflow_artifact_archives",
+      "description": "Workflow artifact archives. Parent selectors and alternate routes preserve the canonical resource population; payload bytes remain detail fields.",
+      "grain": [
+        "artifact_id"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "artifact_id",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_artifact_archives_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "workflow_artifact_archives_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "artifact_id",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body"
+        ],
+        "sql_names": {
+          "repository": "workflow_artifact_archives_repository",
+          "artifact_id": "workflow_artifact_archives_artifact_id",
+          "status_code": "workflow_artifact_archives_status_code",
+          "content_type": "workflow_artifact_archives_content_type",
+          "pending": "workflow_artifact_archives_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "artifact_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "artifact_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "One Actions artifact identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "artifact_id",
+              "source_stage": "records",
+              "source_column": "artifact_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_artifact_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "artifact_id": {
+                    "parameter": "artifact_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_artifact_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "artifact_id": {
+                    "stage": "records",
+                    "column": "artifact_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "runs",
+          "select": [
+            "run_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "run_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Workflow run identity; a rerun retains this identity.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "artifact_id",
+              "source_stage": "records",
+              "source_column": "artifact_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_artifacts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "parameter": "run_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_artifact_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "artifact_id": {
+                    "stage": "records",
+                    "column": "artifact_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "workflows",
+          "select": [
+            "workflow_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "workflow_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Numeric workflow identity; distinct from the mutable workflow name.",
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "artifact_id",
+              "source_stage": "records",
+              "source_column": "artifact_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "runs",
+                "entity": "actions_workflow_runs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "workflow_id": {
+                    "parameter": "workflow_id"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "actions_run_artifacts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "run_id": {
+                    "stage": "runs",
+                    "column": "run_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_artifact_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "artifact_id": {
+                    "stage": "records",
+                    "column": "artifact_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "artifact_id",
+              "source_stage": "records",
+              "source_column": "artifact_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "actions_repository_artifacts_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_artifact_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "artifact_id": {
+                    "stage": "records",
+                    "column": "artifact_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        }
+      ]
+    },
+    {
+      "name": "release_asset_content",
+      "description": "Release asset content. Parent selectors and alternate routes preserve the canonical resource population; payload bytes remain detail fields.",
+      "grain": [
+        "repository_id",
+        "release_asset_id"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "release_asset_id",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "release_asset_content_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "release_asset_content_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "release_asset_id",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body"
+        ],
+        "sql_names": {
+          "repository": "release_asset_content_repository",
+          "release_asset_id": "release_asset_content_release_asset_id",
+          "status_code": "release_asset_content_status_code",
+          "content_type": "release_asset_content_content_type",
+          "pending": "release_asset_content_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "release_asset_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_asset_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Stable release asset ID within repository; requires repository. The direct asset response does not identify its parent release.",
+              "example": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_asset_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_asset_id": {
+                    "parameter": "release_asset_id"
+                  },
+                  "release_id": {
+                    "literal": null
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "release_asset_content_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_asset_id": {
+                    "stage": "assets",
+                    "column": "release_asset_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "releases",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "minimum": 1,
+              "description": "Stable release ID within repository; requires repository. Mutually exclusive with release_tag and release_selection.",
+              "example": 1
+            }
+          ],
+          "select": [
+            "release_id"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "release_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "parameter": "release_id"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_assets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "releases",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "stage": "releases",
+                    "column": "release_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "release_asset_content_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_asset_id": {
+                    "stage": "assets",
+                    "column": "release_asset_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "tags",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_tag",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "Exact release tag; requires repository. Mutually exclusive with release_id and release_selection.",
+              "example": "v1.0.0"
+            }
+          ],
+          "select": [
+            "release_tag"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "release_tag_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_tag": {
+                    "parameter": "release_tag"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_assets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "releases",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "stage": "releases",
+                    "column": "release_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "release_asset_content_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_asset_id": {
+                    "stage": "assets",
+                    "column": "release_asset_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "latest",
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "release_selection",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "enum": [
+                "latest"
+              ],
+              "description": "Use latest for GitHub's latest published non-prerelease release; requires repository. Mutually exclusive with release_id and release_tag.",
+              "example": "latest"
+            }
+          ],
+          "select": [
+            "release_selection"
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "releases",
+                "entity": "latest_release_lookup",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_assets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "releases",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "stage": "releases",
+                    "column": "release_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "release_asset_content_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_asset_id": {
+                    "stage": "assets",
+                    "column": "release_asset_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "repositories",
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "release_asset_id",
+              "source_stage": "assets",
+              "source_column": "release_asset_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "releases",
+                "entity": "releases_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "assets",
+                "entity": "release_assets_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "releases",
+                    "column": "repository"
+                  },
+                  "release_id": {
+                    "stage": "releases",
+                    "column": "release_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "release_asset_content_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "release_asset_id": {
+                    "stage": "assets",
+                    "column": "release_asset_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        }
+      ]
+    },
+    {
+      "name": "code_scanning_sarif_content",
+      "description": "Code scanning sarif content. Parent selectors and alternate routes preserve the canonical resource population; payload bytes remain detail fields.",
+      "grain": [
+        "repository_id",
+        "analysis_id"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "analysis_id",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "code_scanning_sarif_content_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "code_scanning_sarif_content_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "analysis_id",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body",
+          "body_text"
+        ],
+        "sql_names": {
+          "repository": "code_scanning_sarif_content_repository",
+          "analysis_id": "code_scanning_sarif_content_analysis_id",
+          "status_code": "code_scanning_sarif_content_status_code",
+          "content_type": "code_scanning_sarif_content_content_type",
+          "pending": "code_scanning_sarif_content_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "code_scanning_analysis_id"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "code_scanning_analysis_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "description": "Exact code scanning analysis ID within the selected repository.",
+              "example": 501,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "analysis_id",
+              "source_stage": "records",
+              "source_column": "analysis_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "content",
+              "source_column": "body_text"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "code_scanning_analysis_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "code_scanning_analysis_id": {
+                    "parameter": "code_scanning_analysis_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "code_scanning_sarif_content_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "analysis_id": {
+                    "stage": "records",
+                    "column": "analysis_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "code_scanning_ref",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional branch or pull-request Git ref selecting alerts, instances or analyses. Alert discovery is filtered by this ref; canonical alert metadata is hydrated from the alert object endpoint.",
+              "example": "refs/heads/main",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "code_scanning_pr",
+              "type": "BIGINT",
+              "nullable": true,
+              "description": "Optional pull-request number restricting code scanning alert, instance or analysis discovery.",
+              "example": 12,
+              "minimum": 1,
+              "default": null
+            },
+            {
+              "name": "code_scanning_tool_name",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional analysis tool name; the GitHub API rejects simultaneous tool name and tool GUID selectors.",
+              "example": "CodeQL",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "code_scanning_tool_guid",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Optional analysis tool GUID; mutually exclusive with the tool name selector at the GitHub API.",
+              "example": "tool-1",
+              "min_length": 1,
+              "default": null
+            },
+            {
+              "name": "code_scanning_sarif_id",
+              "type": "VARCHAR",
+              "nullable": true,
+              "description": "Exact SARIF upload ID; selects upload status or analyses belonging to this upload.",
+              "example": "upload-1",
+              "min_length": 1,
+              "default": null
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "analysis_id",
+              "source_stage": "records",
+              "source_column": "analysis_id"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "content",
+              "source_column": "body_text"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "code_scanning_analyses_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "code_scanning_ref": {
+                    "parameter": "code_scanning_ref"
+                  },
+                  "code_scanning_pr": {
+                    "parameter": "code_scanning_pr"
+                  },
+                  "code_scanning_tool_name": {
+                    "parameter": "code_scanning_tool_name"
+                  },
+                  "code_scanning_tool_guid": {
+                    "parameter": "code_scanning_tool_guid"
+                  },
+                  "code_scanning_sarif_id": {
+                    "parameter": "code_scanning_sarif_id"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "code_scanning_sarif_content_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "analysis_id": {
+                    "stage": "records",
+                    "column": "analysis_id"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        }
+      ]
+    },
+    {
+      "name": "codeql_database_archives",
+      "description": "Codeql database archives. Parent selectors and alternate routes preserve the canonical resource population; payload bytes remain detail fields.",
+      "grain": [
+        "repository_id",
+        "database_id"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "language",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "codeql_database_archives_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "codeql_database_archives_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "database_id",
+          "language",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body"
+        ],
+        "sql_names": {
+          "repository": "codeql_database_archives_repository",
+          "language": "codeql_database_archives_language",
+          "status_code": "codeql_database_archives_status_code",
+          "content_type": "codeql_database_archives_content_type",
+          "pending": "codeql_database_archives_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "languages",
+          "select": [
+            "codeql_database_language"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "codeql_database_language",
+              "type": "VARCHAR",
+              "nullable": false,
+              "description": "Exact CodeQL database language; retrieves the current uploaded database for that language.",
+              "example": "python",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "database_id",
+              "source_stage": "records",
+              "source_column": "database_id"
+            },
+            {
+              "name": "language",
+              "source_stage": "records",
+              "source_column": "language"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "records",
+                "entity": "codeql_database_lookup_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "codeql_database_language": {
+                    "parameter": "codeql_database_language"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "codeql_database_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "language": {
+                    "stage": "records",
+                    "column": "language"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        },
+        {
+          "name": "repositories",
+          "select": [
+            "owner",
+            "repository",
+            "organization",
+            "repositories"
+          ],
+          "arguments": [
+            {
+              "name": "owner",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "GitHub organization or user owner; user listings contain public owned repositories only. Mutually exclusive with repository and organization.",
+              "example": "Query-farm"
+            },
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization.",
+              "example": "Query-farm/crossfield"
+            },
+            {
+              "name": "organization",
+              "type": "VARCHAR",
+              "nullable": true,
+              "default": null,
+              "min_length": 1,
+              "description": "Explicit GitHub organization scope. Mutually exclusive with owner and repository.",
+              "example": "Query-farm"
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "repositories",
+              "source_column": "repository"
+            },
+            {
+              "name": "database_id",
+              "source_stage": "records",
+              "source_column": "database_id"
+            },
+            {
+              "name": "language",
+              "source_stage": "records",
+              "source_column": "language"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "scope": "repositories"
+              },
+              {
+                "name": "records",
+                "entity": "codeql_databases_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "codeql_database_archives_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "language": {
+                    "stage": "records",
+                    "column": "language"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One requested representation per visible selected parent. All parent pages are exhausted; any unavailable or expired download fails the scan."
+        }
+      ]
+    },
+    {
+      "name": "workflow_step_logs",
+      "description": "Explicitly identified read-only content. Pending downloads are represented with NULL body and pending=true; downloaded bytes have no inferred internal schema.",
+      "grain": [
+        "repository_id",
+        "job_id",
+        "step_number"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "job_id",
+          "step_number",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "workflow_step_logs_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "workflow_step_logs_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "job_id",
+          "step_number",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body",
+          "body_text"
+        ],
+        "sql_names": {
+          "repository": "workflow_step_logs_repository",
+          "job_id": "workflow_step_logs_job_id",
+          "step_number": "workflow_step_logs_step_number",
+          "status_code": "workflow_step_logs_status_code",
+          "content_type": "workflow_step_logs_content_type",
+          "pending": "workflow_step_logs_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "job_id",
+            "step_number"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "Query-farm/crossfield",
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+            },
+            {
+              "name": "job_id",
+              "type": "BIGINT",
+              "nullable": false,
+              "example": 1,
+              "minimum": 1,
+              "description": "One workflow job identity."
+            },
+            {
+              "name": "step_number",
+              "type": "BIGINT",
+              "nullable": false,
+              "example": 1,
+              "minimum": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "content",
+              "source_column": "repository"
+            },
+            {
+              "name": "job_id",
+              "source_stage": "content",
+              "source_column": "job_id"
+            },
+            {
+              "name": "step_number",
+              "source_stage": "content",
+              "source_column": "step_number"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            },
+            {
+              "name": "body_text",
+              "source_stage": "content",
+              "source_column": "body_text"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "workflow_step_logs_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "job_id": {
+                    "parameter": "job_id"
+                  },
+                  "step_number": {
+                    "parameter": "step_number"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One current representation for the explicit repository-qualified identifier."
+        }
+      ]
+    },
+    {
+      "name": "dependency_sbom_report_content",
+      "description": "Explicitly identified read-only content. Pending downloads are represented with NULL body and pending=true; downloaded bytes have no inferred internal schema.",
+      "grain": [
+        "repository_id",
+        "sbom_uuid"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "sbom_uuid",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "dependency_sbom_report_content_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "dependency_sbom_report_content_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "sbom_uuid",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body"
+        ],
+        "sql_names": {
+          "repository": "dependency_sbom_report_content_repository",
+          "sbom_uuid": "dependency_sbom_report_content_sbom_uuid",
+          "status_code": "dependency_sbom_report_content_status_code",
+          "content_type": "dependency_sbom_report_content_content_type",
+          "pending": "dependency_sbom_report_content_pending"
+        },
+        "crossfield": {
+          "metrics": {
+            "dependency_sbom_report_pending_count": {
+              "expression": "COUNT(*) FILTER (WHERE dependency_sbom_report_content.pending = TRUE)"
+            }
+          },
+          "metric_semantics": {
+            "dependency_sbom_report_pending_count": {
+              "dataset": "dependency_sbom_report_content",
+              "comment": "Report requests whose declared bodyless HTTP 202 response remains pending.",
+              "additivity": "additive",
+              "missing": "zero"
+            }
+          }
+        }
+      },
+      "routes": [
+        {
+          "name": "lookup",
+          "select": [
+            "sbom_uuid"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "Query-farm/crossfield",
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+            },
+            {
+              "name": "sbom_uuid",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "example",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "content",
+              "source_column": "repository"
+            },
+            {
+              "name": "sbom_uuid",
+              "source_stage": "content",
+              "source_column": "sbom_uuid"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "dependency_sbom_report_content_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "sbom_uuid": {
+                    "parameter": "sbom_uuid"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "One current representation for the explicit repository-qualified identifier."
+        }
+      ]
+    },
+    {
+      "name": "repository_archives",
+      "description": "ZIP and tarball retrieval routes share one content entity. The format and supplied Git ref qualify each repository snapshot; bytes retain the upstream archive representation.",
+      "grain": [
+        "repository_id",
+        "ref",
+        "archive_format"
+      ],
+      "semantics": {
+        "dimensions": [
+          "repository",
+          "ref",
+          "archive_format",
+          "status_code",
+          "content_type",
+          "pending"
+        ],
+        "metrics": [
+          {
+            "name": "repository_archives_count",
+            "kind": "count",
+            "comment": "Retrieved representation rows, including explicitly pending rows."
+          },
+          {
+            "name": "repository_archives_median_bytes",
+            "kind": "median",
+            "field": "byte_length",
+            "comment": "Median downloaded byte length; pending responses have zero downloaded bytes."
+          }
+        ],
+        "detail_fields": [
+          "repository_id",
+          "repository",
+          "ref",
+          "archive_format",
+          "status_code",
+          "content_type",
+          "byte_length",
+          "pending",
+          "body"
+        ],
+        "sql_names": {
+          "repository": "repository_archives_repository",
+          "ref": "repository_archives_ref",
+          "archive_format": "repository_archives_archive_format",
+          "status_code": "repository_archives_status_code",
+          "content_type": "repository_archives_content_type",
+          "pending": "repository_archives_pending"
+        }
+      },
+      "routes": [
+        {
+          "name": "zip",
+          "select": [
+            "zip_archive_ref"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "Query-farm/crossfield",
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+            },
+            {
+              "name": "zip_archive_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "main",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "content",
+              "source_column": "repository"
+            },
+            {
+              "name": "ref",
+              "source_stage": "content",
+              "source_column": "ref"
+            },
+            {
+              "name": "archive_format",
+              "source_stage": "content",
+              "source_column": "archive_format"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "repository_zip_archive_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "ref": {
+                    "parameter": "zip_archive_ref"
+                  },
+                  "archive_format": {
+                    "literal": "zip"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "Archive of the selected ref at retrieval time; moving branch and tag refs are snapshot selectors, not immutable identities."
+        },
+        {
+          "name": "tar",
+          "select": [
+            "tar_archive_ref"
+          ],
+          "arguments": [
+            {
+              "name": "repository",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "Query-farm/crossfield",
+              "min_length": 1,
+              "description": "One repository as owner/name. Mutually exclusive with owner and organization."
+            },
+            {
+              "name": "tar_archive_ref",
+              "type": "VARCHAR",
+              "nullable": false,
+              "example": "main",
+              "min_length": 1
+            }
+          ],
+          "columns": [
+            {
+              "name": "repository_id",
+              "source_stage": "repositories",
+              "source_column": "repository_id"
+            },
+            {
+              "name": "repository",
+              "source_stage": "content",
+              "source_column": "repository"
+            },
+            {
+              "name": "ref",
+              "source_stage": "content",
+              "source_column": "ref"
+            },
+            {
+              "name": "archive_format",
+              "source_stage": "content",
+              "source_column": "archive_format"
+            },
+            {
+              "name": "status_code",
+              "source_stage": "content",
+              "source_column": "status_code"
+            },
+            {
+              "name": "content_type",
+              "source_stage": "content",
+              "source_column": "content_type"
+            },
+            {
+              "name": "byte_length",
+              "source_stage": "content",
+              "source_column": "byte_length"
+            },
+            {
+              "name": "pending",
+              "source_stage": "content",
+              "source_column": "pending"
+            },
+            {
+              "name": "body",
+              "source_stage": "content",
+              "source_column": "body"
+            }
+          ],
+          "traversal": {
+            "stages": [
+              {
+                "name": "repositories",
+                "entity": "repository_lookup",
+                "arguments": {
+                  "repository": {
+                    "parameter": "repository"
+                  }
+                }
+              },
+              {
+                "name": "content",
+                "entity": "repository_tar_archive_source",
+                "arguments": {
+                  "repository": {
+                    "stage": "repositories",
+                    "column": "repository"
+                  },
+                  "ref": {
+                    "parameter": "tar_archive_ref"
+                  },
+                  "archive_format": {
+                    "literal": "tar"
+                  }
+                }
+              }
+            ],
+            "output_stage": "content"
+          },
+          "population": "Archive of the selected ref at retrieval time; moving branch and tag refs are snapshot selectors, not immutable identities."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "name": "workflow_run_log_archives_to_workflow_runs",
+      "from": "workflow_run_log_archives",
+      "to": "workflow_runs",
+      "from_columns": [
+        "run_id"
+      ],
+      "to_columns": [
+        "run_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_attempt_log_archives_to_workflow_run_attempts",
+      "from": "workflow_attempt_log_archives",
+      "to": "workflow_run_attempts",
+      "from_columns": [
+        "run_id",
+        "attempt_number"
+      ],
+      "to_columns": [
+        "run_id",
+        "attempt_number"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id",
+            "attempt_number": "attempt_number"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "run_id": "run_id",
+            "attempt_number": "attempt_number"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_job_logs_to_workflow_jobs",
+      "from": "workflow_job_logs",
+      "to": "workflow_jobs",
+      "from_columns": [
+        "job_id"
+      ],
+      "to_columns": [
+        "job_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "job_id": "job_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "job_id": "job_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_artifact_archives_to_workflow_artifacts",
+      "from": "workflow_artifact_archives",
+      "to": "workflow_artifacts",
+      "from_columns": [
+        "artifact_id"
+      ],
+      "to_columns": [
+        "artifact_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "artifact_id": "artifact_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "artifact_id": "artifact_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "release_asset_content_to_release_assets",
+      "from": "release_asset_content",
+      "to": "release_assets",
+      "from_columns": [
+        "repository_id",
+        "release_asset_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "release_asset_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "release_asset_id": "release_asset_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "release_asset_id": "release_asset_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "code_scanning_sarif_content_to_code_scanning_analyses",
+      "from": "code_scanning_sarif_content",
+      "to": "code_scanning_analyses",
+      "from_columns": [
+        "repository_id",
+        "analysis_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "analysis_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "code_scanning_analysis_id": "analysis_id"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "code_scanning_analysis_id": "analysis_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "codeql_database_archives_to_codeql_databases",
+      "from": "codeql_database_archives",
+      "to": "codeql_databases",
+      "from_columns": [
+        "repository_id",
+        "database_id"
+      ],
+      "to_columns": [
+        "repository_id",
+        "database_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "languages",
+          "bindings": {
+            "repository": "repository",
+            "codeql_database_language": "language"
+          }
+        },
+        {
+          "direction": "reverse",
+          "route": "languages",
+          "bindings": {
+            "repository": "repository",
+            "codeql_database_language": "language"
+          }
+        }
+      ]
+    },
+    {
+      "name": "workflow_step_logs_to_workflow_jobs",
+      "from": "workflow_step_logs",
+      "to": "workflow_jobs",
+      "from_columns": [
+        "job_id"
+      ],
+      "to_columns": [
+        "job_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository",
+            "job_id": "job_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "dependency_sbom_report_content_to_repositories",
+      "from": "dependency_sbom_report_content",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    },
+    {
+      "name": "repository_archives_to_repositories",
+      "from": "repository_archives",
+      "to": "repositories",
+      "from_columns": [
+        "repository_id"
+      ],
+      "to_columns": [
+        "repository_id"
+      ],
+      "retrievals": [
+        {
+          "direction": "forward",
+          "route": "lookup",
+          "bindings": {
+            "repository": "repository"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -21,11 +21,11 @@
             }
           }
         },
-        "authored_pull_requests": {
+        "pull_requests": {
           "dataset": {
             "fields": {
-              "authored_pr_created_eastern_day": {
-                "expression": "CAST(authored_pull_requests.authored_pr_created_eastern AS DATE)",
+              "pull_request_created_eastern_day": {
+                "expression": "CAST(pull_requests.pull_request_created_eastern AS DATE)",
                 "type": "DATE",
                 "dimension": true,
                 "is_time": true,
@@ -345,14 +345,14 @@
       "latest_approved_reviewer_count": {
         "expression": "COUNT(*) FILTER (WHERE latest_reviewer_reviews.state = 'APPROVED')"
       },
-      "monthly_authored_pr_total": {
-        "expression": "SUM(authored_pr_count) OVER (PARTITION BY authored_pull_requests.user_id, authored_pull_requests.user_login, authored_pull_requests.authored_pr_created_month)"
+      "monthly_pr_total": {
+        "expression": "SUM(pull_request_count) OVER (PARTITION BY pull_requests.author_id, pull_requests.author_login, pull_requests.pull_request_created_month)"
       },
       "monthly_repository_pr_share": {
-        "expression": "authored_pr_count / NULLIF(monthly_authored_pr_total, 0)"
+        "expression": "pull_request_count / NULLIF(monthly_pr_total, 0)"
       },
       "monthly_user_pr_rank": {
-        "expression": "DENSE_RANK() OVER (PARTITION BY authored_pull_requests.authored_pr_created_month ORDER BY authored_pr_count DESC)"
+        "expression": "DENSE_RANK() OVER (PARTITION BY pull_requests.pull_request_created_month ORDER BY pull_request_count DESC)"
       }
     },
     "policy": {
@@ -371,7 +371,7 @@
         "submitted_reviewer_login",
         "latest_reviewer_review_count",
         "latest_approved_reviewer_count",
-        "monthly_authored_pr_total",
+        "monthly_pr_total",
         "monthly_repository_pr_share",
         "monthly_user_pr_rank"
       ],
@@ -395,13 +395,13 @@
         "latest_reviewer_reviews.reviewer_id",
         "latest_reviewer_reviews.review_id",
         "latest_reviewer_reviews.submitted_at",
-        "authored_pull_requests.user_id",
-        "authored_pull_requests.user_login",
-        "authored_pull_requests.repository_node_id",
-        "authored_pull_requests.repository_name",
-        "authored_pull_requests.authored_pr_created_month",
-        "authored_pull_requests.authored_pr_created_eastern",
-        "authored_pull_requests.authored_pr_created_eastern_day",
+        "pull_requests.author_id",
+        "pull_requests.author_login",
+        "pull_requests.repository_node_id",
+        "pull_requests.repository",
+        "pull_requests.pull_request_created_month",
+        "pull_requests.pull_request_created_eastern",
+        "pull_requests.pull_request_created_eastern_day",
         "pull_request_reviews.review_submitted_eastern",
         "pull_request_reviews.review_submitted_eastern_day"
       ],
@@ -425,13 +425,13 @@
         "latest_reviewer_reviews.reviewer_id",
         "latest_reviewer_reviews.review_id",
         "latest_reviewer_reviews.submitted_at",
-        "authored_pull_requests.user_id",
-        "authored_pull_requests.user_login",
-        "authored_pull_requests.repository_node_id",
-        "authored_pull_requests.repository_name",
-        "authored_pull_requests.authored_pr_created_month",
-        "authored_pull_requests.authored_pr_created_eastern",
-        "authored_pull_requests.authored_pr_created_eastern_day",
+        "pull_requests.author_id",
+        "pull_requests.author_login",
+        "pull_requests.repository_node_id",
+        "pull_requests.repository",
+        "pull_requests.pull_request_created_month",
+        "pull_requests.pull_request_created_eastern",
+        "pull_requests.pull_request_created_eastern_day",
         "pull_request_reviews.review_submitted_eastern",
         "pull_request_reviews.review_submitted_eastern_day"
       ],
@@ -463,13 +463,13 @@
         "latest_reviewer_reviews.submitted_at",
         "latest_reviewer_reviews.state",
         "latest_reviewer_reviews.reviewer_login",
-        "authored_pull_requests.user_id",
-        "authored_pull_requests.user_login",
-        "authored_pull_requests.repository_node_id",
-        "authored_pull_requests.repository_name",
-        "authored_pull_requests.authored_pr_created_month",
-        "authored_pull_requests.authored_pr_created_eastern",
-        "authored_pull_requests.authored_pr_created_eastern_day",
+        "pull_requests.author_id",
+        "pull_requests.author_login",
+        "pull_requests.repository_node_id",
+        "pull_requests.repository",
+        "pull_requests.pull_request_created_month",
+        "pull_requests.pull_request_created_eastern",
+        "pull_requests.pull_request_created_eastern_day",
         "pull_request_reviews.review_submitted_eastern",
         "pull_request_reviews.review_submitted_eastern_day"
       ],
@@ -560,35 +560,35 @@
           "additivity": "additive",
           "dataset": "latest_reviewer_reviews"
         },
-        "monthly_authored_pr_total": {
+        "monthly_pr_total": {
           "comment": "Visible authored PR total for this user and UTC creation month across all repository groups in the selected population.",
           "additivity": "non_additive",
           "window_grain": [
-            "authored_pull_requests.user_id",
-            "authored_pull_requests.user_login",
-            "authored_pull_requests.authored_pr_created_month",
-            "authored_pull_requests.repository_node_id",
-            "authored_pull_requests.repository_name"
+            "pull_requests.author_id",
+            "pull_requests.author_login",
+            "pull_requests.pull_request_created_month",
+            "pull_requests.repository_node_id",
+            "pull_requests.repository"
           ]
         },
         "monthly_repository_pr_share": {
           "comment": "Repository share of a user's visible authored PRs in a UTC creation month. Denominator is formed before QUALIFY or output LIMIT; no claim about invisible repositories or contribution quality.",
           "additivity": "non_additive",
           "window_grain": [
-            "authored_pull_requests.user_id",
-            "authored_pull_requests.user_login",
-            "authored_pull_requests.authored_pr_created_month",
-            "authored_pull_requests.repository_node_id",
-            "authored_pull_requests.repository_name"
+            "pull_requests.author_id",
+            "pull_requests.author_login",
+            "pull_requests.pull_request_created_month",
+            "pull_requests.repository_node_id",
+            "pull_requests.repository"
           ]
         },
         "monthly_user_pr_rank": {
           "comment": "Dense rank of selected users by observed authored-PR count in each UTC creation month. Ties share rank; users with no observed PRs are absent. This is activity volume, not performance or impact.",
           "additivity": "non_additive",
           "window_grain": [
-            "authored_pull_requests.user_id",
-            "authored_pull_requests.user_login",
-            "authored_pull_requests.authored_pr_created_month"
+            "pull_requests.author_id",
+            "pull_requests.author_login",
+            "pull_requests.pull_request_created_month"
           ]
         }
       },
@@ -669,18 +669,12 @@
         "latest_reviewer_reviews.reviewer_login": {
           "sql_name": "latest_reviewer_reviews_reviewer_login"
         },
-        "authored_pull_requests.user_id": {
-          "sql_name": "activity_user_id"
-        },
-        "authored_pull_requests.user_login": {
-          "sql_name": "activity_user"
-        },
-        "authored_pull_requests.authored_pr_created_eastern": {
-          "sql_name": "authored_pr_created_eastern",
+        "pull_requests.pull_request_created_eastern": {
+          "sql_name": "pull_request_created_eastern",
           "comment": "Fixed US Eastern reporting wall clock (America/New_York with DST). Explicit reporting choice; never inferred from a GitHub profile location."
         },
-        "authored_pull_requests.authored_pr_created_eastern_day": {
-          "sql_name": "authored_pr_created_eastern_day",
+        "pull_requests.pull_request_created_eastern_day": {
+          "sql_name": "pull_request_created_eastern_day",
           "comment": "US Eastern reporting date using America/New_York daylight-saving rules. UTC dates remain available separately."
         },
         "pull_request_reviews.review_submitted_eastern": {
@@ -691,19 +685,19 @@
           "sql_name": "review_submitted_eastern_day",
           "comment": "US Eastern reporting date using America/New_York daylight-saving rules. UTC dates remain available separately."
         },
-        "authored_pull_requests.repository_node_id": {
+        "pull_requests.repository_node_id": {
           "sql_name": "activity_repository_id"
         }
       },
       "window_metrics": [
         "review_latest_rank",
-        "monthly_authored_pr_total",
+        "monthly_pr_total",
         "monthly_repository_pr_share",
         "monthly_user_pr_rank"
       ],
       "local_time_fields": {
-        "authored_pull_requests.authored_pr_created_eastern": {
-          "instant": "authored_pull_requests.created_at",
+        "pull_requests.pull_request_created_eastern": {
+          "instant": "pull_requests.created_at",
           "zone": "America/New_York",
           "dimension": true
         },

@@ -89,8 +89,12 @@ def test_domain_ownership_rejects_partial_redefinition_with_both_locations(tmp_p
         "domains": ["first.json", "second.json"],
     }
     (tmp_path / "pilot.json").write_text(json.dumps(manifest))
-    (tmp_path / "first.json").write_text(json.dumps({"crossfield": {"metrics": {"total": {"expression": "1"}}}}))
-    (tmp_path / "second.json").write_text(json.dumps({"crossfield": {"metrics": {"total": {"type": "BIGINT"}}}}))
+    (tmp_path / "first.json").write_text(
+        json.dumps({"crossfield": {"metrics": {"total": {"expression": "1"}}}})
+    )
+    (tmp_path / "second.json").write_text(
+        json.dumps({"crossfield": {"metrics": {"total": {"type": "BIGINT"}}}})
+    )
     with pytest.raises(ValueError, match=r"second.json: duplicate native definition.*first.json"):
         load_overlay(tmp_path / "pilot.json")
 
@@ -107,17 +111,22 @@ def test_domains_merge_disjoint_definitions_but_not_case_variant_names():
 def test_analysis_defines_populations_and_grain_without_a_python_recipe():
     native = json.loads((ROOT / "generation/domains/analysis.json").read_text())["crossfield"]
     assert set(native["invocations"]["derived_datasets"]) == {
-        "first_review_prs", "submitted_reviews", "latest_reviewer_reviews"
+        "first_review_prs",
+        "submitted_reviews",
+        "latest_reviewer_reviews",
     }
     stage = native["invocations"]["derived_datasets"]["first_review_prs"]
     assert stage["dataset"]["grain"] == ["repository_id", "pull_request_number"]
     assert stage["semantic_query"]["metrics"]["first_review_hours"] == "pr_first_review_hours"
-    assert "submitted_at IS NOT NULL" in native["policy"]["metric_semantics"]["pr_first_review_hours"]["population"]
+    assert (
+        "submitted_at IS NOT NULL"
+        in native["policy"]["metric_semantics"]["pr_first_review_hours"]["population"]
+    )
     assert "review_id DESC" in native["metrics"]["review_latest_rank"]["expression"]
-    assert native["policy"]["local_time_fields"]["authored_pull_requests.authored_pr_created_eastern"]["zone"] == (
+    assert native["policy"]["local_time_fields"]["pull_requests.pull_request_created_eastern"]["zone"] == (
         "America/New_York"
     )
-    assert native["policy"]["field_semantics"]["authored_pull_requests.repository_node_id"]["sql_name"] == (
+    assert native["policy"]["field_semantics"]["pull_requests.repository_node_id"]["sql_name"] == (
         "activity_repository_id"
     )
     assembled = load_overlay(ROOT / "generation/pilot.json")
@@ -131,3 +140,45 @@ def test_analysis_guide_uses_exact_natively_tested_sql():
     for statement in analysis_statements().values():
         assert statement in native_test
         assert statement in guide
+
+
+def test_native_conformance_passes_exact_fields_types_and_null_semantics():
+    declaration = {
+        "id": "fixture/repository",
+        "domain": "github.repository",
+        "fields": ["repositories.repository", "packages.package_repository"],
+        "datatype": "String",
+        "null_policy": "equal",
+    }
+    fragment = {"conformances": [declaration]}
+    before = deepcopy(fragment)
+    model = apply_native_overlay(base_model(), fragment)
+    assert model["conformances"] == [declaration]
+    assert fragment == before
+    # Reapplying an identical generated declaration does not duplicate it.
+    assert apply_native_overlay(model, fragment)["conformances"] == [declaration]
+
+
+@pytest.mark.parametrize("changed_fields", [False, True])
+def test_native_conformance_ownership_rejects_duplicate_id_between_domains(changed_fields):
+    target, origins = {}, {}
+    declaration = {"id": "fixture/repository", "domain": "repository", "fields": ["a.id", "b.id"]}
+    merge_native(target, {"conformances": [declaration]}, source="first", origins=origins)
+    second = deepcopy(declaration)
+    if changed_fields:
+        second["fields"] = ["a.id", "c.id"]
+    with pytest.raises(ValueError, match="second: duplicate named declaration.*conformances.*first"):
+        merge_native(target, {"conformances": [second]}, source="second", origins=origins)
+
+
+def test_native_conformance_ids_preserve_native_case_sensitive_identity():
+    target, origins = {}, {}
+    for identity in ["fixture/repository", "fixture/Repository"]:
+        declaration = {"id": identity, "domain": "repository", "fields": ["a.id", "b.id"]}
+        merge_native(target, {"conformances": [declaration]}, source=identity, origins=origins)
+    assert [item["id"] for item in target["conformances"]] == ["fixture/repository", "fixture/Repository"]
+
+
+def test_native_conformance_section_requires_array():
+    with pytest.raises(ValueError, match="crossfield.conformances must be an array"):
+        apply_native_overlay(base_model(), {"conformances": {"fixture/repository": {}}})

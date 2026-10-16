@@ -1,0 +1,115 @@
+# Detailed repository change records and opaque cursor filtering.
+require crossfield
+
+require json
+
+require icu
+
+require-env CROSSFIELD_GITHUB_PACKAGE
+
+require-env CROSSFIELD_GITHUB_WORKER
+
+require-env CROSSFIELD_GITHUB_API_LOG
+
+statement ok
+SET TimeZone='UTC';
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{CROSSFIELD_GITHUB_WORKER}', reporting true, auth 'off');
+
+statement ok
+ATTACH '{CROSSFIELD_GITHUB_PACKAGE}' AS engineering (TYPE crossfield, BINDINGS '{"github_source":{"catalog":"github","provider_id":"queryfarm.vgi.github","instance_id":"github.com"}}');
+
+statement ok
+SET crossfield_mode='strict';
+
+query IIII
+SELECT repository_change_count,repository_push_count,repository_force_push_count,repository_branch_deletion_count FROM engineering.semantic.github(organization=>'changes-fixture');
+----
+4	1	1	1
+
+query TIIII
+SELECT repository_name,repository_change_count,repository_push_count,repository_force_push_count,repository_branch_deletion_count FROM engineering.semantic.github(owner=>'changes-fixture') GROUP BY repository_name ORDER BY repository_name;
+----
+changes-fixture/alpha	3	1	1	1
+changes-fixture/beta	1	0	0	0
+
+query TI
+SELECT repository_changes_activity_type,repository_change_count FROM engineering.semantic.github(organization=>'changes-fixture') GROUP BY repository_changes_activity_type ORDER BY repository_changes_activity_type;
+----
+branch_deletion	1
+force_push	1
+pr_merge	1
+push	1
+
+query I
+SELECT repository_change_count FROM engineering.semantic.github(repository=>'changes-fixture/alpha',repository_activity_ref=>'refs/heads/main',repository_activity_actor=>'changes-fixture-actor',repository_activity_period=>'month',repository_activity_type=>'push',repository_activity_direction=>'asc');
+----
+1
+
+query I
+SELECT repository_change_count FROM engineering.semantic.github(repository=>'changes-fixture/alpha',repository_activity_after=>'cursor:1');
+----
+2
+
+query I
+SELECT repository_change_count FROM engineering.semantic.github(repository=>'changes-fixture/alpha',repository_activity_before=>'cursor:1');
+----
+1
+
+query I
+SELECT repository_change_count FROM engineering.semantic.github(repository=>'changes-fixture/alpha',repository_activity_type=>'merge_queue_merge');
+----
+0
+
+query I
+SELECT repository_change_count FROM engineering.semantic.github(repositories=>[]);
+----
+0
+
+statement ok
+CREATE TEMP TABLE repository_change_detail AS SELECT * FROM engineering.detail.repository_changes(organization=>'changes-fixture');
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TIITT
+SELECT repository,change_id,actor_id,activity_type,ref_name FROM repository_change_detail ORDER BY repository,change_id;
+----
+changes-fixture/alpha	1	6850	push	refs/heads/main
+changes-fixture/alpha	2	NULL	force_push	refs/heads/main
+changes-fixture/alpha	3	6850	branch_deletion	refs/heads/old
+changes-fixture/beta	1	6850	pr_merge	refs/heads/main
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query I
+SELECT count(*) FROM repository_change_detail WHERE actor IS NULL AND actor_id IS NULL;
+----
+1
+
+statement ok
+SET crossfield_mode='strict';
+
+# Inspect materialized approved detail with normal DuckDB expressions.
+statement ok
+SET crossfield_mode='semantic';
+
+query TT
+SELECT before_sha,after_sha FROM repository_change_detail WHERE activity_type='branch_deletion';
+----
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	0000000000000000000000000000000000000000
+
+statement ok
+SET crossfield_mode='strict';
+
+statement error
+SELECT repository_change_count FROM engineering.semantic.github(repository=>'changes-fixture/alpha',repository_activity_type=>'unknown');
+----
+repository_activity_type

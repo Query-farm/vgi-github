@@ -31,7 +31,7 @@ statement ok
 EXPLAIN (SEMANTIC) SELECT proof_p90_merge_hours FROM proof.semantic.github(user=>'researcher');
 
 statement ok
-DESCRIBE SELECT proof_title_lower FROM proof.detail.authored_pull_requests(user=>'researcher');
+DESCRIBE SELECT proof_title_lower FROM proof.detail.pull_requests(user=>'researcher');
 
 statement ok
 SET crossfield_mode='off';
@@ -47,18 +47,18 @@ SET crossfield_mode='strict';
 # August merge durations are 12h/12h. September creation cohort is 12h/24h;
 # the open PR contributes no duration. Linear P90 is 12 + 0.9 * (24 - 12) = 22.8h.
 query TR rowsort
-SELECT authored_pr_created_month, proof_p90_merge_hours FROM proof.semantic.github(user=>'researcher') WHERE authored_pr_created_day>=DATE '2026-08-01' AND authored_pr_created_day<DATE '2026-10-01' GROUP BY authored_pr_created_month;
+SELECT pull_request_created_month, proof_p90_merge_hours FROM proof.semantic.github(user=>'researcher') WHERE pull_request_created_day>=DATE '2026-08-01' AND pull_request_created_day<DATE '2026-10-01' GROUP BY pull_request_created_month;
 ----
 2026-08-01	12.000
 2026-09-01	22.800
 
 query TI rowsort
-SELECT proof_title_lower, authored_pr_count FROM proof.semantic.github(user=>'researcher') WHERE authored_pr_created_day=DATE '2026-08-31' GROUP BY proof_title_lower;
+SELECT proof_title_lower, pull_request_count FROM proof.semantic.github(user=>'researcher') WHERE pull_request_created_day=DATE '2026-08-31' GROUP BY proof_title_lower;
 ----
 docs: clarify setup	1
 
 query T
-SELECT proof_title_lower FROM proof.detail.authored_pull_requests(user=>'researcher') WHERE authored_pr_created_day=DATE '2026-08-31';
+SELECT proof_title_lower FROM proof.detail.pull_requests(user=>'researcher') WHERE pull_request_created_day=DATE '2026-08-31';
 ----
 docs: clarify setup
 
@@ -92,6 +92,6 @@ SELECT count(*) FROM duckdb_databases() WHERE database_name IN ('malformed','unr
 0
 
 query R
-SELECT proof_p90_merge_hours FROM proof.semantic.github(user=>'researcher') WHERE authored_pr_created_day>=DATE '2026-09-01' AND authored_pr_created_day<DATE '2026-10-01';
+SELECT proof_p90_merge_hours FROM proof.semantic.github(user=>'researcher') WHERE pull_request_created_day>=DATE '2026-09-01' AND pull_request_created_day<DATE '2026-10-01';
 ----
 22.800
