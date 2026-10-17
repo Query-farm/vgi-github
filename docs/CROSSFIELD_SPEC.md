@@ -157,6 +157,15 @@ HTTP qualification, a historical snapshot or an all-platform release.
 
 ## Validation
 
+The manual [native model validation workflow](../.github/workflows/crossfield-models.yml)
+runs the versioned Crossfield authoring validator against both checked-in model
+profiles and retains source diagnostics as annotations, a summary and JSON.
+It needs an explicitly published validator version and a reviewed action commit;
+no release is assumed to exist and it does not rebuild DuckDB. Enable it on model
+pull requests after pinning the first qualified release. Authoring validation
+does not establish provider binding or numerical answers; the native VGI and
+SQLLogicTest checks below remain the integration evidence.
+
 The connected generated profile passed on EC2 Linux ARM64, October 13, 2026:
 **963 native SQLLogicTest assertions per optimizer mode** across five suites, and
 **237 generator/schema/actual-SDK producer checks**. This includes 299 assertions

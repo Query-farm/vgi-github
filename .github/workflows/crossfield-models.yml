@@ -1,0 +1,50 @@
+name: Native Crossfield model validation
+
+# Enable on pull_request after the first validator release is qualified and
+# pin both inputs below to that release. No engine build happens in this job.
+on:
+  workflow_dispatch:
+    inputs:
+      crossfield_version:
+        description: Published exact native validator version (without v)
+        required: true
+        type: string
+      crossfield_ref:
+        description: Reviewed Crossfield commit containing the matching action
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check out the reviewed validator action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Query-farm/crossfield
+          ref: ${{ inputs.crossfield_ref }}
+          path: .crossfield-action
+          persist-credentials: false
+      - name: Validate the generated semantic models
+        id: validation
+        uses: ./.crossfield-action/actions/validate-model
+        with:
+          crossfield-version: ${{ inputs.crossfield_version }}
+          models: |
+            models/github-reporting.crossfield.json
+            models/generated-pilot/github-generated.crossfield.json
+          phase: authoring
+      - name: Retain structured diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: crossfield-model-validation
+          path: crossfield-validation.json
+          if-no-files-found: warn
