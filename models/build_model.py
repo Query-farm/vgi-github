@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent
 MODEL_NAME = "github"
 MODEL_ID = "queryfarm.github.reporting"
 NAMESPACE = uuid.UUID("5f2482ab-ab61-4a85-8e56-f10b37f0a8bb")
-ENGINE = "6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd"
+ENGINE = "94abd4ed366569345faf5dc1e254ae6ca7311a76"
 RAW_SOURCES = {"rest_responses", "graphql_responses", "api_endpoints"}
 PUBLIC_ARGUMENTS = {
     "discussion_comments": {"number": "discussion_number"},

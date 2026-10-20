@@ -13,7 +13,7 @@ from vgi_github.generation.examples import analysis_documentation, research_arti
 from vgi_github.generation.native_overlay import apply_native_overlay
 from vgi_github.generation.schema import _binding
 
-ENGINE = "6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd"
+ENGINE = "94abd4ed366569345faf5dc1e254ae6ca7311a76"
 NAMESPACE = uuid.UUID("9952d457-873c-5e13-965e-07fbdc1cfe2b")
 IDENTIFIER = re.compile(r"[a-z][a-z0-9_]*\Z")
 

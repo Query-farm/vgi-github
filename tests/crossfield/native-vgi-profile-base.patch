@@ -4,7 +4,7 @@ Date: Wed, 7 Oct 2026 03:13:17 -0400
 Subject: [PATCH] Add isolated DuckDB 2 invocation interoperability profile
 
 ---
- CMakeLists.txt                             |  59 ++++++++++--
+ CMakeLists.txt                             |  61 ++++++++++--
  docs/duckdb2_invocation_profile.md         |  53 ++++++++++
  src/include/storage/vgi_catalog.hpp        |   2 +-
  src/include/storage/vgi_table_entry.hpp    |   3 +
@@ -48,13 +48,13 @@ Subject: [PATCH] Add isolated DuckDB 2 invocation interoperability profile
  src/vgi_unary_rpc.cpp                      |  24 ++---
  test/duckdb2/build_io.py                   |  34 +++++++
  test/duckdb2/invocation_io.cpp             | 107 +++++++++++++++++++++
- 44 files changed, 809 insertions(+), 156 deletions(-)
+ 44 files changed, 811 insertions(+), 156 deletions(-)
  create mode 100644 docs/duckdb2_invocation_profile.md
  create mode 100644 test/duckdb2/build_io.py
  create mode 100644 test/duckdb2/invocation_io.cpp
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 95b4840..8a5d2f3 100644
+index 95b4840..e07f6f8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -275,11 +275,16 @@ if(MSVC)
@@ -78,7 +78,7 @@ index 95b4840..8a5d2f3 100644
  
  set(EXTENSION_SOURCES
  src/vgi_extension.cpp
-@@ -387,12 +392,43 @@ if(EMSCRIPTEN)
+@@ -387,12 +392,45 @@ if(EMSCRIPTEN)
      src/vgi_sab_stream.cpp)
  endif()
  
@@ -112,10 +112,12 @@ index 95b4840..8a5d2f3 100644
 +
 +build_extension_library(${TARGET_NAME} ${EXTENSION_SOURCES})
 +get_target_property(VGI_ARCHIVE_INTERFACE ${EXTENSION_NAME} INTERFACE_LINK_LIBRARIES)
-+list(REMOVE_ITEM VGI_ARCHIVE_INTERFACE duckdb_static)
++list(REMOVE_ITEM VGI_ARCHIVE_INTERFACE duckdb_static
++  "$<$<NOT:$<BOOL:$<TARGET_PROPERTY:DUCKDB_DYNAMIC_LOADABLE_EXTENSION>>>:duckdb_static>")
 +set_property(TARGET ${EXTENSION_NAME} PROPERTY INTERFACE_LINK_LIBRARIES "${VGI_ARCHIVE_INTERFACE}")
 +get_target_property(VGI_ARCHIVE_LINKS ${EXTENSION_NAME} LINK_LIBRARIES)
-+list(REMOVE_ITEM VGI_ARCHIVE_LINKS duckdb_static)
++list(REMOVE_ITEM VGI_ARCHIVE_LINKS duckdb_static
++  "$<$<NOT:$<BOOL:$<TARGET_PROPERTY:DUCKDB_DYNAMIC_LOADABLE_EXTENSION>>>:duckdb_static>")
 +set_property(TARGET ${EXTENSION_NAME} PROPERTY LINK_LIBRARIES "${VGI_ARCHIVE_LINKS}")
  
  # Link OpenSSL in both the static library as the loadable extension
@@ -125,7 +127,7 @@ index 95b4840..8a5d2f3 100644
  
  if(VGI_ENABLE_IROH)
    add_dependencies(${EXTENSION_NAME} vgi_iroh_rust)
-@@ -626,3 +662,12 @@ if((BUILD_VGI_HTTP_INTERRUPT_TESTS OR DEFINED ENV{BUILD_VGI_HTTP_INTERRUPT_TESTS
+@@ -626,3 +664,12 @@ if((BUILD_VGI_HTTP_INTERRUPT_TESTS OR DEFINED ENV{BUILD_VGI_HTTP_INTERRUPT_TESTS
      duckdb_static
      dummy_static_extension_loader)
  endif()

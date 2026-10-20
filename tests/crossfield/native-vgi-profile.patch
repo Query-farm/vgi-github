@@ -105,7 +105,7 @@ index dee5ed4..108ccab 100644
 +## Current GitHub worker qualification
 +
 +The working-tree adapter also builds against DuckDB
-+`6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd` with Crossfield's ordered core patches.
++`94abd4ed366569345faf5dc1e254ae6ca7311a76` with Crossfield's ordered core patches.
 +It uses the engine's external `BindInfo` scan classification and ordinary scalar
 +registration; the retired scalar callback-pointer identity setter is removed.
 +Crossfield's fifth generic patch preserves named scalar options on correlated
@@ -157,7 +157,7 @@ index dee5ed4..108ccab 100644
 +cmake -S /path/to/duckdb -B /path/to/build-vgi \
 +  -DDUCKDB_EXTENSION_CONFIGS=/path/to/vgi-profile-config.cmake \
 +  -DVGI_ENABLE_IROH=OFF -DVGI_DUCKDB2_INVOCATION_PROFILE=ON \
-+  -DGIT_COMMIT_HASH=6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd \
++  -DGIT_COMMIT_HASH=94abd4ed366569345faf5dc1e254ae6ca7311a76 \
 +  -DDUCKDB_EXPLICIT_VERSION=v2.0.0-dev0 \
 +  -DArrow_DIR=/path/to/arrow/share/arrow
 +cmake --build /path/to/build-vgi --target vgi_loadable_extension -j20

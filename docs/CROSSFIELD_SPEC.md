@@ -10,7 +10,7 @@ worker registrations, endpoint domains or stale generated artifacts.
 
 ## Runtime contract
 
-- Use matching patched DuckDB `6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd`,
+- Use matching patched DuckDB `94abd4ed366569345faf5dc1e254ae6ca7311a76`,
   Crossfield and native VGI. Crossfield's `patches/duckdb/series` is authoritative;
   its fifth patch fixes correlated table in-out calls with named scalar options.
 - Attach the worker with `reporting true, operation_timeout_seconds 120`.
@@ -55,7 +55,9 @@ The isolated adapter is reproducible from the upstream VGI checkout plus the
 two checked-in patches; retain VGI's license and notices. The first patch supplies
 the earlier isolated DuckDB 2 profile. The second adds its scalar adapter and
 current engine/signature compatibility. This is a qualified invocation profile,
-not a port of every VGI feature. Build on EC2:
+not a port of every VGI feature. The profile removes direct and conditional
+`duckdb_static` references from both archive link properties, so the loadable
+extension resolves engine symbols from the matching host. Build on EC2:
 
 ```sh
 git clone https://github.com/Query-farm/vgi.git /path/to/vgi-profile
@@ -67,12 +69,12 @@ cmake -S /path/to/patched-duckdb -B /path/to/build-vgi \
   -DDUCKDB_EXTENSION_CONFIGS=/path/to/vgi-config.cmake \
   -DCMAKE_BUILD_TYPE=Release -DBUILD_UNITTESTS=OFF -DEXTENSION_STATIC_BUILD=OFF \
   -DVGI_ENABLE_IROH=OFF -DVGI_DUCKDB2_INVOCATION_PROFILE=ON \
-  -DGIT_COMMIT_HASH=6b6099a3e9787f1b32c59fab61fcdd1d3bc835cd \
+  -DGIT_COMMIT_HASH=94abd4ed366569345faf5dc1e254ae6ca7311a76 \
   -DDUCKDB_EXPLICIT_VERSION=v2.0.0-dev0 -DArrow_DIR=/path/to/arrow/share/arrow
 cmake --build /path/to/build-vgi --target vgi_loadable_extension -j 20
 ```
 
-`patched-duckdb` must have Crossfield's complete six-patch series applied.
+`patched-duckdb` must have Crossfield's complete seven-patch series applied.
 Supply the installed Arrow CMake package for the target platform. The tested EC2
 installation is `vgi/build/release/vcpkg_installed/arm64-linux/share/arrow`.
 The output is `build-vgi/extension/vgi/vgi.duckdb_extension`. Native SQL fixtures
@@ -156,6 +158,16 @@ SQL. These deterministic tests do not claim a live github.com integration run,
 HTTP qualification, a historical snapshot or an all-platform release.
 
 ## Validation
+
+The DuckDB baseline refresh to `94abd4ed366569345faf5dc1e254ae6ca7311a76`
+passes **1,524 native SQLLogicTest assertions across nine suites per optimizer
+mode** on EC2 Linux ARM64, October 20 UTC, with rebuilt Crossfield and native
+VGI. Generated-artifact and pinned-source verification also pass for all nine
+artifacts. Evidence is in Crossfield's `logs/dev/20261020T023415Z-2589-github-sql.log`,
+`20261020T023824Z-3296-github-sql.log` and `20261020T023401Z-2539-github-check.log`.
+These selected workloads use deterministic HTTP with the actual worker; they do
+not qualify every generated operation, live github.com or HTTP/Iroh transport.
+The dated checkpoints below retain their original artifacts and scope.
 
 The manual [native model validation workflow](../.github/workflows/crossfield-models.yml)
 runs the versioned Crossfield authoring validator against both checked-in model
