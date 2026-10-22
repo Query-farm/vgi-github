@@ -229,7 +229,7 @@ def test_object_entries_reject_unmodeled_pagination(monkeypatch):
             200, json={"a": 1}, headers={"Link": '<https://api.github.com/dictionary?page=2>; rel="next"'}
         ),
     )
-    with pytest.raises(GeneratedContractError, match="cannot paginate"):
+    with pytest.raises(GeneratedContractError, match="unexpected pagination Link on nonpaginated response"):
         emitted(compiled, {"scope": "example"})
 
 
