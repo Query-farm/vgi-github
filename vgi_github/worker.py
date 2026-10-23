@@ -574,8 +574,8 @@ class GitHubCatalog(ReadOnlyCatalogInterface):
     catalog = _GITHUB_CATALOG
     catalog_name = _GITHUB_CATALOG.name
     # ReadOnlyCatalogInterface enables the single-RPC catalog_contents API.
-    # SchemaInfo embeds our per-attach auth/token_source/cache_ttl payload, so
-    # its serialized snapshot must not be reused across different attaches.
+    # Keep snapshots scoped to their attachment. Session policy is carried by
+    # the request envelope, not schema metadata.
     catalog_contents_attach_independent = False
     secret_types = [auth.SECRET_SPEC]
     attach_option_specs = [

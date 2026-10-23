@@ -9,6 +9,7 @@ from pathlib import Path
 import pyarrow as pa
 import pytest
 from vgi.catalog import SchemaObjectType
+from vgi.catalog.contents_codec import decode_inventory
 from vgi.client import Client
 from vgi.protocol import CatalogAttachRequest, CatalogContentsResponse
 
@@ -37,16 +38,17 @@ class TestCatalogContents:
         decoded = CatalogContentsResponse.deserialize_from_bytes(response.serialize_to_bytes())
         assert decoded.catalog_version == attached.catalog_version
         assert not decoded.not_modified
-        assert [s.path for s in decoded.schemas] == [["main"], ["rest"], ["api"]]
-        main = decoded.schemas[0]
-        assert [s.schema for s in decoded.schemas] == worker.catalog_schemas(attach).items
-        assert main.tables == worker.catalog_schema_contents_tables(attach, ["main"]).items
+        schemas = decode_inventory(decoded)
+        assert [s.schema.path for s in schemas] == [["main"], ["rest"], ["api"]]
+        main = schemas[0]
+        assert [s.schema for s in schemas] == worker.catalog_schemas(attach).to_infos()
+        assert main.tables == worker.catalog_schema_contents_tables(attach, ["main"]).to_infos()
         assert len(main.tables) == 1
         assert (
             main.table_functions
             == worker.catalog_schema_contents_functions(
                 attach, ["main"], SchemaObjectType.TABLE_FUNCTION
-            ).items
+            ).to_infos()
         )
         assert len(main.table_functions) == len(SCHEMA.functions)
         for kind in (
@@ -59,8 +61,10 @@ class TestCatalogContents:
         ):
             assert getattr(main, kind) == []
 
-    def test_client_bulk_contents_preserve_each_attach_policy(self) -> None:
+    def test_client_bulk_contents_keep_attach_state_out_of_metadata(self) -> None:
         script = Path(__file__).resolve().parent.parent / "github_worker.py"
+        attach_tokens = set()
+        previous_schemas = None
         with Client([sys.executable, str(script)], pool=None, worker_limit=1) as client:
             for mode, ttl in [("off", 0), ("required", 300), ("auto", 60)]:
                 attached = client.catalog_attach(
@@ -70,10 +74,18 @@ class TestCatalogContents:
                     implementation_version=None,
                 )
                 assert attached.supports_catalog_contents
+                assert attached.attach_opaque_data_required
+                assert attached.attach_opaque_data
+                token = bytes(attached.attach_opaque_data)
+                assert token not in attach_tokens
+                attach_tokens.add(token)
                 contents = client.contents(attach_opaque_data=attached.attach_opaque_data)
                 assert [list(s.schema.path) for s in contents.schemas] == [["main"], ["rest"], ["api"]]
+                assert all(s.schema.attach_opaque_data is None for s in contents.schemas)
+                if previous_schemas is not None:
+                    assert contents.schemas == previous_schemas
+                previous_schemas = contents.schemas
                 main = contents.schemas[0]
-                assert bytes(main.schema.attach_opaque_data) == auth.encode_attach(mode, "", ttl)
                 assert main.schema.comment == SCHEMA.comment
                 assert main.schema.tags == SCHEMA.tags
                 assert [t.name for t in main.tables] == ["rate_limit"]
@@ -143,14 +155,17 @@ class TestMetadata:
 
 
 class TestAttachCaching:
+    @pytest.mark.parametrize("mode", ["auto", "required", "off"])
     @pytest.mark.parametrize("ttl", [0, 300])
-    def test_default_round_trip(self, ttl) -> None:
+    def test_policy_round_trip(self, mode, ttl) -> None:
         result = GitHubCatalog().catalog_attach(
             name="github",
-            options={"cache_ttl": ttl},
+            options={"auth": mode, "cache_ttl": ttl},
             data_version_spec=None,
             implementation_version=None,
         )
+        assert json.loads(result.attach_opaque_data) == {"auth": mode, "token_source": "", "cache_ttl": ttl}
+        assert auth.mode_of(result.attach_opaque_data) == mode
         assert auth.cache_ttl_of(result.attach_opaque_data) == ttl
 
     @pytest.mark.parametrize("ttl", [-1, 1.5, True, "300", None])
