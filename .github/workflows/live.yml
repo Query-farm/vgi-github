@@ -43,13 +43,16 @@ jobs:
         run: uv run --no-sources pytest -q -m live tests/test_live.py
 
       - name: End-to-end SQL
-        run: uv run --no-sources pytest -q -m live tests/test_end_to_end.py
+        # Native wire 2.2 is published for the Haybarn 1.5.6 client. Override
+        # only the test process; the PEP-723 workers keep the SDK's required
+        # Haybarn 1.5.5 filter engine in their independent environments.
+        run: uv run --no-sources --with haybarn==1.5.6rc1 python -m pytest -q -m live tests/test_end_to_end.py
 
       # One HTTP server, several clients. The server runs without
       # VGI_GITHUB_TOKEN, so any authentication seen came from a client's own
       # secret — and must not reach any other client.
       - name: HTTP transport and client isolation
-        run: uv run --no-sources pytest -q -m live tests/test_http_transport.py
+        run: uv run --no-sources --with haybarn==1.5.6rc1 python -m pytest -q -m live tests/test_http_transport.py
 
   behavioural:
     name: vgi-lint (executes every example)
