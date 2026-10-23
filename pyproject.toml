@@ -23,22 +23,22 @@ dependencies = [
     # an in-process DuckDB engine, and without one every filtered scan fails at
     # runtime with "No DuckDB-compatible engine is installed". The offline tests
     # cannot see this, because the dev group brings in `duckdb` as a fallback.
-    "vgi-python[http,haybarn]>=0.40.0",
+    "vgi-python[http,haybarn]>=0.46.1",
     "httpx>=0.28.1",
     "graphql-core>=3.2.6,<3.3",
 ]
 
 [project.optional-dependencies]
-serve = ["vgi-python[http,haybarn,oauth]>=0.40.0", "vgi-rpc[sentry]>=0.48.0"]
+serve = ["vgi-python[http,haybarn,oauth]>=0.46.1", "vgi-rpc[sentry]>=0.52.0"]
 
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
     # Pinned to a minor: the rule set is version-dependent, so an unpinned ruff
     # means CI can fail on a commit that was clean locally.
-    "ruff>=0.16.10,<0.17",
+    "ruff>=0.17.2,<0.18",
     # Drives a real ATTACH in tests/test_end_to_end.py.
-    "duckdb>=1.5.6",
+    "duckdb>=2.0.0",
     # DuckDB materializes TIMESTAMP WITH TIME ZONE through pytz; without it a
     # scan that returns one fails at fetch time, not at bind.
     "pytz>=2026.5",

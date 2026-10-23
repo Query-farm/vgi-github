@@ -1,8 +1,8 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "vgi-python[http,haybarn]>=0.40.0",
-#     "vgi-rpc>=0.48.0",
+#     "vgi-python[http,haybarn]>=0.46.1",
+#     "vgi-rpc>=0.52.0",
 #     "httpx>=0.28.1",
 #     "graphql-core>=3.2.6,<3.3",
 # ]

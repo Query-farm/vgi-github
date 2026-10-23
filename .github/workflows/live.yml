@@ -64,5 +64,5 @@ jobs:
       - run: uv sync --no-sources
       - name: vgi-lint (structural + behavioural)
         run: >
-          uvx --no-sources --from vgi-lint-check==0.82.0 vgi-lint lint "uv run --no-sources github_worker.py"
+          uvx --no-sources --from vgi-lint-check==0.84.1 vgi-lint lint "uv run --no-sources github_worker.py"
           --execute-concurrency 1 --no-check-links --audit-waivers --fail-on error
