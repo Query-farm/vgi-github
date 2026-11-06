@@ -9,9 +9,10 @@ from pathlib import Path
 import pyarrow as pa
 import pytest
 from vgi.catalog import SchemaObjectType
+from vgi.catalog.capabilities import CONSTRAINT_RECORDS_READ, CatalogCapabilities
 from vgi.catalog.contents_codec import decode_inventory
 from vgi.client import Client
-from vgi.protocol import CatalogAttachRequest, CatalogContentsResponse
+from vgi.protocol import CatalogAttachRequest, CatalogContentsResponse, ClientCapabilities
 
 from vgi_github import auth
 from vgi_github.functions import KEYED_FUNCTIONS
@@ -27,7 +28,18 @@ class TestCatalogContents:
         worker = GitHubWorker()
         attached = worker.catalog_attach(
             CatalogAttachRequest(
-                name="github", options=None, data_version_spec=None, implementation_version=None
+                name="github",
+                options=None,
+                data_version_spec=None,
+                implementation_version=None,
+                client_capabilities=ClientCapabilities(
+                    engine="vgi-python",
+                    native_formats=[],
+                    catalogs=[],
+                    can_stream=False,
+                    filter_encodings=[],
+                    catalog=CatalogCapabilities(read=[CONSTRAINT_RECORDS_READ]),
+                ),
             )
         )
         assert attached.supports_catalog_contents
@@ -44,6 +56,11 @@ class TestCatalogContents:
         assert [s.schema for s in schemas] == worker.catalog_schemas(attach).to_infos()
         assert main.tables == worker.catalog_schema_contents_tables(attach, ["main"]).to_infos()
         assert len(main.tables) == 1
+        primary_keys = [c for c in main.tables[0].constraint_infos() if c.definition.kind == "PRIMARY_KEY"]
+        assert len(primary_keys) == 1
+        assert primary_keys[0].definition.column_paths == [["resource"]]
+        assert primary_keys[0].enforcement == "ENFORCED"
+        assert primary_keys[0].validation == "ALL_ROWS"
         assert (
             main.table_functions
             == worker.catalog_schema_contents_functions(
@@ -81,7 +98,10 @@ class TestCatalogContents:
                 attach_tokens.add(token)
                 contents = client.contents(attach_opaque_data=attached.attach_opaque_data)
                 assert [list(s.schema.path) for s in contents.schemas] == [["main"], ["rest"], ["api"]]
-                assert all(s.schema.attach_opaque_data is None for s in contents.schemas)
+                assert all(
+                    "attach_opaque_data" not in pa.ipc.open_stream(s.schema.serialize_to_bytes()).schema.names
+                    for s in contents.schemas
+                )
                 if previous_schemas is not None:
                     assert contents.schemas == previous_schemas
                 previous_schemas = contents.schemas

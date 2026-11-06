@@ -22,7 +22,7 @@ from typing import Any
 
 import pyarrow as pa
 from vgi import Worker
-from vgi.catalog import Catalog, ReadOnlyCatalogInterface, Schema
+from vgi.catalog import Catalog, ReadOnlyCatalogInterface, Schema, constraint_record
 from vgi.catalog.attach_option import AttachOptionSpec
 from vgi.catalog.catalog_interface import AttachOpaqueData, CatalogAttachResult, CatalogInfo
 from vgi.catalog.descriptors import Table
@@ -472,8 +472,26 @@ _GITHUB_CATALOG = Catalog(
                     comment="Remaining GitHub API budget for the credentials in use",
                     tags=_RATE_LIMIT_DOCS,
                     column_comments=column_comments(RATE_LIMIT_SCHEMA),
-                    primary_key=(("resource",),),
-                    not_null=("resource",),
+                    constraints=(
+                        constraint_record(
+                            ["main"],
+                            "rate_limit",
+                            "pk",
+                            "PRIMARY_KEY",
+                            [["resource"]],
+                            enforcement="ENFORCED",
+                            validation="ALL_ROWS",
+                        ),
+                        constraint_record(
+                            ["main"],
+                            "rate_limit",
+                            "resource_not_null",
+                            "NOT_NULL",
+                            [["resource"]],
+                            enforcement="ENFORCED",
+                            validation="ALL_ROWS",
+                        ),
+                    ),
                     cardinality_estimate=12,
                 ),
             ],
@@ -553,8 +571,26 @@ _GITHUB_CATALOG = Catalog(
                         ),
                     },
                     column_comments=column_comments(ENDPOINT_SCHEMA),
-                    primary_key=(("operation_id",),),
-                    not_null=("operation_id",),
+                    constraints=(
+                        constraint_record(
+                            ["api"],
+                            "endpoints",
+                            "pk",
+                            "PRIMARY_KEY",
+                            [["operation_id"]],
+                            enforcement="ENFORCED",
+                            validation="ALL_ROWS",
+                        ),
+                        constraint_record(
+                            ["api"],
+                            "endpoints",
+                            "operation_id_not_null",
+                            "NOT_NULL",
+                            [["operation_id"]],
+                            enforcement="ENFORCED",
+                            validation="ALL_ROWS",
+                        ),
+                    ),
                     cardinality_estimate=len(REST_FUNCTIONS),
                 )
             ],

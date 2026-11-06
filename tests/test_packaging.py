@@ -82,11 +82,11 @@ def _vgi_python_requirements() -> dict[str, str]:
 
 @pytest.mark.parametrize("where", sorted(_vgi_python_requirements()))
 def test_vgi_python_pulls_in_a_filter_engine(where: str) -> None:
-    """vgi-python needs an in-process DuckDB engine, and the dev group's `duckdb` hides its absence."""
+    """vgi-python needs its pinned filter engine independently of the Haybarn test client."""
     spec = _vgi_python_requirements()[where]
     bracket = re.search(r"\[([^\]]*)\]", spec)
     extras = {e.strip() for e in bracket.group(1).split(",")} if bracket else set()
-    assert "haybarn" in extras, f"{where}: {spec!r} lacks the `haybarn` extra"
+    assert "duckdb" in extras, f"{where}: {spec!r} lacks the `duckdb` extra"
 
 
 class TestLicenseMetadata:
