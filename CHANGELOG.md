@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-11-10
 
 - Speak VGI protocol 3.2 (vgi-python 0.50.0, vgi-rpc 0.53.1); protocol 3.1 support came with
   the previous SDK upgrade.
