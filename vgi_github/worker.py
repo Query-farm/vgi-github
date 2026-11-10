@@ -312,7 +312,11 @@ _CATEGORIES = json.dumps(
 _CATALOG_TAGS = {
     "provider": "github",
     "domain": "software-development",
-    "vgi.title": "GitHub (read-only APIs)",
+    "vgi.title": "GitHub API",
+    "vgi.subtitle": (
+        "Query GitHub repositories, issues, pull requests, commits, Actions, Projects "
+        "and Discussions read-only, plus every REST GET endpoint."
+    ),
     "vgi.source_url": SOURCE_URL,
     "vgi.author": "Query Farm LLC <hello@query.farm>",
     "vgi.copyright": (

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Speak VGI protocol 3.2 (vgi-python 0.50.0, vgi-rpc 0.53.1); protocol 3.1 support came with
+  the previous SDK upgrade.
+- Catalog metadata for vgi-lint 2.2: the display title is now the short name `GitHub API`
+  (was `GitHub (read-only APIs)`), and a one-sentence `vgi.subtitle` describes the catalog
+  in listings. CI now lints with vgi-lint-check 2.2.0 (protocol 3.2) and fails on info-level
+  findings.
+
 - Add typed `main.discussions`, `discussion_comments` and `discussion_replies` through
   GraphQL, and `projects`, `project_items` and `project_fields` through REST. All support
   bounded automatic pagination, named filters and correlated `LATERAL`; custom Project
