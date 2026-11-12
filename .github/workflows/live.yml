@@ -46,13 +46,13 @@ jobs:
         # Native wire 2.2 is published for the Haybarn 1.5.6 client. Override
         # only the test process; the PEP-723 workers keep the SDK's required
         # Haybarn 1.5.5 filter engine in their independent environments.
-        run: uv run --no-sources --with haybarn==1.5.6rc1 python -m pytest -q -m live tests/test_end_to_end.py
+        run: uv run --no-sources --with 'haybarn>=2.0.0rc11,<2.1' python -m pytest -q -m live tests/test_end_to_end.py
 
       # One HTTP server, several clients. The server runs without
       # VGI_GITHUB_TOKEN, so any authentication seen came from a client's own
       # secret — and must not reach any other client.
       - name: HTTP transport and client isolation
-        run: uv run --no-sources --with haybarn==1.5.6rc1 python -m pytest -q -m live tests/test_http_transport.py
+        run: uv run --no-sources --with 'haybarn>=2.0.0rc11,<2.1' python -m pytest -q -m live tests/test_http_transport.py
 
   behavioural:
     name: vgi-lint (executes every example)
@@ -67,5 +67,5 @@ jobs:
       - run: uv sync --no-sources
       - name: vgi-lint (structural + behavioural)
         run: >
-          uvx --no-sources --from vgi-lint-check==0.84.1 vgi-lint lint "uv run --no-sources github_worker.py"
+          uvx --no-sources --from vgi-lint-check==2.5.0 vgi-lint lint "uv run --no-sources github_worker.py"
           --execute-concurrency 1 --no-check-links --audit-waivers --fail-on error
