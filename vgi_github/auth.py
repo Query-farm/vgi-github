@@ -58,7 +58,27 @@ SECRET_SPEC = SecretTypeSpec(
         "to 60 requests an hour and cannot see private repositories. Provide token (a personal "
         "access token, OAuth token such as `gh auth token` prints, or an App installation token)."
     ),
-    schema=pa.schema([pa.field(TOKEN, pa.string(), metadata={"redact": "true"})]),
+    schema=pa.schema(
+        [
+            pa.field(
+                TOKEN,
+                pa.string(),
+                metadata={
+                    "redact": "true",
+                    "vgi_doc": (
+                        "Personal access token from GitHub Settings > Developer settings > "
+                        "Personal access tokens, or the output of `gh auth token`"
+                    ),
+                },
+            )
+        ],
+        metadata={
+            "vgi_doc_url": (
+                "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/"
+                "managing-your-personal-access-tokens"
+            )
+        },
+    ),
 )
 
 

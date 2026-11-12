@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 — 2026-11-12
+
+- Speak VGI protocol 3.3 (vgi-python 0.51.0). The published `vgi` extension matches
+  major+minor exactly, so 0.2.x workers are rejected at `ATTACH` by the current extension.
+- The `github` secret type documents its `token` parameter and links to how to create a
+  personal access token (vgi-lint-check 2.5 VGI1011/VGI1012).
+
 ## 0.2.0 — 2026-11-10
 
 - Speak VGI protocol 3.2 (vgi-python 0.50.0, vgi-rpc 0.53.1); protocol 3.1 support came with

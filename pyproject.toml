@@ -20,14 +20,14 @@ classifiers = [
 requires-python = ">=3.13"
 dependencies = [
     # The SDK needs its pinned DuckDB 1.5 filter evaluator inside the worker.
-    # Native SQL tests use Haybarn 2.0 separately as the VGI 3.2 client.
-    "vgi-python[http,duckdb]>=0.50.0",
+    # Native SQL tests use Haybarn 2.0 separately as the VGI 3.3 client.
+    "vgi-python[http,duckdb]>=0.51.0",
     "httpx>=0.28.1",
     "graphql-core>=3.2.6,<3.3",
 ]
 
 [project.optional-dependencies]
-serve = ["vgi-python[http,duckdb,oauth]>=0.50.0", "vgi-rpc[sentry]>=0.53.1"]
+serve = ["vgi-python[http,duckdb,oauth]>=0.51.0", "vgi-rpc[sentry]>=0.53.1"]
 
 [dependency-groups]
 dev = [
