@@ -1,0 +1,31 @@
+{
+  "source": "GitHub public REST API; complete unmodified response bodies; no authentication",
+  "repository": "duckdb/duckdb",
+  "api_version": "2022-11-28",
+  "entries": [
+    {
+      "filename": "pulls-page-1.json",
+      "url": "https://api.github.com/repos/duckdb/duckdb/pulls?state=all&sort=created&direction=desc&per_page=100&page=1",
+      "page": 1,
+      "started_at_utc": "2026-11-14T06:55:37.197060+00:00",
+      "completed_at_utc": "2026-11-14T06:55:38.130965+00:00",
+      "status": 200,
+      "sha256": "7eeed64aed6bb5d3a4311e4ef27b68a674d6f241cbd844390331a5fe823217f4",
+      "bytes": 1815630,
+      "link": "<https://api.github.com/repositories/138754790/pulls?state=all&sort=created&direction=desc&per_page=100&page=2>; rel=\"next\", <https://api.github.com/repositories/138754790/pulls?state=all&sort=created&direction=desc&per_page=100&page=166>; rel=\"last\"",
+      "rows": 100
+    },
+    {
+      "filename": "pulls-page-2.json",
+      "url": "https://api.github.com/repos/duckdb/duckdb/pulls?state=all&sort=created&direction=desc&per_page=100&page=2",
+      "page": 2,
+      "started_at_utc": "2026-11-14T06:55:38.144987+00:00",
+      "completed_at_utc": "2026-11-14T06:55:39.864399+00:00",
+      "status": 200,
+      "sha256": "07be24022dc09ad510025fc87495d59a2035715a0bf9f963c80957edd0fccffd",
+      "bytes": 1766219,
+      "link": "<https://api.github.com/repositories/138754790/pulls?state=all&sort=created&direction=desc&per_page=100&page=1>; rel=\"prev\", <https://api.github.com/repositories/138754790/pulls?state=all&sort=created&direction=desc&per_page=100&page=3>; rel=\"next\", <https://api.github.com/repositories/138754790/pulls?state=all&sort=created&direction=desc&per_page=100&page=166>; rel=\"last\", <https://api.github.com/repositories/138754790/pulls?state=all&sort=created&direction=desc&per_page=100&page=1>; rel=\"first\"",
+      "rows": 100
+    }
+  ]
+}

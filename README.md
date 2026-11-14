@@ -503,3 +503,7 @@ See [NOTICE](NOTICE). This project is not affiliated with or endorsed by GitHub.
   Built with <a href="https://query.farm/vgi/">VGI — the Vector Gateway Interface</a><br>
   by <a href="https://query.farm">🚜 Query.Farm</a>
 </p>
+
+## Executed notebook
+
+[Explore how recent-PR caps change merge-time populations](notebooks/README.md).
