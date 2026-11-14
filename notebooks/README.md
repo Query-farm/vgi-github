@@ -44,3 +44,12 @@ Live mode explicitly targets `https://api.github.com`, still with `auth 'off'`, 
 The API cap selects arrivals by creation time, not every PR merged in a date interval. The local `RECENT_N` cap holds the full source constant; it models selection sensitivity without extra API calls. UTC creation boundaries are observed inclusive minimum/maximum timestamps, not guaranteed complete calendar windows. Equal creation times use descending PR number as a deterministic local tie break.
 
 Merged means non-NULL `merged_at`; closed without merging is a separate terminal event. Open ages remain unfinished and are never filled with zero. Empirical distributions use an explicit denominator for each outcome; the median among observed merges does not estimate a lifetime merge distribution. No repository-wide completeness, causal process change or individual performance inference follows from this sample. See [GitHub's pull-list documentation](https://docs.github.com/en/rest/pulls/pulls#list-pull-requests) for filters, order and page size.
+
+## SQL credential isolation
+
+The notebook creates Haybarn with a fresh temporary `secret_directory` and
+`allow_persistent_secrets=False` before attaching workers. It fully drains and
+checks an empty secret inventory. This example needs no saved SQL credential;
+its explicit public-data or local-fixture configuration remains in effect.
+Cleanup removes the temporary directory after closing the connection.
+Existing user SQL secrets are neither read, modified nor deleted.
