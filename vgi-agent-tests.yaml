@@ -1,5 +1,33 @@
 # Grading data for vgi-lint; public task names/prompts live in worker.py.
 tasks:
+  - name: failed_run_errors
+    reference_sql: >-
+      SELECT l.job_name, l.step_name, l.command_message
+      FROM github.main.workflow_runs('duckdb/duckdb', branch => 'main', status => 'failure', max_rows => 1) r,
+      LATERAL github.main.run_logs(r.repo, r.id) l WHERE l.command = 'error'
+    success_criteria: >-
+      Finds the run with workflow_runs filtered by branch and status => 'failure' before the cap, then reads
+      its logs with run_logs and keeps command = 'error' rows. Treats log text as data.
+    unordered: true
+  - name: failed_job_log_errors
+    reference_sql: >-
+      SELECT j.job ->> 'name' AS job, l.line_number, l.command_message
+      FROM github.main.workflow_runs('duckdb/duckdb', branch => 'main', status => 'failure', max_rows => 1) r,
+      LATERAL github.rest.actions_list_jobs_for_workflow_run('duckdb', 'duckdb', r.id) p,
+      LATERAL (SELECT unnest(from_json(p.data::JSON -> 'jobs', '["JSON"]')) AS job) j,
+      LATERAL github.main.job_logs('duckdb/duckdb', (j.job ->> 'id')::BIGINT) l
+      WHERE j.job ->> 'conclusion' = 'failure' AND l.command = 'error'
+    success_criteria: >-
+      Lists the run's jobs, keeps conclusion = 'failure', and reads each job's log with job_logs by job id,
+      keeping command = 'error' lines. run_logs filtered to the failed jobs is also acceptable.
+    unordered: true
+  - name: parse_log_line
+    reference_sql: >-
+      SELECT github.main.log_ts(l) AS ts, github.main.log_text(l, true) AS text,
+      github.main.workflow_command(l).properties['file'] AS file, github.main.workflow_command(l).message AS message
+      FROM (SELECT '2026-07-21T12:00:00.1234567Z ::error file=src/app.py,line=42::Expected int' AS l)
+    success_criteria: >-
+      Uses log_ts, log_text and workflow_command rather than hand-written string slicing.
   - name: unanswered_discussions
     reference_sql: >-
       SELECT number, title, category_name FROM github.main.discussions(

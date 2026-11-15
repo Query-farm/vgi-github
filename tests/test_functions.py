@@ -307,6 +307,15 @@ class TestLanguagesAndActions:
         out = _run(fn.WorkflowRunsFunction, args, _input(repo=["o/r"]))
         assert seen[0].url.params["branch"] == "main" and seen[0].url.params["status"] == "failure"
         assert out.batches[0].column("conclusion").to_pylist() == ["failure"]
+        assert "created" not in seen[0].url.params
+
+    def test_workflow_runs_created_cursor_reaches_github(self, monkeypatch) -> None:
+        seen = install(
+            monkeypatch, lambda r: httpx.Response(200, json={"total_count": 0, "workflow_runs": []})
+        )
+        args = fn.WorkflowRunsArgs(repo="", created=" >=2026-07-01T00:00:00Z ")
+        _run(fn.WorkflowRunsFunction, args, _input(repo=["o/r", "o/s"]))
+        assert [r.url.params["created"] for r in seen] == [">=2026-07-01T00:00:00Z"] * 2
 
 
 class TestSearchScan:

@@ -13,6 +13,7 @@ from vgi.catalog.capabilities import CONSTRAINT_RECORDS_READ, CatalogCapabilitie
 from vgi.catalog.contents_codec import decode_inventory
 from vgi.client import Client
 from vgi.protocol import CatalogAttachRequest, CatalogContentsResponse, ClientCapabilities
+from vgi.scalar_function import ScalarFunction
 
 from vgi_github import auth
 from vgi_github.functions import KEYED_FUNCTIONS
@@ -21,6 +22,9 @@ from vgi_github.search import SEARCH_FUNCTIONS
 from vgi_github.worker import _GITHUB_CATALOG, GitHubCatalog, GitHubWorker
 
 SCHEMA = _GITHUB_CATALOG.schemas[0]
+#: The log-line parsers are scalars; everything else in ``main`` is a table function.
+SCALAR_FUNCTIONS = [f for f in SCHEMA.functions if issubclass(f, ScalarFunction)]
+TABLE_FUNCTIONS = [f for f in SCHEMA.functions if not issubclass(f, ScalarFunction)]
 
 
 class TestCatalogContents:
@@ -67,10 +71,16 @@ class TestCatalogContents:
                 attach, ["main"], SchemaObjectType.TABLE_FUNCTION
             ).to_infos()
         )
-        assert len(main.table_functions) == len(SCHEMA.functions)
+        assert len(main.table_functions) == len(TABLE_FUNCTIONS)
+        assert (
+            main.scalar_functions
+            == worker.catalog_schema_contents_functions(
+                attach, ["main"], SchemaObjectType.SCALAR_FUNCTION
+            ).to_infos()
+        )
+        assert {f.name for f in main.scalar_functions} == {f.Meta.name for f in SCALAR_FUNCTIONS}
         for kind in (
             "views",
-            "scalar_functions",
             "aggregate_functions",
             "scalar_macros",
             "table_macros",
@@ -109,7 +119,8 @@ class TestCatalogContents:
                 assert main.schema.comment == SCHEMA.comment
                 assert main.schema.tags == SCHEMA.tags
                 assert [t.name for t in main.tables] == ["rate_limit"]
-                assert {f.name for f in main.table_functions} == {f.Meta.name for f in SCHEMA.functions}
+                assert {f.name for f in main.table_functions} == {f.Meta.name for f in TABLE_FUNCTIONS}
+                assert {f.name for f in main.scalar_functions} == {f.Meta.name for f in SCALAR_FUNCTIONS}
 
 
 class TestLateralComposability:
@@ -135,17 +146,23 @@ class TestMetadata:
         assert {f.Meta.name for f in KEYED_FUNCTIONS + SEARCH_FUNCTIONS} <= names
 
     def test_every_function_asks_for_the_github_secret(self) -> None:
-        for func in SCHEMA.functions:
+        for func in TABLE_FUNCTIONS:
             types = [s.secret_type for s in func.Meta.required_secrets]
             assert types == ["github"], func.Meta.name
 
+    def test_log_line_scalars_never_ask_for_credentials(self) -> None:
+        """They parse text the caller supplies and make no GitHub request."""
+        assert {f.Meta.name for f in SCALAR_FUNCTIONS} == {"log_ts", "log_text", "workflow_command"}
+        for func in SCALAR_FUNCTIONS:
+            assert not getattr(func.Meta, "required_secrets", None), func.Meta.name
+
     def test_every_column_is_documented(self) -> None:
-        for func in SCHEMA.functions:
+        for func in TABLE_FUNCTIONS:
             for f in func.FIXED_SCHEMA:
                 assert comment_of(f), f"{func.Meta.name}.{f.name}"
 
     def test_declared_result_schema_matches_the_arrow_schema(self) -> None:
-        for func in SCHEMA.functions:
+        for func in TABLE_FUNCTIONS:
             declared = json.loads(func.Meta.tags["vgi.result_columns_schema"])
             assert [c["name"] for c in declared] == func.FIXED_SCHEMA.names, func.Meta.name
 
@@ -155,16 +172,16 @@ class TestMetadata:
         Declaring it on a blended function would advertise an optimisation that
         never happens, and the docs steer filtering to named arguments instead.
         """
-        for func in SCHEMA.functions:
+        for func in TABLE_FUNCTIONS:
             assert not func.get_metadata().filter_pushdown, func.Meta.name
 
     def test_no_reserved_word_columns(self) -> None:
         reserved = {"limit", "order", "group", "select", "from", "where", "user"}
-        for func in SCHEMA.functions:
+        for func in TABLE_FUNCTIONS:
             assert not reserved & set(func.FIXED_SCHEMA.names), func.Meta.name
 
     def test_timestamps_are_utc(self) -> None:
-        for func in SCHEMA.functions:
+        for func in TABLE_FUNCTIONS:
             for f in func.FIXED_SCHEMA:
                 if pa.types.is_timestamp(f.type):
                     assert f.type.tz == "UTC", f"{func.Meta.name}.{f.name}"

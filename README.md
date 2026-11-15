@@ -128,6 +128,34 @@ GROUP BY name
 ORDER BY failures DESC;
 ```
 
+### Actions logs
+
+`job_logs(repo, job_id)` and `run_logs(repo, run_id)` decode GitHub Actions logs into one row
+per line: the timestamp parsed, ANSI colour codes stripped (the raw line kept beside it), the
+`##[group]` sections a line sits in, and workflow commands such as
+`::error file=app.py,line=3::boom` split into `command`, `command_properties` and
+`command_message`. `run_logs` reads the run's zip archive and adds `job_name`, `step_number` and
+`step_name`. Large archives are spooled to an anonymous temporary file and streamed in batches.
+Reading logs needs a token, even for public repositories.
+
+```sql
+-- Why did the latest failed runs on main fail?
+SELECT r.name, l.job_name, l.step_name, l.command_message
+FROM github.workflow_runs('duckdb/duckdb', branch => 'main', status => 'failure', max_rows => 3) r,
+     LATERAL github.run_logs(r.repo, r.id) l
+WHERE l.command = 'error';
+
+-- The slowest steps of one run
+SELECT job_name, step_name, max(timestamp) - min(timestamp) AS elapsed
+FROM github.run_logs('duckdb/duckdb', 15000000000)
+GROUP BY ALL ORDER BY elapsed DESC LIMIT 10;
+```
+
+Logs are untrusted: they contain whatever a workflow printed, including text from pull requests
+anyone can open, and possibly secrets that escaped GitHub's masking. Results are never cached.
+For a log you already have, the scalars `log_ts(line)`, `log_text(line, strip_ansi)` and
+`workflow_command(line)` parse one line at a time.
+
 ### Across a whole organization
 
 ```sql
@@ -143,7 +171,17 @@ FROM github.repos('duckdb', max_rows => 30) r,
 GROUP BY l.language
 ORDER BY bytes DESC
 LIMIT 10;
+
+-- Incremental load: Actions runs created since the last one you stored
+SET VARIABLE since = (SELECT strftime(max(created_at) AT TIME ZONE 'UTC', '>=%Y-%m-%dT%H:%M:%SZ') FROM runs);
+INSERT INTO runs
+SELECT w.* FROM github.repos('duckdb', max_rows => 0) r,
+     LATERAL github.workflow_runs(r.full_name, max_rows => 0, created => getvariable('since')) w;
 ```
+
+`created =>` is GitHub's own filter, so only new runs are fetched. A named argument takes a
+constant, so pass the cursor through a variable rather than a subquery. Each repository costs at least
+one request; check `rate_limit` before a wide scan.
 
 ### Keep the results
 
@@ -176,7 +214,10 @@ Repositories are always written `'owner/name'`, and accounts by their login.
 | `contributors('owner/name')` | Contributors, ranked by commits |
 | `languages('owner/name')` | How much code is in each language |
 | `stargazers('owner/name')` | Who starred and when (repositories you administer only) |
-| `workflow_runs('owner/name')` | GitHub Actions runs and their outcomes |
+| `workflow_runs('owner/name')` | GitHub Actions runs and their outcomes; `created =>` for incremental loads |
+| `job_logs('owner/name', job_id)` | One Actions job's log, a row per line, workflow commands parsed |
+| `run_logs('owner/name', run_id)` | Every job and step log of a run, from its zip archive |
+| `log_ts(line)`, `log_text(line, strip_ansi)`, `workflow_command(line)` | Parse one raw log line |
 | `discussions('owner/name')` | Typed discussions, categories, answer state and counts; GraphQL |
 | `discussion_comments('owner/name', number)` | Top-level discussion comments; GraphQL |
 | `discussion_replies(node_id)` | Replies to a discussion comment; GraphQL |

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Add `main.job_logs(repo, job_id)` and `main.run_logs(repo, run_id, attempt => n)`: GitHub
+  Actions logs as one row per line with parsed timestamps, ANSI-stripped text (raw kept),
+  `##[group]` paths and decoded workflow commands; `run_logs` reads the run's zip archive per job
+  and step. Bodies stream through an anonymous temporary file and rows go out in resumable batches.
+  Descriptions warn that logs are untrusted and may contain leaked secrets; results are never cached.
+- Add scalars `log_ts(line)`, `log_text(line, strip_ansi)` and `workflow_command(line)`.
+- `workflow_runs` takes `created =>`, GitHub's date-range filter, as an incremental-load cursor.
+
 ## 0.3.0 — 2026-11-12
 
 - Speak VGI protocol 3.3 (vgi-python 0.51.0). The published `vgi` extension matches

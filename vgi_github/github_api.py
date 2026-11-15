@@ -34,7 +34,7 @@ from collections import OrderedDict
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, BinaryIO
 from urllib.parse import quote, urlsplit
 
 import httpx
@@ -745,6 +745,93 @@ def _get(
             _Cached(etag, response.content, link, response.headers.get("cache-control", ""), content_type),
         )
     return Response(payload, link, response.status_code, response.content, content_type)
+
+
+#: Largest body :func:`download` will spool; a bigger one fails rather than fill the disk.
+MAX_DOWNLOAD_BYTES = 8 * 1024**3
+
+#: Download chunk size.
+_DOWNLOAD_CHUNK = 1024 * 1024
+
+
+def download(
+    path: str,
+    sink: BinaryIO,
+    *,
+    credentials: Credentials | None = None,
+    accept: str = ACCEPT_JSON,
+    max_bytes: int = MAX_DOWNLOAD_BYTES,
+) -> bool:
+    """Stream a GET response body into ``sink`` without holding it in memory.
+
+    The streaming twin of :func:`_get` for bodies too large to buffer — Actions
+    log archives run to gigabytes. It is still ``GET`` only, below the API base,
+    with the same retry and rate-limit policy. GitHub answers log requests with a
+    302 to a short-lived signed blob URL on another origin; the shared client
+    follows it and httpx drops ``Authorization`` on the cross-origin hop, so the
+    token never reaches the blob store.
+
+    Returns False when the object is missing or expired (404/410 and the other
+    :data:`MISSING_STATUSES`), True when the body was written. ``sink`` is
+    truncated before each attempt, so a retried download never duplicates bytes.
+    """
+    if not path.startswith("/"):
+        raise GitHubInputError(f"download path must be below the API base: {path!r}")
+    url = f"{base_url()}{path}"
+    headers = {"Accept": accept, "X-GitHub-Api-Version": API_VERSION}
+    if credentials is not None:
+        headers.update(credentials.headers())
+    http = shared_client()
+    activity = _activity.get()
+    for attempt in range(_RETRY_ATTEMPTS):
+        last_attempt = attempt == _RETRY_ATTEMPTS - 1
+        if activity is not None:
+            activity.requests += 1
+        try:
+            with http.stream("GET", url, headers=headers, timeout=TIMEOUT) as response:
+                if activity is not None:
+                    activity.observe(response)
+                status = response.status_code
+                if status in MISSING_STATUSES:
+                    return False
+                if status >= 400:
+                    response.read()
+                    wait = _retry_after(response, attempt)
+                    if wait is None or last_attempt:
+                        if _is_rate_limited(response):
+                            raise GitHubRateLimitError(
+                                status,
+                                path,
+                                response.text,
+                                reset_at=_reset_at(response),
+                                authenticated=credentials is not None,
+                            )
+                        raise GitHubError(status, path, response.text)
+                else:
+                    sink.seek(0)
+                    sink.truncate()
+                    written = 0
+                    for chunk in response.iter_bytes(_DOWNLOAD_CHUNK):
+                        written += len(chunk)
+                        if written > max_bytes:
+                            raise GitHubError(
+                                status, path, f"response exceeds the {max_bytes:,}-byte download limit"
+                            )
+                        sink.write(chunk)
+                    sink.flush()
+                    return True
+        except httpx.TransportError as exc:
+            if last_attempt:
+                raise
+            wait = _RETRY_BASE_SECONDS * (2**attempt)
+            if activity is not None:
+                activity.warn(
+                    f"GitHub download of {path} failed ({type(exc).__name__}); retrying in {wait:g}s"
+                )
+        if activity is not None:
+            activity.retries += 1
+        _wait(wait)
+    raise GitHubError(0, path, "download retries exhausted")  # pragma: no cover - loop always returns
 
 
 def graphql_query(

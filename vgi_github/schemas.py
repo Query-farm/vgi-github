@@ -683,6 +683,86 @@ def flatten_workflow_run(w: dict[str, Any], repo: str) -> dict[str, Any]:
 
 
 # --------------------------------------------------------------------------
+# Actions logs
+# --------------------------------------------------------------------------
+
+#: ``workflow_command()``'s result, and the shape of the command columns.
+COMMAND_PROPERTIES_TYPE = pa.map_(pa.string(), pa.string())
+WORKFLOW_COMMAND_TYPE = pa.struct(
+    [
+        pa.field("command", pa.string()),
+        pa.field("properties", COMMAND_PROPERTIES_TYPE),
+        pa.field("message", pa.string()),
+    ]
+)
+
+_LOG_LINE_FIELDS = [
+    field("line_number", pa.int64(), "1-based line number within the log file.", nullable=False),
+    field(
+        "timestamp",
+        TIMESTAMP,
+        "When the runner wrote the line, from its RFC 3339 prefix (truncated to microseconds); "
+        "NULL for a line without one.",
+    ),
+    field(
+        "text",
+        pa.string(),
+        "The line after its timestamp prefix, ANSI escape sequences removed. Untrusted: "
+        "may contain secrets that escaped masking.",
+        nullable=False,
+    ),
+    field(
+        "raw",
+        pa.string(),
+        "The line exactly as GitHub served it, prefix and ANSI codes included.",
+        nullable=False,
+    ),
+    field(
+        "group_path",
+        pa.list_(pa.string()),
+        "Open ##[group] sections around the line, outermost first; empty outside any group.",
+        nullable=False,
+    ),
+    field(
+        "command",
+        pa.string(),
+        "Lower-cased workflow command or runner marker: 'error', 'warning', 'notice', 'debug', "
+        "'group', 'endgroup', 'command', 'section', ...; NULL on ordinary output.",
+    ),
+    field(
+        "command_properties",
+        COMMAND_PROPERTIES_TYPE,
+        "Decoded command properties, e.g. {file: app.py, line: 3}; empty for ##[...] markers; "
+        "NULL on ordinary output.",
+    ),
+    field("command_message", pa.string(), "Decoded command message; NULL on ordinary output."),
+]
+
+JOB_LOG_SCHEMA = pa.schema(
+    [
+        field("repo", pa.string(), "Repository the job belongs to, as 'owner/name'.", nullable=False),
+        field("job_id", pa.int64(), "Actions job id the log belongs to.", nullable=False),
+        *_LOG_LINE_FIELDS,
+    ]
+)
+
+RUN_LOG_SCHEMA = pa.schema(
+    [
+        field("repo", pa.string(), "Repository the run belongs to, as 'owner/name'.", nullable=False),
+        field("run_id", pa.int64(), "Workflow run id the log belongs to.", nullable=False),
+        field("attempt", pa.int64(), "Requested run attempt; NULL when the latest attempt was read."),
+        field("job_name", pa.string(), "Job the line belongs to, from the archive's file layout."),
+        field(
+            "step_number", pa.int64(), "Step number within the job; NULL when the archive has no step files."
+        ),
+        field("step_name", pa.string(), "Step name; NULL when the archive has no step files for the job."),
+        field("file_name", pa.string(), "Archive member the line came from; line_number counts within it."),
+        *_LOG_LINE_FIELDS,
+    ]
+)
+
+
+# --------------------------------------------------------------------------
 # Rate limit
 # --------------------------------------------------------------------------
 

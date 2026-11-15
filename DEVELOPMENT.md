@@ -123,7 +123,9 @@ per-row input columns, so one registration serves a literal call and a `LATERAL`
 | `contributors(repo)` | `'owner/name'` | `max_rows`, `cache_ttl` |
 | `languages(repo)` | `'owner/name'` | `cache_ttl` |
 | `stargazers(repo)` | `'owner/name'` | `max_rows`, `cache_ttl` |
-| `workflow_runs(repo)` | `'owner/name'` | `branch`, `event`, `status`, `max_rows`, `cache_ttl` |
+| `workflow_runs(repo)` | `'owner/name'` | `branch`, `event`, `status`, `created`, `max_rows`, `cache_ttl` |
+| `job_logs(repo, job_id)` *(streamed)* | both | — |
+| `run_logs(repo, run_id)` *(streamed)* | both | `attempt` |
 
 A repository is always one string, `'owner/name'`, and every row that belongs to one carries it
 in a `repo` (or `full_name`) column. That is the whole composition story — the output of any
@@ -180,7 +182,7 @@ SELECT * FROM github.issues('duckdb/duckdb', state => 'closed');
 | `pulls` | `state`, `base` |
 | `commits` | `sha`, `path`, `author`, `since`, `until` |
 | `repos` | `type`, `sort` |
-| `workflow_runs` | `branch`, `event`, `status` — a lifecycle status *or* a conclusion such as `'failure'` |
+| `workflow_runs` | `branch`, `event`, `status` — a lifecycle status *or* a conclusion such as `'failure'`; `created` — a date range, the incremental-load cursor |
 | `search_*` | everything: put qualifiers (`org:`, `label:`, `is:open`, `stars:>1000`) in the query |
 
 This was found the hard way. An early build declared filter pushdown on the blended functions and
@@ -238,6 +240,49 @@ positional `const` arg is rejected, so every optional knob is a named arg; and n
 define `finalize`/`finish`, because DuckDB forbids `FinalExecute` under correlated `LATERAL`. A
 named argument cannot receive a correlated column either — `LATERAL f(x => t.col)` does not bind
 — so pass a literal or a scalar subquery.
+
+## Actions logs
+
+`logs.py` adds `job_logs`, `run_logs` and three scalars (`log_ts`, `log_text`,
+`workflow_command`). They are hand-written blended functions like the rest of `main`; the
+generated pipeline does not cover them because a log is a byte stream, not a JSON entity.
+
+**Streamed, not buffered.** GitHub answers a log request with a 302 to a short-lived signed blob
+URL on another origin; the shared client follows it and httpx drops `Authorization` on the
+cross-origin hop. Run archives reach gigabytes, so `github_api.download()` streams the body into an
+anonymous temporary file (unlinked at creation on POSIX, delete-on-close on Windows) instead of
+holding it in memory, so a log that leaked a secret never outlives the worker, even a killed one. It is the one `.stream()` call in
+the package, with a literal `"GET"` that `tests/test_readonly_guard.py` checks; it applies the same
+retry and rate-limit policy as `_get`, refuses bodies over 8 GiB, and turns 404/410 (expired or
+deleted logs) into no rows.
+
+**Bounded batches with resume.** A blended function may emit one input batch's output over several
+replies (`more=True` then `resume()`). Each reply carries at most 8,192 lines or 4 MiB. The resume
+state (`LogScanState`) holds only the input keys and a position — input row, archive member,
+byte offset, line number and open `##[group]` stack — so it travels in the HTTP state token. A
+resume on the same process reuses the spooled file and its open reader (readers use `os.pread`,
+so they never share a file offset); one on another process downloads again and seeks. Spools are
+dropped when their input row is done, on eviction, on cancel and at exit.
+
+**Archive layout.** A run archive holds `N_<job>.txt` (the whole job) and usually `<job>/N_<step>.txt`
+per step. Step files are read when present and the whole-job file skipped, so no line is counted
+twice; jobs without step files fall back to the whole-job file with NULL step columns.
+
+**Not semantic sources.** `models/build_model.py` lists `LOG_FUNCTIONS` in
+`EXCLUDED_COLLECTIONS`: the surface gate still fails on any unreviewed collection, but log lines
+have no entity grain or metric population and may carry leaked secrets, so they stay out of the
+Crossfield model.
+
+**Untrusted content.** Logs carry whatever a workflow printed — fork pull requests included —
+and can contain secrets GitHub failed to mask. The functions parse but never interpret them, every
+description says so, and results are never given a cache policy.
+
+`tests/test_logs.py` covers parsing, layout, redirects without the token, resume after state
+serialization and after a cold cache, cancellation, eviction mid-read and anonymous spools;
+`tests/test_api_sql.py` runs the functions in a real worker subprocess through Haybarn, including
+a 20,000-line log that needs several resumed batches, and `tests/test_logs_http.py` repeats that
+over the HTTP transport, where resume state travels in the state token. Fixtures live in
+`tests/fixtures/actions_logs/`.
 
 ## Caching and rate limits
 

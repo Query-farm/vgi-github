@@ -23,8 +23,30 @@ def test_no_http_write_calls_anywhere() -> None:
         for node in ast.walk(ast.parse(path.read_text())):
             is_method_call = isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
             if is_method_call and node.func.attr in WRITE_VERBS:
+                if node.func.attr == "stream" and _is_streamed_get(path, node):
+                    continue
                 offenders.append(f"{path.name}: .{node.func.attr}()")
     assert offenders == [], offenders
+
+
+def _is_streamed_get(path: Path, node: ast.Call) -> bool:
+    """The one allowed ``.stream()``: a literal ``"GET"`` in the chokepoint module.
+
+    Actions log archives are too large to buffer, so ``github_api.download``
+    streams them. The method must be the constant ``"GET"`` -- never a variable
+    a caller could steer -- and the call must live in the audited module.
+    """
+    first = node.args[0] if node.args else None
+    return path.name == "github_api.py" and isinstance(first, ast.Constant) and first.value == "GET"
+
+
+def test_only_streamed_get_is_allowed() -> None:
+    bad = ast.parse('client.stream("POST", url)').body[0].value
+    good = ast.parse('client.stream("GET", url)').body[0].value
+    assert isinstance(bad, ast.Call) and isinstance(good, ast.Call)
+    assert not _is_streamed_get(PACKAGE / "github_api.py", bad)
+    assert _is_streamed_get(PACKAGE / "github_api.py", good)
+    assert not _is_streamed_get(PACKAGE / "rest.py", good)
 
 
 def test_single_http_chokepoint() -> None:

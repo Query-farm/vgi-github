@@ -1,0 +1,14 @@
+﻿2026-07-21T12:00:00.1234567Z Requested labels: ubuntu-latest
+2026-07-21T12:00:00.2000000Z ##[group]Operating System
+2026-07-21T12:00:00.2100000Z Ubuntu 24.04
+2026-07-21T12:00:00.2200000Z ##[endgroup]
+2026-07-21T12:00:01.0000000Z ##[group]Run make test
+2026-07-21T12:00:01.0100000Z [36;1mmake test[0m
+2026-07-21T12:00:01.0200000Z shell: /usr/bin/bash -e {0}
+2026-07-21T12:00:01.0300000Z ##[endgroup]
+2026-07-21T12:00:02.0000000Z [31mFAILED[0m tests/test_app.py::test_parse
+2026-07-21T12:00:02.1000000Z ::error file=src/app.py,line=42,col=7,title=Type%3A error::Expected int, got str%0Asecond line
+2026-07-21T12:00:02.2000000Z ##[warning]Node.js 16 actions are deprecated.
+2026-07-21T12:00:02.3000000Z ##[error]Process completed with exit code 1.
+a continuation line without a timestamp
+2026-07-21T12:00:03.0000000Z Cleaning up orphan processes

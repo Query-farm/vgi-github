@@ -31,6 +31,7 @@ from vgi_github import __version__, auth, github_api
 from vgi_github.datasets import DATASET_FUNCTIONS
 from vgi_github.functions import KEYED_FUNCTIONS
 from vgi_github.graphql_reads import GraphQLFunction
+from vgi_github.logs import LOG_FUNCTIONS
 from vgi_github.meta import column_comments, docs, examples, keywords
 from vgi_github.reference import REFERENCE_FUNCTIONS, RateLimitFunction
 from vgi_github.rest import ENDPOINT_SCHEMA, REST_FUNCTIONS, EndpointsFunction, RestFunction
@@ -41,7 +42,7 @@ IMPLEMENTATION_VERSION = __version__
 DATA_VERSION_SPEC = f"=={__version__}"
 SOURCE_URL = "https://github.com/Query-farm/vgi-github"
 
-_FUNCTIONS = [*SEARCH_FUNCTIONS, *KEYED_FUNCTIONS, *REFERENCE_FUNCTIONS, *DATASET_FUNCTIONS]
+_FUNCTIONS = [*SEARCH_FUNCTIONS, *KEYED_FUNCTIONS, *LOG_FUNCTIONS, *REFERENCE_FUNCTIONS, *DATASET_FUNCTIONS]
 
 _EXAMPLE_QUERIES = examples(
     (
@@ -235,6 +236,22 @@ _AGENT_TEST_TASKS = json.dumps(
             "name": "project_contents",
             "prompt": "List up to ten items for the first project returned for the github organization. "
             "Include item content types and titles.",
+        },
+        {
+            "name": "failed_run_errors",
+            "prompt": "Using GitHub credentials, show the error annotations (job, step and message) in "
+            "the logs of the most recent failed workflow run on duckdb/duckdb's main branch.",
+        },
+        {
+            "name": "failed_job_log_errors",
+            "prompt": "Using GitHub credentials, take the most recent failed workflow run on duckdb/duckdb's "
+            "main branch, and for each of its failed jobs list the error lines from that job's own log.",
+        },
+        {
+            "name": "parse_log_line",
+            "prompt": "Parse this GitHub Actions log line: '2026-07-21T12:00:00.1234567Z ::error "
+            "file=src/app.py,line=42::Expected int'. Give its timestamp, its text without the timestamp "
+            "prefix, and the annotation's file and message.",
         },
         {
             "name": "project_field_definitions",

@@ -39,6 +39,13 @@ PUBLIC_ARGUMENTS = {
 }
 
 
+#: Main-schema collections reviewed and deliberately kept out of the semantic model.
+#: Actions logs (job_logs, run_logs and the log-line scalars) are untrusted raw console
+#: text, one row per line: no stable entity grain, no metric population, and possibly
+#: leaked secrets, so they must not become reportable sources.
+EXCLUDED_COLLECTIONS = {"logs.py": "LOG_FUNCTIONS"}
+
+
 def validate_surface(inventory):
     """Detect omitted worker entries and REST manifest drift without importing a worker."""
     actual = {}
@@ -76,7 +83,9 @@ def validate_surface(inventory):
         for node in worker.body
         if isinstance(node, ast.Assign) and node.targets[0].id == "_FUNCTIONS"
     )
-    if {node.value.id for node in registrations.elts} != set(collections.values()):
+    if {node.value.id for node in registrations.elts} != set(collections.values()) | set(
+        EXCLUDED_COLLECTIONS.values()
+    ):
         raise ValueError("Worker main registration changed; review every new function collection")
     declared = {f["name"]: f["class"] for f in inventory["functions"] if f["schema"] == "main"}
     if actual != declared or sorted(actual) != inventory["coverage"]["main_functions"]:

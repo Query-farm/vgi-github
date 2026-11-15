@@ -1399,6 +1399,15 @@ class WorkflowRunsArgs:
             default="",
         ),
     ] = ""
+    created: Annotated[
+        str,
+        Arg(
+            "created",
+            doc="Only runs created in this date range, written in GitHub's search date syntax "
+            "(for example >=2026-07-01T00:00:00Z); the incremental-load cursor",
+            default="",
+        ),
+    ] = ""
     max_rows: Annotated[int, Arg("max_rows", doc=_MAX_ROWS_DOC, default=DEFAULT_MAX_ROWS, ge=0)] = (
         DEFAULT_MAX_ROWS
     )
@@ -1434,7 +1443,9 @@ class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):
                 "branch =>, event => and status => (which also accepts a conclusion such as "
                 "'failure'); a WHERE clause only sees the max_rows (default 100) runs fetched, so a "
                 "failure rate over the default is over the last 100 runs. For a longer window "
-                "raise max_rows (GitHub caps a filtered listing at 1,000 runs)."
+                "raise max_rows (GitHub caps a filtered listing at 1,000 runs). For incremental loads "
+                "pass created => '>=<last seen created_at>'; drive it from repos(org) under LATERAL "
+                "to cover a whole organization. run_logs(repo, id) reads a run's logs."
             ),
             md=(
                 "One row per workflow run, newest first.\n\n"
@@ -1447,6 +1458,14 @@ class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):
                 "`max_rows` applies. `status` takes either a lifecycle status (`completed`) or a "
                 "conclusion (`failure`) — GitHub has one parameter for both. GitHub caps any "
                 "filtered listing at 1,000 runs.\n\n"
+                "### Incremental and organization-wide loads\n\n"
+                "`created` is GitHub's own date filter (`>=2026-07-01T00:00:00Z`, "
+                "`2026-07-01..2026-07-31`), applied before `max_rows`. Keep the largest `created_at` "
+                "you have loaded and pass `created => getvariable('since')` after `SET VARIABLE since = "
+                "'>=' || ...` next time (a named argument takes a constant, not a subquery). To cover an "
+                "organization, drive it from `repos(org)` under `LATERAL`; each repository costs at "
+                "least one request, the worker waits out short rate-limit pauses, warns when the "
+                "budget runs low and fails rather than sleeping through a long reset.\n\n"
                 "### Duration\n\n"
                 "For a completed run, `updated_at - run_started_at` approximates wall-clock time "
                 "of the last attempt."
@@ -1458,6 +1477,13 @@ class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):
                     "count(*) FILTER (WHERE conclusion = 'failure') AS failures "
                     "FROM github.main.workflow_runs('duckdb/duckdb') WHERE status = 'completed' "
                     "GROUP BY name ORDER BY failures DESC",
+                ),
+                (
+                    "Runs created since a cursor, across an organization's repositories",
+                    "SELECT w.repo, w.id, w.name, w.conclusion, w.created_at "
+                    "FROM github.main.repos('duckdb', max_rows => 20) r, "
+                    "LATERAL github.main.workflow_runs(r.full_name, created => '>=2026-07-01T00:00:00Z', "
+                    "max_rows => 0) w",
                 ),
                 (
                     "Recent failed runs on main",
@@ -1498,6 +1524,7 @@ class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):
             "branch": args.branch or None,
             "event": args.event or None,
             "status": args.status or None,
+            "created": args.created.strip() or None,
         }
 
         def fetch(repo: str, hint: CacheHint, credentials: Credentials | None) -> list[dict[str, Any]]:
