@@ -530,23 +530,28 @@ def _project_path(owner, owner_type, number=None):
 
 
 class GitHubProjectsAccessError(api.GitHubError):
-    """A Projects v2 404 for an owner that exists: GitHub hiding Projects from the token.
+    """A Projects v2 refusal for an owner that exists: the token cannot read Projects.
 
-    GitHub answers 404, not 403, when a token lacks Projects access, so a bare
-    "Not Found" reads like a missing owner. Confirming the owner exists turns it
-    into the refusal it is, naming the permission to grant.
+    A classic token without read:project gets 404, so a bare "Not Found" reads
+    like a missing owner; an installation token such as a workflow GITHUB_TOKEN
+    gets a refusal that does not name the missing permission. Confirming the
+    owner exists makes it the refusal it is and names the permission to grant.
     """
 
     def __init__(self, exc: api.GitHubError, owner: str, *, numbered: bool) -> None:
         super().__init__(exc.status, exc.path, exc.message)
         maybe = "either the project does not exist or " if numbered else ""
         self.args = (
-            f"GitHub API {exc.status} for {exc.path}: {owner} exists, so {maybe}the token cannot read "
+            f"GitHub API {exc.status} for {exc.path} ({exc.message[:200]}): {owner} exists, so {maybe}"
+            "the token cannot read "
             "its Projects. Reading Projects requires a token with the read:project scope (classic) or "
             "Projects read permission (fine-grained token or GitHub App); a workflow GITHUB_TOKEN has "
             "neither. Attach a 'github' secret holding such a token: "
             "CREATE SECRET (TYPE github, token '...')",
         )
+
+
+_PROJECTS_REFUSALS = frozenset({401, 403, 404})
 
 
 def _collect_projects(owner, owner_type, number, suffix, params, args, hint, credentials):
@@ -561,7 +566,12 @@ def _collect_projects(owner, owner_type, number, suffix, params, args, hint, cre
             credentials=credentials,
         )
     except api.GitHubError as exc:
-        if exc.status != 404:
+        # Only a refusal of the first page; a page failing mid-walk is not an access answer.
+        if (
+            exc.path != path
+            or exc.status not in _PROJECTS_REFUSALS
+            or isinstance(exc, api.GitHubRateLimitError)
+        ):
             raise
         prefix = "orgs" if owner_type == "organization" else "users"
         try:

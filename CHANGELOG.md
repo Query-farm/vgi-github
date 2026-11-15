@@ -12,6 +12,10 @@
 - `projects`, `project_items` and `project_fields`: GitHub answers 404 when a token cannot read
   Projects. For an owner that exists, the error now says so and names the permission to grant
   (`read:project`, or Projects read for fine-grained and App tokens) instead of a bare Not Found.
+- `projects`, `project_items` and `project_fields` treat a first-page 401/403 the same way, so an
+  installation token's refusal (a workflow `GITHUB_TOKEN`) also names the missing permission.
+- The organization-wide `workflow_runs` example uses a closed one-day `created` window. The open
+  `>=` cursor with `max_rows => 0` walked a growing history and outlived the lint timeout.
 - The `discussion_replies` example reads a fixed duckdb/duckdb discussion (#1688) that has replies.
 - The API coverage drift workflow runs the generator inside the project environment (`uv run`).
 

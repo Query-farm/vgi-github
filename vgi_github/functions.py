@@ -1479,11 +1479,11 @@ class WorkflowRunsFunction(RowTransformFunction[WorkflowRunsArgs]):
                     "GROUP BY name ORDER BY failures DESC",
                 ),
                 (
-                    "Runs created since a cursor, across an organization's repositories",
+                    "Every run in one closed date window, across an organization's repositories",
                     "SELECT w.repo, w.id, w.name, w.conclusion, w.created_at "
                     "FROM github.main.repos('duckdb', max_rows => 20) r, "
-                    "LATERAL github.main.workflow_runs(r.full_name, created => '>=2026-07-01T00:00:00Z', "
-                    "max_rows => 0) w",
+                    "LATERAL github.main.workflow_runs(r.full_name, "
+                    "created => '2026-07-01T00:00:00Z..2026-07-01T23:59:59Z', max_rows => 0) w",
                 ),
                 (
                     "Recent failed runs on main",
