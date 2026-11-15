@@ -9,6 +9,11 @@
   Descriptions warn that logs are untrusted and may contain leaked secrets; results are never cached.
 - Add scalars `log_ts(line)`, `log_text(line, strip_ansi)` and `workflow_command(line)`.
 - `workflow_runs` takes `created =>`, GitHub's date-range filter, as an incremental-load cursor.
+- `projects`, `project_items` and `project_fields`: GitHub answers 404 when a token cannot read
+  Projects. For an owner that exists, the error now says so and names the permission to grant
+  (`read:project`, or Projects read for fine-grained and App tokens) instead of a bare Not Found.
+- The `discussion_replies` example reads a fixed duckdb/duckdb discussion (#1688) that has replies.
+- The API coverage drift workflow runs the generator inside the project environment (`uv run`).
 
 ## 0.3.0 — 2026-11-12
 

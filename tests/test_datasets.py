@@ -325,6 +325,27 @@ def test_project_permissions_do_not_look_like_empty_boards(monkeypatch, status):
         _run(ds.ProjectsFunction, ds.ProjectsArgs(owner=""), _input(owner=["o"]))
 
 
+@pytest.mark.parametrize("owner_type,prefix", [("organization", "orgs"), ("user", "users")])
+@pytest.mark.parametrize("func,args_type,inputs,suffix", PROJECT_FUNCTIONS)
+def test_project_404_for_existing_owner_names_the_missing_permission(
+    monkeypatch, owner_type, prefix, func, args_type, inputs, suffix
+):
+    # GitHub hides Projects from a token without read:project behind a 404, so
+    # the worker confirms the owner exists and says which permission is missing.
+    def handle(request):
+        if request.url.raw_path.split(b"?")[0].decode() == f"/{prefix}/space%20name":
+            return httpx.Response(200, json={"login": "space name"})
+        return httpx.Response(404, json={"message": "Not Found"})
+
+    seen = install(monkeypatch, handle)
+    args = args_type(**{k: v[0] for k, v in inputs.items()}, owner_type=owner_type, max_rows=1)
+    with pytest.raises(ds.GitHubProjectsAccessError, match="read:project scope") as raised:
+        _run(func, args, _input(**inputs))
+    assert raised.value.status == 404 and len(seen) == 2
+    assert ("project does not exist" in str(raised.value)) == bool(suffix)
+    assert "Attach a 'github' secret" in str(raised.value)
+
+
 @pytest.mark.parametrize(
     "func,args,inputs",
     [

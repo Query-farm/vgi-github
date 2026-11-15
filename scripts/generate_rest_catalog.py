@@ -1,6 +1,6 @@
 """Rebuild the read-only operation manifest from pinned official GitHub OpenAPI files.
 
-Usage: python scripts/generate_rest_catalog.py [--check | --check-upstream | --revision latest]
+Usage: uv run python scripts/generate_rest_catalog.py [--check | --check-upstream | --revision latest]
 Only the generator downloads specifications; importing the worker never does.
 """
 

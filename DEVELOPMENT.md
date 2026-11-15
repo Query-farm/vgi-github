@@ -49,14 +49,14 @@ OpenAPI descriptions at a pinned revision. It includes source hashes and per-pro
 endpoint counts. There is no discovery-time network dependency. Regenerate or verify it:
 
 ```bash
-python scripts/generate_rest_catalog.py
-python scripts/generate_rest_catalog.py --check
+uv run python scripts/generate_rest_catalog.py
+uv run python scripts/generate_rest_catalog.py --check
 ```
 
 `--source-dir` reads the two pinned source files locally. The manifest is the source of truth
 for the pinned commit and request API version. To check upstream without writing files, run
-`python scripts/generate_rest_catalog.py --check-upstream`. To refresh, run
-`python scripts/generate_rest_catalog.py --revision latest`, or supply a full commit SHA.
+`uv run python scripts/generate_rest_catalog.py --check-upstream`. To refresh, run
+`uv run python scripts/generate_rest_catalog.py --revision latest`, or supply a full commit SHA.
 The generator resolves `latest` once so both products use the same immutable commit; it reports
 added, removed and changed operations. Review the manifest diff and run the offline suite and
 catalog lint before accepting it. The request API version changes only with `--api-version`.

@@ -498,8 +498,8 @@ class DiscussionRepliesFunction(RowTransformFunction[DiscussionRepliesArgs]):
         "Pass a comment's global node_id from discussion_comments. Reads the replies connection "
         "through GraphQL with GitHub credentials, retaining discussion and parent-comment identifiers. "
         "The max_rows cap applies to each parent comment.",
-        "SELECT r.user_login, r.body FROM github.main.discussions('duckdb/duckdb', max_rows => 1) d, "
-        "LATERAL github.main.discussion_comments(d.repo, d.number, max_rows => 1) c, "
+        "SELECT r.user_login, r.body "
+        "FROM github.main.discussion_comments('duckdb/duckdb', 1688, max_rows => 1) c, "
         "LATERAL github.main.discussion_replies(c.node_id, max_rows => 10) r",
     )
 
@@ -529,6 +529,50 @@ def _project_path(owner, owner_type, number=None):
     return path if number is None else f"{path}/{_positive_number(number)}"
 
 
+class GitHubProjectsAccessError(api.GitHubError):
+    """A Projects v2 404 for an owner that exists: GitHub hiding Projects from the token.
+
+    GitHub answers 404, not 403, when a token lacks Projects access, so a bare
+    "Not Found" reads like a missing owner. Confirming the owner exists turns it
+    into the refusal it is, naming the permission to grant.
+    """
+
+    def __init__(self, exc: api.GitHubError, owner: str, *, numbered: bool) -> None:
+        super().__init__(exc.status, exc.path, exc.message)
+        maybe = "either the project does not exist or " if numbered else ""
+        self.args = (
+            f"GitHub API {exc.status} for {exc.path}: {owner} exists, so {maybe}the token cannot read "
+            "its Projects. Reading Projects requires a token with the read:project scope (classic) or "
+            "Projects read permission (fine-grained token or GitHub App); a workflow GITHUB_TOKEN has "
+            "neither. Attach a 'github' secret holding such a token: "
+            "CREATE SECRET (TYPE github, token '...')",
+        )
+
+
+def _collect_projects(owner, owner_type, number, suffix, params, args, hint, credentials):
+    path = _project_path(owner, owner_type, number) + suffix
+    try:
+        return api.collect(
+            path,
+            params,
+            limit=args.max_rows or None,
+            missing_ok=False,
+            hint=hint,
+            credentials=credentials,
+        )
+    except api.GitHubError as exc:
+        if exc.status != 404:
+            raise
+        prefix = "orgs" if owner_type == "organization" else "users"
+        try:
+            exists = api.lookup(f"/{prefix}/{api.segment(owner)}", credentials=credentials) is not None
+        except api.GitHubError:
+            exists = False
+        if not exists:
+            raise
+        raise GitHubProjectsAccessError(exc, owner, numbered=number is not None) from exc
+
+
 def _json(value):
     return None if value is None else json.dumps(value, ensure_ascii=False)
 
@@ -553,13 +597,15 @@ class ProjectsFunction(RowTransformFunction[ProjectsArgs]):
     @classmethod
     def process(cls, params, state, batch, out):
         def fetch(owner, hint, credentials):
-            rows = api.collect(
-                _project_path(owner, params.args.owner_type),
+            rows = _collect_projects(
+                owner,
+                params.args.owner_type,
+                None,
+                "",
                 {"q": params.args.query or None},
-                limit=params.args.max_rows or None,
-                missing_ok=False,
-                hint=hint,
-                credentials=credentials,
+                params.args,
+                hint,
+                credentials,
             )
             reporting.validate_dataset_payloads(cls.Meta.name, rows)
             return _validate_parents(
@@ -602,13 +648,15 @@ class ProjectItemsFunction(RowTransformFunction[ProjectItemsArgs]):
     def process(cls, params, state, batch, out):
         def fetch(key, hint, credentials):
             owner, number = key
-            rows = api.collect(
-                _project_path(owner, params.args.owner_type, number) + "/items",
+            rows = _collect_projects(
+                owner,
+                params.args.owner_type,
+                number,
+                "/items",
                 {"q": params.args.query or None, "fields": params.args.fields or None},
-                limit=params.args.max_rows or None,
-                missing_ok=False,
-                hint=hint,
-                credentials=credentials,
+                params.args,
+                hint,
+                credentials,
             )
             reporting.validate_dataset_payloads(cls.Meta.name, rows)
             return [
@@ -655,12 +703,8 @@ class ProjectFieldsFunction(RowTransformFunction[ProjectFieldsArgs]):
     def process(cls, params, state, batch, out):
         def fetch(key, hint, credentials):
             owner, number = key
-            rows = api.collect(
-                _project_path(owner, params.args.owner_type, number) + "/fields",
-                limit=params.args.max_rows or None,
-                missing_ok=False,
-                hint=hint,
-                credentials=credentials,
+            rows = _collect_projects(
+                owner, params.args.owner_type, number, "/fields", None, params.args, hint, credentials
             )
             reporting.validate_dataset_payloads(cls.Meta.name, rows)
             return [

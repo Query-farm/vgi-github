@@ -9,9 +9,17 @@ on:
       - scripts/generate_rest_catalog.py
       - vgi_github/rest_manifest.json
       - .github/workflows/api-coverage.yml
+      - pyproject.toml
+      - uv.lock
 
 permissions:
   contents: read
+
+env:
+  # The generator imports vgi_github, so it runs inside the project environment.
+  # Match CI: a Python with published native wheels, dependencies from PyPI.
+  UV_PYTHON: "3.14"
+  UV_NO_SOURCES: "1"
 
 jobs:
   coverage:
@@ -21,8 +29,12 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --no-sources
       - name: Verify reproducible pinned catalog
-        run: python3 scripts/generate_rest_catalog.py --check
+        run: uv run --no-sources python scripts/generate_rest_catalog.py --check
       - name: Check upstream read coverage
         if: github.event_name != 'pull_request'
-        run: python3 scripts/generate_rest_catalog.py --check-upstream
+        run: uv run --no-sources python scripts/generate_rest_catalog.py --check-upstream

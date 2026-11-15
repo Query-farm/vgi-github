@@ -354,7 +354,7 @@ Enterprise Server release or future API addition.
 The [API coverage workflow](.github/workflows/api-coverage.yml) checks upstream weekly and
 reports added, removed or changed GET operations. It has read-only permissions and creates no
 commits or pull requests. Maintainers can refresh the local snapshot with
-`python scripts/generate_rest_catalog.py --revision latest`, review the diff and run the tests.
+`uv run python scripts/generate_rest_catalog.py --revision latest`, review the diff and run the tests.
 `--check-upstream` checks for drift without modifying files. The request API version remains
 pinned unless explicitly updated with `--api-version`.
 
