@@ -37,4 +37,7 @@ jobs:
         run: uv run --no-sources python scripts/generate_rest_catalog.py --check
       - name: Check upstream read coverage
         if: github.event_name != 'pull_request'
+        env:
+          # Resolving `latest` is one API call; anonymous calls are rate limited per runner IP.
+          GITHUB_TOKEN: ${{ github.token }}
         run: uv run --no-sources python scripts/generate_rest_catalog.py --check-upstream

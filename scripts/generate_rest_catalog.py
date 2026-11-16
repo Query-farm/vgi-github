@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import urllib.request
 from pathlib import Path
@@ -37,9 +38,12 @@ def resolve(spec: dict, value: dict) -> dict:
 def resolve_revision(revision: str) -> str:
     """Resolve latest once, so both products come from the same immutable commit."""
     if revision == "latest":
+        headers = {"Accept": "application/vnd.github+json", "User-Agent": "vgi-github-catalog-check"}
+        # Anonymous API calls share 60 an hour per IP, which hosted runners exhaust.
+        if token := os.environ.get("GITHUB_TOKEN"):
+            headers["Authorization"] = f"Bearer {token}"
         request = urllib.request.Request(
-            "https://api.github.com/repos/github/rest-api-description/commits/main",
-            headers={"Accept": "application/vnd.github+json", "User-Agent": "vgi-github-catalog-check"},
+            "https://api.github.com/repos/github/rest-api-description/commits/main", headers=headers
         )
         with urllib.request.urlopen(request, timeout=30) as response:
             revision = json.load(response)["sha"]
