@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.3.1 (2026-11-16)
 
+- Require vgi-python `>=0.52.2,<0.53`; uv.lock re-locked.
+- Move to Python 3.14: `requires-python >=3.14`, CI, the Docker image and lint tooling target 3.14.
 - Accept GitHub REST API description revision `2a33d9cc5d1dc6ca603b908e0796454af88c1999`
   (was `58b1e0c0`): 34 new and 179 changed GET operations, no removals. The `rest` schema now
   exposes 814 GET operations (667 GitHub.com, 804 Enterprise Cloud), and the regenerated
