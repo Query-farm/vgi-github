@@ -43,12 +43,12 @@ def to_timestamp(value: Any) -> datetime | None:
     if isinstance(value, (int, float)):
         try:
             parsed = datetime.fromtimestamp(float(value), tz=UTC)
-        except (ValueError, OverflowError, OSError):
+        except ValueError, OverflowError, OSError:
             return None
     else:
         try:
             parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-        except (ValueError, OverflowError):
+        except ValueError, OverflowError:
             return None
         if parsed.tzinfo is None:
             parsed = parsed.replace(tzinfo=UTC)
@@ -63,7 +63,7 @@ def to_integer(value: Any) -> int | None:
         return None
     try:
         return int(value)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return None
 
 
@@ -94,7 +94,7 @@ def column(rows: Sequence[dict[str, Any]], key: str, f: pa.Field) -> pa.Array:
     # that do not match rather than losing the batch.
     try:
         return pa.array(values, type=f.type)
-    except (pa.ArrowInvalid, pa.ArrowTypeError, TypeError, ValueError):
+    except pa.ArrowInvalid, pa.ArrowTypeError, TypeError, ValueError:
         return pa.array([_nullable(v, f.type) for v in values], type=f.type)
 
 
@@ -104,7 +104,7 @@ def _nullable(value: Any, kind: pa.DataType) -> Any:
         return None
     try:
         pa.array([value], type=kind)
-    except (pa.ArrowInvalid, pa.ArrowTypeError, TypeError, ValueError):
+    except pa.ArrowInvalid, pa.ArrowTypeError, TypeError, ValueError:
         return None
     return value
 

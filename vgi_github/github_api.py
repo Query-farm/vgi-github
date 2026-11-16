@@ -476,7 +476,7 @@ class ActivityLog:
             remaining = int(headers["x-ratelimit-remaining"])
             limit = int(headers["x-ratelimit-limit"])
             reset = int(headers.get("x-ratelimit-reset", "0"))
-        except (KeyError, ValueError):
+        except KeyError, ValueError:
             return
         resource = headers.get("x-ratelimit-resource", "core")
         self.budget[resource] = (remaining, limit, reset)
@@ -582,7 +582,7 @@ def _reset_at(response: httpx.Response) -> datetime | None:
     raw = response.headers.get("x-ratelimit-reset")
     try:
         return datetime.fromtimestamp(int(raw), tz=UTC) if raw else None
-    except (ValueError, OverflowError, OSError):
+    except ValueError, OverflowError, OSError:
         return None
 
 

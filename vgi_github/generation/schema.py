@@ -445,7 +445,7 @@ def _entity_base(entity: dict) -> dict:
                 if len(item["pattern"].encode("utf-8")) > 4096:
                     _fail(name, "pattern exceeds 4096 UTF-8 bytes")
                 re.compile(item["pattern"])
-            except (re.error, UnicodeEncodeError):
+            except re.error, UnicodeEncodeError:
                 _fail(name, "pattern must be a valid regular expression")
         if "minimum" in item and (item["type"] != "BIGINT" or type(item["minimum"]) is not int):
             _fail(name, "minimum requires a BIGINT argument and integer bound")
@@ -484,7 +484,7 @@ def _entity_base(entity: dict) -> dict:
                     if kind in LIST_ARGUMENTS
                     else valid[kind](value)
                 )
-            except (ValueError, OverflowError):
+            except ValueError, OverflowError:
                 matches = False
             if not matches:
                 _fail(name, f"example must be a non-NULL scalar matching {kind}")
