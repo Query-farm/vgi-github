@@ -4,7 +4,7 @@ The [model guide](../models/README.md) owns user SQL and business definitions.
 [build_model.py](../models/build_model.py) assembles the reviewed model and named
 reports; [source_inventory.json](../models/source_inventory.json) records all
 24 native source signatures and 344 source columns. This covers all 21 typed
-`main` functions, all 780 pinned REST operations through `api.rest`, GraphQL and
+`main` functions, all 814 pinned REST operations through `api.rest`, GraphQL and
 endpoint discovery. Generated JSON is checked in; `--check` rejects changed
 worker registrations, endpoint domains or stale generated artifacts.
 
@@ -229,9 +229,9 @@ connected generated profile:
 EC2 Linux ARM64, October 12, 2026, using the matching engine and native extensions.
 Worker sources use revision `56d28ba8` plus the reporting/model
 changes for this milestone. Coverage is all 21 typed `main` functions, 51 metrics
-and 49 reports, plus all 780 pinned REST GET operations, raw GraphQL and local
+and 49 reports, plus all 814 pinned REST GET operations, raw GraphQL and local
 endpoint discovery through 24 model sources. Raw payloads have response grain;
-this is not 780 independently defined business metric populations.
+this is not 814 independently defined business metric populations.
 
 | Check | Result |
 | --- | --- |
@@ -251,8 +251,8 @@ Stable model, package and report IDs are unchanged. SQL logs and mock HTTP trace
 `crossfield/logs/github-model-rename/on/` and `off/`; both complete three-suite runs
 pass without changing numerical expectations. Earlier worker, schema and engine
 regression evidence remains under `crossfield/logs/github-surface/`.
-All 780 operation IDs and 24 source schemas have inventory/contract coverage;
-runtime tests exercise representative raw operations, not 780 live endpoints.
+All 814 operation IDs and 24 source schemas have inventory/contract coverage;
+runtime tests exercise representative raw operations, not 814 live endpoints.
 
 The PR oracle is **4 merged, mean 9 hours, median 7, p90 17**.
 The combined PR/CI oracle is **6 all-history merges, 3 runs, 0.5 success rate**;

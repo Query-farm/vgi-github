@@ -139,7 +139,7 @@ SELECT hex(body) FROM binary_report;
 query I
 SELECT count(*) FROM engineering.reports.api_endpoints_detail;
 ----
-780
+814
 
 statement ok
 DROP VIEW binary_report;

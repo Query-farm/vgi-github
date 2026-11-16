@@ -288,8 +288,8 @@ gaps such as Discussions; the SQL interface remains typed either way. GitHub doc
 ### Full read-only API coverage
 
 The `main` functions above provide convenient typed tables. The `rest` schema additionally
-exposes **780 distinct GET operations** from the pinned GitHub.com and Enterprise Cloud
-OpenAPI descriptions (644 and 770 operations respectively, with overlap). This includes
+exposes **814 distinct GET operations** from the pinned GitHub.com and Enterprise Cloud
+OpenAPI descriptions (667 and 804 operations respectively, with overlap). This includes
 reviews, files, branches, Actions jobs/logs/artifacts, checks, deployments, security alerts,
 organization membership, enterprise administration, billing, packages and the other REST reads.
 

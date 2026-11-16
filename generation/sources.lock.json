@@ -6,7 +6,7 @@
     "api.github.com",
     "ghec"
   ],
-  "rest_revision": "58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1",
+  "rest_revision": "2a33d9cc5d1dc6ca603b908e0796454af88c1999",
   "selection": {
     "graphql_field_paths": [
       [
@@ -606,11 +606,11 @@
     },
     {
       "path": "generation/sources/api-inventory.json",
-      "sha256": "7f19c09f63d032ea02894a964e13a1134c9f84867267cf998743e79021a6959f"
+      "sha256": "e8421d47dcbd094a33143b1a39e9edb802d8c202e713ed9c0251d9ff985ecae6"
     },
     {
       "path": "generation/sources/api.github.com.selected.json",
-      "sha256": "55768a7c6011e7695f07c671cf5fe7cfadcc4be3fc7f2e051bebdec5ab766fbb"
+      "sha256": "e2451e216241a7b31886106cacbf10ea2393a0839800b6226738e35eacf66ff7"
     },
     {
       "path": "generation/sources/ghec.selected.json",
@@ -632,19 +632,19 @@
       "bytes": 1063,
       "file": "REST-LICENSE",
       "sha256": "3243761cbac07e6d169a5a2f4e7c25cc544da85248e735df74c3672e055cc87b",
-      "url": "https://raw.githubusercontent.com/github/rest-api-description/58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1/LICENSE.md"
+      "url": "https://raw.githubusercontent.com/github/rest-api-description/2a33d9cc5d1dc6ca603b908e0796454af88c1999/LICENSE.md"
     },
     {
-      "bytes": 13018046,
+      "bytes": 14274027,
       "file": "api.github.com.json",
-      "sha256": "da3d22e417611cca9a4131dceea89d4d61c3be021b0917f32d9e4422e4fe60f1",
-      "url": "https://raw.githubusercontent.com/github/rest-api-description/58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1/descriptions/api.github.com/api.github.com.json"
+      "sha256": "f7a3de68869181d34b232d88840d31f8157ade45cad1746eaab90cd3c801b31c",
+      "url": "https://raw.githubusercontent.com/github/rest-api-description/2a33d9cc5d1dc6ca603b908e0796454af88c1999/descriptions/api.github.com/api.github.com.json"
     },
     {
-      "bytes": 14247497,
+      "bytes": 15696442,
       "file": "ghec.json",
-      "sha256": "82adb3fd67ba54e8aa8b18bcebc0799ec287e0be7df2c7ee87534d2357b8a2b1",
-      "url": "https://raw.githubusercontent.com/github/rest-api-description/58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1/descriptions/ghec/ghec.json"
+      "sha256": "623eb101885b5aa7ffb30e068aeb88187e82c929e285229b88bcd0b79371259b",
+      "url": "https://raw.githubusercontent.com/github/rest-api-description/2a33d9cc5d1dc6ca603b908e0796454af88c1999/descriptions/ghec/ghec.json"
     },
     {
       "bytes": 1223842,

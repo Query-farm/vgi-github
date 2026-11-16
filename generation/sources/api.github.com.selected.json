@@ -115,6 +115,9 @@
           "pages": [
             "192.0.2.1"
           ],
+          "shared_ingress": [
+            "192.0.2.1/32"
+          ],
           "ssh_key_fingerprints": {
             "SHA256_DSA": 1234567890,
             "SHA256_ECDSA": 1234567890,
@@ -1392,12 +1395,14 @@
       },
       "code-scanning-ai-scan-enablement": {
         "value": {
-          "pr_scan": "enabled"
+          "pr_scan": "enabled",
+          "repository_scan": "enabled"
         }
       },
       "code-scanning-ai-scan-org-settings": {
         "value": {
-          "pr_scan": "enabled"
+          "pr_scan": "enabled",
+          "repository_scan": "enabled"
         }
       },
       "code-scanning-alert": {
@@ -2441,7 +2446,7 @@
                 "node_id": "MDEwOlJlcG9zaXRvcnkxNjcxNzQ=",
                 "notifications_url": "https://api.github.com/repos/jquery/jquery/notifications{?since,all,participating}",
                 "owner": {
-                  "avatar_url": "https://0.gravatar.com/avatar/6906f317a4733f4379b06c32229ef02f?d=https%3A%2F%2Fidenticons.github.com%2Ff426f04f2f9813718fb806b30e0093de.png",
+                  "avatar_url": "https://avatars.githubusercontent.com/u/70142?v=4",
                   "events_url": "https://api.github.com/users/jquery/events{/privacy}",
                   "followers_url": "https://api.github.com/users/jquery/followers",
                   "following_url": "https://api.github.com/users/jquery/following{/other_user}",
@@ -5207,7 +5212,8 @@
               "name": "ansible"
             },
             "relationship": "direct",
-            "scope": "runtime"
+            "scope": "runtime",
+            "version_requirement": "= 2.8.18"
           },
           "dismissed_at": null,
           "dismissed_by": null,
@@ -5355,7 +5361,8 @@
                 "name": "django"
               },
               "relationship": "direct",
-              "scope": "runtime"
+              "scope": "runtime",
+              "version_requirement": ">= 2.0.0, < 2.0.2"
             },
             "dismissed_at": "2022-08-23T14:29:47Z",
             "dismissed_by": {
@@ -5560,7 +5567,8 @@
                 "name": "ansible"
               },
               "relationship": "direct",
-              "scope": "runtime"
+              "scope": "runtime",
+              "version_requirement": "= 2.8.18"
             },
             "dismissed_at": null,
             "dismissed_by": null,
@@ -5772,7 +5780,8 @@
                 "name": "django"
               },
               "relationship": "direct",
-              "scope": "runtime"
+              "scope": "runtime",
+              "version_requirement": ">= 2.0.0, < 2.0.2"
             },
             "dismissed_at": "2022-08-23T14:29:47Z",
             "dismissed_by": {
@@ -5910,7 +5919,8 @@
                 "name": "ansible"
               },
               "relationship": "direct",
-              "scope": "runtime"
+              "scope": "runtime",
+              "version_requirement": "= 2.8.18"
             },
             "dismissed_at": null,
             "dismissed_by": null,
@@ -10326,7 +10336,8 @@
             "id": 1,
             "name": "Text field",
             "node_id": "IFT_kwDNAd3NAZo",
-            "updated_at": "2024-12-11T14:39:09Z"
+            "updated_at": "2024-12-11T14:39:09Z",
+            "visibility": "all"
           },
           {
             "created_at": "2024-12-11T14:39:09Z",
@@ -10338,21 +10349,34 @@
             "options": [
               {
                 "color": "red",
+                "created_at": "2024-12-11T14:39:09Z",
+                "description": "High priority",
                 "id": 1,
-                "name": "High"
+                "name": "High",
+                "priority": 1,
+                "updated_at": "2024-12-11T14:39:09Z"
               },
               {
                 "color": "yellow",
+                "created_at": "2024-12-11T14:39:09Z",
+                "description": "Medium priority",
                 "id": 2,
-                "name": "Medium"
+                "name": "Medium",
+                "priority": 2,
+                "updated_at": "2024-12-11T14:39:09Z"
               },
               {
                 "color": "green",
+                "created_at": "2024-12-11T14:39:09Z",
+                "description": "Low priority",
                 "id": 3,
-                "name": "Low"
+                "name": "Low",
+                "priority": 3,
+                "updated_at": "2024-12-11T14:39:09Z"
               }
             ],
-            "updated_at": "2024-12-11T14:39:09Z"
+            "updated_at": "2024-12-11T14:39:09Z",
+            "visibility": "all"
           },
           {
             "created_at": "2024-12-11T14:39:09Z",
@@ -10364,21 +10388,34 @@
             "options": [
               {
                 "color": "blue",
+                "created_at": "2024-12-11T14:39:09Z",
+                "description": null,
                 "id": 4,
-                "name": "Frontend"
+                "name": "Frontend",
+                "priority": 1,
+                "updated_at": "2024-12-11T14:39:09Z"
               },
               {
                 "color": "green",
+                "created_at": "2024-12-11T14:39:09Z",
+                "description": null,
                 "id": 5,
-                "name": "Backend"
+                "name": "Backend",
+                "priority": 2,
+                "updated_at": "2024-12-11T14:39:09Z"
               },
               {
                 "color": "purple",
+                "created_at": "2024-12-11T14:39:09Z",
+                "description": null,
                 "id": 6,
-                "name": "Infrastructure"
+                "name": "Infrastructure",
+                "priority": 3,
+                "updated_at": "2024-12-11T14:39:09Z"
               }
             ],
-            "updated_at": "2024-12-11T14:39:09Z"
+            "updated_at": "2024-12-11T14:39:09Z",
+            "visibility": "all"
           }
         ]
       },
@@ -10671,7 +10708,7 @@
                 "diff_url": "https://github.com/octocat/Hello-World/pull/1347.diff",
                 "html_url": "https://github.com/octocat/Hello-World/pull/1347",
                 "patch_url": "https://api.github.com/repos/octocat/Hello-World/pulls/1347",
-                "url": "https://api/github.com/repos/octocat/Hello-World/pull/1347"
+                "url": "https://api.github.com/repos/octocat/Hello-World/pull/1347"
               },
               "repository_url": "https://api.github.com/repos/batterseapower/pinyin-toolkit",
               "score": 1,
@@ -10691,7 +10728,7 @@
               "updated_at": "2009-07-19T09:23:43Z",
               "url": "https://api.github.com/repos/batterseapower/pinyin-toolkit/issues/132",
               "user": {
-                "avatar_url": "https://secure.gravatar.com/avatar/934442aadfe3b2f4630510de416c5718?d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png",
+                "avatar_url": "https://avatars.githubusercontent.com/u/90254?v=4",
                 "events_url": "https://api.github.com/users/Nick3C/events{/privacy}",
                 "followers_url": "https://api.github.com/users/Nick3C/followers",
                 "following_url": "https://api.github.com/users/Nick3C/following{/other_user}",
@@ -10780,17 +10817,21 @@
       "issue-type-items": {
         "value": [
           {
+            "color": "gray",
             "created_at": "2024-12-11T14:39:09Z",
             "description": "A specific piece of work",
             "id": 410,
+            "is_enabled": true,
             "name": "Task",
             "node_id": "IT_kwDNAd3NAZo",
             "updated_at": "2024-12-11T14:39:09Z"
           },
           {
+            "color": "red",
             "created_at": "2024-12-11T14:39:09Z",
             "description": "An unexpected problem or behavior",
             "id": 411,
+            "is_enabled": true,
             "name": "Bug",
             "node_id": "IT_kwDNAd3NAZs",
             "updated_at": "2024-12-11T14:39:09Z"
@@ -14275,7 +14316,7 @@
                 "git_commits_url": "https://api.github.com/repos/github/Hello-World/git/commits{/sha}",
                 "git_refs_url": "https://api.github.com/repos/github/Hello-World/git/refs{/sha}",
                 "git_tags_url": "https://api.github.com/repos/github/Hello-World/git/tags{/sha}",
-                "git_url": "git://github.localhost/github/Hello-World.git",
+                "git_url": "git://github.example.com/github/Hello-World.git",
                 "has_discussions": false,
                 "has_downloads": true,
                 "has_issues": true,
@@ -14329,7 +14370,7 @@
                 "pushed_at": "2025-08-01T18:44:50Z",
                 "releases_url": "https://api.github.com/repos/github/Hello-World/releases{/id}",
                 "size": 6,
-                "ssh_url": "ssh://git@localhost:3035/github/Hello-World.git",
+                "ssh_url": "ssh://git@example.com:3035/github/Hello-World.git",
                 "stargazers_count": 0,
                 "stargazers_url": "https://api.github.com/repos/github/Hello-World/stargazers",
                 "statuses_url": "https://api.github.com/repos/github/Hello-World/statuses/{sha}",
@@ -14409,7 +14450,7 @@
                 "git_commits_url": "https://api.github.com/repos/github/Hello-World/git/commits{/sha}",
                 "git_refs_url": "https://api.github.com/repos/github/Hello-World/git/refs{/sha}",
                 "git_tags_url": "https://api.github.com/repos/github/Hello-World/git/tags{/sha}",
-                "git_url": "git://github.localhost/github/Hello-World.git",
+                "git_url": "git://github.example.com/github/Hello-World.git",
                 "has_discussions": false,
                 "has_downloads": true,
                 "has_issues": true,
@@ -14463,7 +14504,7 @@
                 "pushed_at": "2025-08-01T18:44:50Z",
                 "releases_url": "https://api.github.com/repos/github/Hello-World/releases{/id}",
                 "size": 6,
-                "ssh_url": "ssh://git@localhost:3035/github/Hello-World.git",
+                "ssh_url": "ssh://git@example.com:3035/github/Hello-World.git",
                 "stargazers_count": 0,
                 "stargazers_url": "https://api.github.com/repos/github/Hello-World/stargazers",
                 "statuses_url": "https://api.github.com/repos/github/Hello-World/statuses/{sha}",
@@ -17019,7 +17060,7 @@
               "open_issues": 1,
               "open_issues_count": 0,
               "owner": {
-                "avatar_url": "https://secure.gravatar.com/avatar/e7956084e75f239de85d3a31bc172ace?d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png",
+                "avatar_url": "https://example.com/avatar/e7956084e75f239de85d3a31bc172ace",
                 "events_url": "https://api.github.com/users/octocat/events{/privacy}",
                 "followers_url": "https://api.github.com/users/octocat/followers",
                 "following_url": "https://api.github.com/users/octocat/following{/other_user}",
@@ -20954,6 +20995,16 @@
         },
         "x-multi-segment": true
       },
+      "include-metadata": {
+        "description": "When set to `true`, the response will include additional metadata for pull request and required status check rule evaluation.\nResults are capped at 50 entries.",
+        "in": "query",
+        "name": "include_metadata",
+        "required": false,
+        "schema": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
       "invitation-id": {
         "description": "The unique identifier of the invitation.",
         "in": "path",
@@ -21645,7 +21696,7 @@
         }
       },
       "step-number": {
-        "description": "The zero-based position number of the step in the job.",
+        "description": "The number assigned to the step, as shown in the `number` field of the workflow job's `steps` array.",
         "in": "path",
         "name": "step_number",
         "required": true,
@@ -21685,7 +21736,7 @@
         }
       },
       "team-type": {
-        "description": "Filter team results by their type. For more information, see \"[What kind of team should I use?](https://docs.github.com/enterprise-cloud@latest/admin/concepts/enterprise-fundamentals/teams-in-an-enterprise#what-kind-of-team-should-i-use)\"",
+        "description": "Filter team results by their type. For more information, see \"[What kind of team should I use?](https://docs.github.com/admin/concepts/enterprise-fundamentals/teams-in-an-enterprise#what-kind-of-team-should-i-use)\"",
         "in": "query",
         "name": "team_type",
         "required": false,
@@ -22643,6 +22694,16 @@
           "pages": {
             "example": [
               "192.0.2.1"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "shared_ingress": {
+            "description": "Public destination IP ranges in CIDR notation for shared GitHub-managed ingress infrastructure.\nThese ranges may serve multiple GitHub services and are not outbound source ranges.\nUse them alongside the relevant product-specific network requirements.\nOmitted when no ranges are available.",
+            "example": [
+              "192.0.2.1/32"
             ],
             "items": {
               "type": "string"
@@ -24544,7 +24605,15 @@
         "description": "AI Scan enablement for a repository.",
         "properties": {
           "pr_scan": {
-            "description": "Whether AI Scan is enabled for the repository.",
+            "description": "Whether AI Scan on pull requests is enabled for the repository.",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "type": "string"
+          },
+          "repository_scan": {
+            "description": "Whether the full repository AI Scan is enabled for the repository.",
             "enum": [
               "enabled",
               "disabled"
@@ -24562,6 +24631,15 @@
         "properties": {
           "pr_scan": {
             "description": "Whether AI Scan on pull requests is enabled for the organization. The organization setting respects enterprise policy, and repositories inherit it: when disabled, repositories cannot enable AI Scan; when enabled, repositories can still opt out.",
+            "enum": [
+              "enabled",
+              "disabled"
+            ],
+            "example": "enabled",
+            "type": "string"
+          },
+          "repository_scan": {
+            "description": "Whether the full repository AI Scan is enabled for the organization. The organization setting respects enterprise policy, and repositories inherit it: when disabled, repositories cannot enable the full repository AI Scan; when enabled, repositories can still opt out.",
             "enum": [
               "enabled",
               "disabled"
@@ -24610,6 +24688,13 @@
           },
           "instances_url": {
             "$ref": "#/components/schemas/alert-instances-url"
+          },
+          "linked_issues": {
+            "description": "Issues linked to this alert.",
+            "items": {
+              "$ref": "#/components/schemas/code-scanning-alert-linked-issue"
+            },
+            "type": "array"
           },
           "linked_pull_requests": {
             "description": "Pull requests linked to this alert.",
@@ -24824,6 +24909,20 @@
           "instances_url": {
             "$ref": "#/components/schemas/alert-instances-url"
           },
+          "linked_issues": {
+            "description": "Issues linked to this alert.",
+            "items": {
+              "$ref": "#/components/schemas/code-scanning-alert-linked-issue"
+            },
+            "type": "array"
+          },
+          "linked_pull_requests": {
+            "description": "Pull requests linked to this alert.",
+            "items": {
+              "$ref": "#/components/schemas/pull-requests-on-alerts"
+            },
+            "type": "array"
+          },
           "most_recent_instance": {
             "$ref": "#/components/schemas/code-scanning-alert-instance"
           },
@@ -24859,6 +24958,49 @@
           "rule",
           "tool",
           "most_recent_instance"
+        ],
+        "type": "object"
+      },
+      "code-scanning-alert-linked-issue": {
+        "description": "A GitHub issue linked to a code scanning alert. The issue may belong to a different repository.",
+        "properties": {
+          "html_url": {
+            "description": "The URL to view the issue on GitHub.",
+            "format": "uri",
+            "type": "string"
+          },
+          "issue_type": {
+            "$ref": "#/components/schemas/issue-type"
+          },
+          "number": {
+            "description": "The issue number.",
+            "type": "integer"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/simple-repository"
+          },
+          "state": {
+            "description": "The state of the issue.",
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the issue.",
+            "type": "string"
+          },
+          "url": {
+            "description": "The REST API URL of the issue.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "number",
+          "title",
+          "state",
+          "url",
+          "html_url",
+          "repository",
+          "issue_type"
         ],
         "type": "object"
       },
@@ -28594,6 +28736,12 @@
             "description": "The name of the property",
             "type": "string"
           },
+          "regex": {
+            "description": "A regular expression (RE2 syntax) that values of the property must match.\nOnly present for properties with a `value_type` of `string` that define a regular expression.",
+            "example": "^[a-z0-9-]+$",
+            "nullable": true,
+            "type": "string"
+          },
           "require_explicit_values": {
             "description": "Whether setting properties values is mandatory",
             "type": "boolean"
@@ -28862,6 +29010,12 @@
                 "nullable": true,
                 "readOnly": true,
                 "type": "string"
+              },
+              "version_requirement": {
+                "description": "The dependency version or version constraint last recorded for the dependency associated with this alert.\nFor dependencies detected from a lockfile, this can be the resolved version.\nFor manifest-only dependencies, it can be the declared version constraint. Returns `null` when unavailable.\n\nAn empty string can indicate an unconstrained dependency. The stored value is limited to 64 bytes;\nlonger requirements may have been truncated and may no longer form a complete, valid version constraint.\n\nWhen multiple vulnerable versions of a dependency correspond to the same alert, this field contains one\nrecorded version or constraint and may not represent all vulnerable versions.\n",
+                "nullable": true,
+                "readOnly": true,
+                "type": "string"
               }
             },
             "readOnly": true,
@@ -28902,6 +29056,50 @@
           },
           "number": {
             "$ref": "#/components/schemas/alert-number"
+          },
+          "reachability": {
+            "additionalProperties": false,
+            "description": "The reachability result for the vulnerability that triggered the alert, indicating whether a\nvulnerable function is reachable from the repository's own code.\n",
+            "properties": {
+              "reason": {
+                "description": "The reason for the reachability verdict. This field is omitted when reachability analysis is disabled or no result has been computed.",
+                "enum": [
+                  "unknown",
+                  "unavailable_unsupported_ecosystem",
+                  "unavailable_analysis_timed_out",
+                  "potentially_reachable_invalid_manifest_path",
+                  "potentially_reachable_missing_vulnerable_function_annotation",
+                  "potentially_reachable_dependency_not_found",
+                  "potentially_reachable_dependency_analysis_incomplete",
+                  "potentially_reachable_repository_analysis_incomplete",
+                  "potentially_reachable_call_found_outside_manifest_scope",
+                  "potentially_reachable_unclassified_analysis_state",
+                  "reachable_vulnerable_function_called",
+                  "unreachable_vulnerable_function_not_called",
+                  "potentially_reachable_unresolved_dynamic_call"
+                ],
+                "nullable": false,
+                "readOnly": true,
+                "type": "string"
+              },
+              "verdict": {
+                "description": "The reachability verdict for the alert.\n\n- `reachable`: a path from the repository's code reaches a vulnerable function.\n- `unreachable`: no path from the repository's code reaches a vulnerable function.\n- `potentially_reachable`: reachability could not be determined with confidence; review manually.\n- `unavailable`: no verdict has been computed for the alert yet.\n- `disabled`: reachability analysis is not enabled for the repository.\n",
+                "enum": [
+                  "reachable",
+                  "unreachable",
+                  "potentially_reachable",
+                  "unavailable",
+                  "disabled"
+                ],
+                "readOnly": true,
+                "type": "string"
+              }
+            },
+            "readOnly": true,
+            "required": [
+              "verdict"
+            ],
+            "type": "object"
           },
           "security_advisory": {
             "$ref": "#/components/schemas/dependabot-alert-security-advisory"
@@ -29341,6 +29539,12 @@
                 "nullable": true,
                 "readOnly": true,
                 "type": "string"
+              },
+              "version_requirement": {
+                "description": "The dependency version or version constraint last recorded for the dependency associated with this alert.\nFor dependencies detected from a lockfile, this can be the resolved version.\nFor manifest-only dependencies, it can be the declared version constraint. Returns `null` when unavailable.\n\nAn empty string can indicate an unconstrained dependency. The stored value is limited to 64 bytes;\nlonger requirements may have been truncated and may no longer form a complete, valid version constraint.\n\nWhen multiple vulnerable versions of a dependency correspond to the same alert, this field contains one\nrecorded version or constraint and may not represent all vulnerable versions.\n",
+                "nullable": true,
+                "readOnly": true,
+                "type": "string"
               }
             },
             "readOnly": true,
@@ -29381,6 +29585,50 @@
           },
           "number": {
             "$ref": "#/components/schemas/alert-number"
+          },
+          "reachability": {
+            "additionalProperties": false,
+            "description": "The reachability result for the vulnerability that triggered the alert, indicating whether a\nvulnerable function is reachable from the repository's own code.\n",
+            "properties": {
+              "reason": {
+                "description": "The reason for the reachability verdict. This field is omitted when reachability analysis is disabled or no result has been computed.",
+                "enum": [
+                  "unknown",
+                  "unavailable_unsupported_ecosystem",
+                  "unavailable_analysis_timed_out",
+                  "potentially_reachable_invalid_manifest_path",
+                  "potentially_reachable_missing_vulnerable_function_annotation",
+                  "potentially_reachable_dependency_not_found",
+                  "potentially_reachable_dependency_analysis_incomplete",
+                  "potentially_reachable_repository_analysis_incomplete",
+                  "potentially_reachable_call_found_outside_manifest_scope",
+                  "potentially_reachable_unclassified_analysis_state",
+                  "reachable_vulnerable_function_called",
+                  "unreachable_vulnerable_function_not_called",
+                  "potentially_reachable_unresolved_dynamic_call"
+                ],
+                "nullable": false,
+                "readOnly": true,
+                "type": "string"
+              },
+              "verdict": {
+                "description": "The reachability verdict for the alert.\n\n- `reachable`: a path from the repository's code reaches a vulnerable function.\n- `unreachable`: no path from the repository's code reaches a vulnerable function.\n- `potentially_reachable`: reachability could not be determined with confidence; review manually.\n- `unavailable`: no verdict has been computed for the alert yet.\n- `disabled`: reachability analysis is not enabled for the repository.\n",
+                "enum": [
+                  "reachable",
+                  "unreachable",
+                  "potentially_reachable",
+                  "unavailable",
+                  "disabled"
+                ],
+                "readOnly": true,
+                "type": "string"
+              }
+            },
+            "readOnly": true,
+            "required": [
+              "verdict"
+            ],
+            "type": "object"
           },
           "repository": {
             "$ref": "#/components/schemas/simple-repository"
@@ -31883,6 +32131,7 @@
             "type": "string"
           },
           "temp_clone_token": {
+            "description": "When present and non-empty, a temporary credential for read-only Git access to this repository.\nIt expires five minutes after generation and cannot be used to push changes.\nTreat this value as sensitive and avoid recording it in logs.",
             "nullable": true,
             "type": "string"
           },
@@ -33512,6 +33761,34 @@
             "nullable": true,
             "type": "string"
           },
+          "status": {
+            "description": "The status of the issue, or `null` if it has none. Issue statuses are in preview and only available to accounts enrolled in the preview.",
+            "nullable": true,
+            "properties": {
+              "category": {
+                "description": "A stable identifier for the category, such as `backlog`, `planned`, `started`, `completed`, `not_planned` or `duplicate`. Clients should expect new keys to be added.",
+                "example": "started",
+                "type": "string"
+              },
+              "id": {
+                "description": "The stable identifier of the planning status.",
+                "example": 4,
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The display name of the planning status, which may change in the future.",
+                "example": "In progress",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "category"
+            ],
+            "type": "object"
+          },
           "sub_issues_summary": {
             "$ref": "#/components/schemas/sub-issues-summary"
           },
@@ -34059,7 +34336,7 @@
         "type": "object"
       },
       "issue-field": {
-        "description": "A custom attribute defined at the organization level for attaching structured data to issues.",
+        "description": "A custom attribute defined by a repository owner for attaching structured data to issues.",
         "nullable": true,
         "properties": {
           "created_at": {
@@ -34158,10 +34435,11 @@
             "type": "string"
           },
           "visibility": {
-            "description": "The visibility of the issue field. Can be `organization_members_only` (visible only within the organization) or `all` (visible to all users who can see issues).",
+            "description": "The visibility of the issue field. Organization-owned fields return `organization_members_only` for restricted visibility (visible to organization members and to collaborators on the repository the field is read through), or `all` (visible to all users who can see issues). For create and update requests, use `restricted` instead of the deprecated `organization_members_only` input. Existing REST API versions continue to return `organization_members_only` for restricted organization-owned fields, even when a request uses `restricted`. Any change to this response spelling will be introduced in a future REST API version.",
             "enum": [
               "organization_members_only",
-              "all"
+              "all",
+              "restricted"
             ],
             "type": "string"
           }
@@ -34483,6 +34761,34 @@
           "state_reason": {
             "nullable": true,
             "type": "string"
+          },
+          "status": {
+            "description": "The status of the issue, or `null` if it has none. Issue statuses are in preview and only available to accounts enrolled in the preview.",
+            "nullable": true,
+            "properties": {
+              "category": {
+                "description": "A stable identifier for the category, such as `backlog`, `planned`, `started`, `completed`, `not_planned` or `duplicate`. Clients should expect new keys to be added.",
+                "example": "started",
+                "type": "string"
+              },
+              "id": {
+                "description": "The stable identifier of the planning status.",
+                "example": 4,
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The display name of the planning status, which may change in the future.",
+                "example": "In progress",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "category"
+            ],
+            "type": "object"
           },
           "sub_issues_summary": {
             "$ref": "#/components/schemas/sub-issues-summary"
@@ -36278,6 +36584,7 @@
             "type": "string"
           },
           "temp_clone_token": {
+            "description": "When present and non-empty, a temporary credential for read-only Git access to this repository.\nIt expires five minutes after generation and cannot be used to push changes.\nTreat this value as sensitive and avoid recording it in logs.",
             "type": "string"
           },
           "topics": {
@@ -37090,6 +37397,34 @@
             "nullable": true,
             "type": "string"
           },
+          "status": {
+            "description": "The status of the issue, or `null` if it has none. Issue statuses are in preview and only available to accounts enrolled in the preview.",
+            "nullable": true,
+            "properties": {
+              "category": {
+                "description": "A stable identifier for the category, such as `backlog`, `planned`, `started`, `completed`, `not_planned` or `duplicate`. Clients should expect new keys to be added.",
+                "example": "started",
+                "type": "string"
+              },
+              "id": {
+                "description": "The stable identifier of the planning status.",
+                "example": 4,
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "description": "The display name of the planning status, which may change in the future.",
+                "example": "In progress",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "category"
+            ],
+            "type": "object"
+          },
           "sub_issues_summary": {
             "$ref": "#/components/schemas/sub-issues-summary"
           },
@@ -37899,6 +38234,7 @@
             "type": "string"
           },
           "temp_clone_token": {
+            "description": "When present and non-empty, a temporary credential for read-only Git access to this repository.\nIt expires five minutes after generation and cannot be used to push changes.\nTreat this value as sensitive and avoid recording it in logs.",
             "type": "string"
           },
           "topics": {
@@ -38550,6 +38886,7 @@
             "type": "string"
           },
           "temp_clone_token": {
+            "description": "When present and non-empty, a temporary credential for read-only Git access to this repository.\nIt expires five minutes after generation and cannot be used to push changes.\nTreat this value as sensitive and avoid recording it in logs.",
             "type": "string"
           },
           "topics": {
@@ -38779,9 +39116,7 @@
         ]
       },
       "nullable-secret-scanning-first-detected-location": {
-        "description": "Details on the location where the token was initially detected. This can be a commit, wiki commit, issue, discussion, pull request.\n",
-        "nullable": true,
-        "oneOf": [
+        "anyOf": [
           {
             "$ref": "#/components/schemas/secret-scanning-location-commit"
           },
@@ -38820,8 +39155,13 @@
           },
           {
             "$ref": "#/components/schemas/secret-scanning-location-pull-request-review-comment"
+          },
+          {
+            "$ref": "#/components/schemas/secret-scanning-location-actions-log"
           }
-        ]
+        ],
+        "description": "Details on the location where the token was initially detected. This can be a commit, wiki commit, issue, discussion, pull request, or Actions job log.\n",
+        "nullable": true
       },
       "nullable-simple-commit": {
         "description": "A commit.",
@@ -42351,6 +42691,12 @@
             "nullable": true,
             "type": "string"
           },
+          "copilot_code_review_effort": {
+            "description": "The persisted effective effort used to produce this Copilot code review, or null if unavailable. For more information, see [Review effort level](https://docs.github.com/copilot/concepts/agent-capabilities/agent-powered-workflows-and-operations/code-review#review-effort-level).",
+            "example": null,
+            "nullable": true,
+            "type": "string"
+          },
           "html_url": {
             "example": "https://github.com/octocat/Hello-World/pull/12#pullrequestreview-80",
             "format": "uri",
@@ -42361,6 +42707,11 @@
             "example": 42,
             "format": "int64",
             "type": "integer"
+          },
+          "is_copilot_code_review": {
+            "description": "Whether this review was produced by Copilot code review. Bot authorship alone does not establish provenance.",
+            "example": false,
+            "type": "boolean"
           },
           "node_id": {
             "example": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3ODA=",
@@ -42471,6 +42822,53 @@
             "example": "6dcb09b5b57875f334f61aebed695e2e4193db5e",
             "type": "string"
           },
+          "copilot_code_review_sources": {
+            "description": "Sources reported as contributing to this comment; may be incomplete. Not returned for issue timeline events.",
+            "example": [
+              {
+                "kind": "SKILL",
+                "name": "code-review",
+                "path": ".github/skills/code-review/SKILL.md"
+              },
+              {
+                "kind": "MCP",
+                "name": "github"
+              },
+              {
+                "kind": "CUSTOM_INSTRUCTIONS",
+                "name": "custom instructions",
+                "path": ".github/copilot-instructions.md"
+              }
+            ],
+            "items": {
+              "properties": {
+                "kind": {
+                  "description": "The kind of contributing source.",
+                  "enum": [
+                    "SKILL",
+                    "MCP",
+                    "CUSTOM_INSTRUCTIONS"
+                  ],
+                  "type": "string"
+                },
+                "name": {
+                  "description": "The reported source name, or \"custom instructions\" for CUSTOM_INSTRUCTIONS. Copilot Dreaming's reviewer agent and checks skill are reported as one SKILL source named \"Copilot dreaming\".",
+                  "type": "string"
+                },
+                "path": {
+                  "description": "The validated repository-relative source path, if available. Commit OIDs are not exposed.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "name"
+              ],
+              "type": "object"
+            },
+            "maxItems": 16,
+            "type": "array"
+          },
           "created_at": {
             "example": "2011-04-14T16:00:49Z",
             "format": "date-time",
@@ -42497,6 +42895,11 @@
             "description": "The comment ID to reply to.",
             "example": 8,
             "type": "integer"
+          },
+          "is_copilot_code_review": {
+            "description": "Whether this comment was produced by Copilot code review. Not returned for issue timeline events.",
+            "example": false,
+            "type": "boolean"
           },
           "line": {
             "description": "The line of the blob to which the comment applies. The last line of the range for a multi-line comment",
@@ -43473,6 +43876,69 @@
         "title": "Pull Request Stack",
         "type": "object"
       },
+      "pull-requests-on-alerts": {
+        "description": "A pull request linked to a code scanning alert.",
+        "properties": {
+          "draft": {
+            "description": "Whether the linked pull request is a draft.",
+            "type": "boolean"
+          },
+          "html_url": {
+            "description": "The URL of the linked pull request on GitHub.",
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "description": "The ID of the linked pull request.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "merged_at": {
+            "description": "The time the linked pull request was merged. Null if it has not been merged.",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "number": {
+            "description": "The number of the linked pull request.",
+            "type": "integer"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/simple-repository"
+          },
+          "state": {
+            "description": "The state of the referenced pull request.",
+            "enum": [
+              "open",
+              "closed",
+              "merged"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "The title of the linked pull request.",
+            "type": "string"
+          },
+          "url": {
+            "description": "The REST API URL for the linked pull request.",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "number",
+          "id",
+          "repository",
+          "title",
+          "state",
+          "merged_at",
+          "html_url",
+          "url",
+          "draft"
+        ],
+        "title": "Pull Requests on Alerts",
+        "type": "object"
+      },
       "push-event": {
         "properties": {
           "before": {
@@ -44415,6 +44881,7 @@
             "type": "string"
           },
           "temp_clone_token": {
+            "description": "When present and non-empty, a temporary credential for read-only Git access to this repository.\nIt expires five minutes after generation and cannot be used to push changes.\nTreat this value as sensitive and avoid recording it in logs.",
             "type": "string"
           },
           "text_matches": {
@@ -44990,6 +45457,7 @@
             "type": "string"
           },
           "temp_clone_token": {
+            "description": "When present and non-empty, a temporary credential for read-only Git access to this repository.\nIt expires five minutes after generation and cannot be used to push changes.\nTreat this value as sensitive and avoid recording it in logs.",
             "type": "string"
           },
           "topics": {
@@ -45711,7 +46179,7 @@
               "write",
               "admin",
               "triage",
-              "triage_plus",
+              "moderate",
               "maintain"
             ],
             "example": "read",
@@ -45822,6 +46290,53 @@
             "example": "6dcb09b5b57875f334f61aebed695e2e4193db5e",
             "type": "string"
           },
+          "copilot_code_review_sources": {
+            "description": "Sources reported as contributing to this comment; may be incomplete.",
+            "example": [
+              {
+                "kind": "SKILL",
+                "name": "code-review",
+                "path": ".github/skills/code-review/SKILL.md"
+              },
+              {
+                "kind": "MCP",
+                "name": "github"
+              },
+              {
+                "kind": "CUSTOM_INSTRUCTIONS",
+                "name": "custom instructions",
+                "path": ".github/copilot-instructions.md"
+              }
+            ],
+            "items": {
+              "properties": {
+                "kind": {
+                  "description": "The kind of contributing source.",
+                  "enum": [
+                    "SKILL",
+                    "MCP",
+                    "CUSTOM_INSTRUCTIONS"
+                  ],
+                  "type": "string"
+                },
+                "name": {
+                  "description": "The reported source name, or \"custom instructions\" for CUSTOM_INSTRUCTIONS. Copilot Dreaming's reviewer agent and checks skill are reported as one SKILL source named \"Copilot dreaming\".",
+                  "type": "string"
+                },
+                "path": {
+                  "description": "The validated repository-relative source path, if available. Commit OIDs are not exposed.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "name"
+              ],
+              "type": "object"
+            },
+            "maxItems": 16,
+            "type": "array"
+          },
           "created_at": {
             "example": "2011-04-14T16:00:49Z",
             "format": "date-time",
@@ -45844,6 +46359,11 @@
           "in_reply_to_id": {
             "example": 8,
             "type": "integer"
+          },
+          "is_copilot_code_review": {
+            "description": "Whether this comment was produced by Copilot code review.",
+            "example": false,
+            "type": "boolean"
           },
           "line": {
             "description": "The line of the blob to which the comment applies. The last line of the range for a multi-line comment",
@@ -46426,6 +46946,26 @@
                   ],
                   "type": "string"
                 },
+                "metadata": {
+                  "description": "Additional metadata about the rule evaluation.",
+                  "discriminator": {
+                    "mapping": {
+                      "pull_request": "#/components/schemas/rule-suite-pull-request",
+                      "required_status_checks": "#/components/schemas/rule-suite-required-status-checks"
+                    },
+                    "propertyName": "rule_type"
+                  },
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/rule-suite-pull-request"
+                    },
+                    {
+                      "$ref": "#/components/schemas/rule-suite-required-status-checks"
+                    }
+                  ],
+                  "type": "object"
+                },
                 "result": {
                   "description": "The result of the evaluation of the individual rule.",
                   "enum": [
@@ -46464,6 +47004,185 @@
           }
         },
         "title": "Rule Suite",
+        "type": "object"
+      },
+      "rule-suite-pull-request": {
+        "description": "Metadata for a pull request rule evaluation result.",
+        "properties": {
+          "pull_request": {
+            "description": "The pull request associated with the rule evaluation.",
+            "properties": {
+              "id": {
+                "description": "The unique identifier of the pull request.",
+                "type": "integer"
+              },
+              "number": {
+                "description": "The number of the pull request.",
+                "type": "integer"
+              },
+              "proof_of_presence": {
+                "description": "The proof of presence evaluation for the pull request. Null if proof of presence was not evaluated.",
+                "nullable": true,
+                "properties": {
+                  "base_sha": {
+                    "description": "The base commit SHA the proof of presence evaluation applies to. Empty if unavailable.",
+                    "type": "string"
+                  },
+                  "code": {
+                    "description": "A code describing the reason for the proof of presence state.",
+                    "type": "string"
+                  },
+                  "head_sha": {
+                    "description": "The head commit SHA the proof of presence evaluation applies to. Empty if unavailable.",
+                    "type": "string"
+                  },
+                  "required_level": {
+                    "description": "The authentication level required by the rule. Empty if unavailable.",
+                    "type": "string"
+                  },
+                  "state": {
+                    "description": "The state of the proof of presence evaluation.",
+                    "type": "string"
+                  },
+                  "verified_at": {
+                    "description": "The time proof of presence was verified, in ISO 8601 format. Empty if proof of presence has not been completed.",
+                    "type": "string"
+                  },
+                  "verified_level": {
+                    "description": "The authentication level that was verified. Empty if proof of presence has not been completed.",
+                    "type": "string"
+                  },
+                  "verifier": {
+                    "description": "The user who provided proof of presence. Null if no proof of presence was recorded.",
+                    "nullable": true,
+                    "properties": {
+                      "id": {
+                        "description": "The unique identifier of the user.",
+                        "type": "integer"
+                      },
+                      "login": {
+                        "description": "The handle for the GitHub user account.",
+                        "type": "string"
+                      },
+                      "type": {
+                        "description": "The type of the user.",
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "reviews": {
+                "description": "The reviews associated with the pull request.",
+                "items": {
+                  "properties": {
+                    "id": {
+                      "description": "The unique identifier of the review.",
+                      "type": "integer"
+                    },
+                    "state": {
+                      "description": "The state of the review.",
+                      "type": "string"
+                    },
+                    "user": {
+                      "description": "The user who submitted the review.",
+                      "properties": {
+                        "id": {
+                          "description": "The unique identifier of the user.",
+                          "type": "integer"
+                        },
+                        "login": {
+                          "description": "The handle for the GitHub user account.",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "The type of the user.",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "user": {
+                "description": "The user who created the pull request.",
+                "properties": {
+                  "id": {
+                    "description": "The unique identifier of the user.",
+                    "type": "integer"
+                  },
+                  "login": {
+                    "description": "The handle for the GitHub user account.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The type of the user.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "title": "Pull request rule suite metadata",
+        "type": "object"
+      },
+      "rule-suite-required-status-checks": {
+        "description": "Metadata for a required status checks rule evaluation result.",
+        "properties": {
+          "checks": {
+            "description": "The status checks associated with the rule evaluation.",
+            "items": {
+              "properties": {
+                "app": {
+                  "description": "The GitHub App associated with the status check.",
+                  "nullable": true,
+                  "properties": {
+                    "id": {
+                      "description": "The unique identifier of the GitHub App.",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "description": "The name of the GitHub App.",
+                      "type": "string"
+                    },
+                    "slug": {
+                      "description": "The slug of the GitHub App.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "context": {
+                  "description": "The context name of the status check.",
+                  "type": "string"
+                },
+                "id": {
+                  "description": "The unique identifier of the status check.",
+                  "type": "integer"
+                },
+                "state": {
+                  "description": "The state of the status check.",
+                  "type": "string"
+                },
+                "type": {
+                  "description": "The type of the status check.",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "title": "Required status checks rule suite metadata",
         "type": "object"
       },
       "rule-suites": {
@@ -47025,7 +47744,7 @@
       "secret-scanning-location": {
         "properties": {
           "details": {
-            "oneOf": [
+            "anyOf": [
               {
                 "$ref": "#/components/schemas/secret-scanning-location-commit"
               },
@@ -47064,6 +47783,9 @@
               },
               {
                 "$ref": "#/components/schemas/secret-scanning-location-pull-request-review-comment"
+              },
+              {
+                "$ref": "#/components/schemas/secret-scanning-location-actions-log"
               }
             ]
           },
@@ -47082,12 +47804,47 @@
               "pull_request_body",
               "pull_request_comment",
               "pull_request_review",
-              "pull_request_review_comment"
+              "pull_request_review_comment",
+              "actions_log"
             ],
             "example": "commit",
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "secret-scanning-location-actions-log": {
+        "description": "Represents an 'actions_log' secret scanning location type. The path identifies the workflow definition, while line and column positions identify the secret in the raw job log, not in the workflow file.",
+        "properties": {
+          "end_column": {
+            "description": "The one-based column at which the secret ends within the end line of the raw job log.",
+            "type": "number"
+          },
+          "end_line": {
+            "description": "Line number at which the secret ends in the raw job log.",
+            "type": "number"
+          },
+          "path": {
+            "description": "The workflow definition path. Dynamically generated workflows can have a synthetic path.",
+            "example": ".github/workflows/build.yml",
+            "type": "string"
+          },
+          "start_column": {
+            "description": "The one-based column at which the secret starts within the start line of the raw job log.",
+            "type": "number"
+          },
+          "start_line": {
+            "description": "Line number at which the secret starts in the raw job log.",
+            "type": "number"
+          }
+        },
+        "required": [
+          "path",
+          "start_line",
+          "end_line",
+          "start_column",
+          "end_column"
+        ],
         "type": "object"
       },
       "secret-scanning-location-commit": {
@@ -49868,6 +50625,7 @@
             "type": "string"
           },
           "temp_clone_token": {
+            "description": "When present and non-empty, a temporary credential for read-only Git access to this repository.\nIt expires five minutes after generation and cannot be used to push changes.\nTreat this value as sensitive and avoid recording it in logs.",
             "type": "string"
           },
           "topics": {
@@ -56351,6 +57109,15 @@
             "$ref": "#/components/parameters/all"
           },
           {
+            "description": "Whether to return only done notifications (`true`) or exclude them (`false`). When omitted, notifications are not filtered by done status. Use `all=true&is_done=true` for done notifications or `all=true&is_done=false` for both read and unread inbox notifications. If `all` is omitted or `false`, `is_done=true` returns no notifications.",
+            "in": "query",
+            "name": "is_done",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "$ref": "#/components/parameters/participating"
           },
           {
@@ -57075,7 +57842,7 @@
     },
     "/orgs/{org}/attestations/repositories": {
       "get": {
-        "description": "List repositories owned by the provided organization that have created at least one attested artifact\nResults will be sorted in ascending order by repository ID",
+        "description": "List repositories owned by the provided organization that have created at least one attested artifact.\nResults will be sorted in ascending order by repository ID.",
         "externalDocs": {
           "description": "API method documentation",
           "url": "https://docs.github.com/rest/orgs/attestations#list-attestation-repositories"
@@ -60726,6 +61493,9 @@
           },
           {
             "$ref": "#/components/parameters/rule-suite-id"
+          },
+          {
+            "$ref": "#/components/parameters/include-metadata"
           }
         ],
         "responses": {
@@ -61498,7 +62268,7 @@
             "description": "Alternative response with repository permissions"
           },
           "204": {
-            "description": "Response if team has permission for the repository. This is the response when the repository media type hasn't been provded in the Accept header."
+            "description": "Response if team has permission for the repository. This is the response when the repository media type hasn't been provided in the Accept header."
           },
           "404": {
             "description": "Not Found if team does not have permission for the repository"
@@ -61632,7 +62402,7 @@
     },
     "/repos/{owner}/{repo}": {
       "get": {
-        "description": "The `parent` and `source` objects are present when the repository is a fork. `parent` is the repository this repository was forked from, `source` is the ultimate source for the network.\n\n> [!NOTE]\n> - In order to see the `security_and_analysis` block for a repository you must have admin permissions for the repository or be an owner or security manager for the organization that owns the repository. For more information, see \"[Managing security managers in your organization](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-security-managers-in-your-organization).\"\n> - To view merge-related settings, you must have the `contents:read` and `contents:write` permissions.",
+        "description": "The `parent` and `source` objects are present when the repository is a fork. `parent` is the repository this repository was forked from, `source` is the ultimate source for the network.\n\nWhen present and non-empty, `temp_clone_token` is a temporary credential for read-only Git access to this repository. It expires five minutes after generation and cannot be used to push changes. Treat this value as sensitive and avoid recording it in logs.\n\n> [!NOTE]\n> - In order to see the `security_and_analysis` block for a repository you must have admin permissions for the repository or be an owner or security manager for the organization that owns the repository. For more information, see \"[Managing security managers in your organization](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-security-managers-in-your-organization).\"\n> - To view merge-related settings, you must have the `contents:read` and `contents:write` permissions.",
         "externalDocs": {
           "description": "API method documentation",
           "url": "https://docs.github.com/rest/repos/repos#get-a-repository"
@@ -62325,6 +63095,9 @@
                 "$ref": "#/components/headers/link"
               }
             }
+          },
+          "304": {
+            "$ref": "#/components/responses/not_modified"
           }
         },
         "summary": "List workflow runs for a repository",
@@ -65542,7 +66315,7 @@
               "enum": [
                 "pull",
                 "triage",
-                "triage_plus",
+                "moderate",
                 "push",
                 "maintain",
                 "admin"
@@ -68572,7 +69345,7 @@
     },
     "/repos/{owner}/{repo}/issue-types": {
       "get": {
-        "description": "Lists issue types available for a repository (inherited from its organization owner, with any per-repository overrides applied).\nOAuth app tokens and personal access tokens (classic) need the `repo` scope to use this endpoint.\nFine-grained access tokens require the \"Metadata\" repository permission (read).",
+        "description": "Lists enabled issue types inherited from the repository owner.\nOAuth app tokens and personal access tokens (classic) need the `repo` scope to use this endpoint.\nFine-grained access tokens require the \"Metadata\" repository permission (read).",
         "externalDocs": {
           "description": "API method documentation",
           "url": "https://docs.github.com/rest/repos/issue-types#list-issue-types-for-a-repository"
@@ -68697,7 +69470,7 @@
             }
           },
           {
-            "description": "A comma-separated list of issue field filters in `field_slug:value` format.\nOnly issues matching all specified field values are returned.\nRequires issue fields to be enabled for the repository. Issue fields are\nnot available for user-owned repositories, and field availability for\norganization-owned public repositories depends on the organization's\nvisibility settings. For example, `priority:Urgent,severity:High` filters\nissues where the `priority` field is `Urgent` AND the `severity` field is\n`High`.",
+            "description": "A comma-separated list of issue field filters in `field_slug:value` format.\nOnly issues matching all specified field values are returned.\nRequires issue fields to be enabled for the repository. Supports both\nuser-owned and organization-owned repositories. Field availability depends\non the owner's issue field visibility settings and the caller's access.\nFor example, `priority:Urgent,severity:High` filters\nissues where the `priority` field is `Urgent` AND the `severity` field is\n`High`.",
             "in": "query",
             "name": "issue_field_values",
             "required": false,
@@ -70577,6 +71350,15 @@
           },
           {
             "$ref": "#/components/parameters/all"
+          },
+          {
+            "description": "Whether to return only done notifications (`true`) or exclude them (`false`). When omitted, notifications are not filtered by done status. Use `all=true&is_done=true` for done notifications or `all=true&is_done=false` for both read and unread inbox notifications. If `all` is omitted or `false`, `is_done=true` returns no notifications.",
+            "in": "query",
+            "name": "is_done",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           },
           {
             "$ref": "#/components/parameters/participating"
@@ -72592,6 +73374,9 @@
           },
           {
             "$ref": "#/components/parameters/rule-suite-id"
+          },
+          {
+            "$ref": "#/components/parameters/include-metadata"
           }
         ],
         "responses": {
@@ -75501,7 +76286,7 @@
     },
     "/user": {
       "get": {
-        "description": "OAuth app tokens and personal access tokens (classic) need the `read:user` scope, or the broader `user` scope, for this endpoint to return the private user response. The private user response includes additional fields such as `private_gists`, `total_private_repos`, `owned_private_repos`, `disk_usage`, `collaborators`, and `two_factor_authentication`. Tokens without these scopes receive the public user response.\n\nThe private and public user response types are unrelated to the [private profile](https://docs.github.com/account-and-profile/concepts/personal-profile#private-profiles) setting. A token without scopes still authenticates as the token's owner, so values subject to private profile visibility, such as `followers` and `following`, may differ from an unauthenticated response.",
+        "description": "OAuth app tokens and personal access tokens (classic) need the `read:user` scope, or the broader `user` scope, for this endpoint to return the private user response. The private user response includes additional fields such as `private_gists`, `total_private_repos`, `owned_private_repos`, `disk_usage`, `collaborators`, and `two_factor_authentication`. Tokens without these scopes receive the public user response.\n\nThe private and public user response types are unrelated to the [private profile](https://docs.github.com/account-and-profile/concepts/personal-profile#private-profiles) setting. A token without scopes still authenticates as the token's owner, so values subject to private profile visibility, such as `followers` and `following`, may differ from an unauthenticated response.\n\nFor enterprise-managed users, if their email is unverified, this endpoint will return a placeholder email in the format `email+shortcode@domain.com` instead of their actual email. This placeholder email [may cause issues with some third-party apps](https://github.blog/changelog/2024-08-01-enterprise-managed-user-accounts-now-require-email-verification/). Once the user has [verified their email address](https://docs.github.com/account-and-profile/how-tos/email-preferences/verifying-your-email-address), the endpoint will return their real email.",
         "externalDocs": {
           "description": "API method documentation",
           "url": "https://docs.github.com/rest/users/users#get-the-authenticated-user"
@@ -75860,7 +76645,7 @@
     },
     "/user/emails": {
       "get": {
-        "description": "Lists all of your email addresses, and specifies which one is visible\nto the public.\n\nOAuth app tokens and personal access tokens (classic) need the `user:email` scope to use this endpoint.",
+        "description": "Lists all of your email addresses, and specifies which one is visible\nto the public.\n\nOAuth app tokens and personal access tokens (classic) need the `user:email` scope to use this endpoint.\n\nFor enterprise-managed users, if their email is unverified, this endpoint will return a placeholder email in the format `email+shortcode@domain.com` instead of their actual email. This placeholder email [may cause issues with some third-party apps](https://github.blog/changelog/2024-08-01-enterprise-managed-user-accounts-now-require-email-verification/). Once the user has [verified their email address](https://docs.github.com/account-and-profile/how-tos/email-preferences/verifying-your-email-address), the endpoint will return their real email.",
         "externalDocs": {
           "description": "API method documentation",
           "url": "https://docs.github.com/rest/users/emails#list-email-addresses-for-the-authenticated-user"

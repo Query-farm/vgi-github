@@ -34,8 +34,8 @@ def run(operation, values=None, *, attach=None, **options):
 
 def test_manifest_contains_all_source_reads_and_only_get():
     assert {source["product"]: source["get_operations"] for source in rest.MANIFEST["sources"]} == {
-        "api.github.com": 644,
-        "ghec": 770,
+        "api.github.com": 667,
+        "ghec": 804,
     }
     assert len(FUNCTIONS) == len(rest.OPERATIONS)
     assert len(FUNCTIONS) >= max(source["get_operations"] for source in rest.MANIFEST["sources"])

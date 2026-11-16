@@ -26,7 +26,8 @@ max_functions = 1000
 max_schema_objects = 1000
 max_function_name_length = 128
 # Actions jobs have numeric IDs; enterprise vulnerability-sync jobs use strings.
-type_consistency_ignore_names = ["job_id"]
+# Actions policies have numeric IDs; enterprise dependency license policies use strings.
+type_consistency_ignore_names = ["job_id", "policy_id"]
 
 [per-object]
 "github.rest.*" = { ignore = [

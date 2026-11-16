@@ -77108,6 +77108,11 @@
                 "mapped_dynamic_maps": [],
                 "mapped_properties": [
                   "#/components/schemas/secret-scanning-alert-with-metadata/properties/first_location_detected",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_line",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/path",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_line",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_sha",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_url",
                   "#/components/schemas/secret-scanning-location-commit/properties/commit_sha",
@@ -77524,6 +77529,11 @@
                 "column": "details",
                 "mapped_dynamic_maps": [],
                 "mapped_properties": [
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_line",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/path",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_line",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_sha",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_url",
                   "#/components/schemas/secret-scanning-location-commit/properties/commit_sha",
@@ -90274,7 +90284,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": [
                   "activity_events_performed_source"
                 ]
@@ -90354,7 +90364,7 @@
                     }
                   ]
                 },
-                "parameter_count": 6,
+                "parameter_count": 7,
                 "public_dynamic_maps": [],
                 "public_properties": [
                   "#/components/schemas/minimal-repository/properties/full_name",
@@ -90456,7 +90466,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": [
                   "activity_events_organization_authenticated_source"
                 ]
@@ -90522,7 +90532,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": [
                   "activity_events_public_source"
                 ]
@@ -90608,7 +90618,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 724,
+                "response_property_count": 728,
                 "selected_sources": [
                   "activity_events_network_source"
                 ]
@@ -90683,7 +90693,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": [
                   "activity_events_performed_public_source"
                 ]
@@ -90758,7 +90768,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": [
                   "activity_events_organization_source"
                 ]
@@ -90833,7 +90843,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": [
                   "activity_events_received_source"
                 ]
@@ -90908,7 +90918,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": [
                   "activity_events_received_public_source"
                 ]
@@ -90994,7 +91004,7 @@
                   "#/components/schemas/event/properties/repo/properties/url",
                   "#/components/schemas/event/properties/type"
                 ],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": [
                   "activity_events_repository_source"
                 ]
@@ -91094,7 +91104,7 @@
                     }
                   ]
                 },
-                "parameter_count": 8,
+                "parameter_count": 9,
                 "public_dynamic_maps": [],
                 "public_properties": [
                   "#/components/schemas/minimal-repository/properties/full_name",
@@ -91402,6 +91412,141 @@
                 "selected_sources": [
                   "repository_watchers_by_repository_source"
                 ]
+              },
+              "agent-automations/get-automation-revision": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 4,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 189,
+                "selected_sources": []
+              },
+              "agent-automations/get-repo-automation": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 3,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 178,
+                "selected_sources": []
+              },
+              "agent-automations/list-automation-revisions": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 5,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 190,
+                "selected_sources": []
+              },
+              "agent-automations/list-automations": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 3,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 180,
+                "selected_sources": []
+              },
+              "agent-automations/list-available-repo-automation-tools": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 13,
+                "selected_sources": []
+              },
+              "agent-automations/list-available-repo-automation-triggers": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 24,
+                "selected_sources": []
+              },
+              "agent-automations/list-repo-automation-tasks": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 9,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 33,
+                "selected_sources": []
+              },
+              "agent-automations/list-repo-automations": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 5,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 178,
+                "selected_sources": []
+              },
+              "agent-merge/get-agent-merge-enrollment": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 3,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 5,
+                "selected_sources": []
               },
               "agent-tasks/get-task-by-id": {
                 "content_contracts": [],
@@ -92259,7 +92404,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 131,
+                "response_property_count": 132,
                 "selected_sources": []
               },
               "apps/get-org-installation": {
@@ -92274,7 +92419,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 131,
+                "response_property_count": 132,
                 "selected_sources": []
               },
               "apps/get-repo-installation": {
@@ -92289,7 +92434,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 135,
+                "response_property_count": 136,
                 "selected_sources": []
               },
               "apps/get-subscription-plan-for-account": {
@@ -92334,7 +92479,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 131,
+                "response_property_count": 132,
                 "selected_sources": []
               },
               "apps/get-webhook-config-for-app": {
@@ -92439,7 +92584,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 131,
+                "response_property_count": 132,
                 "selected_sources": []
               },
               "apps/list-installations-for-authenticated-user": {
@@ -92454,7 +92599,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 133,
+                "response_property_count": 134,
                 "selected_sources": []
               },
               "apps/list-plans": {
@@ -94048,7 +94193,7 @@
                 "public_properties": [
                   "#/components/schemas/code-scanning-ai-scan-enablement/properties/pr_scan"
                 ],
-                "response_property_count": 1,
+                "response_property_count": 2,
                 "selected_sources": [
                   "code_scanning_repository_ai_source"
                 ]
@@ -94079,7 +94224,7 @@
                 "public_properties": [
                   "#/components/schemas/code-scanning-ai-scan-org-settings/properties/pr_scan"
                 ],
-                "response_property_count": 1,
+                "response_property_count": 2,
                 "selected_sources": [
                   "code_scanning_organization_ai_source"
                 ]
@@ -94247,7 +94392,7 @@
                   "#/components/schemas/simple-user/properties/login",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 332,
+                "response_property_count": 394,
                 "selected_sources": [
                   "code_scanning_alert_lookup_source"
                 ]
@@ -95201,7 +95346,7 @@
                 "parameter_count": 15,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 90,
+                "response_property_count": 162,
                 "selected_sources": [
                   "code_scanning_alert_discovery_source"
                 ]
@@ -95420,7 +95565,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "code-security/get-configuration-for-repository": {
@@ -95435,7 +95580,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 41,
+                "response_property_count": 43,
                 "selected_sources": []
               },
               "code-security/get-configurations-for-enterprise": {
@@ -95450,7 +95595,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "code-security/get-configurations-for-org": {
@@ -95465,7 +95610,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "code-security/get-default-configurations": {
@@ -95480,7 +95625,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 41,
+                "response_property_count": 43,
                 "selected_sources": []
               },
               "code-security/get-default-configurations-for-enterprise": {
@@ -95495,7 +95640,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 41,
+                "response_property_count": 43,
                 "selected_sources": []
               },
               "code-security/get-repositories-for-configuration": {
@@ -95540,7 +95685,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "codes-of-conduct/get-all-codes-of-conduct": {
@@ -98654,6 +98799,96 @@
                 "response_property_count": 97,
                 "selected_sources": []
               },
+              "copilot/get-copilot-team-customizations": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 3,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 3,
+                "selected_sources": []
+              },
+              "copilot/get-enterprise-code-review-policy": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 1,
+                "selected_sources": []
+              },
+              "copilot/get-organization-code-review-policy": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 4,
+                "selected_sources": []
+              },
+              "copilot/get-organization-code-review-runner": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 5,
+                "selected_sources": []
+              },
+              "copilot/get-organization-code-review-settings": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 7,
+                "selected_sources": []
+              },
+              "copilot/get-repository-code-review-settings": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 7,
+                "selected_sources": []
+              },
               "copilot/list-copilot-coding-agent-selected-repositories-for-organization": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -98821,7 +99056,7 @@
                   "#/components/schemas/simple-user/properties/login",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 110,
+                "response_property_count": 114,
                 "selected_sources": [
                   "dependabot_lookup_source"
                 ]
@@ -98886,6 +99121,21 @@
                 "response_property_count": 3,
                 "selected_sources": []
               },
+              "dependabot/get-repository-runner-settings": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 3,
+                "selected_sources": []
+              },
               "dependabot/list-alerts-for-enterprise": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -98898,7 +99148,7 @@
                 "parameter_count": 16,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 157,
+                "response_property_count": 161,
                 "selected_sources": []
               },
               "dependabot/list-alerts-for-org": {
@@ -99077,7 +99327,7 @@
                   "#/components/schemas/simple-user/properties/login",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 157,
+                "response_property_count": 161,
                 "selected_sources": [
                   "dependabot_organization_source"
                 ]
@@ -99264,7 +99514,7 @@
                   "#/components/schemas/simple-user/properties/login",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 110,
+                "response_property_count": 114,
                 "selected_sources": [
                   "dependabot_repository_source"
                 ]
@@ -101274,7 +101524,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": [
                   "issue_assignments_source",
                   "reaction_issue_threads_subject_source",
@@ -101698,10 +101948,25 @@
                   "#/components/schemas/team/properties/node_id",
                   "#/components/schemas/team/properties/slug"
                 ],
-                "response_property_count": 454,
+                "response_property_count": 458,
                 "selected_sources": [
                   "issue_event_lookup_source"
                 ]
+              },
+              "issues/get-issue-artifact": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 6,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 32,
+                "selected_sources": []
               },
               "issues/get-label": {
                 "content_contracts": [],
@@ -101982,7 +102247,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": [
                   "rest_get_parent_source"
                 ]
@@ -102150,7 +102415,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 310,
+                "response_property_count": 314,
                 "selected_sources": [
                   "rest_viewer_visible_issues_source"
                 ]
@@ -102530,7 +102795,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": [
                   "rest_list_dependencies_blocked_by_source"
                 ]
@@ -102694,7 +102959,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": [
                   "rest_list_dependencies_blocking_source"
                 ]
@@ -103121,7 +103386,7 @@
                   "#/components/schemas/team/properties/node_id",
                   "#/components/schemas/team/properties/slug"
                 ],
-                "response_property_count": 454,
+                "response_property_count": 458,
                 "selected_sources": [
                   "repository_issue_events_source"
                 ]
@@ -104383,7 +104648,7 @@
                   "#/components/schemas/unlabeled-issue-event/properties/performed_via_github_app",
                   "#/components/schemas/unlabeled-issue-event/properties/url"
                 ],
-                "response_property_count": 892,
+                "response_property_count": 901,
                 "selected_sources": [
                   "issue_timeline_source"
                 ]
@@ -104551,7 +104816,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 310,
+                "response_property_count": 314,
                 "selected_sources": [
                   "rest_viewer_member_issues_source"
                 ]
@@ -104728,7 +104993,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 310,
+                "response_property_count": 314,
                 "selected_sources": [
                   "rest_viewer_organization_issues_source"
                 ]
@@ -104943,10 +105208,25 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": [
                   "rest_repository_issue_discovery_source"
                 ]
+              },
+              "issues/list-issue-artifacts": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 6,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 16,
+                "selected_sources": []
               },
               "issues/list-issue-field-values-for-issue": {
                 "content_contracts": [],
@@ -105515,7 +105795,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": [
                   "rest_list_relates_to_source"
                 ]
@@ -105679,7 +105959,7 @@
                   "#/components/schemas/simple-user/properties/node_id",
                   "#/components/schemas/simple-user/properties/type"
                 ],
-                "response_property_count": 310,
+                "response_property_count": 314,
                 "selected_sources": [
                   "rest_list_sub_issues_source"
                 ]
@@ -106114,7 +106394,7 @@
                   "#/components/schemas/api-overview/properties/verifiable_password_authentication",
                   "#/components/schemas/api-overview/properties/web"
                 ],
-                "response_property_count": 34,
+                "response_property_count": 35,
                 "selected_sources": [
                   "api_metadata_observations_source"
                 ]
@@ -106651,7 +106931,7 @@
                   "#/components/schemas/custom-property/properties/value_type",
                   "#/components/schemas/custom-property/properties/values_editable_by"
                 ],
-                "response_property_count": 10,
+                "response_property_count": 11,
                 "selected_sources": [
                   "organization_property_definition_lookup_source"
                 ]
@@ -106700,7 +106980,7 @@
                   "#/components/schemas/custom-property/properties/value_type",
                   "#/components/schemas/custom-property/properties/values_editable_by"
                 ],
-                "response_property_count": 10,
+                "response_property_count": 11,
                 "selected_sources": [
                   "organization_property_definitions_source"
                 ]
@@ -107309,7 +107589,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 133,
+                "response_property_count": 134,
                 "selected_sources": []
               },
               "orgs/list-artifact-deployment-records": {
@@ -111446,7 +111726,7 @@
                   "#/components/schemas/pull-request-review/properties/submitted_at",
                   "#/components/schemas/pull-request-review/properties/user"
                 ],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": [
                   "pull_request_review_lookup_source"
                 ]
@@ -111570,7 +111850,7 @@
                   "#/components/schemas/pull-request-review-comment/properties/subject_type",
                   "#/components/schemas/pull-request-review-comment/properties/updated_at"
                 ],
-                "response_property_count": 67,
+                "response_property_count": 72,
                 "selected_sources": [
                   "reaction_review_comments_subject_source",
                   "review_comments_lookup_source"
@@ -111880,7 +112160,7 @@
                   "#/components/schemas/review-comment/properties/subject_type",
                   "#/components/schemas/review-comment/properties/updated_at"
                 ],
-                "response_property_count": 65,
+                "response_property_count": 70,
                 "selected_sources": [
                   "review_comments_review_source"
                 ]
@@ -112223,7 +112503,7 @@
                   "#/components/schemas/pull-request-review-comment/properties/subject_type",
                   "#/components/schemas/pull-request-review-comment/properties/updated_at"
                 ],
-                "response_property_count": 67,
+                "response_property_count": 72,
                 "selected_sources": [
                   "review_comments_pull_request_source"
                 ]
@@ -112330,7 +112610,7 @@
                   "#/components/schemas/pull-request-review-comment/properties/subject_type",
                   "#/components/schemas/pull-request-review-comment/properties/updated_at"
                 ],
-                "response_property_count": 67,
+                "response_property_count": 72,
                 "selected_sources": [
                   "review_comments_repository_source"
                 ]
@@ -112470,7 +112750,7 @@
                   "#/components/schemas/pull-request-review/properties/submitted_at",
                   "#/components/schemas/pull-request-review/properties/user"
                 ],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": [
                   "reviews_source"
                 ]
@@ -114143,7 +114423,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 117,
+                "response_property_count": 120,
                 "selected_sources": []
               },
               "repos/get-clones": {
@@ -116197,7 +116477,7 @@
                     }
                   ]
                 },
-                "parameter_count": 2,
+                "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [
                   "#/components/schemas/rule-suite/properties/actor_id",
@@ -116221,7 +116501,7 @@
                   "#/components/schemas/rule-suite/properties/rule_evaluations/items/properties/rule_source/properties/type",
                   "#/components/schemas/rule-suite/properties/rule_evaluations/items/properties/rule_type"
                 ],
-                "response_property_count": 20,
+                "response_property_count": 56,
                 "selected_sources": [
                   "organization_rule_suite_lookup_source"
                 ]
@@ -116333,7 +116613,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-org-rulesets": {
@@ -116348,7 +116628,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-pages": {
@@ -117412,7 +117692,7 @@
                     }
                   ]
                 },
-                "parameter_count": 3,
+                "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [
                   "#/components/schemas/rule-suite/properties/actor_id",
@@ -117436,7 +117716,7 @@
                   "#/components/schemas/rule-suite/properties/rule_evaluations/items/properties/rule_source/properties/type",
                   "#/components/schemas/rule-suite/properties/rule_evaluations/items/properties/rule_type"
                 ],
-                "response_property_count": 20,
+                "response_property_count": 56,
                 "selected_sources": [
                   "repository_rule_suite_lookup_source"
                 ]
@@ -117550,7 +117830,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-repo-ruleset-history": {
@@ -117595,7 +117875,7 @@
                 "parameter_count": 6,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-status-checks-protection": {
@@ -119945,6 +120225,21 @@
                   "pages_build_list_source"
                 ]
               },
+              "repos/list-planning-statuses": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 3,
+                "selected_sources": []
+              },
               "repos/list-public": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -121333,7 +121628,7 @@
                   "#/paths/~1search~1issues/get/responses/200/content/application~1json/schema/properties/search_type",
                   "#/paths/~1search~1issues/get/responses/200/content/application~1json/schema/properties/total_count"
                 ],
-                "response_property_count": 323,
+                "response_property_count": 327,
                 "selected_sources": [
                   "search_issue_hits_source"
                 ]
@@ -122063,6 +122358,11 @@
                   "#/components/schemas/secret-scanning-alert-with-metadata/properties/updated_at",
                   "#/components/schemas/secret-scanning-alert-with-metadata/properties/url",
                   "#/components/schemas/secret-scanning-alert-with-metadata/properties/validity",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_line",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/path",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_line",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_sha",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_url",
                   "#/components/schemas/secret-scanning-location-commit/properties/commit_sha",
@@ -122185,6 +122485,11 @@
                   "#/components/schemas/secret-scanning-alert-with-metadata/properties/updated_at",
                   "#/components/schemas/secret-scanning-alert-with-metadata/properties/url",
                   "#/components/schemas/secret-scanning-alert-with-metadata/properties/validity",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_line",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/path",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_line",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_sha",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_url",
                   "#/components/schemas/secret-scanning-location-commit/properties/commit_sha",
@@ -122224,7 +122529,7 @@
                   "#/components/schemas/secret-scanning-location-wiki-commit/properties/start_column",
                   "#/components/schemas/secret-scanning-location-wiki-commit/properties/start_line"
                 ],
-                "response_property_count": 96,
+                "response_property_count": 101,
                 "selected_sources": [
                   "secret_scanning_alert_lookup_source"
                 ]
@@ -122463,7 +122768,7 @@
                   "#/components/schemas/simple-repository/properties/full_name",
                   "#/components/schemas/simple-repository/properties/id"
                 ],
-                "response_property_count": 162,
+                "response_property_count": 167,
                 "selected_sources": [
                   "secret_scanning_org_alert_discovery_source"
                 ]
@@ -122644,7 +122949,7 @@
                 "parameter_count": 22,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 93,
+                "response_property_count": 98,
                 "selected_sources": [
                   "secret_scanning_alert_discovery_source"
                 ]
@@ -122656,6 +122961,11 @@
                 "included": true,
                 "mapped_dynamic_maps": [],
                 "mapped_properties": [
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_line",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/path",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_line",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_sha",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_url",
                   "#/components/schemas/secret-scanning-location-commit/properties/commit_sha",
@@ -122747,6 +123057,11 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/end_line",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/path",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_column",
+                  "#/components/schemas/secret-scanning-location-actions-log/properties/start_line",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_sha",
                   "#/components/schemas/secret-scanning-location-commit/properties/blob_url",
                   "#/components/schemas/secret-scanning-location-commit/properties/commit_sha",
@@ -122788,7 +123103,7 @@
                   "#/components/schemas/secret-scanning-location/properties/details",
                   "#/components/schemas/secret-scanning-location/properties/type"
                 ],
-                "response_property_count": 40,
+                "response_property_count": 45,
                 "selected_sources": [
                   "secret_scanning_locations_source"
                 ]
@@ -123243,6 +123558,21 @@
                   "advisory_repository_lookup_source"
                 ]
               },
+              "security-advisories/get-repository-advisory-comment": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 4,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 32,
+                "selected_sources": []
+              },
               "security-advisories/list-global-advisories": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -123620,6 +123950,21 @@
                 "selected_sources": [
                   "advisory_repository_source"
                 ]
+              },
+              "security-advisories/list-repository-advisory-comments": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 6,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 32,
+                "selected_sources": []
               },
               "teams/check-permissions-for-repo-in-org": {
                 "content_contracts": [
@@ -125861,6 +126206,36 @@
                 "response_property_count": 33,
                 "selected_sources": []
               },
+              "users/list-issue-fields-for-authenticated-user": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 0,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 16,
+                "selected_sources": []
+              },
+              "users/list-issue-types-for-authenticated-user": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 0,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 8,
+                "selected_sources": []
+              },
               "users/list-public-emails-for-authenticated-user": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -126053,23 +126428,23 @@
               }
             },
             "summary": {
-              "dynamic_maps": 37,
+              "dynamic_maps": 40,
               "in_scope_bound_parameters": 1272,
-              "in_scope_dynamic_maps": 22,
+              "in_scope_dynamic_maps": 25,
               "in_scope_mapped_dynamic_maps": 4,
-              "in_scope_mapped_response_properties": 3183,
+              "in_scope_mapped_response_properties": 3188,
               "in_scope_navigation_properties": 217,
-              "in_scope_operations": 375,
-              "in_scope_parameters": 1482,
+              "in_scope_operations": 398,
+              "in_scope_parameters": 1556,
               "in_scope_public_dynamic_maps": 4,
-              "in_scope_public_response_properties": 3139,
-              "in_scope_response_properties": 5231,
+              "in_scope_public_response_properties": 3144,
+              "in_scope_response_properties": 6402,
               "in_scope_validated_control_response_properties": 40,
               "mapped_dynamic_maps": 4,
-              "mapped_response_properties": 3221,
-              "operations": 644,
-              "parameters": 2251,
-              "response_properties": 6608,
+              "mapped_response_properties": 3226,
+              "operations": 667,
+              "parameters": 2325,
+              "response_properties": 7787,
               "selected_operations": 370,
               "validated_control_response_properties": 40
             }
@@ -132030,7 +132405,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": []
               },
               "activity/list-notifications-for-authenticated-user": {
@@ -132042,7 +132417,7 @@
                 "mapped_properties": [],
                 "navigation_properties": [],
                 "parameter_bindings": {},
-                "parameter_count": 6,
+                "parameter_count": 7,
                 "public_dynamic_maps": [],
                 "public_properties": [],
                 "response_property_count": 165,
@@ -132060,7 +132435,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": []
               },
               "activity/list-public-events": {
@@ -132075,7 +132450,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": []
               },
               "activity/list-public-events-for-repo-network": {
@@ -132090,7 +132465,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 724,
+                "response_property_count": 728,
                 "selected_sources": []
               },
               "activity/list-public-events-for-user": {
@@ -132105,7 +132480,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": []
               },
               "activity/list-public-org-events": {
@@ -132120,7 +132495,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": []
               },
               "activity/list-received-events-for-user": {
@@ -132135,7 +132510,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": []
               },
               "activity/list-received-public-events-for-user": {
@@ -132150,7 +132525,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": []
               },
               "activity/list-repo-events": {
@@ -132165,7 +132540,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 720,
+                "response_property_count": 724,
                 "selected_sources": []
               },
               "activity/list-repo-notifications-for-authenticated-user": {
@@ -132177,7 +132552,7 @@
                 "mapped_properties": [],
                 "navigation_properties": [],
                 "parameter_bindings": {},
-                "parameter_count": 8,
+                "parameter_count": 9,
                 "public_dynamic_maps": [],
                 "public_properties": [],
                 "response_property_count": 165,
@@ -132271,6 +132646,141 @@
                 "public_dynamic_maps": [],
                 "public_properties": [],
                 "response_property_count": 22,
+                "selected_sources": []
+              },
+              "agent-automations/get-automation-revision": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 4,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 189,
+                "selected_sources": []
+              },
+              "agent-automations/get-repo-automation": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 3,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 178,
+                "selected_sources": []
+              },
+              "agent-automations/list-automation-revisions": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 5,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 190,
+                "selected_sources": []
+              },
+              "agent-automations/list-automations": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 3,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 180,
+                "selected_sources": []
+              },
+              "agent-automations/list-available-repo-automation-tools": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 13,
+                "selected_sources": []
+              },
+              "agent-automations/list-available-repo-automation-triggers": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 24,
+                "selected_sources": []
+              },
+              "agent-automations/list-repo-automation-tasks": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 9,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 33,
+                "selected_sources": []
+              },
+              "agent-automations/list-repo-automations": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 5,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 178,
+                "selected_sources": []
+              },
+              "agent-merge/get-agent-merge-enrollment": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 3,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 5,
                 "selected_sources": []
               },
               "agent-tasks/get-task-by-id": {
@@ -132750,7 +133260,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 134,
+                "response_property_count": 135,
                 "selected_sources": []
               },
               "apps/get-installation": {
@@ -132765,7 +133275,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 134,
+                "response_property_count": 135,
                 "selected_sources": []
               },
               "apps/get-org-installation": {
@@ -132780,7 +133290,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 134,
+                "response_property_count": 135,
                 "selected_sources": []
               },
               "apps/get-repo-installation": {
@@ -132795,7 +133305,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 138,
+                "response_property_count": 139,
                 "selected_sources": []
               },
               "apps/get-subscription-plan-for-account": {
@@ -132840,7 +133350,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 134,
+                "response_property_count": 135,
                 "selected_sources": []
               },
               "apps/get-webhook-config-for-app": {
@@ -132945,7 +133455,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 134,
+                "response_property_count": 135,
                 "selected_sources": []
               },
               "apps/list-installations-for-authenticated-user": {
@@ -132960,7 +133470,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 136,
+                "response_property_count": 137,
                 "selected_sources": []
               },
               "apps/list-plans": {
@@ -133123,6 +133633,21 @@
                 "navigation_properties": [],
                 "parameter_bindings": {},
                 "parameter_count": 4,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 12,
+                "selected_sources": []
+              },
+              "billing/get-cost-center-membership": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": false,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
                 "response_property_count": 12,
@@ -133515,7 +134040,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 1,
+                "response_property_count": 2,
                 "selected_sources": []
               },
               "code-scanning/get-ai-scan-enablement-for-org": {
@@ -133530,7 +134055,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 1,
+                "response_property_count": 2,
                 "selected_sources": []
               },
               "code-scanning/get-alert": {
@@ -133545,7 +134070,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 332,
+                "response_property_count": 394,
                 "selected_sources": []
               },
               "code-scanning/get-analysis": {
@@ -133817,7 +134342,7 @@
                 "parameter_count": 15,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 90,
+                "response_property_count": 162,
                 "selected_sources": []
               },
               "code-scanning/list-codeql-databases": {
@@ -134151,7 +134676,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "code-security/get-configuration-for-repository": {
@@ -134166,7 +134691,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 41,
+                "response_property_count": 43,
                 "selected_sources": []
               },
               "code-security/get-configurations-for-enterprise": {
@@ -134181,7 +134706,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "code-security/get-configurations-for-org": {
@@ -134196,7 +134721,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "code-security/get-default-configurations": {
@@ -134211,7 +134736,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 41,
+                "response_property_count": 43,
                 "selected_sources": []
               },
               "code-security/get-default-configurations-for-enterprise": {
@@ -134226,7 +134751,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 41,
+                "response_property_count": 43,
                 "selected_sources": []
               },
               "code-security/get-repositories-for-configuration": {
@@ -134271,7 +134796,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "codes-of-conduct/get-all-codes-of-conduct": {
@@ -135099,6 +135624,126 @@
                 "response_property_count": 97,
                 "selected_sources": []
               },
+              "copilot/get-copilot-team-customizations": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 3,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 3,
+                "selected_sources": []
+              },
+              "copilot/get-enterprise-code-review-policy": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 1,
+                "selected_sources": []
+              },
+              "copilot/get-organization-code-review-policy": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 4,
+                "selected_sources": []
+              },
+              "copilot/get-organization-code-review-runner": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 5,
+                "selected_sources": []
+              },
+              "copilot/get-organization-code-review-settings": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 7,
+                "selected_sources": []
+              },
+              "copilot/get-organization-feature-policies": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 3,
+                "selected_sources": []
+              },
+              "copilot/get-organization-model-policies": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 7,
+                "selected_sources": []
+              },
+              "copilot/get-repository-code-review-settings": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 7,
+                "selected_sources": []
+              },
               "copilot/get-usage-records": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -135171,7 +135816,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 110,
+                "response_property_count": 114,
                 "selected_sources": []
               },
               "dependabot/get-dismissal-request-for-repo": {
@@ -135345,6 +135990,21 @@
                 "response_property_count": 3,
                 "selected_sources": []
               },
+              "dependabot/get-repository-runner-settings": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 3,
+                "selected_sources": []
+              },
               "dependabot/list-alerts-for-enterprise": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -135357,7 +136017,7 @@
                 "parameter_count": 16,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 157,
+                "response_property_count": 161,
                 "selected_sources": []
               },
               "dependabot/list-alerts-for-org": {
@@ -135372,7 +136032,7 @@
                 "parameter_count": 19,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 157,
+                "response_property_count": 161,
                 "selected_sources": []
               },
               "dependabot/list-alerts-for-repo": {
@@ -135387,7 +136047,7 @@
                 "parameter_count": 18,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 110,
+                "response_property_count": 114,
                 "selected_sources": []
               },
               "dependabot/list-dismissal-requests-for-org": {
@@ -135829,6 +136489,21 @@
                 "response_property_count": 1,
                 "selected_sources": []
               },
+              "dependency-graph/get-enterprise-license-policy": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 12,
+                "selected_sources": []
+              },
               "emojis/get": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -135901,7 +136576,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 10,
+                "response_property_count": 11,
                 "selected_sources": []
               },
               "enterprise-admin/custom-properties-for-repos-get-enterprise-definitions": {
@@ -135916,7 +136591,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 10,
+                "response_property_count": 11,
                 "selected_sources": []
               },
               "enterprise-admin/get-allowed-actions-enterprise": {
@@ -136009,6 +136684,51 @@
                 "response_property_count": 21,
                 "selected_sources": []
               },
+              "enterprise-admin/get-enterprise-apps-model-policies": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": false,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 6,
+                "selected_sources": []
+              },
+              "enterprise-admin/get-enterprise-feature-policies": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": false,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 2,
+                "selected_sources": []
+              },
+              "enterprise-admin/get-enterprise-fusion-model-policies": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": false,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 7,
+                "selected_sources": []
+              },
               "enterprise-admin/get-enterprise-innersource-vulnerability-sync-status": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -136022,6 +136742,21 @@
                 "public_dynamic_maps": [],
                 "public_properties": [],
                 "response_property_count": 14,
+                "selected_sources": []
+              },
+              "enterprise-admin/get-enterprise-model-policies": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": false,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 1,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 6,
                 "selected_sources": []
               },
               "enterprise-admin/get-enterprise-role": {
@@ -136064,6 +136799,21 @@
                 "navigation_properties": [],
                 "parameter_bindings": {},
                 "parameter_count": 3,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 6,
+                "selected_sources": []
+              },
+              "enterprise-admin/get-enterprise-team-model-policies": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": false,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
                 "response_property_count": 6,
@@ -136561,7 +137311,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 68,
+                "response_property_count": 69,
                 "selected_sources": []
               },
               "enterprise-team-memberships/get": {
@@ -137176,7 +137926,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": []
               },
               "issues/get-comment": {
@@ -137206,7 +137956,22 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 454,
+                "response_property_count": 458,
+                "selected_sources": []
+              },
+              "issues/get-issue-artifact": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 6,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 32,
                 "selected_sources": []
               },
               "issues/get-label": {
@@ -137251,7 +138016,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": []
               },
               "issues/list": {
@@ -137266,7 +138031,7 @@
                 "parameter_count": 12,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 310,
+                "response_property_count": 314,
                 "selected_sources": []
               },
               "issues/list-assignees": {
@@ -137326,7 +138091,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": []
               },
               "issues/list-dependencies-blocking": {
@@ -137341,7 +138106,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": []
               },
               "issues/list-events": {
@@ -137371,7 +138136,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 454,
+                "response_property_count": 458,
                 "selected_sources": []
               },
               "issues/list-events-for-timeline": {
@@ -137386,7 +138151,7 @@
                 "parameter_count": 6,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 892,
+                "response_property_count": 901,
                 "selected_sources": []
               },
               "issues/list-for-authenticated-user": {
@@ -137401,7 +138166,7 @@
                 "parameter_count": 8,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 310,
+                "response_property_count": 314,
                 "selected_sources": []
               },
               "issues/list-for-org": {
@@ -137416,7 +138181,7 @@
                 "parameter_count": 10,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 310,
+                "response_property_count": 314,
                 "selected_sources": []
               },
               "issues/list-for-repo": {
@@ -137431,7 +138196,22 @@
                 "parameter_count": 15,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 314,
+                "response_property_count": 318,
+                "selected_sources": []
+              },
+              "issues/list-issue-artifacts": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 6,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 16,
                 "selected_sources": []
               },
               "issues/list-issue-field-values-for-issue": {
@@ -137521,7 +138301,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 314,
+                "response_property_count": 318,
                 "selected_sources": []
               },
               "issues/list-sub-issues": {
@@ -137536,7 +138316,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 310,
+                "response_property_count": 314,
                 "selected_sources": []
               },
               "issues/list-suggestions": {
@@ -137611,7 +138391,7 @@
                 "parameter_count": 0,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 34,
+                "response_property_count": 35,
                 "selected_sources": []
               },
               "meta/get-all-versions": {
@@ -137956,7 +138736,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 10,
+                "response_property_count": 11,
                 "selected_sources": []
               },
               "orgs/custom-properties-for-repos-get-organization-definitions": {
@@ -137971,7 +138751,7 @@
                 "parameter_count": 1,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 10,
+                "response_property_count": 11,
                 "selected_sources": []
               },
               "orgs/custom-properties-for-repos-get-organization-values": {
@@ -138271,7 +139051,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 136,
+                "response_property_count": 137,
                 "selected_sources": []
               },
               "orgs/list-artifact-deployment-records": {
@@ -139614,7 +140394,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "pulls/get-review-comment": {
@@ -139629,7 +140409,7 @@
                 "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 67,
+                "response_property_count": 72,
                 "selected_sources": []
               },
               "pulls/list": {
@@ -139659,7 +140439,7 @@
                 "parameter_count": 6,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 65,
+                "response_property_count": 70,
                 "selected_sources": []
               },
               "pulls/list-commits": {
@@ -139719,7 +140499,7 @@
                 "parameter_count": 8,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 67,
+                "response_property_count": 72,
                 "selected_sources": []
               },
               "pulls/list-review-comments-for-repo": {
@@ -139734,7 +140514,7 @@
                 "parameter_count": 7,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 67,
+                "response_property_count": 72,
                 "selected_sources": []
               },
               "pulls/list-reviews": {
@@ -139749,7 +140529,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 39,
+                "response_property_count": 41,
                 "selected_sources": []
               },
               "rate-limit/get": {
@@ -140169,7 +140949,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 117,
+                "response_property_count": 120,
                 "selected_sources": []
               },
               "repos/get-clones": {
@@ -140424,7 +141204,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-environment": {
@@ -140496,10 +141276,10 @@
                 "mapped_properties": [],
                 "navigation_properties": [],
                 "parameter_bindings": {},
-                "parameter_count": 2,
+                "parameter_count": 3,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 20,
+                "response_property_count": 56,
                 "selected_sources": []
               },
               "repos/get-org-rule-suites": {
@@ -140529,7 +141309,7 @@
                 "parameter_count": 2,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-org-rulesets": {
@@ -140544,7 +141324,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-pages": {
@@ -140852,10 +141632,10 @@
                 "mapped_properties": [],
                 "navigation_properties": [],
                 "parameter_bindings": {},
-                "parameter_count": 3,
+                "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 20,
+                "response_property_count": 56,
                 "selected_sources": []
               },
               "repos/get-repo-rule-suites": {
@@ -140885,7 +141665,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-repo-ruleset-history": {
@@ -140930,7 +141710,7 @@
                 "parameter_count": 6,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 150,
+                "response_property_count": 153,
                 "selected_sources": []
               },
               "repos/get-status-checks-protection": {
@@ -141443,6 +142223,21 @@
                 "response_property_count": 31,
                 "selected_sources": []
               },
+              "repos/list-planning-statuses": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 3,
+                "selected_sources": []
+              },
               "repos/list-public": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -141790,7 +142585,7 @@
                 "parameter_count": 7,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 323,
+                "response_property_count": 327,
                 "selected_sources": []
               },
               "search/labels": {
@@ -141865,7 +142660,7 @@
                 "parameter_count": 4,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 96,
+                "response_property_count": 101,
                 "selected_sources": []
               },
               "secret-scanning/get-bypass-request": {
@@ -142080,6 +142875,21 @@
                   "secret_scanning_dismissal_lookup_source"
                 ]
               },
+              "secret-scanning/get-public-monitoring-alert-for-enterprise": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 1,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 2,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 210,
+                "selected_sources": []
+              },
               "secret-scanning/get-scan-history": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -142122,7 +142932,7 @@
                 "parameter_count": 20,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 162,
+                "response_property_count": 167,
                 "selected_sources": []
               },
               "secret-scanning/list-alerts-for-org": {
@@ -142137,7 +142947,7 @@
                 "parameter_count": 21,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 162,
+                "response_property_count": 167,
                 "selected_sources": []
               },
               "secret-scanning/list-alerts-for-repo": {
@@ -142152,7 +142962,7 @@
                 "parameter_count": 22,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 93,
+                "response_property_count": 98,
                 "selected_sources": []
               },
               "secret-scanning/list-enterprise-bypass-requests": {
@@ -142227,7 +143037,7 @@
                 "parameter_count": 5,
                 "public_dynamic_maps": [],
                 "public_properties": [],
-                "response_property_count": 40,
+                "response_property_count": 45,
                 "selected_sources": []
               },
               "secret-scanning/list-org-bypass-requests": {
@@ -142536,6 +143346,21 @@
                 "public_dynamic_maps": [],
                 "public_properties": [],
                 "response_property_count": 15,
+                "selected_sources": []
+              },
+              "secret-scanning/list-public-monitoring-alerts-for-enterprise": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 1,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 10,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 210,
                 "selected_sources": []
               },
               "secret-scanning/list-repo-bypass-requests": {
@@ -142879,6 +143704,21 @@
                 "response_property_count": 158,
                 "selected_sources": []
               },
+              "security-advisories/get-repository-advisory-comment": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 4,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 32,
+                "selected_sources": []
+              },
               "security-advisories/list-global-advisories": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -142922,6 +143762,21 @@
                 "public_dynamic_maps": [],
                 "public_properties": [],
                 "response_property_count": 158,
+                "selected_sources": []
+              },
+              "security-advisories/list-repository-advisory-comments": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 6,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 32,
                 "selected_sources": []
               },
               "teams/check-permissions-for-repo-in-org": {
@@ -143569,6 +144424,36 @@
                 "response_property_count": 33,
                 "selected_sources": []
               },
+              "users/list-issue-fields-for-authenticated-user": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 0,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 16,
+                "selected_sources": []
+              },
+              "users/list-issue-types-for-authenticated-user": {
+                "content_contracts": [],
+                "control_properties": [],
+                "dynamic_map_count": 0,
+                "included": true,
+                "mapped_dynamic_maps": [],
+                "mapped_properties": [],
+                "navigation_properties": [],
+                "parameter_bindings": {},
+                "parameter_count": 0,
+                "public_dynamic_maps": [],
+                "public_properties": [],
+                "response_property_count": 8,
+                "selected_sources": []
+              },
               "users/list-public-emails-for-authenticated-user": {
                 "content_contracts": [],
                 "control_properties": [],
@@ -143676,23 +144561,23 @@
               }
             },
             "summary": {
-              "dynamic_maps": 41,
+              "dynamic_maps": 45,
               "in_scope_bound_parameters": 100,
-              "in_scope_dynamic_maps": 22,
+              "in_scope_dynamic_maps": 26,
               "in_scope_mapped_dynamic_maps": 0,
               "in_scope_mapped_response_properties": 152,
               "in_scope_navigation_properties": 16,
-              "in_scope_operations": 390,
-              "in_scope_parameters": 1577,
+              "in_scope_operations": 418,
+              "in_scope_parameters": 1667,
               "in_scope_public_dynamic_maps": 0,
               "in_scope_public_response_properties": 150,
-              "in_scope_response_properties": 5374,
+              "in_scope_response_properties": 6695,
               "in_scope_validated_control_response_properties": 0,
               "mapped_dynamic_maps": 0,
               "mapped_response_properties": 152,
-              "operations": 770,
-              "parameters": 2667,
-              "response_properties": 7257,
+              "operations": 804,
+              "parameters": 2766,
+              "response_properties": 8579,
               "selected_operations": 17,
               "validated_control_response_properties": 0
             }
@@ -193145,16 +194030,16 @@
     ],
     "excluded_rest_methods": {
       "api.github.com": {
-        "DELETE": 188,
-        "PATCH": 73,
-        "POST": 193,
-        "PUT": 134
+        "DELETE": 194,
+        "PATCH": 79,
+        "POST": 200,
+        "PUT": 141
       },
       "ghec": {
-        "DELETE": 233,
-        "PATCH": 103,
-        "POST": 236,
-        "PUT": 166
+        "DELETE": 239,
+        "PATCH": 117,
+        "POST": 244,
+        "PUT": 174
       }
     },
     "graphql_excluded_roots": [
@@ -292144,6 +293029,20 @@
         "selected_operations": 24
       },
       {
+        "category": "agent-automations",
+        "implementation_scope": "included",
+        "in_scope_operations": 8,
+        "operations": 8,
+        "selected_operations": 0
+      },
+      {
+        "category": "agent-merge",
+        "implementation_scope": "included",
+        "in_scope_operations": 1,
+        "operations": 1,
+        "selected_operations": 0
+      },
+      {
         "category": "agent-tasks",
         "implementation_scope": "included",
         "in_scope_operations": 4,
@@ -292168,7 +293067,7 @@
         "category": "billing",
         "implementation_scope": "excluded",
         "in_scope_operations": 0,
-        "operations": 23,
+        "operations": 24,
         "selected_operations": 0
       },
       {
@@ -292230,8 +293129,8 @@
       {
         "category": "copilot",
         "implementation_scope": "partial",
-        "in_scope_operations": 6,
-        "operations": 25,
+        "in_scope_operations": 14,
+        "operations": 33,
         "selected_operations": 6
       },
       {
@@ -292244,15 +293143,15 @@
       {
         "category": "dependabot",
         "implementation_scope": "partial",
-        "in_scope_operations": 6,
-        "operations": 16,
+        "in_scope_operations": 7,
+        "operations": 17,
         "selected_operations": 6
       },
       {
         "category": "dependency-graph",
         "implementation_scope": "included",
-        "in_scope_operations": 4,
-        "operations": 4,
+        "in_scope_operations": 5,
+        "operations": 5,
         "selected_operations": 3
       },
       {
@@ -292266,7 +293165,7 @@
         "category": "enterprise-admin",
         "implementation_scope": "excluded",
         "in_scope_operations": 0,
-        "operations": 48,
+        "operations": 53,
         "selected_operations": 0
       },
       {
@@ -292328,8 +293227,8 @@
       {
         "category": "issues",
         "implementation_scope": "included",
-        "in_scope_operations": 28,
-        "operations": 28,
+        "in_scope_operations": 30,
+        "operations": 30,
         "selected_operations": 28
       },
       {
@@ -292412,8 +293311,8 @@
       {
         "category": "repos",
         "implementation_scope": "partial",
-        "in_scope_operations": 78,
-        "operations": 109,
+        "in_scope_operations": 79,
+        "operations": 110,
         "selected_operations": 77
       },
       {
@@ -292433,15 +293332,15 @@
       {
         "category": "secret-scanning",
         "implementation_scope": "partial",
-        "in_scope_operations": 11,
-        "operations": 19,
+        "in_scope_operations": 13,
+        "operations": 21,
         "selected_operations": 14
       },
       {
         "category": "security-advisories",
         "implementation_scope": "included",
-        "in_scope_operations": 5,
-        "operations": 5,
+        "in_scope_operations": 7,
+        "operations": 7,
         "selected_operations": 5
       },
       {
@@ -292461,8 +293360,8 @@
       {
         "category": "users",
         "implementation_scope": "partial",
-        "in_scope_operations": 16,
-        "operations": 27,
+        "in_scope_operations": 18,
+        "operations": 29,
         "selected_operations": 16
       }
     ],
@@ -299013,6 +299912,465 @@
         "selection_status": "selected"
       },
       {
+        "category": "agent-automations",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-automations/get-automation-revision",
+        "path": "/agents/repos/{owner}/{repo}/automations/{automation_id}/revisions/{revision_id}",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "agent-automations",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-automations/get-repo-automation",
+        "path": "/agents/repos/{owner}/{repo}/automations/{automation_id}",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "tools": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "tools": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "agent-automations",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-automations/list-automation-revisions",
+        "path": "/agents/repos/{owner}/{repo}/automations/{automation_id}/revisions",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "revisions": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "revisions": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "agent-automations",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-automations/list-automations",
+        "path": "/agents/automations",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "agent-automations",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-automations/list-available-repo-automation-tools",
+        "path": "/agents/repos/{owner}/{repo}/automations/available-tools",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "mcp_servers": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "tool_groups": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "mcp_servers": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "tool_groups": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "agent-automations",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-automations/list-available-repo-automation-triggers",
+        "path": "/agents/repos/{owner}/{repo}/automations/available-triggers",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "agent-automations",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-automations/list-repo-automation-tasks",
+        "path": "/agents/repos/{owner}/{repo}/automations/{automation_id}/tasks",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "tasks": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "tasks": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "agent-automations",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-automations/list-repo-automations",
+        "path": "/agents/repos/{owner}/{repo}/automations",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "automations": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "automations": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "agent-merge",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "agent-merge/get-agent-merge-enrollment",
+        "path": "/agents/repos/{owner}/{repo}/pulls/{pull_number}/agent-merge",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "allowed_actions": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "allowed_actions": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
         "category": "agent-tasks",
         "decision": null,
         "exclusion_reason": null,
@@ -301780,6 +303138,41 @@
         "decision": null,
         "exclusion_reason": "Excluded by user: Enterprise, billing, apps, and administration area.",
         "implementation_scope": "excluded",
+        "operation_id": "billing/get-cost-center-membership",
+        "path": "/enterprises/{enterprise}/settings/billing/cost-centers/memberships",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {
+                "memberships": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/billing-cost-center-membership",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "billing",
+        "decision": null,
+        "exclusion_reason": "Excluded by user: Enterprise, billing, apps, and administration area.",
+        "implementation_scope": "excluded",
         "operation_id": "billing/get-github-advanced-security-billing-ghe",
         "path": "/enterprises/{enterprise}/settings/billing/advanced-security",
         "products": [
@@ -303210,6 +304603,13 @@
                   },
                   "type": "array"
                 },
+                "linked_issues": {
+                  "items": {
+                    "schema_ref": "#/components/schemas/code-scanning-alert-linked-issue",
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
                 "linked_pull_requests": {
                   "items": {
                     "schema_ref": "#/components/schemas/pull-request-simple",
@@ -303232,6 +304632,13 @@
                 "assignees": {
                   "items": {
                     "schema_ref": "#/components/schemas/simple-user",
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "linked_issues": {
+                  "items": {
+                    "schema_ref": "#/components/schemas/code-scanning-alert-linked-issue",
                     "type": "object"
                   },
                   "type": "array"
@@ -307241,6 +308648,353 @@
       {
         "category": "copilot",
         "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "copilot/get-copilot-team-customizations",
+        "path": "/orgs/{org}/teams/{team_slug}/copilot/customizations",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "copilot",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "copilot/get-enterprise-code-review-policy",
+        "path": "/enterprises/{enterprise}/copilot/policies/code-review",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/enterprise-copilot-code-review-policy",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/enterprise-copilot-code-review-policy",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "copilot",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "copilot/get-organization-code-review-policy",
+        "path": "/orgs/{org}/copilot/policies/code-review",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/organization-copilot-code-review-policy",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/organization-copilot-code-review-policy",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "copilot",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "copilot/get-organization-code-review-runner",
+        "path": "/orgs/{org}/copilot/code-review/runner",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "runner_labels": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/organization-copilot-code-review-runner",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "runner_labels": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/organization-copilot-code-review-runner",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "copilot",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "copilot/get-organization-code-review-settings",
+        "path": "/orgs/{org}/copilot/code-review/settings",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "available_review_efforts": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/organization-copilot-code-review-settings",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "available_review_efforts": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/organization-copilot-code-review-settings",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "copilot",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "copilot/get-organization-feature-policies",
+        "path": "/orgs/{org}/copilot/feature-policies",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "copilot",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "copilot/get-organization-model-policies",
+        "path": "/orgs/{org}/copilot/model-policies",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {
+                "models": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "copilot",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "copilot/get-repository-code-review-settings",
+        "path": "/repos/{owner}/{repo}/copilot/code-review/settings",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "available_review_efforts": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/repository-copilot-code-review-settings",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "available_review_efforts": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/repository-copilot-code-review-settings",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "copilot",
+        "decision": null,
         "exclusion_reason": "Excluded by user: enterprise-wide access.",
         "implementation_scope": "excluded",
         "operation_id": "copilot/get-usage-records",
@@ -307670,6 +309424,61 @@
               "media_type": "application/json",
               "root": {
                 "schema_ref": "#/components/schemas/dependabot-secret",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "dependabot",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "dependabot/get-repository-runner-settings",
+        "path": "/repos/{owner}/{repo}/dependabot/runner-settings",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {
+                "runner_labels": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/dependabot-runner-settings",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {
+                "runner_labels": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/dependabot-runner-settings",
                 "type": "object"
               },
               "status": "200"
@@ -308341,6 +310150,39 @@
         "selection_status": "intentionally_unselected"
       },
       {
+        "category": "dependency-graph",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "dependency-graph/get-enterprise-license-policy",
+        "path": "/enterprises/{enterprise}/license-compliance/policies/{policy_id}",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/enterprise-license-policy-item"
+                  }
+                ],
+                "schema_ref": "#/components/schemas/enterprise-license-policy-response",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
         "category": "emojis",
         "decision": null,
         "exclusion_reason": null,
@@ -308736,6 +310578,101 @@
         "decision": null,
         "exclusion_reason": "Excluded by user: Enterprise, billing, apps, and administration area.",
         "implementation_scope": "excluded",
+        "operation_id": "enterprise-admin/get-enterprise-apps-model-policies",
+        "path": "/enterprises/{enterprise}/copilot/apps/model-policies",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {
+                "models": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "enterprise-admin",
+        "decision": null,
+        "exclusion_reason": "Excluded by user: Enterprise, billing, apps, and administration area.",
+        "implementation_scope": "excluded",
+        "operation_id": "enterprise-admin/get-enterprise-feature-policies",
+        "path": "/enterprises/{enterprise}/copilot/feature-policies",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "enterprise-admin",
+        "decision": null,
+        "exclusion_reason": "Excluded by user: Enterprise, billing, apps, and administration area.",
+        "implementation_scope": "excluded",
+        "operation_id": "enterprise-admin/get-enterprise-fusion-model-policies",
+        "path": "/enterprises/{enterprise}/copilot/fusion/model-policies",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {
+                "models": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "enterprise-admin",
+        "decision": null,
+        "exclusion_reason": "Excluded by user: Enterprise, billing, apps, and administration area.",
+        "implementation_scope": "excluded",
         "operation_id": "enterprise-admin/get-enterprise-innersource-vulnerability-sync-status",
         "path": "/enterprises/{enterprise}/innersource-vulnerabilities/sync/status/{job_id}",
         "products": [
@@ -308766,6 +310703,40 @@
                 "type": "object"
               },
               "status": "202"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "enterprise-admin",
+        "decision": null,
+        "exclusion_reason": "Excluded by user: Enterprise, billing, apps, and administration area.",
+        "implementation_scope": "excluded",
+        "operation_id": "enterprise-admin/get-enterprise-model-policies",
+        "path": "/enterprises/{enterprise}/copilot/model-policies",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {
+                "models": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
+              },
+              "status": "200"
             }
           ]
         },
@@ -308865,6 +310836,40 @@
                   }
                 ],
                 "schema_ref": "#/components/schemas/ruleset-version-with-state"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "enterprise-admin",
+        "decision": null,
+        "exclusion_reason": "Excluded by user: Enterprise, billing, apps, and administration area.",
+        "implementation_scope": "excluded",
+        "operation_id": "enterprise-admin/get-enterprise-team-model-policies",
+        "path": "/enterprises/{enterprise}/teams/{team_id}/copilot/model-policies",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {
+                "models": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
+              "media_type": "application/json",
+              "root": {
+                "type": "object"
               },
               "status": "200"
             }
@@ -311919,6 +313924,59 @@
         "decision": null,
         "exclusion_reason": null,
         "implementation_scope": "included",
+        "operation_id": "issues/get-issue-artifact",
+        "path": "/repos/{owner}/{repo}/issues/{issue_number}/artifacts/{artifact_number}",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/issue-artifact"
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/issue-artifact"
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "issues",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
         "operation_id": "issues/get-label",
         "path": "/repos/{owner}/{repo}/labels/{name}",
         "products": [
@@ -312672,6 +314730,53 @@
         "decision": null,
         "exclusion_reason": null,
         "implementation_scope": "included",
+        "operation_id": "issues/list-issue-artifacts",
+        "path": "/repos/{owner}/{repo}/issues/{issue_number}/artifacts",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/issue-artifact",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/issue-artifact",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "issues",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
         "operation_id": "issues/list-issue-field-values-for-issue",
         "path": "/repos/{owner}/{repo}/issues/{issue_number}/issue-field-values",
         "products": [
@@ -313327,6 +315432,12 @@
                   },
                   "type": "array"
                 },
+                "shared_ingress": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
                 "ssh_keys": {
                   "items": {
                     "type": "string"
@@ -313424,6 +315535,12 @@
                   "type": "array"
                 },
                 "pages": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "shared_ingress": {
                   "items": {
                     "type": "string"
                   },
@@ -318878,7 +320995,14 @@
         "response_shapes_by_product": {
           "api.github.com": [
             {
-              "collections": {},
+              "collections": {
+                "copilot_code_review_sources": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
               "media_type": "application/json",
               "root": {
                 "schema_ref": "#/components/schemas/pull-request-review-comment",
@@ -318889,7 +321013,14 @@
           ],
           "ghec": [
             {
-              "collections": {},
+              "collections": {
+                "copilot_code_review_sources": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              },
               "media_type": "application/json",
               "root": {
                 "schema_ref": "#/components/schemas/pull-request-review-comment",
@@ -324765,6 +326896,53 @@
         "decision": null,
         "exclusion_reason": null,
         "implementation_scope": "included",
+        "operation_id": "repos/list-planning-statuses",
+        "path": "/repos/{owner}/{repo}/planning-statuses",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/planning-status",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/planning-status",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "repos",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
         "operation_id": "repos/list-public",
         "path": "/repositories",
         "products": [
@@ -325850,6 +328028,34 @@
         "decision": null,
         "exclusion_reason": null,
         "implementation_scope": "included",
+        "operation_id": "secret-scanning/get-public-monitoring-alert-for-enterprise",
+        "path": "/enterprises/{enterprise}/secret-scanning/public-monitoring-alerts/{alert_number}",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/public-monitoring-alert",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "secret-scanning",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
         "operation_id": "secret-scanning/get-scan-history",
         "path": "/repos/{owner}/{repo}/secret-scanning/scan-history",
         "products": [
@@ -326489,6 +328695,37 @@
         "decision": null,
         "exclusion_reason": null,
         "implementation_scope": "included",
+        "operation_id": "secret-scanning/list-public-monitoring-alerts-for-enterprise",
+        "path": "/enterprises/{enterprise}/secret-scanning/public-monitoring-alerts",
+        "products": [
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/public-monitoring-alert",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "secret-scanning",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
         "operation_id": "secret-scanning/list-repo-bypass-requests",
         "path": "/repos/{owner}/{repo}/bypass-requests/secret-scanning",
         "products": [
@@ -326884,6 +329121,47 @@
         "decision": null,
         "exclusion_reason": null,
         "implementation_scope": "included",
+        "operation_id": "security-advisories/get-repository-advisory-comment",
+        "path": "/repos/{owner}/{repo}/security-advisories/{ghsa_id}/comments/{comment_id}",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/repository-advisory-comment",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "schema_ref": "#/components/schemas/repository-advisory-comment",
+                "type": "object"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "security-advisories",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
         "operation_id": "security-advisories/list-global-advisories",
         "path": "/advisories",
         "products": [
@@ -327025,6 +329303,53 @@
           "ghec": []
         },
         "selection_status": "selected"
+      },
+      {
+        "category": "security-advisories",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "security-advisories/list-repository-advisory-comments",
+        "path": "/repos/{owner}/{repo}/security-advisories/{ghsa_id}/comments",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/repository-advisory-comment",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/repository-advisory-comment",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
       },
       {
         "category": "teams",
@@ -329072,6 +331397,100 @@
         "decision": null,
         "exclusion_reason": null,
         "implementation_scope": "included",
+        "operation_id": "users/list-issue-fields-for-authenticated-user",
+        "path": "/user/issue-fields",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/user-issue-field",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/user-issue-field",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "users",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
+        "operation_id": "users/list-issue-types-for-authenticated-user",
+        "path": "/user/issue-types",
+        "products": [
+          "api.github.com",
+          "ghec"
+        ],
+        "response_shapes_by_product": {
+          "api.github.com": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/issue-type",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ],
+          "ghec": [
+            {
+              "collections": {},
+              "media_type": "application/json",
+              "root": {
+                "items": {
+                  "schema_ref": "#/components/schemas/issue-type",
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "status": "200"
+            }
+          ]
+        },
+        "selected_sources_by_product": {
+          "api.github.com": [],
+          "ghec": []
+        },
+        "selection_status": "unselected"
+      },
+      {
+        "category": "users",
+        "decision": null,
+        "exclusion_reason": null,
+        "implementation_scope": "included",
         "operation_id": "users/list-public-emails-for-authenticated-user",
         "path": "/user/public_emails",
         "products": [
@@ -329423,11 +331842,11 @@
       "graphql_selected_schema_fields": 528,
       "graphql_source_path_fields": 32,
       "relationships": 298,
-      "rest_categories": 48,
-      "rest_excluded_operations": 390,
-      "rest_in_scope_operations": 390,
+      "rest_categories": 50,
+      "rest_excluded_operations": 396,
+      "rest_in_scope_operations": 418,
       "rest_in_scope_selected_operations": 381,
-      "rest_operations": 780,
+      "rest_operations": 814,
       "rest_selected_operations": 387,
       "routes": 526
     },
@@ -332057,9 +334476,9 @@
   },
   "provenance": {
     "graphql_revision": "82ff2d4780080e6929ebb95608cefa22dfa05ac7",
-    "overlay_sha256": "1e575492ab9dce192866fa90f32c9fd156fa21afa77535b90e706e0e1ebbc60e",
-    "rest_revision": "58b1e0c00b39b9e46c24dc4a0ba6a2669c90e9c1",
-    "source_lock_sha256": "412467f77907fa971326d1eb10bca20168b3f18442674cdd32a01e4fbcc10970"
+    "overlay_sha256": "0eb22ec6afb661610e1026ecaa7d91c3a2bb99d72d91c7e7046239ef92c9af55",
+    "rest_revision": "2a33d9cc5d1dc6ca603b908e0796454af88c1999",
+    "source_lock_sha256": "677b429328f6362256b065f6ba2da283bc925aa0811fdf5c6609cdea22cc9e04"
   },
   "relationships": [
     {

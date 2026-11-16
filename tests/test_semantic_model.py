@@ -31,7 +31,7 @@ def sql_type(value):
 def test_complete_worker_and_rest_surface_is_pinned():
     builder.validate_surface(INVENTORY)
     assert len(INVENTORY["coverage"]["main_functions"]) == 21
-    assert len(INVENTORY["coverage"]["rest_operation_ids"]) == 780
+    assert len(INVENTORY["coverage"]["rest_operation_ids"]) == 814
 
 
 @pytest.mark.parametrize("function", INVENTORY["functions"], ids=lambda value: value["name"])

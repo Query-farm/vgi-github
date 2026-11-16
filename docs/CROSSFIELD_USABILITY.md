@@ -26,7 +26,7 @@ details belong in the worker and model.
 
 ## What completeness means
 
-The REST denominator is the checked-in manifest: **780 GET operations across 48
+The REST denominator is the checked-in manifest: **814 GET operations across 50
 categories**, with separate `api.github.com` and Enterprise Cloud availability.
 The implementation scope excludes Enterprise, billing, apps and administration,
 as requested. Excluded operations remain visible in the ledger; category and

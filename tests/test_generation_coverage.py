@@ -351,10 +351,10 @@ def test_full_pinned_surface_tracks_implemented_and_remaining_navigation():
     contract = compile_contract(specs, sdl, overlay)
     policy = json.loads((root / "generation/coverage-policy.json").read_text())
     result = audit_coverage(contract, inventory, sdl, policy=policy)
-    assert result["summary"]["rest_operations"] == 780
-    assert result["summary"]["rest_categories"] == 48
-    assert result["summary"]["rest_excluded_operations"] == 390
-    assert result["summary"]["rest_in_scope_operations"] == 390
+    assert result["summary"]["rest_operations"] == 814
+    assert result["summary"]["rest_categories"] == 50
+    assert result["summary"]["rest_excluded_operations"] == 396
+    assert result["summary"]["rest_in_scope_operations"] == 418
     assert result["summary"]["rest_in_scope_selected_operations"] == 381
     assert result["milestones"]["releases_ci_artifacts"]["selected_operations"] == 23
     assert result["milestones"]["releases_ci_artifacts"]["remaining_operations"] == []

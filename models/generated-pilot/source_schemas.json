@@ -68055,13 +68055,74 @@
                   "kind": "struct",
                   "nullable": true
                 }
+              },
+              {
+                "name": "variant_14",
+                "nullable": true,
+                "required": true,
+                "schema": {
+                  "fields": [
+                    {
+                      "name": "end_column",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "DOUBLE"
+                      }
+                    },
+                    {
+                      "name": "end_line",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "DOUBLE"
+                      }
+                    },
+                    {
+                      "name": "path",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "VARCHAR"
+                      }
+                    },
+                    {
+                      "name": "start_column",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "DOUBLE"
+                      }
+                    },
+                    {
+                      "name": "start_line",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "DOUBLE"
+                      }
+                    }
+                  ],
+                  "kind": "struct",
+                  "nullable": true
+                }
               }
             ],
             "kind": "struct",
             "nullable": true,
             "variant": {
               "discriminator": null,
-              "mode": "oneOf",
+              "mode": "anyOf",
               "names": [
                 "variant_1",
                 "variant_2",
@@ -68075,11 +68136,12 @@
                 "variant_10",
                 "variant_11",
                 "variant_12",
-                "variant_13"
+                "variant_13",
+                "variant_14"
               ]
             }
           },
-          "type": "STRUCT(\"matched_types\" VARCHAR[], \"variant_1\" STRUCT(\"blob_sha\" VARCHAR, \"blob_url\" VARCHAR, \"commit_sha\" VARCHAR, \"commit_url\" VARCHAR, \"end_column\" DOUBLE, \"end_line\" DOUBLE, \"html_url\" VARCHAR, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE), \"variant_2\" STRUCT(\"blob_sha\" VARCHAR, \"commit_sha\" VARCHAR, \"commit_url\" VARCHAR, \"end_column\" DOUBLE, \"end_line\" DOUBLE, \"page_url\" VARCHAR, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE), \"variant_3\" STRUCT(\"html_url\" VARCHAR, \"issue_title_url\" VARCHAR), \"variant_4\" STRUCT(\"html_url\" VARCHAR, \"issue_body_url\" VARCHAR), \"variant_5\" STRUCT(\"html_url\" VARCHAR, \"issue_comment_url\" VARCHAR), \"variant_6\" STRUCT(\"discussion_title_url\" VARCHAR), \"variant_7\" STRUCT(\"discussion_body_url\" VARCHAR), \"variant_8\" STRUCT(\"discussion_comment_url\" VARCHAR), \"variant_9\" STRUCT(\"html_url\" VARCHAR, \"pull_request_title_url\" VARCHAR), \"variant_10\" STRUCT(\"html_url\" VARCHAR, \"pull_request_body_url\" VARCHAR), \"variant_11\" STRUCT(\"html_url\" VARCHAR, \"pull_request_comment_url\" VARCHAR), \"variant_12\" STRUCT(\"html_url\" VARCHAR, \"pull_request_review_url\" VARCHAR), \"variant_13\" STRUCT(\"html_url\" VARCHAR, \"pull_request_review_comment_url\" VARCHAR))"
+          "type": "STRUCT(\"matched_types\" VARCHAR[], \"variant_1\" STRUCT(\"blob_sha\" VARCHAR, \"blob_url\" VARCHAR, \"commit_sha\" VARCHAR, \"commit_url\" VARCHAR, \"end_column\" DOUBLE, \"end_line\" DOUBLE, \"html_url\" VARCHAR, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE), \"variant_2\" STRUCT(\"blob_sha\" VARCHAR, \"commit_sha\" VARCHAR, \"commit_url\" VARCHAR, \"end_column\" DOUBLE, \"end_line\" DOUBLE, \"page_url\" VARCHAR, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE), \"variant_3\" STRUCT(\"html_url\" VARCHAR, \"issue_title_url\" VARCHAR), \"variant_4\" STRUCT(\"html_url\" VARCHAR, \"issue_body_url\" VARCHAR), \"variant_5\" STRUCT(\"html_url\" VARCHAR, \"issue_comment_url\" VARCHAR), \"variant_6\" STRUCT(\"discussion_title_url\" VARCHAR), \"variant_7\" STRUCT(\"discussion_body_url\" VARCHAR), \"variant_8\" STRUCT(\"discussion_comment_url\" VARCHAR), \"variant_9\" STRUCT(\"html_url\" VARCHAR, \"pull_request_title_url\" VARCHAR), \"variant_10\" STRUCT(\"html_url\" VARCHAR, \"pull_request_body_url\" VARCHAR), \"variant_11\" STRUCT(\"html_url\" VARCHAR, \"pull_request_comment_url\" VARCHAR), \"variant_12\" STRUCT(\"html_url\" VARCHAR, \"pull_request_review_url\" VARCHAR), \"variant_13\" STRUCT(\"html_url\" VARCHAR, \"pull_request_review_comment_url\" VARCHAR), \"variant_14\" STRUCT(\"end_column\" DOUBLE, \"end_line\" DOUBLE, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE))"
         },
         {
           "description": "",
@@ -68756,7 +68818,8 @@
               "pull_request_body",
               "pull_request_comment",
               "pull_request_review",
-              "pull_request_review_comment"
+              "pull_request_review_comment",
+              "actions_log"
             ],
             "kind": "scalar",
             "nullable": false,
@@ -69310,13 +69373,74 @@
                   "kind": "struct",
                   "nullable": true
                 }
+              },
+              {
+                "name": "variant_14",
+                "nullable": true,
+                "required": true,
+                "schema": {
+                  "fields": [
+                    {
+                      "name": "end_column",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "DOUBLE"
+                      }
+                    },
+                    {
+                      "name": "end_line",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "DOUBLE"
+                      }
+                    },
+                    {
+                      "name": "path",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "VARCHAR"
+                      }
+                    },
+                    {
+                      "name": "start_column",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "DOUBLE"
+                      }
+                    },
+                    {
+                      "name": "start_line",
+                      "nullable": false,
+                      "required": true,
+                      "schema": {
+                        "kind": "scalar",
+                        "nullable": false,
+                        "type": "DOUBLE"
+                      }
+                    }
+                  ],
+                  "kind": "struct",
+                  "nullable": true
+                }
               }
             ],
             "kind": "struct",
             "nullable": false,
             "variant": {
               "discriminator": null,
-              "mode": "oneOf",
+              "mode": "anyOf",
               "names": [
                 "variant_1",
                 "variant_2",
@@ -69330,11 +69454,12 @@
                 "variant_10",
                 "variant_11",
                 "variant_12",
-                "variant_13"
+                "variant_13",
+                "variant_14"
               ]
             }
           },
-          "type": "STRUCT(\"matched_types\" VARCHAR[], \"variant_1\" STRUCT(\"blob_sha\" VARCHAR, \"blob_url\" VARCHAR, \"commit_sha\" VARCHAR, \"commit_url\" VARCHAR, \"end_column\" DOUBLE, \"end_line\" DOUBLE, \"html_url\" VARCHAR, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE), \"variant_2\" STRUCT(\"blob_sha\" VARCHAR, \"commit_sha\" VARCHAR, \"commit_url\" VARCHAR, \"end_column\" DOUBLE, \"end_line\" DOUBLE, \"page_url\" VARCHAR, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE), \"variant_3\" STRUCT(\"html_url\" VARCHAR, \"issue_title_url\" VARCHAR), \"variant_4\" STRUCT(\"html_url\" VARCHAR, \"issue_body_url\" VARCHAR), \"variant_5\" STRUCT(\"html_url\" VARCHAR, \"issue_comment_url\" VARCHAR), \"variant_6\" STRUCT(\"discussion_title_url\" VARCHAR), \"variant_7\" STRUCT(\"discussion_body_url\" VARCHAR), \"variant_8\" STRUCT(\"discussion_comment_url\" VARCHAR), \"variant_9\" STRUCT(\"html_url\" VARCHAR, \"pull_request_title_url\" VARCHAR), \"variant_10\" STRUCT(\"html_url\" VARCHAR, \"pull_request_body_url\" VARCHAR), \"variant_11\" STRUCT(\"html_url\" VARCHAR, \"pull_request_comment_url\" VARCHAR), \"variant_12\" STRUCT(\"html_url\" VARCHAR, \"pull_request_review_url\" VARCHAR), \"variant_13\" STRUCT(\"html_url\" VARCHAR, \"pull_request_review_comment_url\" VARCHAR))"
+          "type": "STRUCT(\"matched_types\" VARCHAR[], \"variant_1\" STRUCT(\"blob_sha\" VARCHAR, \"blob_url\" VARCHAR, \"commit_sha\" VARCHAR, \"commit_url\" VARCHAR, \"end_column\" DOUBLE, \"end_line\" DOUBLE, \"html_url\" VARCHAR, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE), \"variant_2\" STRUCT(\"blob_sha\" VARCHAR, \"commit_sha\" VARCHAR, \"commit_url\" VARCHAR, \"end_column\" DOUBLE, \"end_line\" DOUBLE, \"page_url\" VARCHAR, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE), \"variant_3\" STRUCT(\"html_url\" VARCHAR, \"issue_title_url\" VARCHAR), \"variant_4\" STRUCT(\"html_url\" VARCHAR, \"issue_body_url\" VARCHAR), \"variant_5\" STRUCT(\"html_url\" VARCHAR, \"issue_comment_url\" VARCHAR), \"variant_6\" STRUCT(\"discussion_title_url\" VARCHAR), \"variant_7\" STRUCT(\"discussion_body_url\" VARCHAR), \"variant_8\" STRUCT(\"discussion_comment_url\" VARCHAR), \"variant_9\" STRUCT(\"html_url\" VARCHAR, \"pull_request_title_url\" VARCHAR), \"variant_10\" STRUCT(\"html_url\" VARCHAR, \"pull_request_body_url\" VARCHAR), \"variant_11\" STRUCT(\"html_url\" VARCHAR, \"pull_request_comment_url\" VARCHAR), \"variant_12\" STRUCT(\"html_url\" VARCHAR, \"pull_request_review_url\" VARCHAR), \"variant_13\" STRUCT(\"html_url\" VARCHAR, \"pull_request_review_comment_url\" VARCHAR), \"variant_14\" STRUCT(\"end_column\" DOUBLE, \"end_line\" DOUBLE, \"path\" VARCHAR, \"start_column\" DOUBLE, \"start_line\" DOUBLE))"
         }
       ],
       "grain": [
@@ -172055,7 +172180,7 @@
               "write",
               "admin",
               "triage",
-              "triage_plus",
+              "moderate",
               "maintain"
             ],
             "kind": "scalar",
@@ -172745,7 +172870,7 @@
               "write",
               "admin",
               "triage",
-              "triage_plus",
+              "moderate",
               "maintain"
             ],
             "kind": "scalar",
@@ -185514,13 +185639,44 @@
             "item": {
               "fields": [
                 {
-                  "name": "details",
-                  "nullable": true,
+                  "name": "rule_source",
+                  "nullable": false,
                   "required": false,
                   "schema": {
-                    "kind": "scalar",
-                    "nullable": true,
-                    "type": "VARCHAR"
+                    "fields": [
+                      {
+                        "name": "type",
+                        "nullable": false,
+                        "required": false,
+                        "schema": {
+                          "kind": "scalar",
+                          "nullable": false,
+                          "type": "VARCHAR"
+                        }
+                      },
+                      {
+                        "name": "id",
+                        "nullable": true,
+                        "required": false,
+                        "schema": {
+                          "kind": "scalar",
+                          "nullable": true,
+                          "type": "BIGINT"
+                        }
+                      },
+                      {
+                        "name": "name",
+                        "nullable": true,
+                        "required": false,
+                        "schema": {
+                          "kind": "scalar",
+                          "nullable": true,
+                          "type": "VARCHAR"
+                        }
+                      }
+                    ],
+                    "kind": "struct",
+                    "nullable": false
                   }
                 },
                 {
@@ -185553,53 +185709,22 @@
                   }
                 },
                 {
-                  "name": "rule_source",
-                  "nullable": false,
-                  "required": false,
-                  "schema": {
-                    "fields": [
-                      {
-                        "name": "id",
-                        "nullable": true,
-                        "required": false,
-                        "schema": {
-                          "kind": "scalar",
-                          "nullable": true,
-                          "type": "BIGINT"
-                        }
-                      },
-                      {
-                        "name": "name",
-                        "nullable": true,
-                        "required": false,
-                        "schema": {
-                          "kind": "scalar",
-                          "nullable": true,
-                          "type": "VARCHAR"
-                        }
-                      },
-                      {
-                        "name": "type",
-                        "nullable": false,
-                        "required": false,
-                        "schema": {
-                          "kind": "scalar",
-                          "nullable": false,
-                          "type": "VARCHAR"
-                        }
-                      }
-                    ],
-                    "kind": "struct",
-                    "nullable": false
-                  }
-                },
-                {
                   "name": "rule_type",
                   "nullable": false,
                   "required": false,
                   "schema": {
                     "kind": "scalar",
                     "nullable": false,
+                    "type": "VARCHAR"
+                  }
+                },
+                {
+                  "name": "details",
+                  "nullable": true,
+                  "required": false,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": true,
                     "type": "VARCHAR"
                   }
                 }
@@ -185610,7 +185735,7 @@
             "kind": "list",
             "nullable": false
           },
-          "type": "STRUCT(\"details\" VARCHAR, \"enforcement\" VARCHAR, \"result\" VARCHAR, \"rule_source\" STRUCT(\"id\" BIGINT, \"name\" VARCHAR, \"type\" VARCHAR), \"rule_type\" VARCHAR)[]"
+          "type": "STRUCT(\"rule_source\" STRUCT(\"type\" VARCHAR, \"id\" BIGINT, \"name\" VARCHAR), \"enforcement\" VARCHAR, \"result\" VARCHAR, \"rule_type\" VARCHAR, \"details\" VARCHAR)[]"
         },
         {
           "description": "",
@@ -185986,13 +186111,44 @@
             "item": {
               "fields": [
                 {
-                  "name": "details",
-                  "nullable": true,
+                  "name": "rule_source",
+                  "nullable": false,
                   "required": false,
                   "schema": {
-                    "kind": "scalar",
-                    "nullable": true,
-                    "type": "VARCHAR"
+                    "fields": [
+                      {
+                        "name": "type",
+                        "nullable": false,
+                        "required": false,
+                        "schema": {
+                          "kind": "scalar",
+                          "nullable": false,
+                          "type": "VARCHAR"
+                        }
+                      },
+                      {
+                        "name": "id",
+                        "nullable": true,
+                        "required": false,
+                        "schema": {
+                          "kind": "scalar",
+                          "nullable": true,
+                          "type": "BIGINT"
+                        }
+                      },
+                      {
+                        "name": "name",
+                        "nullable": true,
+                        "required": false,
+                        "schema": {
+                          "kind": "scalar",
+                          "nullable": true,
+                          "type": "VARCHAR"
+                        }
+                      }
+                    ],
+                    "kind": "struct",
+                    "nullable": false
                   }
                 },
                 {
@@ -186025,53 +186181,22 @@
                   }
                 },
                 {
-                  "name": "rule_source",
-                  "nullable": false,
-                  "required": false,
-                  "schema": {
-                    "fields": [
-                      {
-                        "name": "id",
-                        "nullable": true,
-                        "required": false,
-                        "schema": {
-                          "kind": "scalar",
-                          "nullable": true,
-                          "type": "BIGINT"
-                        }
-                      },
-                      {
-                        "name": "name",
-                        "nullable": true,
-                        "required": false,
-                        "schema": {
-                          "kind": "scalar",
-                          "nullable": true,
-                          "type": "VARCHAR"
-                        }
-                      },
-                      {
-                        "name": "type",
-                        "nullable": false,
-                        "required": false,
-                        "schema": {
-                          "kind": "scalar",
-                          "nullable": false,
-                          "type": "VARCHAR"
-                        }
-                      }
-                    ],
-                    "kind": "struct",
-                    "nullable": false
-                  }
-                },
-                {
                   "name": "rule_type",
                   "nullable": false,
                   "required": false,
                   "schema": {
                     "kind": "scalar",
                     "nullable": false,
+                    "type": "VARCHAR"
+                  }
+                },
+                {
+                  "name": "details",
+                  "nullable": true,
+                  "required": false,
+                  "schema": {
+                    "kind": "scalar",
+                    "nullable": true,
                     "type": "VARCHAR"
                   }
                 }
@@ -186082,7 +186207,7 @@
             "kind": "list",
             "nullable": false
           },
-          "type": "STRUCT(\"details\" VARCHAR, \"enforcement\" VARCHAR, \"result\" VARCHAR, \"rule_source\" STRUCT(\"id\" BIGINT, \"name\" VARCHAR, \"type\" VARCHAR), \"rule_type\" VARCHAR)[]"
+          "type": "STRUCT(\"rule_source\" STRUCT(\"type\" VARCHAR, \"id\" BIGINT, \"name\" VARCHAR), \"enforcement\" VARCHAR, \"result\" VARCHAR, \"rule_type\" VARCHAR, \"details\" VARCHAR)[]"
         },
         {
           "description": "",
@@ -189578,7 +189703,8 @@
           "schema": {
             "enum": [
               "organization_members_only",
-              "all"
+              "all",
+              "restricted"
             ],
             "kind": "scalar",
             "nullable": true,

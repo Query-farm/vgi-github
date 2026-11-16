@@ -134,14 +134,34 @@ def test_locations_cover_all_thirteen_variants_and_page_spanning_ordinals(pilot,
     )
     assert [r["location_ordinal"] for r in rows] == list(range(1, 15))
     assert {r["location_type"] for r in rows} == set(secret.LOCATION_TYPES)
-    assert rows[0]["details"]["matched_types"] == ["variant_1"]
-    assert rows[1]["details"]["matched_types"] == ["variant_2"]
+    # Upstream's actions_log variant (variant_14) requires only the path and
+    # line/column fields, so commit and wiki-commit details also satisfy it.
+    # The tagged representation reports every variant a payload matches.
+    assert rows[0]["details"]["matched_types"] == ["variant_1", "variant_14"]
+    assert rows[1]["details"]["matched_types"] == ["variant_2", "variant_14"]
     assert rows[2]["details"]["matched_types"] == ["variant_3"]
     assert rows[12]["details"]["matched_types"] == ["variant_13"]
     assert rows[0]["details"]["variant_1"]["start_line"] == 1.0
     assert rows[-1]["details"]["variant_1"]["start_line"] == 2.0
     assert rows[0]["details"]["variant_2"] is None
     assert sum(r.url.path.endswith("/locations") for r in requests) == 14
+
+
+def test_actions_log_location_matches_only_its_variant(pilot, secret, monkeypatch):
+    _, contract, _ = pilot
+    detail = {"path": "build/1_test.txt", "start_line": 4, "end_line": 4, "start_column": 1, "end_column": 7}
+    monkeypatch.setattr(
+        secret, "LOCATIONS", {**secret.LOCATIONS, 1: [{"type": "actions_log", "details": detail}]}
+    )
+    install(monkeypatch, secret.respond)
+    rows = rows_for(
+        contract,
+        "secret_scanning_locations",
+        repository="secret-fixture/alpha",
+        secret_scanning_alert_number=1,
+    )
+    assert [r["location_type"] for r in rows] == ["actions_log"]
+    assert rows[0]["details"]["matched_types"] == ["variant_14"]
 
 
 def test_location_retrieval_resets_local_ordinal_per_alert_not_per_page(pilot, secret, monkeypatch):
@@ -221,7 +241,8 @@ def test_delegated_request_roles_and_alert_number_text_are_not_coerced(pilot, se
 def test_malformed_location_variant_fails_without_erasing_details(pilot, secret, monkeypatch):
     _, contract, _ = pilot
     changed = deepcopy(secret.LOCATIONS)
-    changed[1][0]["details"].pop("commit_sha")
+    # path is required by every variant a commit location could match, including actions_log.
+    changed[1][0]["details"].pop("path")
     monkeypatch.setattr(secret, "LOCATIONS", changed)
     install(monkeypatch, secret.respond)
     with pytest.raises(GeneratedContractError, match="variant"):

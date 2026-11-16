@@ -702,7 +702,18 @@
           "name": "rule_evaluations",
           "path": [
             "rule_evaluations"
-          ]
+          ],
+          "selection": {
+            "rule_source": {
+              "type": true,
+              "id": true,
+              "name": true
+            },
+            "enforcement": true,
+            "result": true,
+            "rule_type": true,
+            "details": true
+          }
         },
         {
           "name": "reported_repository_name",
@@ -993,7 +1004,18 @@
           "name": "rule_evaluations",
           "path": [
             "rule_evaluations"
-          ]
+          ],
+          "selection": {
+            "rule_source": {
+              "type": true,
+              "id": true,
+              "name": true
+            },
+            "enforcement": true,
+            "result": true,
+            "rule_type": true,
+            "details": true
+          }
         },
         {
           "name": "reported_repository_name",

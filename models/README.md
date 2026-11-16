@@ -7,7 +7,7 @@ retrieval routes and gaps against the full pinned read API. The broad package
 described below retains its wider endpoint coverage; these remain separate
 packages/workers.
 
-This model covers the worker's 21 typed `main` functions, all 780 pinned REST GET
+This model covers the worker's 21 typed `main` functions, all 814 pinned REST GET
 operations, GraphQL queries and endpoint discovery: 24 sources, 51 approved
 business metrics and 49 named reports. REST uses the operation-ID dispatcher;
 one source covers the same operations as the generated `rest` functions. Business

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Accept GitHub REST API description revision `2a33d9cc5d1dc6ca603b908e0796454af88c1999`
+  (was `58b1e0c0`): 34 new and 179 changed GET operations, no removals. The `rest` schema now
+  exposes 814 GET operations (667 GitHub.com, 804 Enterprise Cloud), and the regenerated
+  semantic sources, generated pilot and Crossfield model pin them. Upstream added a `oneOf`
+  `metadata` field to rule-suite evaluations; the `rule_evaluations` columns keep their
+  previous fields through an explicit selection. Secret-scanning locations gain an
+  `actions_log` details variant (`variant_14`); it requires only path and line/column fields, so
+  commit and wiki-commit details now also list it in `matched_types`. The GraphQL schema
+  revision is unchanged.
 - Add `main.job_logs(repo, job_id)` and `main.run_logs(repo, run_id, attempt => n)`: GitHub
   Actions logs as one row per line with parsed timestamps, ANSI-stripped text (raw kept),
   `##[group]` paths and decoded workflow commands; `run_logs` reads the run's zip archive per job

@@ -61,7 +61,7 @@ bytes. Membership checks can explicitly retain HTTP 404. Raw GraphQL returns
 request-dependent login values, extensions and a connection cursor with
 `hasNextPage: true`; exposing that envelope does not imply complete entity data.
 Mutation input and partial-data errors reject. The endpoint inventory contains
-the pinned 780 GET operations and makes no data request.
+the pinned 814 GET operations and makes no data request.
 
 `connected_fixture.py` exercises the opt-in generated producer worker and the
 standalone `models/generated-pilot/` package. Every REST list and GraphQL
