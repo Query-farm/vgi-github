@@ -1,0 +1,29 @@
+# name: test/sql/catalog.test
+# description: ATTACH, catalog shape and the read-only guard. No network calls.
+# group: [sql]
+
+require-env VGI_GITHUB_WORKER
+
+require vgi
+
+statement ok
+ATTACH 'github' AS github (TYPE vgi, LOCATION '{VGI_GITHUB_WORKER}', auth 'off');
+
+query I
+SELECT schema_name FROM duckdb_schemas() WHERE database_name = 'github' AND schema_name IN ('main', 'rest', 'api') ORDER BY schema_name;
+----
+api
+main
+rest
+
+# Every pinned REST operation is listed, and each one is a GET.
+query I
+SELECT count(*) > 500 FROM github.api.endpoints;
+----
+true
+
+# GraphQL is read-only: a mutation is refused before any request is made.
+statement error
+SELECT * FROM github.api.graphql('mutation { deleteIssue { clientMutationId } }', '{}');
+----
+queries only
