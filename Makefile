@@ -9,7 +9,7 @@
 # SQL tests run test/sql/*.test through the published haybarn-unittest with the
 # signed community vgi extension (ci/run-integration.sh; no local DuckDB/vgi
 # builds). test/sql/mock_api.test runs against test/mock_api/server.py.
-HAYBARN_VERSION ?= 2.0.0rc11
+HAYBARN_VERSION ?= 2.0.1rc3
 WORKER          := $(CURDIR)/.venv/bin/vgi-github
 TOOLS           := $(CURDIR)/.tools
 HAYBARN_UNITTEST := $(TOOLS)/bin/haybarn-unittest
