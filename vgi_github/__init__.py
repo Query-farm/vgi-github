@@ -1,3 +1,3 @@
 """Read-only VGI worker exposing the GitHub REST API to DuckDB/SQL."""
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"

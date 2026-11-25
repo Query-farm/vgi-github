@@ -38,12 +38,14 @@ the matching patched DuckDB 2.0 and native VGI build.
 You need [DuckDB](https://duckdb.org) (or [Haybarn](https://query.farm)) and
 [uv](https://docs.astral.sh/uv/). Then, in DuckDB:
 
+vgi-github 0.4.0 speaks VGI protocol 3.4, so it needs Haybarn 2.0.1 or newer (Haybarn 2.0.0 loads a 3.3 `vgi` extension that cannot attach it).
+
 ```sql
 INSTALL vgi FROM community;   -- once per machine
 LOAD vgi;
 
 ATTACH 'github' (TYPE vgi,
-  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github@v0.3.1 vgi-github');
+  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github@v0.4.0 vgi-github');
 
 CREATE SECRET github (TYPE github, token 'ghp_...');   -- recommended, see "Use a token"
 ```
@@ -435,7 +437,7 @@ login when you attach:
 
 ```sql
 ATTACH 'github' (TYPE vgi,
-  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github@v0.3.1 vgi-github',
+  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github@v0.4.0 vgi-github',
   token_source 'gh');
 ```
 
@@ -457,7 +459,7 @@ instead of an empty result:
 
 ```sql
 ATTACH 'github' (TYPE vgi,
-  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github@v0.3.1 vgi-github',
+  LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-github@v0.4.0 vgi-github',
   auth 'required');
 ```
 
@@ -484,7 +486,7 @@ ETag revalidation cache. `rate_limit` always fetches fresh data.
 Instead of every DuckDB starting its own worker, run one server and point everyone at it:
 
 ```bash
-uvx --from git+https://github.com/Query-farm/vgi-github@v0.3.1 vgi-github-http --port 8000
+uvx --from git+https://github.com/Query-farm/vgi-github@v0.4.0 vgi-github-http --port 8000
 ```
 
 ```sql
@@ -508,7 +510,7 @@ own machine:
   GitHub CLI login, so anyone else who can reach it would act as you too.
 
   ```bash
-  VGI_GITHUB_ALLOW_TOKEN_SOURCE=1 uvx --from git+https://github.com/Query-farm/vgi-github@v0.3.1 vgi-github-http --port 8000
+  VGI_GITHUB_ALLOW_TOKEN_SOURCE=1 uvx --from git+https://github.com/Query-farm/vgi-github@v0.4.0 vgi-github-http --port 8000
   ```
 
   ```sql

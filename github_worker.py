@@ -1,8 +1,8 @@
 # /// script
 # requires-python = ">=3.14"
 # dependencies = [
-#     "vgi-python[http,duckdb]>=0.52.2,<0.53",
-#     "vgi-rpc>=0.53.1",
+#     "vgi-python[http,duckdb]>=0.55.2,<0.56",
+#     "vgi-rpc>=0.57.1",
 #     "httpx>=0.28.1",
 #     "graphql-core>=3.2.6,<3.3",
 # ]
